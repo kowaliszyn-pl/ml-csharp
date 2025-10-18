@@ -22,7 +22,7 @@ float a = 0, b = 0;
 
 // 4. Training loop
 
-for (int iteration = 0; iteration < iterations; iteration++)
+for (int iteration = 1; iteration <= iterations; iteration++)
 {
     // Initialize accumulators for errors
     float sumErrorValue = 0, sumError = 0, squaredError = 0;
