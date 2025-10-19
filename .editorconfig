@@ -1,4 +1,4 @@
-# Remove the line below if you want to inherit .editorconfig settings from higher directories
+﻿# Remove the line below if you want to inherit .editorconfig settings from higher directories
 root = true
 
 # C# files
@@ -6,7 +6,7 @@ root = true
 
 #### Core EditorConfig Options ####
 
-file_header_template = Machine Learning Utils\nFile name: {fileName}\nCode It Yourself with .NET, 2024
+file_header_template = Neural Networks in C♯\nFile name: {fileName}\nwww.kowaliszyn.pl, 2025
 
 # Indentation and spacing
 indent_size = 4
