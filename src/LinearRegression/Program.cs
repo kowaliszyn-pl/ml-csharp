@@ -68,6 +68,6 @@ for (int iteration = 1; iteration <= Iterations; iteration++)
 // 5. Output learned parameters
 
 Console.WriteLine();
-Console.WriteLine($"{"Learned parameters:",-20} a = {a:F4} | b = {b:F4}");
-Console.WriteLine($"{"Expected parameters:",-20} a = {-2:F4} | b = {120:F4}");
+Console.WriteLine($"{"Learned parameters:",-20} a = {a,9:F4} | b = {b,9:F4}");
+Console.WriteLine($"{"Expected parameters:",-20} a = {-2,9:F4} | b = {120,9:F4}");
 Console.ReadLine();
