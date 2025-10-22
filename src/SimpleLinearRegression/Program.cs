@@ -24,6 +24,9 @@ float[][] data = [
 
 float a = 0, b = 0;
 
+// Number of samples
+int n = data.Length;
+
 // 4. Training loop
 
 for (int iteration = 1; iteration <= Iterations; iteration++)
@@ -45,9 +48,6 @@ for (int iteration = 1; iteration <= Iterations; iteration++)
         sumErrorValue += error * x;
         sumError += error;
     }
-
-    // Number of samples
-    int n = data.Length;
 
     // MSE
     float meanSquaredError = squaredError / n;
