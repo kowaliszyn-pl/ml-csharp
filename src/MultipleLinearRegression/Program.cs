@@ -49,7 +49,7 @@ while (running)
             Matrices();
             break;
         case "4":
-            // MatricesWithBias();
+            MatricesWithBias();
             break;
         default:
             Console.WriteLine("Goodbye!");
@@ -291,3 +291,63 @@ void Matrices()
     Console.WriteLine($"{"Expected parameters:",-20} a1 = {2,9:F4} | a2 = {3,9:F4} | a3 = {-1,9:F4} | b = {5,9:F4}");
 }
 
+void MatricesWithBias()
+{
+    // 1. Convert data to matrices with bias term
+
+    // Number of samples and coefficients
+    int n = data.Length;
+    int numCoefficients = data[0].Length - 1; // Number of independent variables (3 in this case)
+
+    float[,] XAnd1 = new float[n, numCoefficients + 1]; // +1 for bias term
+    float[,] Y = new float[n, 1];
+
+    // Prepare feature matrix XAnd1 with bias term and target vector Y
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < numCoefficients; j++)
+        {
+            XAnd1[i, j] = data[i][j];
+        }
+        XAnd1[i, numCoefficients] = 1; // Bias term
+        Y[i, 0] = data[i][numCoefficients];
+    }
+
+    // 2. Initialize model parameters
+
+    // These are the coefficients for our independent variables and the bias term
+    float[,] AB = new float[numCoefficients + 1, 1]; // Corresponds to a1, a2, a3, b. It's already initialized to 0 at this point.
+
+    // 3. Training loop
+
+    for (int iteration = 1; iteration <= Iterations; iteration++)
+    {
+        // Prediction and error calculation
+
+        // Make predictions for all samples at once: predictions = XAnd1 * AB
+        float[,] predictions = XAnd1.MultiplyDot(AB);
+
+        // Calculate errors for all samples: errors = Y - predictions
+        float[,] errors = Y.Subtract(predictions);
+
+        // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
+        float meanSquaredError = errors.Power(2).Mean();
+
+        // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
+        float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
+
+        // Update regression parameters using gradient descent
+        AB = AB.Subtract(deltaAB.Multiply(LearningRate));
+
+        if (iteration % PrintEvery == 0)
+        {
+            Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {AB[0, 0],8:F4} | a2: {AB[1, 0],8:F4} | a3: {AB[2, 0],8:F4} | b: {AB[3, 0],8:F4}");
+        }
+    }
+
+    // 4. Output learned parameters
+
+    Console.WriteLine("\n--- Training Complete (Matrices with Bias) ---");
+    Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | b = {AB[3, 0],9:F4}");
+    Console.WriteLine($"{"Expected parameters:",-20} a1 = {2,9:F4} | a2 = {3,9:F4} | a3 = {-1,9:F4} | b = {5,9:F4}");
+}
