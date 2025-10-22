@@ -29,10 +29,9 @@ while (running)
     {
         case "1":
             Variables();
-            PressAnyKey();
             break;
         case "2":
-            // Tables();
+            Tables();
             break;
         case "3":
             // Matrices();
@@ -45,13 +44,13 @@ while (running)
             running = false;
             break;
     }
-}
 
-void PressAnyKey()
-{
-    Console.WriteLine("\nPress any key to continue...");
-    Console.ReadKey();
-    Console.WriteLine();
+    if (running)
+    {
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
+        Console.WriteLine();
+    }
 }
 
 void Variables()
@@ -135,15 +134,11 @@ void Variables()
     // 4. Output learned parameters
 
     Console.WriteLine("\n--- Training Complete ---");
-    //Console.WriteLine("Learned parameters:");
-    //Console.WriteLine($"  a1: {a1:F4} (coefficient for 1st variable)");
-    //Console.WriteLine($"  a2: {a2:F4} (coefficient for 2nd variable)");
-    //Console.WriteLine($"  a3: {a3:F4} (coefficient for 3rd variable)");
-    //Console.WriteLine($"  b:  {b:F4} (intercept)");
-
-    //Console.WriteLine($"\nExpected parameters from the formula y = 2*x1 + 3*x2 - 1*x3 + 5:");
-    //Console.WriteLine($"  a1 =  2.0000, a2 =  3.0000, a3 = -1.0000, b = 5.0000");
-
     Console.WriteLine($"{"Learned parameters:",-20} a1 = {a1,9:F4} | a2 = {a2,9:F4} | a3 = {a3,9:F4} | b = {b,9:F4}");
     Console.WriteLine($"{"Expected parameters:",-20} a1 = {2,9:F4} | a2 = {3,9:F4} | a3 = {-1,9:F4} | b = {5,9:F4}");
+}
+
+void Tables()
+{
+
 }
