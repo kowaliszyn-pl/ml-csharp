@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{A18AB45F-739
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultipleLinearRegression", "src\MultipleLinearRegression\MultipleLinearRegression.csproj", "{42A08578-C890-4AB8-A97C-48F113E54381}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,12 +24,17 @@ Global
 		{2F1C2D20-5ECA-413C-B08E-68785A29B460}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F1C2D20-5ECA-413C-B08E-68785A29B460}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F1C2D20-5ECA-413C-B08E-68785A29B460}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42A08578-C890-4AB8-A97C-48F113E54381}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42A08578-C890-4AB8-A97C-48F113E54381}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42A08578-C890-4AB8-A97C-48F113E54381}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42A08578-C890-4AB8-A97C-48F113E54381}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2F1C2D20-5ECA-413C-B08E-68785A29B460} = {F2B3171E-5931-44ED-A282-BE9E7F223D56}
+		{42A08578-C890-4AB8-A97C-48F113E54381} = {F2B3171E-5931-44ED-A282-BE9E7F223D56}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1BDE2A5-2774-4AEF-A5CF-1D9513B84564}
