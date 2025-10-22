@@ -8,6 +8,18 @@ const float LearningRate = 0.0005f;
 const int Iterations = 35_000;
 const int PrintEvery = 1_000;
 
+// Prepare training data
+// Each inner array represents a sample: [x1, x2, x3, y]
+// We will be trying to find the relationship: y = 2*x1 + 3*x2 - 1*x3 + 5
+
+float[][] data = [
+    [1, 2, 1, 12], // y = 2*1 + 3*2 - 1*1 + 5 = 12
+    [2, 1, 2, 10], // etc.
+    [3, 3, 1, 19],
+    [4, 2, 3, 16],
+    [1, 4, 2, 17]
+];
+
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -55,25 +67,13 @@ while (running)
 
 void Variables()
 {
-    // 1. Prepare training data
-    // Each inner array represents a sample: [x1, x2, x3, y]
-    // We are trying to find the relationship: y = 2*x1 + 3*x2 - 1*x3 + 5
-
-    float[][] data = [
-        [1, 2, 1, 12], // y = 2*1 + 3*2 - 1*1 + 5 = 12
-        [2, 1, 2, 10], // etc.
-        [3, 3, 1, 19], 
-        [4, 2, 3, 16],
-        [1, 4, 2, 17]  
-    ];
-
-    // 2. Initialize model parameters
+    // 1. Initialize model parameters
     // These are the coefficients for our independent variables and the bias term
 
     float a1 = 0, a2 = 0, a3 = 0; // Parameters for x1, x2, x3
     float b = 0;
 
-    // 3. Training loop
+    // 2. Training loop
 
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
@@ -131,7 +131,7 @@ void Variables()
         }
     }
 
-    // 4. Output learned parameters
+    // 3. Output learned parameters
 
     Console.WriteLine("\n--- Training Complete (Variables) ---");
     Console.WriteLine($"{"Learned parameters:",-20} a1 = {a1,9:F4} | a2 = {a2,9:F4} | a3 = {a3,9:F4} | b = {b,9:F4}");
@@ -140,29 +140,17 @@ void Variables()
 
 void Tables()
 {
-    // 1. Prepare training data
-    // Each inner array represents a sample: [x1, x2, x3, y]
-    // We are trying to find the relationship: y = 2*x1 + 3*x2 - 1*x3 + 5
-
-    float[][] data = [
-        [1, 2, 1, 12], // y = 2*1 + 3*2 - 1*1 + 5 = 12
-        [2, 1, 2, 10], // etc.
-        [3, 3, 1, 19], 
-        [4, 2, 3, 16], 
-        [1, 4, 2, 17]  
-    ];
-
     // Number of samples and coefficients
     int n = data.Length;
     int numCoefficients = data[0].Length - 1; // Number of independent variables (3 in this case)
 
-    // 2. Initialize model parameters
+    // 1. Initialize model parameters
     // These are the coefficients for our independent variables and the bias term
 
     float[] a = new float[numCoefficients]; // Corresponds to a1, a2, a3. It's already initialized to 0 at this point.
     float b = 0;
 
-    // 3. Training loop
+    // 2. Training loop
 
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
@@ -230,7 +218,7 @@ void Tables()
         }
     }
 
-    // 4. Output learned parameters
+    // 3. Output learned parameters
 
     Console.WriteLine("\n--- Training Complete (Tables) ---");
     Console.WriteLine($"{"Learned parameters:",-20} a1 = {a[0],9:F4} | a2 = {a[1],9:F4} | a3 = {a[2],9:F4} | b = {b,9:F4}");
