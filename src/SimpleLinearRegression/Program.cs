@@ -61,8 +61,7 @@ for (int iteration = 1; iteration <= Iterations; iteration++)
     b -= LearningRate * deltaB;
 
     if (iteration % PrintEvery == 0)
-        Console.WriteLine($"Iteration: {iteration,5} | MSE: {meanSquaredError,10:F5} | ∂MSE/∂a: {deltaA,10:F4} | ∂MSE/∂b: {deltaB,10:F4} | a: {a,9:F4} | b: {b,9:F4}"
-    );
+        Console.WriteLine($"Iteration: {iteration,5} | MSE: {meanSquaredError,10:F5} | ∂MSE/∂a: {deltaA,10:F4} | ∂MSE/∂b: {deltaB,10:F4} | a: {a,9:F4} | b: {b,9:F4}");
 }
 
 // 5. Output learned parameters
