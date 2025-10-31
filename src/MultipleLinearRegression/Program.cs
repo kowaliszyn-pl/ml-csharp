@@ -109,9 +109,6 @@ void Variables()
             sumErrorForB += error;
         }
 
-        // MSE
-        float meanSquaredError = sumSquaredError / n;
-
         // Calculate gradients (partial derivatives of MSE)
         // ∂MSE/∂a1 = -2/n * Σ(error * x1)
         float deltaA1 = -2.0f / n * sumErrorForA1;
@@ -127,6 +124,9 @@ void Variables()
 
         if (iteration % PrintEvery == 0)
         {
+            // MSE
+            float meanSquaredError = sumSquaredError / n;
+
             Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {a1,8:F4} | a2: {a2,8:F4} | a3: {a3,8:F4} | b: {b,8:F4}");
         }
     }
@@ -191,9 +191,6 @@ void Tables()
             sumErrorForB += error;
         }
 
-        // MSE
-        float meanSquaredError = sumSquaredError / n;
-
         // Calculate gradients (partial derivatives of MSE)
         // ∂MSE/∂ai = -2/n * Σ(error * xi)
         float[] deltaA = new float[numCoefficients];
@@ -214,6 +211,9 @@ void Tables()
 
         if (iteration % PrintEvery == 0)
         {
+            // MSE
+            float meanSquaredError = sumSquaredError / n;
+
             Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {a[0],8:F4} | a2: {a[1],8:F4} | a3: {a[2],8:F4} | b: {b,8:F4}");
         }
     }
@@ -264,9 +264,6 @@ void Matrices()
         // Calculate errors for all samples: errors = Y - predictions
         float[,] errors = Y.Subtract(predictions);
 
-        // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
-        float meanSquaredError = errors.Power(2).Mean();
-
         // Calculate gradient for coefficients 'a': ∂MSE/∂a = -2/n * X^T * errors
         // X.Transpose() aligns features with their corresponding errors for the dot product.
         float[,] deltaA = X.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
@@ -280,6 +277,9 @@ void Matrices()
 
         if (iteration % PrintEvery == 0)
         {
+            // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
+            float meanSquaredError = errors.Power(2).Mean();
+
             Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {A[0, 0],8:F4} | a2: {A[1, 0],8:F4} | a3: {A[2, 0],8:F4} | b: {b,8:F4}");
         }
     }
@@ -330,10 +330,8 @@ void MatricesWithBias()
         // Calculate errors for all samples: errors = Y - predictions
         float[,] errors = Y.Subtract(predictions);
 
-        // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
-        float meanSquaredError = errors.Power(2).Mean();
-
         // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
+        // We can precalculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity.
         float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
 
         // Update regression parameters using gradient descent
@@ -341,6 +339,9 @@ void MatricesWithBias()
 
         if (iteration % PrintEvery == 0)
         {
+            // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
+            float meanSquaredError = errors.Power(2).Mean();
+
             Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {AB[0, 0],8:F4} | a2: {AB[1, 0],8:F4} | a3: {AB[2, 0],8:F4} | b: {AB[3, 0],8:F4}");
         }
     }
