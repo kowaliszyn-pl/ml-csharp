@@ -205,6 +205,71 @@ public static class ArrayExtensions
         return res;
     }
 
+    public static float[,] Invert(this float[,] A)
+    {
+        int n = A.GetLength(0);
+        float[,] result = new float[n, n];
+        float[,] aug = new float[n, 2 * n];
+
+        // Tworzymy macierz rozszerzoną [A | I]
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+                aug[i, j] = A[i, j];
+            aug[i, n + i] = 1f;
+        }
+
+        // Eliminacja Gaussa–Jordana
+        for (int i = 0; i < n; i++)
+        {
+            // Znajdź największy element w kolumnie (dla stabilności)
+            float maxEl = Math.Abs(aug[i, i]);
+            int maxRow = i;
+            for (int k = i + 1; k < n; k++)
+            {
+                if (Math.Abs(aug[k, i]) > maxEl)
+                {
+                    maxEl = Math.Abs(aug[k, i]);
+                    maxRow = k;
+                }
+            }
+
+            // Zamiana wierszy
+            for (int k = 0; k < 2 * n; k++)
+            {
+                float tmp = aug[maxRow, k];
+                aug[maxRow, k] = aug[i, k];
+                aug[i, k] = tmp;
+            }
+
+            // Normalizacja wiersza
+            float diag = aug[i, i];
+            if (diag == 0)
+                throw new InvalidOperationException("Macierz jest osobliwa (nieodwracalna).");
+
+            for (int k = 0; k < 2 * n; k++)
+                aug[i, k] /= diag;
+
+            // Zerowanie pozostałych elementów w kolumnie
+            for (int j = 0; j < n; j++)
+            {
+                if (j != i)
+                {
+                    float factor = aug[j, i];
+                    for (int k = 0; k < 2 * n; k++)
+                        aug[j, k] -= factor * aug[i, k];
+                }
+            }
+        }
+
+        // Kopiowanie prawej połowy do wyniku
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                result[i, j] = aug[i, j + n];
+
+        return result;
+    }
+
     /// <summary>
     /// Standardizes the matrix by converting each column to have a mean of 0 and a standard deviationFromMean of 1.
     /// <summary>
@@ -229,6 +294,11 @@ public static class ArrayExtensions
                 sumOfSquares += MathF.Pow(source[row, col] - mean, 2);
             }
             float stdDev = MathF.Sqrt(sumOfSquares / rows);
+
+            if(stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
 
             // Standardize values
             for (int row = 0; row < rows; row++)

@@ -4,7 +4,7 @@
 
 // Set the parameters for the model
 
-const float LearningRate = 0.0005f;
+const float LearningRate = 0.005f;
 const int Iterations = 35_000;
 const int PrintEvery = 1_000;
 
@@ -362,7 +362,7 @@ void MatricesWithBiasBoston()
     // 1. Load Boston housing dataset and standardize it (scale features to have mean 0 and stddev 1)
 
     float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv");
-    bostonData.Standardize();
+    //bostonData.Standardize();
 
     // 2. Convert data to matrices with bias term
 
@@ -383,11 +383,34 @@ void MatricesWithBiasBoston()
         XAnd1[i, numCoefficients] = 1; // Bias term
         Y[i, 0] = bostonData[i, numCoefficients];
     }
+    XAnd1.Standardize();
+
+    // 1.1 First, find the analitycal solution to compare with later
+    // Calculate analytical solution: AB_analytical = (X^T * X)^-1 * X^T * Y
+    float[,] XT = XAnd1.Transpose();
+    float[,] XTX = XT.MultiplyDot(XAnd1);
+    float[,] XTXInv = XTX.Invert();
+    float[,] XTY = XT.MultiplyDot(Y);
+    float[,] AB_analytical = XTXInv.MultiplyDot(XTY);
+    Console.WriteLine("--- Analytical solution on Boston Data ---");
+    Console.WriteLine("Learned parameters:");
+    for (int i = 0; i < numCoefficients; i++)
+    {
+        Console.WriteLine($" a{i + 1} = {AB_analytical[i, 0],9:F4}");
+    }
+    Console.WriteLine($" b = {AB_analytical[numCoefficients, 0],9:F4}");
+    Console.WriteLine();
 
     // 2. Initialize model parameters
 
     // These are the coefficients for our independent variables and the bias term
     float[,] AB = new float[numCoefficients + 1, 1];
+    // fill with random small values
+    Random rand = new Random();
+    for (int i = 0; i < numCoefficients + 1; i++)
+    {
+        AB[i, 0] = (float)(rand.NextDouble() * 0.1 - 0.05); // Random values between -0.05 and 0.05
+    }
 
     // 3. Training loop
 
@@ -420,7 +443,14 @@ void MatricesWithBiasBoston()
     // 4. Output learned parameters
 
     Console.WriteLine("\n--- Training Complete (Matrices with Bias on Boston Data) ---");
-    Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | ... | b = {AB[numCoefficients, 0],9:F4}");
+    Console.WriteLine("Learned parameters:");
+
+    for (int i = 0; i < numCoefficients; i++)
+    {
+        Console.WriteLine($" a{i + 1} = {AB[i, 0],9:F4}");
+    }
+
+    //Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | ... | b = {AB[numCoefficients, 0],9:F4}");
     Console.WriteLine("Sample predictions vs actual values:");
     Console.WriteLine(
         "Predicted".PadRight(15) +
@@ -431,15 +461,15 @@ void MatricesWithBiasBoston()
         "------".PadRight(15)
     );
     Console.WriteLine(
-        $"{(XAnd1.GetRowAs2D(0).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{(XAnd1.GetRowAs2D(0).MultiplyDot(AB)).Sum(),-15:F4}" +
         $"{Y[0, 0],-15:F4}"
     );
     Console.WriteLine(
-        $"{(XAnd1.GetRowAs2D(1).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{(XAnd1.GetRowAs2D(1).MultiplyDot(AB)).Sum(),-15:F4}" +
         $"{Y[1, 0],-15:F4}"
     );
     Console.WriteLine(
-        $"{(XAnd1.GetRowAs2D(2).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{(XAnd1.GetRowAs2D(2).MultiplyDot(AB)).Sum(),-15:F4}" +
         $"{Y[2, 0],-15:F4}"
     );
     Console.WriteLine(
