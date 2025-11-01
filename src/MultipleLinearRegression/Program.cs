@@ -413,15 +413,48 @@ void MatricesWithBiasBoston()
             // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
             float meanSquaredError = errors.Power(2).Mean();
 
-            Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {AB[0, 0],8:F4} | a2: {AB[1, 0],8:F4} | a3: {AB[2, 0],8:F4} | b: {AB[3, 0],8:F4}");
+            Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {AB[0, 0],8:F4} | a2: {AB[1, 0],8:F4} | a3: {AB[2, 0],8:F4} | ... | b: {AB[numCoefficients, 0],8:F4}");
         }
     }
 
     // 4. Output learned parameters
 
-    Console.WriteLine("\n--- Training Complete (Matrices with Bias) ---");
-    Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | b = {AB[3, 0],9:F4}");
-    Console.WriteLine($"{"Expected parameters:",-20} a1 = {2,9:F4} | a2 = {3,9:F4} | a3 = {-1,9:F4} | b = {5,9:F4}");
+    Console.WriteLine("\n--- Training Complete (Matrices with Bias on Boston Data) ---");
+    Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | ... | b = {AB[numCoefficients, 0],9:F4}");
+    Console.WriteLine("Sample predictions vs actual values:");
+    Console.WriteLine(
+        "Predicted".PadRight(15) +
+        "Actual".PadRight(15)
+    );
+    Console.WriteLine(
+        "---------".PadRight(15) +
+        "------".PadRight(15)
+    );
+    Console.WriteLine(
+        $"{(XAnd1.GetRowAs2D(0).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{Y[0, 0],-15:F4}"
+    );
+    Console.WriteLine(
+        $"{(XAnd1.GetRowAs2D(1).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{Y[1, 0],-15:F4}"
+    );
+    Console.WriteLine(
+        $"{(XAnd1.GetRowAs2D(2).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{Y[2, 0],-15:F4}"
+    );
+    Console.WriteLine(
+        $"{(XAnd1.GetRowAs2D(3).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{Y[3, 0],-15:F4}"
+    );
+    Console.WriteLine(
+        $"{(XAnd1.GetRowAs2D(4).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{Y[4, 0],-15:F4}"
+    );
+    Console.WriteLine(
+        $"{(XAnd1.GetRowAs2D(n - 1).MultiplyDot(AB))[0, 0],-15:F4}" +
+        $"{Y[n - 1, 0],-15:F4}"
+    );
+
 }
 
 static float[,] LoadCsv(string filePath)

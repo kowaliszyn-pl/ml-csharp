@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 public static class ArrayExtensions
 {
@@ -165,6 +166,43 @@ public static class ArrayExtensions
         }
 
         return array;
+    }
+
+    /// <summary>
+    /// Gets a row from the matrix.
+    /// </summary>
+    /// <param name="row">The index of the row to retrieve.</param>
+    /// <returns>A new <see cref="Matrix"/> object representing the specified row.</returns>
+    /// <remarks>
+    /// The returned row is a new instance of the <see cref="Matrix"/> class and has the same number of columns as the original matrix.
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[] GetRow(this float[,] source, int row)
+    {
+        int columns = source.GetLength(1);
+
+        // Create an array to store the row.
+        float[] res = new float[columns];
+        for (int i = 0; i < columns; i++)
+        {
+            // Access each element in the specified row.
+            res[i] = source[row, i];
+        }
+
+        return res;
+    }
+
+    public static float[,] GetRowAs2D(this float[,] source, int row)
+    {
+        int columns = source.GetLength(1);
+        // Create an array to store the row.
+        float[,] res = new float[1, columns];
+        for (int i = 0; i < columns; i++)
+        {
+            // Access each element in the specified row.
+            res[0, i] = source[row, i];
+        }
+        return res;
     }
 
     /// <summary>
