@@ -166,4 +166,37 @@ public static class ArrayExtensions
 
         return array;
     }
+
+    /// <summary>
+    /// Standardizes the matrix by converting each column to have a mean of 0 and a standard deviationFromMean of 1.
+    /// <summary>
+    public static void Standardize(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        for (int col = 0; col < columns; col++)
+        {
+            // Calculate mean
+            float sum = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                sum += source[row, col];
+            }
+            float mean = sum / rows;
+
+            // Calculate standard deviationFromMean
+            float sumOfSquares = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                sumOfSquares += MathF.Pow(source[row, col] - mean, 2);
+            }
+            float stdDev = MathF.Sqrt(sumOfSquares / rows);
+
+            // Standardize values
+            for (int row = 0; row < rows; row++)
+            {
+                source[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+    }
 }

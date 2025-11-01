@@ -30,6 +30,7 @@ while (running)
     Console.WriteLine("2. Tables");
     Console.WriteLine("3. Matrices");
     Console.WriteLine("4. Matrices with bias");
+    Console.WriteLine("5. Matrices with bias on the Boston data");
     Console.WriteLine("Other: Exit");
     Console.WriteLine();
     Console.Write("Enter your choice: ");
@@ -50,6 +51,9 @@ while (running)
             break;
         case "4":
             MatricesWithBias();
+            break;
+        case "5":
+            MatricesWithBiasBoston();
             break;
         default:
             Console.WriteLine("Goodbye!");
@@ -351,4 +355,89 @@ void MatricesWithBias()
     Console.WriteLine("\n--- Training Complete (Matrices with Bias) ---");
     Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | b = {AB[3, 0],9:F4}");
     Console.WriteLine($"{"Expected parameters:",-20} a1 = {2,9:F4} | a2 = {3,9:F4} | a3 = {-1,9:F4} | b = {5,9:F4}");
+}
+
+void MatricesWithBiasBoston()
+{
+    // 1. Load Boston housing dataset and standardize it (scale features to have mean 0 and stddev 1)
+
+    float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv");
+    bostonData.Standardize();
+
+    // 2. Convert data to matrices with bias term
+
+    // Number of samples and coefficients
+    int n = bostonData.GetLength(0);
+    int numCoefficients = bostonData.GetLength(1) - 1; // Number of independent variables
+
+    float[,] XAnd1 = new float[n, numCoefficients + 1]; // +1 for bias term
+    float[,] Y = new float[n, 1];
+
+    // Prepare feature matrix XAnd1 with bias term and target vector Y
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < numCoefficients; j++)
+        {
+            XAnd1[i, j] = bostonData[i, j];
+        }
+        XAnd1[i, numCoefficients] = 1; // Bias term
+        Y[i, 0] = bostonData[i, numCoefficients];
+    }
+
+    // 2. Initialize model parameters
+
+    // These are the coefficients for our independent variables and the bias term
+    float[,] AB = new float[numCoefficients + 1, 1];
+
+    // 3. Training loop
+
+    for (int iteration = 1; iteration <= Iterations; iteration++)
+    {
+        // Prediction and error calculation
+
+        // Make predictions for all samples at once: predictions = XAnd1 * AB
+        float[,] predictions = XAnd1.MultiplyDot(AB);
+
+        // Calculate errors for all samples: errors = Y - predictions
+        float[,] errors = Y.Subtract(predictions);
+
+        // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
+        // We can precalculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity.
+        float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
+
+        // Update regression parameters using gradient descent
+        AB = AB.Subtract(deltaAB.Multiply(LearningRate));
+
+        if (iteration % PrintEvery == 0)
+        {
+            // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
+            float meanSquaredError = errors.Power(2).Mean();
+
+            Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {AB[0, 0],8:F4} | a2: {AB[1, 0],8:F4} | a3: {AB[2, 0],8:F4} | b: {AB[3, 0],8:F4}");
+        }
+    }
+
+    // 4. Output learned parameters
+
+    Console.WriteLine("\n--- Training Complete (Matrices with Bias) ---");
+    Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | b = {AB[3, 0],9:F4}");
+    Console.WriteLine($"{"Expected parameters:",-20} a1 = {2,9:F4} | a2 = {3,9:F4} | a3 = {-1,9:F4} | b = {5,9:F4}");
+}
+
+static float[,] LoadCsv(string filePath)
+{
+    string[] lines = [.. File.ReadAllLines(filePath).Skip(1)];
+    int rows = lines.Length;
+    int cols = lines[0].Split(',').Length;
+    float[,] matrix = new float[rows, cols];
+    for (int i = 0; i < rows; i++)
+    {
+        string[] values = lines[i].Split(',');
+        for (int j = 0; j < cols; j++)
+        {
+            string value = values[j].Trim('"');
+            matrix[i, j] = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+        }
+    }
+    return matrix;
 }
