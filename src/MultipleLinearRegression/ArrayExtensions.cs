@@ -10,6 +10,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Adds a scalar value to each element of the matrix.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Add(this float[,] source, float scalar)
     {
         int rows = source.GetLength(0);
@@ -30,12 +31,14 @@ public static class ArrayExtensions
     /// <summary>
     /// Calculates the mean of all elements in the matrix.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Mean(this float[,] source)
         => source.Sum() / source.Length;
 
     /// <summary>
     /// Multiplies each element of the matrix by a scalar value.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Multiply(this float[,] source, float scalar)
     {
         int rows = source.GetLength(0);
@@ -56,6 +59,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Multiplies the current matrix with another matrix using the dot product.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyDot(this float[,] source, float[,] matrix)
     {
         Debug.Assert(source.GetLength(1) == matrix.GetLength(0));
@@ -86,6 +90,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Raises each element of the matrix to the specified power.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Power(this float[,] source, int scalar)
     {
         int rows = source.GetLength(0);
@@ -106,6 +111,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Subtracts the elements of the specified matrix from the current matrix.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Subtract(this float[,] source, float[,] matrix)
     {
         Debug.Assert(source.GetLength(0) == matrix.GetLength(0));
@@ -129,6 +135,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Calculates the sum of all elements in the matrix.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Sum(this float[,] source)
     {
         // Sum over all elements.
@@ -150,6 +157,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Transposes the matrix by swapping its rows and columns.
     /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Transpose(this float[,] source)
     {
         int rows = source.GetLength(0);
@@ -192,6 +200,7 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetRowAs2D(this float[,] source, int row)
     {
         int columns = source.GetLength(1);
@@ -203,108 +212,5 @@ public static class ArrayExtensions
             res[0, i] = source[row, i];
         }
         return res;
-    }
-
-    public static float[,] Invert(this float[,] A)
-    {
-        int n = A.GetLength(0);
-        float[,] result = new float[n, n];
-        float[,] aug = new float[n, 2 * n];
-
-        // Tworzymy macierz rozszerzoną [A | I]
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = 0; j < n; j++)
-                aug[i, j] = A[i, j];
-            aug[i, n + i] = 1f;
-        }
-
-        // Eliminacja Gaussa–Jordana
-        for (int i = 0; i < n; i++)
-        {
-            // Znajdź największy element w kolumnie (dla stabilności)
-            float maxEl = Math.Abs(aug[i, i]);
-            int maxRow = i;
-            for (int k = i + 1; k < n; k++)
-            {
-                if (Math.Abs(aug[k, i]) > maxEl)
-                {
-                    maxEl = Math.Abs(aug[k, i]);
-                    maxRow = k;
-                }
-            }
-
-            // Zamiana wierszy
-            for (int k = 0; k < 2 * n; k++)
-            {
-                float tmp = aug[maxRow, k];
-                aug[maxRow, k] = aug[i, k];
-                aug[i, k] = tmp;
-            }
-
-            // Normalizacja wiersza
-            float diag = aug[i, i];
-            if (diag == 0)
-                throw new InvalidOperationException("Macierz jest osobliwa (nieodwracalna).");
-
-            for (int k = 0; k < 2 * n; k++)
-                aug[i, k] /= diag;
-
-            // Zerowanie pozostałych elementów w kolumnie
-            for (int j = 0; j < n; j++)
-            {
-                if (j != i)
-                {
-                    float factor = aug[j, i];
-                    for (int k = 0; k < 2 * n; k++)
-                        aug[j, k] -= factor * aug[i, k];
-                }
-            }
-        }
-
-        // Kopiowanie prawej połowy do wyniku
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                result[i, j] = aug[i, j + n];
-
-        return result;
-    }
-
-    /// <summary>
-    /// Standardizes the matrix by converting each column to have a mean of 0 and a standard deviationFromMean of 1.
-    /// <summary>
-    public static void Standardize(this float[,] source)
-    {
-        int rows = source.GetLength(0);
-        int columns = source.GetLength(1);
-        for (int col = 0; col < columns; col++)
-        {
-            // Calculate mean
-            float sum = 0;
-            for (int row = 0; row < rows; row++)
-            {
-                sum += source[row, col];
-            }
-            float mean = sum / rows;
-
-            // Calculate standard deviationFromMean
-            float sumOfSquares = 0;
-            for (int row = 0; row < rows; row++)
-            {
-                sumOfSquares += MathF.Pow(source[row, col] - mean, 2);
-            }
-            float stdDev = MathF.Sqrt(sumOfSquares / rows);
-
-            if(stdDev == 0)
-            {
-                stdDev = 1; // To avoid division by zero
-            }
-
-            // Standardize values
-            for (int row = 0; row < rows; row++)
-            {
-                source[row, col] = (source[row, col] - mean) / stdDev;
-            }
-        }
     }
 }
