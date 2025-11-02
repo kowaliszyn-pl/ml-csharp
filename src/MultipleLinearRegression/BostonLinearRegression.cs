@@ -2,10 +2,6 @@
 // File name: BostonLinearRegression.cs
 // www.kowaliszyn.pl, 2025
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace MultipleLinearRegression;
 
 public static class BostonLinearRegression
@@ -31,11 +27,20 @@ public static class BostonLinearRegression
         for (int j = 0; j < numCoefficients; j++)
         {
             float mean = 0f, std = 0f;
-            for (int i = 0; i < n; i++) mean += bostonData[i, j];
+            for (int i = 0; i < n; i++)
+            {
+                mean += bostonData[i, j];
+            }
             mean /= n;
-            for (int i = 0; i < n; i++) std += (bostonData[i, j] - mean) * (bostonData[i, j] - mean);
+            for (int i = 0; i < n; i++)
+            {
+                std += MathF.Pow(bostonData[i, j] - mean, 2);
+            }
             std = MathF.Sqrt(std / n);
-            for (int i = 0; i < n; i++) bostonData[i, j] = (bostonData[i, j] - mean) / std;
+            for (int i = 0; i < n; i++)
+            {
+                bostonData[i, j] = (bostonData[i, j] - mean) / std;
+            }
         }
 
         // 2. Convert data to matrices with bias term
@@ -65,7 +70,8 @@ public static class BostonLinearRegression
         float[,] AB = new float[numCoefficients + 1, 1];
 
         // 3. Training loop
-
+        var XAnd1T = XAnd1.Transpose();
+        var gradientMultiplier = -2.0f / n;
         for (int iteration = 1; iteration <= Iterations; iteration++)
         {
             // Prediction and error calculation
@@ -77,8 +83,7 @@ public static class BostonLinearRegression
             float[,] errors = Y.Subtract(predictions);
 
             // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
-            // We can precalculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity.
-            float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
+            float[,] deltaAB = XAnd1T.MultiplyDot(errors).Multiply(gradientMultiplier);
 
             // Update regression parameters using gradient descent
             AB = AB.Subtract(deltaAB.Multiply(LearningRate));
