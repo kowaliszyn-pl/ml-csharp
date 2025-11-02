@@ -2,9 +2,9 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025
 
-// Set the parameters for the model
+// Set the hyperparameters for the model
 
-const float LearningRate = 0.005f;
+const float LearningRate = 0.0005f;
 const int Iterations = 35_000;
 const int PrintEvery = 1_000;
 
@@ -19,6 +19,15 @@ float[][] data = [
     [4, 2, 3, 16],
     [1, 4, 2, 17]
 ];
+
+// the same data as above
+float[,] dataMatrix = new float[,] {
+    {1, 2, 1, 12}, // y = 2*1 + 3*2 - 1*1 + 5 = 12
+    {2, 1, 2, 10}, // etc.
+    {3, 3, 1, 19},
+    {4, 2, 3, 16},
+    {1, 4, 2, 17}
+};
 
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -362,13 +371,25 @@ void MatricesWithBiasBoston()
     // 1. Load Boston housing dataset and standardize it (scale features to have mean 0 and stddev 1)
 
     float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv");
-    //bostonData.Standardize();
-
-    // 2. Convert data to matrices with bias term
 
     // Number of samples and coefficients
     int n = bostonData.GetLength(0);
-    int numCoefficients = bostonData.GetLength(1) - 1; // Number of independent variables
+
+    // Number of independent variables
+    int numCoefficients = bostonData.GetLength(1) - 1;
+
+    // Standardize each feature column (mean = 0, stddev = 1)
+    for (int j = 0; j < numCoefficients; j++)
+    {
+        float mean = 0f, std = 0f;
+        for (int i = 0; i < n; i++) mean += bostonData[i, j];
+        mean /= n;
+        for (int i = 0; i < n; i++) std += (bostonData[i, j] - mean) * (bostonData[i, j] - mean);
+        std = MathF.Sqrt(std / n);
+        for (int i = 0; i < n; i++) bostonData[i, j] = (bostonData[i, j] - mean) / std;
+    }
+
+    // 2. Convert data to matrices with bias term
 
     float[,] XAnd1 = new float[n, numCoefficients + 1]; // +1 for bias term
     float[,] Y = new float[n, 1];
@@ -380,37 +401,19 @@ void MatricesWithBiasBoston()
         {
             XAnd1[i, j] = bostonData[i, j];
         }
-        XAnd1[i, numCoefficients] = 1; // Bias term
+
+        // Add bias term
+        XAnd1[i, numCoefficients] = 1;
+
+        // Target values
         Y[i, 0] = bostonData[i, numCoefficients];
     }
-    XAnd1.Standardize();
-
-    // 1.1 First, find the analitycal solution to compare with later
-    // Calculate analytical solution: AB_analytical = (X^T * X)^-1 * X^T * Y
-    float[,] XT = XAnd1.Transpose();
-    float[,] XTX = XT.MultiplyDot(XAnd1);
-    float[,] XTXInv = XTX.Invert();
-    float[,] XTY = XT.MultiplyDot(Y);
-    float[,] AB_analytical = XTXInv.MultiplyDot(XTY);
-    Console.WriteLine("--- Analytical solution on Boston Data ---");
-    Console.WriteLine("Learned parameters:");
-    for (int i = 0; i < numCoefficients; i++)
-    {
-        Console.WriteLine($" a{i + 1} = {AB_analytical[i, 0],9:F4}");
-    }
-    Console.WriteLine($" b = {AB_analytical[numCoefficients, 0],9:F4}");
-    Console.WriteLine();
 
     // 2. Initialize model parameters
 
     // These are the coefficients for our independent variables and the bias term
+    // initialized to zero
     float[,] AB = new float[numCoefficients + 1, 1];
-    // fill with random small values
-    Random rand = new Random();
-    for (int i = 0; i < numCoefficients + 1; i++)
-    {
-        AB[i, 0] = (float)(rand.NextDouble() * 0.1 - 0.05); // Random values between -0.05 and 0.05
-    }
 
     // 3. Training loop
 
@@ -436,6 +439,12 @@ void MatricesWithBiasBoston()
             // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
             float meanSquaredError = errors.Power(2).Mean();
 
+            if (float.IsNaN(meanSquaredError))
+            {
+                Console.WriteLine($"NaN detected at iteration {iteration}");
+                break;
+            }
+
             Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5} | a1: {AB[0, 0],8:F4} | a2: {AB[1, 0],8:F4} | a3: {AB[2, 0],8:F4} | ... | b: {AB[numCoefficients, 0],8:F4}");
         }
     }
@@ -450,7 +459,7 @@ void MatricesWithBiasBoston()
         Console.WriteLine($" a{i + 1} = {AB[i, 0],9:F4}");
     }
 
-    //Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | ... | b = {AB[numCoefficients, 0],9:F4}");
+    Console.WriteLine($"{"Learned parameters:",-20} a1 = {AB[0, 0],9:F4} | a2 = {AB[1, 0],9:F4} | a3 = {AB[2, 0],9:F4} | ... | b = {AB[numCoefficients, 0],9:F4}");
     Console.WriteLine("Sample predictions vs actual values:");
     Console.WriteLine(
         "Predicted".PadRight(15) +
