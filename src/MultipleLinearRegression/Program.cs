@@ -4,8 +4,6 @@
 
 // Set the hyperparameters for the model
 
-using MultipleLinearRegression;
-
 const float LearningRate = 0.0005f;
 const int Iterations = 35_000;
 const int PrintEvery = 1_000;
@@ -41,7 +39,6 @@ while (running)
     Console.WriteLine("2. Tables");
     Console.WriteLine("3. Matrices");
     Console.WriteLine("4. Matrices with bias");
-    Console.WriteLine("5. Matrices with bias on the Boston data");
     Console.WriteLine("Other: Exit");
     Console.WriteLine();
     Console.Write("Enter your choice: ");
@@ -63,9 +60,7 @@ while (running)
         case "4":
             MatricesWithBias();
             break;
-        case "5":
-            BostonLinearRegression.MatricesWithBiasBoston();
-            break;
+        
         default:
             Console.WriteLine("Goodbye!");
             running = false;
