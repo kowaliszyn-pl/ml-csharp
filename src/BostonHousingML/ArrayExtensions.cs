@@ -57,6 +57,21 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Multiplies each element of the matrix by a scalar value.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[] Multiply(this float[] source, float scalar)
+    {
+        int length = source.GetLength(0);
+        float[] res = new float[length];
+        for (int i = 0; i < length; i++)
+        {
+            res[i] = source[i] * scalar;
+        }
+        return res;
+    }
+
+    /// <summary>
     /// Multiplies the current matrix with another matrix using the dot product.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -129,6 +144,22 @@ public static class ArrayExtensions
             }
         }
 
+        return res;
+    }
+
+    /// <summary>
+    /// Subtracts the elements of the specified matrix from the current matrix.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[] Subtract(this float[] source, float[] matrix)
+    {
+        Debug.Assert(source.GetLength(0) == matrix.GetLength(0));
+        int length = source.GetLength(0);
+        float[] res = new float[length];
+        for (int i = 0; i < length; i++)
+        {
+            res[i] = source[i] - matrix[i];
+        }
         return res;
     }
 

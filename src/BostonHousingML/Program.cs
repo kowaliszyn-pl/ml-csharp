@@ -2,9 +2,6 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025
 
-using System;
-using System.Net.Http.Headers;
-
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -48,7 +45,7 @@ static void MultipleLinearRegression()
     // 1. Set the hyperparameters for the regression task
 
     const float LearningRate = 0.0005f;
-    const int Iterations = 46_000;
+    const int Iterations = 48_000;
     const int PrintEvery = 2_000;
 
     // 2. Load Boston housing dataset and standardize it (scale features to have mean 0 and stddev 1)
@@ -179,7 +176,7 @@ static void FirstNeuralNetwork()
     // 1. Set the hyperparameters for the neural network
 
     const float LearningRate = 0.0005f;
-    const int Iterations = 46_000;
+    const int Iterations = 48_000;
     const int PrintEvery = 2_000;
     const int HiddenLayerSize = 4;
 
@@ -242,7 +239,7 @@ static void FirstNeuralNetwork()
     // weights and biases for the second layer
     float[,] W2 = new float[HiddenLayerSize, 1];
     W2.RandomInPlace(seed);
-    float[] B2 = new float[1];
+    float b2 = 0;
 
     // 5. Training loop
 
@@ -260,21 +257,21 @@ static void FirstNeuralNetwork()
 
         // The second layer
         float[,] M2 = O1.MultiplyDot(W2);
-        float[,] predictions = M2.AddRow(B2);
+        float[,] predictions = M2.Add(b2);
 
         // Calculate errors for all samples: errors = Y - predictions
         float[,] errors = Y.Subtract(predictions);
 
         float meanSquaredError = errors.Power(2).Mean();
 
-        // Back propagation
+        // Back (gradient calculation and parameters update)
 
         // The first layer.
         float[,] dLdP = Y.Subtract(predictions).Multiply(negativeTwoOverN);
         float[,] dPdM2 = M2.AsOnes();
         float[,] dLdM2 = dLdP.MultiplyElementwise(dPdM2);
         float dPdBias2 = 1;
-        float dLBias2 = dLdP.Multiply(dPdBias2).Sum();
+        float dLBias2 = dLdP.Multiply(dPdBias2).Mean();
         float[,] dM2dW2 = O1.Transpose();
         float[,] dLdW2 = dM2dW2.MultiplyDot(dLdP);
 
@@ -285,11 +282,16 @@ static void FirstNeuralNetwork()
         float[,] dLdN1 = dLdO1.MultiplyElementwise(dO1dN1);
         float[] dN1dBias1 = B1.AsOnes();
         float[,] dN1dM1 = M1.AsOnes();
-        // Matrix dLdBias1 = dLdN1.MultiplyElementwise(dN1dBias1).SumBy(Dimension.Rows);
         float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).AvgByRows();
         float[,] dLdM1 = dLdN1.MultiplyElementwise(dN1dM1);
         float[,] dM1dW1 = XT;
         float[,] dLdW1 = dM1dW1.MultiplyDot(dLdM1);
+
+        // Update parameters
+        W1 = W1.Subtract(dLdW1.Multiply(LearningRate));
+        W2 = W2.Subtract(dLdW2.Multiply(LearningRate));
+        B1 = B1.Subtract(dLdBias1.Multiply(LearningRate));
+        b2 -= dLBias2 * LearningRate;
 
         if (iteration % PrintEvery == 0)
         {
@@ -302,6 +304,33 @@ static void FirstNeuralNetwork()
 
             Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5}");
         }
+    }
+
+    // 6. Output learned parameters
+
+    Console.WriteLine("\n--- Training Complete (Neural Network on Boston Data) ---");
+    Console.WriteLine("Sample predictions vs actual values:");
+
+    Console.WriteLine();
+    Console.WriteLine($"{"Sample No",14}{"Predicted",14}{"Actual",14}");
+    Console.WriteLine();
+    int[] showSamples = { 0, 1, 2, 3, 4, n - 1 };
+    for (int i = 0; i < showSamples.Length; i++)
+    {
+        int sampleIndex = showSamples[i];
+        // Forward pass for the sample
+        float[,] M1 = X.GetRowAs2D(sampleIndex).MultiplyDot(W1);
+        float[,] N1 = M1.AddRow(B1);
+        float[,] O1 = N1.Sigmoid();
+        float[,] M2 = O1.MultiplyDot(W2);
+        float[,] prediction = M2.Add(b2);
+        float predicted = prediction[0, 0];
+        float actual = Y[sampleIndex, 0];
+        Console.WriteLine(
+            $"{sampleIndex + 1,14}" +
+            $"{predicted,14:F4}" +
+            $"{actual,14:F4}"
+        );
     }
 }
 
