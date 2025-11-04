@@ -2,12 +2,15 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025
 
+using System;
+using System.Net.Http.Headers;
+
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 while (running)
 {
-    Console.WriteLine("Select a routine to run:");
+    Console.WriteLine("Select a routine to run (Boston housing dataset):");
     Console.WriteLine("1. Multiple Linear Regression");
     Console.WriteLine("2. First Neural Network");
     Console.WriteLine("Other: Exit");
@@ -42,7 +45,7 @@ while (running)
 
 static void MultipleLinearRegression()
 {
-    // 1. Set the hyperparameters for the Boston housing dataset regression task
+    // 1. Set the hyperparameters for the regression task
 
     const float LearningRate = 0.0005f;
     const int Iterations = 46_000;
@@ -173,7 +176,133 @@ static void MultipleLinearRegression()
 
 static void FirstNeuralNetwork()
 {
-    // Placeholder for FirstNeuralNetwork implementation
+    // 1. Set the hyperparameters for the neural network
+
+    const float LearningRate = 0.0005f;
+    const int Iterations = 46_000;
+    const int PrintEvery = 2_000;
+    const int HiddenLayerSize = 4;
+
+    // 2. Load Boston housing dataset and standardize it (scale features to have mean 0 and stddev 1)
+
+    float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv");
+
+    // Number of samples and coefficients
+    int n = bostonData.GetLength(0);
+
+    // Number of independent variables
+    int numCoefficients = bostonData.GetLength(1) - 1;
+
+    // Standardize each feature column (mean = 0, stddev = 1) except the target variable (last column)
+    for (int j = 0; j < numCoefficients; j++)
+    {
+        float mean = 0f, std = 0f;
+        for (int i = 0; i < n; i++)
+        {
+            mean += bostonData[i, j];
+        }
+        mean /= n;
+        for (int i = 0; i < n; i++)
+        {
+            std += MathF.Pow(bostonData[i, j] - mean, 2);
+        }
+        std = MathF.Sqrt(std / n);
+        for (int i = 0; i < n; i++)
+        {
+            bostonData[i, j] = (bostonData[i, j] - mean) / std;
+        }
+    }
+
+    // 3. Convert data to matrices
+
+    float[,] X = new float[n, numCoefficients];
+    float[,] Y = new float[n, 1];
+
+    // Prepare feature matrix X and target vector Y
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < numCoefficients; j++)
+        {
+            X[i, j] = bostonData[i, j];
+        }
+
+        // Target values
+        Y[i, 0] = bostonData[i, numCoefficients];
+    }
+
+    // 4. Initialize model parameters
+
+    int seed = 42;
+
+    // weights and biases for the first layer
+    float[,] W1 = new float[numCoefficients, HiddenLayerSize];
+    W1.RandomInPlace(seed);
+    float[] B1 = new float[HiddenLayerSize];
+
+    // weights and biases for the second layer
+    float[,] W2 = new float[HiddenLayerSize, 1];
+    W2.RandomInPlace(seed);
+    float[] B2 = new float[1];
+
+    // 5. Training loop
+
+    var XT = X.Transpose();
+    var negativeTwoOverN = -2.0f / n;
+    for (int iteration = 1; iteration <= Iterations; iteration++)
+    {
+
+        // Forward (prediction and error calculation)
+
+        // The first layer
+        float[,] M1 = X.MultiplyDot(W1);
+        float[,] N1 = M1.AddRow(B1);
+        float[,] O1 = N1.Sigmoid();
+
+        // The second layer
+        float[,] M2 = O1.MultiplyDot(W2);
+        float[,] predictions = M2.AddRow(B2);
+
+        // Calculate errors for all samples: errors = Y - predictions
+        float[,] errors = Y.Subtract(predictions);
+
+        float meanSquaredError = errors.Power(2).Mean();
+
+        // Back propagation
+
+        // The first layer.
+        float[,] dLdP = Y.Subtract(predictions).Multiply(negativeTwoOverN);
+        float[,] dPdM2 = M2.AsOnes();
+        float[,] dLdM2 = dLdP.MultiplyElementwise(dPdM2);
+        float dPdBias2 = 1;
+        float dLBias2 = dLdP.Multiply(dPdBias2).Sum();
+        float[,] dM2dW2 = O1.Transpose();
+        float[,] dLdW2 = dM2dW2.MultiplyDot(dLdP);
+
+        // The second layer.
+        float[,] dM2dO1 = W2.Transpose();
+        float[,] dLdO1 = dLdM2.MultiplyDot(dM2dO1);
+        float[,] dO1dN1 = N1.SigmoidDerivative();
+        float[,] dLdN1 = dLdO1.MultiplyElementwise(dO1dN1);
+        float[] dN1dBias1 = B1.AsOnes();
+        float[,] dN1dM1 = M1.AsOnes();
+        // Matrix dLdBias1 = dLdN1.MultiplyElementwise(dN1dBias1).SumBy(Dimension.Rows);
+        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).AvgByRows();
+        float[,] dLdM1 = dLdN1.MultiplyElementwise(dN1dM1);
+        float[,] dM1dW1 = XT;
+        float[,] dLdW1 = dM1dW1.MultiplyDot(dLdM1);
+
+        if (iteration % PrintEvery == 0)
+        {
+            // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
+            if (float.IsNaN(meanSquaredError))
+            {
+                Console.WriteLine($"NaN detected at iteration {iteration}");
+                break;
+            }
+
+            Console.WriteLine($"Iteration: {iteration,6} | MSE: {meanSquaredError,8:F5}");
+        }
+    }
 }
 
 static float[,] LoadCsv(string filePath)
