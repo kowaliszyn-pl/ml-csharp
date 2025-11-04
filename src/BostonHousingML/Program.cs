@@ -238,7 +238,7 @@ static void FirstNeuralNetwork()
 
     // weights and biases for the second layer
     float[,] W2 = new float[HiddenLayerSize, 1];
-    W2.RandomInPlace(seed);
+    W2.RandomInPlace(seed + 1);
     float b2 = 0;
 
     // 5. Training loop
@@ -282,7 +282,7 @@ static void FirstNeuralNetwork()
         float[,] dLdN1 = dLdO1.MultiplyElementwise(dO1dN1);
         float[] dN1dBias1 = B1.AsOnes();
         float[,] dN1dM1 = M1.AsOnes();
-        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).AvgByRows();
+        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).MeanByColumn();
         float[,] dLdM1 = dLdN1.MultiplyElementwise(dN1dM1);
         float[,] dM1dW1 = XT;
         float[,] dLdW1 = dM1dW1.MultiplyDot(dLdM1);
@@ -309,8 +309,33 @@ static void FirstNeuralNetwork()
     // 6. Output learned parameters
 
     Console.WriteLine("\n--- Training Complete (Neural Network on Boston Data) ---");
+    Console.WriteLine("Learned parameters:");
+    Console.WriteLine("Weights for the first layer (W1):");
+    for (int i = 0; i < W1.GetLength(0); i++)
+    {
+        for (int j = 0; j < W1.GetLength(1); j++)
+        {
+            Console.Write($"{W1[i, j],8:F4} ");
+        }
+        Console.WriteLine();
+    }
+    Console.WriteLine("Biases for the first layer (B1):");
+    for (int j = 0; j < B1.Length; j++)
+    {
+        Console.WriteLine($" B1[{j}] = {B1[j],8:F4}");
+    }
+    Console.WriteLine("Weights for the second layer (W2):");
+    for (int i = 0; i < W2.GetLength(0); i++)
+    {
+        for (int j = 0; j < W2.GetLength(1); j++)
+        {
+            Console.Write($"{W2[i, j],8:F4} ");
+        }
+        Console.WriteLine();
+    }
+    Console.WriteLine($"Bias for the second layer (b2): {b2,8:F4}");
+    Console.WriteLine();
     Console.WriteLine("Sample predictions vs actual values:");
-
     Console.WriteLine();
     Console.WriteLine($"{"Sample No",14}{"Predicted",14}{"Actual",14}");
     Console.WriteLine();
