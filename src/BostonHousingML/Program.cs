@@ -231,12 +231,12 @@ static void FirstNeuralNetwork()
 
     int seed = 42;
 
-    // weights and biases for the first layer
+    // Weights and biases for the first layer
     float[,] W1 = new float[numCoefficients, HiddenLayerSize];
     W1.RandomInPlace(seed);
     float[] B1 = new float[HiddenLayerSize];
 
-    // weights and biases for the second layer
+    // Weights and biases for the second layer
     float[,] W2 = new float[HiddenLayerSize, 1];
     W2.RandomInPlace(seed + 1);
     float b2 = 0;
@@ -247,7 +247,7 @@ static void FirstNeuralNetwork()
     var negativeTwoOverN = -2.0f / n;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
-
+        // Model structure: X → [W1, B1] → sigmoid → [W2, b2] → output
         // Forward (prediction and error calculation)
 
         // The first layer
@@ -266,8 +266,8 @@ static void FirstNeuralNetwork()
 
         // Back (gradient calculation and parameters update)
 
-        // The first layer.
-        float[,] dLdP = Y.Subtract(predictions).Multiply(negativeTwoOverN);
+        // The first layer
+        float[,] dLdP = errors.Multiply(negativeTwoOverN);
         float[,] dPdM2 = M2.AsOnes();
         float[,] dLdM2 = dLdP.MultiplyElementwise(dPdM2);
         float dPdBias2 = 1;
@@ -275,7 +275,7 @@ static void FirstNeuralNetwork()
         float[,] dM2dW2 = O1.Transpose();
         float[,] dLdW2 = dM2dW2.MultiplyDot(dLdP);
 
-        // The second layer.
+        // The second layer
         float[,] dM2dO1 = W2.Transpose();
         float[,] dLdO1 = dLdM2.MultiplyDot(dM2dO1);
         float[,] dO1dN1 = N1.SigmoidDerivative();
