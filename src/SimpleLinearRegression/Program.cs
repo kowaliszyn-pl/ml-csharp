@@ -12,20 +12,20 @@ const int PrintEvery = 1_000; // 1
 
 // 2. Prepare training data
 
-float[][] data = [
-    [10, 100],
-    [20, 80],
-    [30, 60],
-    [40, 40],
-    [50, 20],
-];
+float[,] data = {
+    { 10, 100 },
+    { 20, 80 },
+    { 30, 60 },
+    { 40, 40 },
+    { 50, 20 },
+};
 
 // 3. Initialize model
 
 float a = 0, b = 0;
 
 // Number of samples
-int n = data.Length;
+int n = data.GetLength(0);
 
 // 4. Training loop
 
@@ -34,10 +34,11 @@ for (int iteration = 1; iteration <= Iterations; iteration++)
     // Initialize accumulators for errors
     float sumErrorValue = 0, sumError = 0, squaredError = 0;
 
-    foreach (float[] sample in data)
+    // For each sample in data
+    for (int row = 0; row < n; row++)
     {
-        float x = sample[0];
-        float y = sample[1];
+        float x = data[row, 0];
+        float y = data[row, 1];
 
         // Prediction and error calculation
         float prediction = a * x + b;
