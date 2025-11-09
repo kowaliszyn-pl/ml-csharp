@@ -406,7 +406,7 @@ public static class ArrayExtensions
             }
             float mean = sum / rows;
 
-            // Calculate standard deviationFromMean
+            // Calculate standard deviation
             float sumOfSquares = 0;
             for (int row = 0; row < rows; row++)
             {
@@ -436,7 +436,7 @@ public static class ArrayExtensions
     /// Optional. The index of the column to standardize. If null, all columns are standardized.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void StandardizeInOneLoop(this float[,] source, Range? columnRange = null)
+    public static void StandardizeSinglePass(this float[,] source, Range? columnRange = null)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
@@ -457,7 +457,7 @@ public static class ArrayExtensions
 
         for (int col = beginColumn; col < endColumn; col++)
         {
-            // Calculate mean
+            // Calculate standard deviation in a single pass
             float sum = 0, sumOfSquares = 0;
             for (int row = 0; row < rows; row++)
             {

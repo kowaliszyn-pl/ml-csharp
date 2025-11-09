@@ -216,25 +216,24 @@ static void FirstNeuralNetwork()
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
         // Model structure: X → [W1, B1] → sigmoid → [W2, b2] → output
+
         // Forward (prediction and error calculation)
 
-        // The first layer
+        // The hidden layer
         float[,] M1 = X.MultiplyDot(W1);
         float[,] N1 = M1.AddRow(B1);
         float[,] O1 = N1.Sigmoid();
 
-        // The second layer
+        // The output layer
         float[,] M2 = O1.MultiplyDot(W2);
         float[,] predictions = M2.Add(b2);
 
         // Calculate errors for all samples: errors = Y - predictions
         float[,] errors = Y.Subtract(predictions);
 
-        float meanSquaredError = errors.Power(2).Mean();
-
         // Back (gradient calculation and parameters update)
 
-        // The first layer
+        // The output layer (we calculate them in backward order)
         float[,] dLdP = errors.Multiply(negativeTwoOverN);
         float[,] dPdM2 = M2.AsOnes();
         float[,] dLdM2 = dLdP.MultiplyElementwise(dPdM2);
@@ -243,7 +242,7 @@ static void FirstNeuralNetwork()
         float[,] dM2dW2 = O1.Transpose();
         float[,] dLdW2 = dM2dW2.MultiplyDot(dLdP);
 
-        // The second layer
+        // The hidden layer
         float[,] dM2dO1 = W2.Transpose();
         float[,] dLdO1 = dLdM2.MultiplyDot(dM2dO1);
         float[,] dO1dN1 = N1.SigmoidDerivative();
@@ -263,6 +262,8 @@ static void FirstNeuralNetwork()
 
         if (iteration % PrintEvery == 0)
         {
+            float meanSquaredError = errors.Power(2).Mean();
+
             // Calculate the Mean Squared Error loss: MSE = mean(errors^2)
             if (float.IsNaN(meanSquaredError))
             {
