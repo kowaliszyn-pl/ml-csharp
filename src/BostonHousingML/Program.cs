@@ -217,23 +217,24 @@ static void FirstNeuralNetwork()
     {
         // Model structure: X → [W1, B1] → sigmoid → [W2, b2] → output
 
-        // Forward (prediction and error calculation)
+        // 5.1. Forward (prediction and error calculation)
 
-        // The hidden layer
+        // The first layer (hidden)
         float[,] M1 = X.MultiplyDot(W1);
         float[,] N1 = M1.AddRow(B1);
+        // Apply sigmoid activation function, so we can get O1 - outputs of the first layer
         float[,] O1 = N1.Sigmoid();
 
-        // The output layer
+        // The second layer (output)
         float[,] M2 = O1.MultiplyDot(W2);
         float[,] predictions = M2.Add(b2);
 
         // Calculate errors for all samples: errors = Y - predictions
         float[,] errors = Y.Subtract(predictions);
 
-        // Back (gradient calculation and parameters update)
+        // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order.
 
-        // The output layer (we calculate them in backward order)
+        // The second layer (output)
         float[,] dLdP = errors.Multiply(negativeTwoOverN);
         float[,] dPdM2 = M2.AsOnes();
         float[,] dLdM2 = dLdP.MultiplyElementwise(dPdM2);
@@ -242,7 +243,7 @@ static void FirstNeuralNetwork()
         float[,] dM2dW2 = O1.Transpose();
         float[,] dLdW2 = dM2dW2.MultiplyDot(dLdP);
 
-        // The hidden layer
+        // The first layer (hidden)
         float[,] dM2dO1 = W2.Transpose();
         float[,] dLdO1 = dLdM2.MultiplyDot(dM2dO1);
         float[,] dO1dN1 = N1.SigmoidDerivative();
