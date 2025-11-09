@@ -370,6 +370,119 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Standardizes the matrix in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1.
+    /// </summary>
+    /// <param name="source">The matrix to standardize.</param>
+    /// <param name="column">
+    /// Optional. The index of the column to standardize. If null, all columns are standardized.
+    /// </param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Standardize(this float[,] source, Range? columnRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        int beginColumn, endColumn;
+
+        if (columnRange is not null)
+        {
+            var (offset, length) = columnRange.Value.GetOffsetAndLength(columns);
+            beginColumn = offset;
+            endColumn = beginColumn + length;
+        }
+        else
+        {
+            beginColumn = 0;
+            endColumn = columns;
+        }
+
+        for (int col = beginColumn; col < endColumn; col++)
+        {
+            // Calculate mean
+            float sum = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                sum += source[row, col];
+            }
+            float mean = sum / rows;
+
+            // Calculate standard deviationFromMean
+            float sumOfSquares = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                float value = source[row, col] - mean;
+                sumOfSquares += value * value;
+            }
+            float stdDev = MathF.Sqrt(sumOfSquares / rows);
+
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int row = 0; row < rows; row++)
+            {
+                source[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Standardizes the matrix in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1. Single loop version.
+    /// </summary>
+    /// <param name="source">The matrix to standardize.</param>
+    /// <param name="column">
+    /// Optional. The index of the column to standardize. If null, all columns are standardized.
+    /// </param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void StandardizeInOneLoop(this float[,] source, Range? columnRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        int beginColumn, endColumn;
+
+        if (columnRange is not null)
+        {
+            var (offset, length) = columnRange.Value.GetOffsetAndLength(columns);
+            beginColumn = offset;
+            endColumn = beginColumn + length;
+        }
+        else
+        {
+            beginColumn = 0;
+            endColumn = columns;
+        }
+
+        for (int col = beginColumn; col < endColumn; col++)
+        {
+            // Calculate mean
+            float sum = 0, sumOfSquares = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                float value = source[row, col];
+                sum += value;
+                sumOfSquares += value * value;
+            }
+            float mean = sum / rows;
+            float variance = (sumOfSquares / rows) - (mean * mean);
+            float stdDev = MathF.Sqrt(variance);
+
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int row = 0; row < rows; row++)
+            {
+                source[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+    }
+
+    /// <summary>
     /// Subtracts the elements of the specified matrix from the current matrix.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -59,24 +59,8 @@ static void MultipleLinearRegression()
     int numCoefficients = bostonData.GetLength(1) - 1;
 
     // Standardize each feature column (mean = 0, stddev = 1) except the target variable (last column)
-    for (int j = 0; j < numCoefficients; j++)
-    {
-        float mean = 0f, std = 0f;
-        for (int i = 0; i < n; i++)
-        {
-            mean += bostonData[i, j];
-        }
-        mean /= n;
-        for (int i = 0; i < n; i++)
-        {
-            std += MathF.Pow(bostonData[i, j] - mean, 2);
-        }
-        std = MathF.Sqrt(std / n);
-        for (int i = 0; i < n; i++)
-        {
-            bostonData[i, j] = (bostonData[i, j] - mean) / std;
-        }
-    }
+    // Note: the upper bound in Range is exclusive, so we use numCoefficients to exclude the last column
+    bostonData.Standardize(0..numCoefficients); 
 
     // 3. Convert data to matrices with bias term
 
@@ -191,24 +175,8 @@ static void FirstNeuralNetwork()
     int numCoefficients = bostonData.GetLength(1) - 1;
 
     // Standardize each feature column (mean = 0, stddev = 1) except the target variable (last column)
-    for (int j = 0; j < numCoefficients; j++)
-    {
-        float mean = 0f, std = 0f;
-        for (int i = 0; i < n; i++)
-        {
-            mean += bostonData[i, j];
-        }
-        mean /= n;
-        for (int i = 0; i < n; i++)
-        {
-            std += MathF.Pow(bostonData[i, j] - mean, 2);
-        }
-        std = MathF.Sqrt(std / n);
-        for (int i = 0; i < n; i++)
-        {
-            bostonData[i, j] = (bostonData[i, j] - mean) / std;
-        }
-    }
+    // Note: the upper bound in Range is exclusive, so we use numCoefficients to exclude the last column
+    bostonData.Standardize(0..numCoefficients);
 
     // 3. Convert data to matrices
 
