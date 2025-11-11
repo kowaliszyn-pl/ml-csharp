@@ -164,6 +164,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Multiplies each element of the matrix by a scalar value.
     /// </summary>
+    /// <remarks>
+    /// Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] Multiply(this float[] source, float scalar)
     {
@@ -179,6 +182,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Multiplies the current matrix with another matrix using the dot product.
     /// </summary>
+    /// <remarks>
+    /// Complexity: O(n * m * p), where n = rows of <paramref name="source"/>, m = shared dimension, p = columns of <paramref name="matrix"/>
+    /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyDot(this float[,] source, float[,] matrix)
     {
