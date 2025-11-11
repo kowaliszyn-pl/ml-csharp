@@ -10,7 +10,7 @@ const int PrintEvery = 1_000;
 
 // Prepare training data
 // Each inner array represents a sample: [x1, x2, x3, y]
-// We will be trying to find the relationship: y = 2*x1 + 3*x2 - 1*x3 + 5
+// We will try to find the relationship: y = 2*x1 + 3*x2 - 1*x3 + 5
 
 float[,] data = new float[,] {
     {1, 2, 1, 12}, // y = 2*1 + 3*2 - 1*1 + 5 = 12
@@ -70,7 +70,7 @@ void Variables()
 {
     // 1. Initialize model parameters
 
-    // Coefficients for independent variables (x1, x2, x3) and the bias term
+    // Coefficients for the independent variables (x1, x2, x3) and the bias term
     float a1 = 0, a2 = 0, a3 = 0;
     float b = 0;
 
@@ -88,7 +88,7 @@ void Variables()
         float sumErrorForA3 = 0;
         float sumErrorForB = 0;
 
-        // For each sample in data
+        // For each sample in the data
         for (int row = 0; row < n; row++)
         {
             // Get the independent variables (features) and the dependent variable (target)
@@ -148,7 +148,7 @@ void Tables()
     int n = data.GetLength(0);
     int numCoefficients = data.GetLength(1) - 1;
 
-    // Coefficients for independent variables and the bias term
+    // Coefficients for the independent variables and the bias term
     float[] a = new float[numCoefficients]; 
     float b = 0;
 
@@ -161,10 +161,10 @@ void Tables()
         float[] sumErrorForA = new float[numCoefficients]; // Accumulator for each coefficient's gradient part
         float sumErrorForB = 0; // Accumulator for the bias's gradient part
 
-        // For each sample in data
+        // For each sample in the data
         for (int row = 0; row < n; row++)
         {
-            // Separate independent variables (features) (x) from the dependent variable (target) (y)
+            // Separate the independent variables (features) (x) from the dependent variable (target) (y)
             float[] x = new float[numCoefficients];
             for (int i = 0; i < numCoefficients; i++)
             {
@@ -239,7 +239,7 @@ void Matrices()
     float[,] X = new float[n, numCoefficients];
     float[,] Y = new float[n, 1];
 
-    // Prepare feature matrix X and target vector Y
+    // Prepare the feature matrix X and the target vector Y
     for (int row = 0; row < n; row++)
     {
         for (int j = 0; j < numCoefficients; j++)
@@ -251,7 +251,7 @@ void Matrices()
 
     // 2. Initialize model parameters
 
-    // Coefficients for independent variables and the bias term
+    // Coefficients for the independent variables and the bias term
     float[,] A = new float[numCoefficients, 1];
     float b = 0;
 
@@ -267,8 +267,9 @@ void Matrices()
         // Calculate errors for all samples: errors = Y - predictions
         float[,] errors = Y.Subtract(predictions);
 
-        // Calculate gradient for coefficients 'a': ∂MSE/∂a = -2/n * X^T * errors
-        // X.Transpose() aligns features with their corresponding errors for the dot product.
+        // Calculate the gradient for the coefficients 'a': ∂MSE/∂a = -2/n * X^T * errors
+        // X.Transpose() aligns features with their corresponding errors for the dot product
+        // We can pre-calculate X.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity
         float[,] deltaA = X.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
 
         // ∂MSE/∂b = -2/n * sum(errors)
@@ -296,16 +297,16 @@ void Matrices()
 
 void MatricesWithBias()
 {
-    // 1. Convert data to matrices with bias term
+    // 1. Convert data to matrices with a bias term
 
     // Number of samples and coefficients
     int n = data.GetLength(0);
     int numCoefficients = data.GetLength(1) - 1;
 
-    float[,] XAnd1 = new float[n, numCoefficients + 1]; // +1 for bias term
+    float[,] XAnd1 = new float[n, numCoefficients + 1]; // +1 column for bias term
     float[,] Y = new float[n, 1];
 
-    // Prepare feature matrix XAnd1 with bias term and target vector Y
+    // Prepare the feature matrix XAnd1 with the bias term and the target vector Y
     for (int row = 0; row < n; row++)
     {
         for (int j = 0; j < numCoefficients; j++)
@@ -318,7 +319,7 @@ void MatricesWithBias()
 
     // 2. Initialize model parameters
 
-    // Coefficients for independent variables and the bias term
+    // Coefficients for the independent variables and the bias term
     float[,] AB = new float[numCoefficients + 1, 1]; 
 
     // 3. Training loop
@@ -333,8 +334,9 @@ void MatricesWithBias()
         // Calculate errors for all samples: errors = Y - predictions
         float[,] errors = Y.Subtract(predictions);
 
-        // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
-        // We can precalculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity.
+        // Calculate the gradient for the coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
+        // XAnd1.Transpose() aligns features and the additional column for the bias term with their corresponding errors for the dot product
+        // We can pre-calculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity.
         float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
 
         // Update regression parameters using gradient descent
