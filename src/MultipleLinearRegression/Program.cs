@@ -70,8 +70,8 @@ void Variables()
 {
     // 1. Initialize model parameters
 
-    // These are the coefficients for our independent variables and the bias term
-    float a1 = 0, a2 = 0, a3 = 0; // Parameters for x1, x2, x3
+    // Coefficients for independent variables (x1, x2, x3) and the bias term
+    float a1 = 0, a2 = 0, a3 = 0;
     float b = 0;
 
     // Number of samples
@@ -144,15 +144,13 @@ void Tables()
 {
     // 1. Initialize model parameters
 
-    // These are the coefficients for our independent variables and the bias term
-    // Number of independent variables (3 in this case)
-    int numCoefficients = data.GetLength(1) - 1; 
-    // Corresponds to a1, a2, a3. It's already initialized to 0 at this point.
-    float[] a = new float[numCoefficients]; 
-    float b = 0;
-
     // Number of samples and coefficients
     int n = data.GetLength(0);
+    int numCoefficients = data.GetLength(1) - 1;
+
+    // Coefficients for independent variables and the bias term
+    float[] a = new float[numCoefficients]; 
+    float b = 0;
 
     // 2. Training loop
 
@@ -236,8 +234,6 @@ void Matrices()
 
     // Number of samples and coefficients
     int n = data.GetLength(0);
-
-    // Number of independent variables (3 in this case)
     int numCoefficients = data.GetLength(1) - 1; 
 
     float[,] X = new float[n, numCoefficients];
@@ -255,8 +251,8 @@ void Matrices()
 
     // 2. Initialize model parameters
 
-    // These are the coefficients for our independent variables and the bias term
-    float[,] A = new float[numCoefficients, 1]; // Corresponds to a1, a2, a3. It's already initialized to 0 at this point.
+    // Coefficients for independent variables and the bias term
+    float[,] A = new float[numCoefficients, 1];
     float b = 0;
 
     // 3. Training loop
@@ -304,8 +300,6 @@ void MatricesWithBias()
 
     // Number of samples and coefficients
     int n = data.GetLength(0);
-
-    // Number of independent variables (3 in this case)
     int numCoefficients = data.GetLength(1) - 1;
 
     float[,] XAnd1 = new float[n, numCoefficients + 1]; // +1 for bias term
@@ -324,8 +318,7 @@ void MatricesWithBias()
 
     // 2. Initialize model parameters
 
-    // These are the coefficients for our independent variables and the bias term
-    // Corresponds to a1, a2, a3, b. It's already initialized to 0 at this point.
+    // Coefficients for independent variables and the bias term
     float[,] AB = new float[numCoefficients + 1, 1]; 
 
     // 3. Training loop
