@@ -104,7 +104,7 @@ static void MultipleLinearRegression()
 
     // 4. Training loop
 
-    float[,] XAnd1T = XTrainAnd1.Transpose();
+    float[,] XTrainAnd1T = XTrainAnd1.Transpose();
     float negativeTwoOverN = -2.0f / trainSampleCount;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
@@ -117,7 +117,7 @@ static void MultipleLinearRegression()
         float[,] errors = YTrain.Subtract(predictions);
 
         // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XTrainAnd1^T * errors
-        float[,] deltaAB = XAnd1T.MultiplyDot(errors).Multiply(negativeTwoOverN);
+        float[,] deltaAB = XTrainAnd1T.MultiplyDot(errors).Multiply(negativeTwoOverN);
 
         // Update regression parameters using gradient descent
         AB = AB.Subtract(deltaAB.Multiply(LearningRate));
@@ -239,7 +239,7 @@ static void FirstNeuralNetwork()
 
     // 5. Training loop
 
-    float[,] XT = XTrain.Transpose();
+    float[,] XTrainT = XTrain.Transpose();
     float negativeTwoOverN = -2.0f / trainSampleCount;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
@@ -280,7 +280,7 @@ static void FirstNeuralNetwork()
         float[,] dN1dM1 = M1.AsOnes();
         float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).MeanByColumn();
         float[,] dLdM1 = dLdN1.MultiplyElementwise(dN1dM1);
-        float[,] dM1dW1 = XT;
+        float[,] dM1dW1 = XTrainT;
         float[,] dLdW1 = dM1dW1.MultiplyDot(dLdM1);
 
         // Update parameters
