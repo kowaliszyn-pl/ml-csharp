@@ -43,10 +43,10 @@ while (running)
 // Set common hyperparameters
 
 const float LearningRate = 0.0005f;
-const int Iterations = 50_000;
+const int Iterations = 48_000;
 const int PrintEvery = 2_000;
-const float TestSplitRatio = 0.8f;
-const int RandomSeed = 42;
+const float TestSplitRatio = 0.7f;
+const int RandomSeed = 251113;
 
 static void MultipleLinearRegression()
 {
@@ -174,76 +174,79 @@ static void MultipleLinearRegression()
     // Show MSE for test data
     
     float[,] testErrors = YTest.Subtract(testPredictions);
-    float testMSE = testErrors.Power(2).Mean();
-    Console.WriteLine($"\nMSE on test data: {testMSE:F5}");
+    float testMeanSquaredError = testErrors.Power(2).Mean();
+    Console.WriteLine($"\nMSE on test data: {testMeanSquaredError:F5}");
 }
 
 static void FirstNeuralNetwork()
 {
     // 1. Set the hyperparameters for the neural network
-
-    const float LearningRate = 0.0005f;
-    const int Iterations = 48_000;
-    const int PrintEvery = 2_000;
+    
     const int HiddenLayerSize = 4;
 
-    // 2. Load Boston housing dataset and standardize it (scale features to have mean 0 and stddev 1)
+    // 2. Get data
 
-    float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv");
+    (float[,] trainData, float[,] testData) = GetData();
 
-    // Number of samples and coefficients
-    int n = bostonData.GetLength(0);
+    // 3. Copy trainData and testData to matrices
 
-    // Number of independent variables
-    int numCoefficients = bostonData.GetLength(1) - 1;
+    int numCoefficients = trainData.GetLength(1) - 1;
+    int trainSamples = trainData.GetLength(0);
+    int testSamples = testData.GetLength(0);
 
-    // Standardize each feature column (mean = 0, stddev = 1) except the target variable (last column)
-    // Note: the upper bound in Range is exclusive, so we use numCoefficients to exclude the last column
-    bostonData.Standardize(0..numCoefficients);
+    float[,] XTrain = new float[trainSamples, numCoefficients];
+    float[,] YTrain = new float[trainSamples, 1];
 
-    // 3. Convert bostonData to matrices
+    float[,] XTest = new float[testSamples, numCoefficients];
+    float[,] YTest = new float[testSamples, 1];
 
-    float[,] X = new float[n, numCoefficients];
-    float[,] Y = new float[n, 1];
-
-    // Prepare feature matrix X and target vector YTrain
-    for (int i = 0; i < n; i++)
+    // Prepare feature matrix XTrain and target vector YTrain
+    for (int i = 0; i < trainSamples; i++)
     {
         for (int j = 0; j < numCoefficients; j++)
         {
-            X[i, j] = bostonData[i, j];
+            XTrain[i, j] = trainData[i, j];
         }
 
         // Target values
-        Y[i, 0] = bostonData[i, numCoefficients];
+        YTrain[i, 0] = trainData[i, numCoefficients];
+    }
+
+    // Prepare feature matrix XTest and target vector YTest
+    for (int i = 0; i < testSamples; i++)
+    {
+        for (int j = 0; j < numCoefficients; j++)
+        {
+            XTest[i, j] = testData[i, j];
+        }
+        // Target values
+        YTest[i, 0] = testData[i, numCoefficients];
     }
 
     // 4. Initialize model parameters
 
-    int seed = 42;
-
     // Weights and biases for the first layer
     float[,] W1 = new float[numCoefficients, HiddenLayerSize];
-    W1.RandomInPlace(seed);
+    W1.RandomInPlace(RandomSeed);
     float[] B1 = new float[HiddenLayerSize];
 
     // Weights and biases for the second layer
     float[,] W2 = new float[HiddenLayerSize, 1];
-    W2.RandomInPlace(seed + 1);
+    W2.RandomInPlace(RandomSeed + 1);
     float b2 = 0;
 
     // 5. Training loop
 
-    var XT = X.Transpose();
-    var negativeTwoOverN = -2.0f / n;
+    var XT = XTrain.Transpose();
+    var negativeTwoOverN = -2.0f / trainSamples;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
-        // Model structure: X → [W1, B1] → sigmoid → [W2, b2] → output
+        // Model structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
 
         // 5.1. Forward (prediction and error calculation)
 
         // The first layer (hidden)
-        float[,] M1 = X.MultiplyDot(W1);
+        float[,] M1 = XTrain.MultiplyDot(W1);
         float[,] N1 = M1.AddRow(B1);
         // Apply sigmoid activation function, so we can get O1 - outputs of the first layer
         float[,] O1 = N1.Sigmoid();
@@ -253,7 +256,7 @@ static void FirstNeuralNetwork()
         float[,] predictions = M2.Add(b2);
 
         // Calculate errors for all samples: errors = YTrain - predictions
-        float[,] errors = Y.Subtract(predictions);
+        float[,] errors = YTrain.Subtract(predictions);
 
         // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order.
 
@@ -332,24 +335,39 @@ static void FirstNeuralNetwork()
     Console.WriteLine();
     Console.WriteLine($"{"Sample No",14}{"Predicted",14}{"Actual",14}");
     Console.WriteLine();
-    int[] showSamples = { 0, 1, 2, 3, 4, n - 1 };
-    for (int i = 0; i < showSamples.Length; i++)
+
+    // Show predictions for the test set
+
+    int[] showTestSamples = { 0, 1, 2, testSamples - 3, testSamples - 2, testSamples - 1 };
+
+    // Do a forward pass for all test samples at once
+
+    // The first layer (hidden)
+    float[,] M1Test = XTest.MultiplyDot(W1);
+    float[,] N1Test = M1Test.AddRow(B1);
+    // Apply sigmoid activation function, so we can get O1 - outputs of the first layer
+    float[,] O1Test = N1Test.Sigmoid();
+    // The second layer (output)
+    float[,] M2Test = O1Test.MultiplyDot(W2);
+    float[,] testPredictions = M2Test.Add(b2);
+
+    for (int i = 0; i < showTestSamples.Length; i++)
     {
-        int sampleIndex = showSamples[i];
-        // Forward pass for the sample
-        float[,] M1 = X.GetRowAs2D(sampleIndex).MultiplyDot(W1);
-        float[,] N1 = M1.AddRow(B1);
-        float[,] O1 = N1.Sigmoid();
-        float[,] M2 = O1.MultiplyDot(W2);
-        float[,] prediction = M2.Add(b2);
-        float predicted = prediction[0, 0];
-        float actual = Y[sampleIndex, 0];
+        int testSampleIndex = showTestSamples[i];
+        float predicted = testPredictions[testSampleIndex, 0];
+        float actual = YTest[testSampleIndex, 0];
         Console.WriteLine(
-            $"{sampleIndex + 1,14}" +
+            $"{testSampleIndex + 1,14}" +
             $"{predicted,14:F4}" +
             $"{actual,14:F4}"
         );
     }
+
+    // Show MSE for test data
+
+    float[,] testErrors = YTest.Subtract(testPredictions);
+    float testMeanSquaredError = testErrors.Power(2).Mean();
+    Console.WriteLine($"\nMSE on test data: {testMeanSquaredError:F5}");
 }
 
 static (float[,] TrainData, float[,] TestData) GetData()
