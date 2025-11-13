@@ -336,7 +336,7 @@ void MatricesWithBias()
 
         // Calculate the gradient for the coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
         // XAnd1.Transpose() aligns features and the additional column for the bias term with their corresponding errors for the dot product
-        // We can pre-calculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity.
+        // We can pre-calculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity
         float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
 
         // Update regression parameters using gradient descent

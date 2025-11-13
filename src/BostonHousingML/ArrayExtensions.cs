@@ -289,6 +289,31 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Randomly permutes the rows of the matrix in-place using the specified seed.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlace(this float[,] source, int seed)
+    {
+        Random rand = new(seed);
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        for (int i = rows - 1; i > 0; i--)
+        {
+            int j = rand.Next(i + 1);
+            if (i != j)
+            {
+                // Swap row i with row j
+                for (int col = 0; col < columns; col++)
+                {
+                    float temp = source[i, col];
+                    source[i, col] = source[j, col];
+                    source[j, col] = temp;
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Raises each element of the matrix to the specified power.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -373,6 +398,31 @@ public static class ArrayExtensions
         }
 
         return res;
+    }
+
+    public static (float[,] Set1, float[,] Set2) SplitRowsByRatio(this float[,] source, float ratio)
+    {
+        Debug.Assert(ratio > 0 && ratio < 1, "Ratio must be between 0 and 1.");
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        int splitIndex = (int)(rows * ratio);
+        float[,] set1 = new float[splitIndex, columns];
+        float[,] set2 = new float[rows - splitIndex, columns];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                if (i < splitIndex)
+                {
+                    set1[i, j] = source[i, j];
+                }
+                else
+                {
+                    set2[i - splitIndex, j] = source[i, j];
+                }
+            }
+        }
+        return (set1, set2);
     }
 
     /// <summary>

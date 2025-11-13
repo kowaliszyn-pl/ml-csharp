@@ -40,69 +40,83 @@ while (running)
     }
 }
 
+// Set common hyperparameters
+
+const float LearningRate = 0.0005f;
+const int Iterations = 50_000;
+const int PrintEvery = 2_000;
+const float TestSplitRatio = 0.8f;
+const int RandomSeed = 42;
+
 static void MultipleLinearRegression()
 {
-    // 1. Set the hyperparameters for the regression task
+    // 1. Get data
 
-    const float LearningRate = 0.0005f;
-    const int Iterations = 48_000;
-    const int PrintEvery = 2_000;
+    (float[,] trainData, float[,] testData) = GetData();
 
-    // 2. Load Boston housing dataset and standardize it (scale features to have mean 0 and stddev 1)
+    // 2. Copy trainData and testData to matrices with bias term
 
-    float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv");
+    int numCoefficients = trainData.GetLength(1) - 1;
+    int trainSamples = trainData.GetLength(0);
+    int testSamples = testData.GetLength(0);
 
-    // Number of samples and coefficients
-    int n = bostonData.GetLength(0);
+    float[,] XTrainAnd1 = new float[trainSamples, numCoefficients + 1];
+    float[,] YTrain = new float[trainSamples, 1];
 
-    // Number of independent variables
-    int numCoefficients = bostonData.GetLength(1) - 1;
+    float[,] XTestAnd1 = new float[testSamples, numCoefficients + 1];
+    float[,] YTest = new float[testSamples, 1];
 
-    // Standardize each feature column (mean = 0, stddev = 1) except the target variable (last column)
-    // Note: the upper bound in Range is exclusive, so we use numCoefficients to exclude the last column
-    bostonData.Standardize(0..numCoefficients); 
-
-    // 3. Convert data to matrices with bias term
-
-    float[,] XAnd1 = new float[n, numCoefficients + 1]; // +1 for bias term
-    float[,] Y = new float[n, 1];
-
-    // Prepare feature matrix XAnd1 with bias term and target vector Y
-    for (int i = 0; i < n; i++)
+    // Prepare feature matrix XTrainAnd1 with bias term and target vector YTrain
+    for (int i = 0; i < trainSamples; i++)
     {
         for (int j = 0; j < numCoefficients; j++)
         {
-            XAnd1[i, j] = bostonData[i, j];
+            XTrainAnd1[i, j] = trainData[i, j];
         }
 
         // Add bias term
-        XAnd1[i, numCoefficients] = 1;
+        XTrainAnd1[i, numCoefficients] = 1;
 
         // Target values
-        Y[i, 0] = bostonData[i, numCoefficients];
+        YTrain[i, 0] = trainData[i, numCoefficients];
     }
 
-    // 4. Initialize model parameters
+    // Prepare feature matrix XTestAnd1 with bias term and target vector YTest
+    for (int i = 0; i < testSamples; i++)
+    {
+        for (int j = 0; j < numCoefficients; j++)
+        {
+            XTestAnd1[i, j] = testData[i, j];
+        }
+
+        // Add bias term
+        XTestAnd1[i, numCoefficients] = 1;
+
+        // Target values
+        YTest[i, 0] = testData[i, numCoefficients];
+    }
+
+    // 3. Initialize model parameters
 
     // These are the coefficients for our independent variables and the bias term
     // initialized to zero
     float[,] AB = new float[numCoefficients + 1, 1];
 
-    // 5. Training loop
+    // 4. Training loop
 
-    var XAnd1T = XAnd1.Transpose();
-    var negativeTwoOverN = -2.0f / n;
+    var XAnd1T = XTrainAnd1.Transpose();
+    var negativeTwoOverN = -2.0f / trainSamples;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
         // Prediction and error calculation
 
-        // Make predictions for all samples at once: predictions = XAnd1 * AB
-        float[,] predictions = XAnd1.MultiplyDot(AB);
+        // Make predictions for all samples at once: predictions = XTrainAnd1 * AB
+        float[,] predictions = XTrainAnd1.MultiplyDot(AB);
 
-        // Calculate errors for all samples: errors = Y - predictions
-        float[,] errors = Y.Subtract(predictions);
+        // Calculate errors for all samples: errors = YTrain - predictions
+        float[,] errors = YTrain.Subtract(predictions);
 
-        // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
+        // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XTrainAnd1^T * errors
         float[,] deltaAB = XAnd1T.MultiplyDot(errors).Multiply(negativeTwoOverN);
 
         // Update regression parameters using gradient descent
@@ -140,19 +154,28 @@ static void MultipleLinearRegression()
     Console.WriteLine($"{"Sample No",14}{"Predicted",14}{"Actual",14}");
     Console.WriteLine();
 
-    int[] showSamples = { 0, 1, 2, 3, 4, n - 1 };
+    // Show predictions for the test set
 
-    for (int i = 0; i < showSamples.Length; i++)
+    int[] showTestSamples = { 0, 1, 2, testSamples - 3, testSamples - 2, testSamples - 1 };
+    float[,] testPredictions = XTestAnd1.MultiplyDot(AB);
+
+    for (int i = 0; i < showTestSamples.Length; i++)
     {
-        int sampleIndex = showSamples[i];
-        float predicted = XAnd1.GetRowAs2D(sampleIndex).MultiplyDot(AB)[0, 0];
-        float actual = Y[sampleIndex, 0];
+        int testSampleIndex = showTestSamples[i];
+        float predicted = testPredictions[testSampleIndex, 0];
+        float actual = YTest[testSampleIndex, 0];
         Console.WriteLine(
-            $"{sampleIndex + 1,14}" +
+            $"{testSampleIndex + 1,14}" +
             $"{predicted,14:F4}" +
             $"{actual,14:F4}"
         );
     }
+
+    // Show MSE for test data
+    
+    float[,] testErrors = YTest.Subtract(testPredictions);
+    float testMSE = testErrors.Power(2).Mean();
+    Console.WriteLine($"\nMSE on test data: {testMSE:F5}");
 }
 
 static void FirstNeuralNetwork()
@@ -178,12 +201,12 @@ static void FirstNeuralNetwork()
     // Note: the upper bound in Range is exclusive, so we use numCoefficients to exclude the last column
     bostonData.Standardize(0..numCoefficients);
 
-    // 3. Convert data to matrices
+    // 3. Convert bostonData to matrices
 
     float[,] X = new float[n, numCoefficients];
     float[,] Y = new float[n, 1];
 
-    // Prepare feature matrix X and target vector Y
+    // Prepare feature matrix X and target vector YTrain
     for (int i = 0; i < n; i++)
     {
         for (int j = 0; j < numCoefficients; j++)
@@ -229,7 +252,7 @@ static void FirstNeuralNetwork()
         float[,] M2 = O1.MultiplyDot(W2);
         float[,] predictions = M2.Add(b2);
 
-        // Calculate errors for all samples: errors = Y - predictions
+        // Calculate errors for all samples: errors = YTrain - predictions
         float[,] errors = Y.Subtract(predictions);
 
         // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order.
@@ -327,6 +350,24 @@ static void FirstNeuralNetwork()
             $"{actual,14:F4}"
         );
     }
+}
+
+static (float[,] TrainData, float[,] TestData) GetData()
+{
+    float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv");
+
+    // Number of independent variables
+    int numCoefficients = bostonData.GetLength(1) - 1;
+
+    // Standardize each feature column (mean = 0, stddev = 1) except the target variable (last column)
+    // Note: the upper bound in Range is exclusive, so we use numCoefficients to exclude the last column
+    bostonData.Standardize(0..numCoefficients);
+
+    // Permute the data randomly
+    bostonData.PermuteInPlace(RandomSeed);
+
+    // Return train and test data split by ratio
+    return bostonData.SplitRowsByRatio(TestSplitRatio);
 }
 
 static float[,] LoadCsv(string filePath)
