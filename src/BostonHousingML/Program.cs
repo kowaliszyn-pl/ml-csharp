@@ -98,8 +98,7 @@ static void MultipleLinearRegression()
 
     // 3. Initialize model parameters
 
-    // These are the coefficients for our independent variables and the bias term
-    // initialized to zero
+    // Coefficients for our independent variables and the bias term initialized to zero
     float[,] AB = new float[inputFeatureCount + 1, 1];
 
     // 4. Training loop

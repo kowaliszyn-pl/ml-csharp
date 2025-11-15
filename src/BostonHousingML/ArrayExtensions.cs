@@ -442,7 +442,7 @@ public static class ArrayExtensions
 
         if (columnRange is not null)
         {
-            var (offset, length) = columnRange.Value.GetOffsetAndLength(columns);
+            (int offset, int length) = columnRange.Value.GetOffsetAndLength(columns);
             beginColumn = offset;
             endColumn = beginColumn + length;
         }
@@ -501,7 +501,7 @@ public static class ArrayExtensions
 
         if (columnRange is not null)
         {
-            var (offset, length) = columnRange.Value.GetOffsetAndLength(columns);
+            (int offset, int length) = columnRange.Value.GetOffsetAndLength(columns);
             beginColumn = offset;
             endColumn = beginColumn + length;
         }
