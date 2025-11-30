@@ -118,7 +118,9 @@ public static class ArrayExtensions
     public static float Mean(this float[,] source)
         => source.Sum() / source.Length;
 
-
+    /// <summary>
+    /// Calculates the mean of each column in the matrix. 
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] MeanByColumn(this float[,] source)
     {
@@ -400,6 +402,11 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Splits the matrix into two sets of rows based on the specified ratio. 
+    /// </summary>
+    /// <param name="ratio">The ratio for splitting the rows.</param>
+    /// <returns>A tuple containing the two sets of rows.</returns>
     public static (float[,] Set1, float[,] Set2) SplitRowsByRatio(this float[,] source, float ratio)
     {
         Debug.Assert(ratio > 0 && ratio < 1, "Ratio must be between 0 and 1.");
@@ -598,6 +605,30 @@ public static class ArrayExtensions
         }
 
         return sum;
+    }
+
+    /// <summary>
+    /// Calculates the sum of each column in the matrix.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[] SumByColumn(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        float[] res = new float[columns];
+
+        for (int col = 0; col < columns; col++)
+        {
+            float sum = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                sum += source[row, col];
+            }
+            res[col] = sum;
+        }
+
+        return res;
     }
 
     /// <summary>

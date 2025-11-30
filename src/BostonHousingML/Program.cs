@@ -2,6 +2,8 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025
 
+using System.Diagnostics;
+
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -18,6 +20,7 @@ while (running)
     string? choice = Console.ReadLine();
     Console.WriteLine();
 
+    Stopwatch stopwatch = Stopwatch.StartNew();
     switch (choice)
     {
         case "1":
@@ -35,9 +38,13 @@ while (running)
             running = false;
             break;
     }
-
+    
     if (running)
     {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine($"Elapsed time: ~{stopwatch.Elapsed.TotalSeconds:F2} seconds.");
+        Console.ResetColor();
+
         Console.WriteLine("\nPress any key to continue...");
         Console.ReadKey();
         Console.WriteLine();
@@ -178,7 +185,9 @@ static void MultipleLinearRegression()
 
     float[,] testErrors = YTest.Subtract(testPredictions);
     float testMeanSquaredError = testErrors.Power(2).Mean();
+    Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine($"\nMSE on test data: {testMeanSquaredError:F5}");
+    Console.ResetColor();
 }
 
 static void FirstNeuralNetwork()
@@ -243,20 +252,19 @@ static void FirstNeuralNetwork()
     // 5. Training loop
 
     float[,] XTrainT = XTrain.Transpose();
-    float negativeTwoOverN = -2.0f / nTrain;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
         // Model structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
 
         // 5.1. Forward (prediction and error calculation)
 
-        // The first layer (hidden)
+        // == The first layer (hidden) ==
         float[,] M1 = XTrain.MultiplyDot(W1);
         float[,] N1 = M1.AddRow(B1);
         // Apply sigmoid activation function, so we can get O1 - outputs of the first layer
         float[,] O1 = N1.Sigmoid();
 
-        // The second layer (output)
+        // == The second layer (output) ==
         float[,] M2 = O1.MultiplyDot(W2);
         float[,] predictions = M2.Add(b2);
 
@@ -265,25 +273,58 @@ static void FirstNeuralNetwork()
 
         // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order.
 
-        // The second layer (output)
-        float[,] dLdP = errors.Multiply(negativeTwoOverN);
+        // == The second layer (output) ==
+
+        // [nTrain, 1]
+        float[,] dLdP = errors.Multiply(-2.0f / nTrain);
+
+        // [nTrain, 1]
         float[,] dPdM2 = M2.AsOnes();
+
+        // [nTrain, 1]
         float[,] dLdM2 = dLdP.MultiplyElementwise(dPdM2);
+
         float dPdBias2 = 1;
-        float dLdBias2 = dLdP.Multiply(dPdBias2).Mean();
+
+        // mean([nTrain, 1]) -> scalar
+        float dLdBias2 = dLdP.Multiply(dPdBias2).Sum();
+
+        // [HiddenLayerSize, nTrain]
         float[,] dM2dW2 = O1.Transpose();
+
+        // [HiddenLayerSize, 1]
         float[,] dLdW2 = dM2dW2.MultiplyDot(dLdP);
 
-        // The first layer (hidden)
+        // == The first layer (hidden) == 
+
+        // [1, HiddenLayerSize]
         float[,] dM2dO1 = W2.Transpose();
+
+        // [nTrain, HiddenLayerSize]
         float[,] dLdO1 = dLdM2.MultiplyDot(dM2dO1);
+
+        // [nTrain, HiddenLayerSize]
         float[,] dO1dN1 = N1.SigmoidDerivative();
+
+        // [nTrain, HiddenLayerSize]
         float[,] dLdN1 = dLdO1.MultiplyElementwise(dO1dN1);
+
+        // [HiddenLayerSize]
         float[] dN1dBias1 = B1.AsOnes();
+
+        // [nTrain, HiddenLayerSize]
         float[,] dN1dM1 = M1.AsOnes();
-        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).MeanByColumn();
+
+        // [HiddenLayerSize]
+        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).SumByColumn();
+
+        // [nTrain, HiddenLayerSize]
         float[,] dLdM1 = dLdN1.MultiplyElementwise(dN1dM1);
+
+        // [inputFeatureCount, nTrain]
         float[,] dM1dW1 = XTrainT;
+
+        // [inputFeatureCount, HiddenLayerSize]
         float[,] dLdW1 = dM1dW1.MultiplyDot(dLdM1);
 
         // Update parameters
@@ -372,7 +413,9 @@ static void FirstNeuralNetwork()
 
     float[,] testErrors = YTest.Subtract(testPredictions);
     float testMeanSquaredError = testErrors.Power(2).Mean();
+    Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine($"\nMSE on test data: {testMeanSquaredError:F5}");
+    Console.ResetColor();
 }
 
 static void FirstNeuralNetworkSimplified()
@@ -503,7 +546,7 @@ static void FirstNeuralNetworkSimplified()
 
     // 6. Output learned parameters
 
-    Console.WriteLine("\n--- Training Complete (Neural Network on Boston Data) ---");
+    Console.WriteLine("\n--- Training Complete (Simplified Neural Network on Boston Data) ---");
     Console.WriteLine("Learned parameters:");
     Console.WriteLine("Weights for the first layer (W1):");
     for (int i = 0; i < W1.GetLength(0); i++)
@@ -566,7 +609,9 @@ static void FirstNeuralNetworkSimplified()
 
     float[,] testErrors = YTest.Subtract(testPredictions);
     float testMeanSquaredError = testErrors.Power(2).Mean();
+    Console.ForegroundColor = ConsoleColor.Yellow;
     Console.WriteLine($"\nMSE on test data: {testMeanSquaredError:F5}");
+    Console.ResetColor();
 }
 
 static (float[,] TrainData, float[,] TestData) GetData()
