@@ -291,7 +291,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Randomly permutes the rows of the matrix in-place using the specified seed.
+    /// Randomly permutes the rows of the matrix in-place using the specified seed. It uses the Fisher-Yates shuffle algorithm.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlace(this float[,] source, int seed)
