@@ -500,28 +500,18 @@ static void FirstNeuralNetworkSimplified()
         // Calculate errors for all samples: errors = YTrain - predictions
         float[,] errors = YTrain.Subtract(predictions);
 
-        // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order.
+        // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order. This time a little bit simplified.
 
         // The second layer (output)
         float[,] dLdP = errors.Multiply(negativeTwoOverN);
-        float[,] dPdM2 = M2.AsOnes();
-        float[,] dLdM2 = dLdP.MultiplyElementwise(dPdM2);
-        float dPdBias2 = 1;
-        float dLdBias2 = dLdP.Multiply(dPdBias2).Mean();
-        float[,] dM2dW2 = O1.Transpose();
-        float[,] dLdW2 = dM2dW2.MultiplyDot(dLdP);
+        float dLdBias2 = dLdP.Sum();
+        float[,] dLdW2 = O1.Transpose().MultiplyDot(dLdP);
 
         // The first layer (hidden)
-        float[,] dM2dO1 = W2.Transpose();
-        float[,] dLdO1 = dLdM2.MultiplyDot(dM2dO1);
-        float[,] dO1dN1 = N1.SigmoidDerivative();
-        float[,] dLdN1 = dLdO1.MultiplyElementwise(dO1dN1);
-        float[] dN1dBias1 = B1.AsOnes();
-        float[,] dN1dM1 = M1.AsOnes();
-        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).MeanByColumn();
-        float[,] dLdM1 = dLdN1.MultiplyElementwise(dN1dM1);
-        float[,] dM1dW1 = XTrainT;
-        float[,] dLdW1 = dM1dW1.MultiplyDot(dLdM1);
+        float[,] dLdO1 = dLdP.MultiplyDot(W2.Transpose());
+        float[,] dLdN1 = dLdO1.MultiplyElementwise(N1.SigmoidDerivative());
+        float[] dLdBias1 = dLdN1.SumByColumn();
+        float[,] dLdW1 = XTrainT.MultiplyDot(dLdN1);
 
         // Update parameters
         W1 = W1.Subtract(dLdW1.Multiply(LearningRate));
