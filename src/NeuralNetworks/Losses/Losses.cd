@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MachineLearning.NeuralNetwork.Losses.Loss">
+    <Position X="0.75" Y="1.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAASACAAAAAAAAAAAACAEQAAAAABAEAAAAAAAABI=</HashCode>
+      <FileName>NeuralNetwork\Losses\Loss.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MachineLearning.NeuralNetwork.Losses.MeanSquaredError">
+    <Position X="3.5" Y="1.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>NeuralNetwork\Losses\MeanSquaredError.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MachineLearning.NeuralNetwork.Losses.SoftmaxCrossEntropyLoss">
+    <Position X="3.5" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
+      <FileName>NeuralNetwork\Losses\SoftmaxCrossEntropyLoss.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

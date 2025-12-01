@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MachineLearning.NeuralNetwork.ParamInitializers.ParamInitializer">
+    <Position X="1" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAIAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>NeuralNetwork\ParamInitializers\ParamInitializer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MachineLearning.NeuralNetwork.ParamInitializers.RandomInitializer">
+    <Position X="3.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAEAIAAAQAAAABAAAAAAAAgAAAAE=</HashCode>
+      <FileName>NeuralNetwork\ParamInitializers\RandomInitializer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MachineLearning.NeuralNetwork.ParamInitializers.RangeInitializer">
+    <Position X="1" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAIAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>NeuralNetwork\ParamInitializers\RangeInitializer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MachineLearning.NeuralNetwork.ParamInitializers.NormallyDistributedRandomInitializer">
+    <Position X="1" Y="7.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAIAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>NeuralNetwork\ParamInitializers\NormallyDistributedRandomInitializer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MachineLearning.NeuralNetwork.ParamInitializers.GlorotInitializer" Collapsed="true">
+    <Position X="5.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAIAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>NeuralNetwork\ParamInitializers\GlorotInitializer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
