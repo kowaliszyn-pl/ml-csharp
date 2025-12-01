@@ -1,14 +1,13 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: Trainer.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-
-using MachineLearning.Typed.NeuralNetwork.DataSources;
 
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Models;
 using NeuralNetworks.Optimizers;
@@ -205,7 +204,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             WriteLine($"{paramCount:n0} parameters trained.");
 
         logger?.LogInformation("===== End Log =====");
-        
+
     }
 
 

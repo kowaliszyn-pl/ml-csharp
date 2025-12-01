@@ -1,8 +1,8 @@
-﻿// Machine Learning Utils
-// File name: Dropout.cs
-// Code It Yourself with .NET, 2024
+﻿// Neural Networks in C♯
+// File name: Dropout2D.cs
+// www.kowaliszyn.pl, 2025
 
-using MachineLearning.NeuralNetwork.Exceptions;
+using System.Diagnostics;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Operations.Interfaces;
@@ -26,8 +26,11 @@ public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : Ope
         }
     }
 
-    protected override float[,] CalcInputGradient(float[,] outputGradient) 
-        => outputGradient.MultiplyElementwise(_mask ?? throw new NotYetCalculatedException());
+    protected override float[,] CalcInputGradient(float[,] outputGradient)
+    {
+        Debug.Assert(_mask != null, "Mask must not be null here.");
+        return outputGradient.MultiplyElementwise(_mask);
+    }
 
     public override string ToString() => $"Dropout2D (keepProb={keepProb}, seed={random?.Seed})";
 

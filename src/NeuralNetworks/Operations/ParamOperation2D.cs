@@ -1,13 +1,8 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: ParamOperation2D.cs
-// Code It Yourself with .NET, 2024
-
-// This class is derived from the content originally published in the book Deep Learning from Scratch: Building with
-// Python from First Principles by Seth Weidman. Some comments here are copied/modified from the original text.
+// www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-
-using MachineLearning.NeuralNetwork.Exceptions;
 
 using NeuralNetworks.Layers;
 using NeuralNetworks.Operations.Interfaces;
@@ -31,7 +26,14 @@ public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D
 
     protected TParam Param => param;
 
-    protected TParam ParamGradient => _paramGradient ?? throw new NotYetCalculatedException();
+    protected TParam ParamGradient
+    {
+        get
+        {
+            Debug.Assert(_paramGradient != null, "ParamGradient must not be null here.");
+            return _paramGradient;
+        }
+    }
 
     public override float[,] Backward(float[,] outputGradient)
     {

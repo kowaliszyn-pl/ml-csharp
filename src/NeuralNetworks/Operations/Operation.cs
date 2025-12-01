@@ -1,13 +1,8 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: Operation.cs
-// Code It Yourself with .NET, 2024
-
-// This class is derived from the content originally published in the book Deep Learning from Scratch: Building with
-// Python from First Principles by Seth Weidman. Some comments here are copied/modified from the original text.
+// www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-
-using MachineLearning.NeuralNetwork.Exceptions;
 
 namespace NeuralNetworks.Operations;
 
@@ -27,12 +22,25 @@ public abstract class Operation<TIn, TOut> : Operation
     where TOut : notnull
 {
     private TIn? _input;
-    // private Matrix? _inputGradient; // not used - to remove
     private TOut? _output;
 
-    protected TIn Input => _input ?? throw new NotYetCalculatedException();
+    protected TIn Input
+    {
+        get
+        {
+            Debug.Assert(_input != null, "Input must not be null here.");
+            return _input;
+        }
+    }
 
-    protected TOut Output => _output ?? throw new NotYetCalculatedException();
+    protected TOut Output
+    {
+        get
+        {
+            Debug.Assert(_output != null, "Output must not be null here.");
+            return _output;
+        }
+    }
 
     /// <summary>
     /// Converts input to output.
@@ -71,7 +79,7 @@ public abstract class Operation<TIn, TOut> : Operation
     /// Calculates input gradient.
     /// </summary>
     /// <remarks>
-    /// Na podstawie outputGradient oblicza zmiany w input.
+    /// Based on outputGradient, calculates changes in input.
     /// </remarks>
     protected abstract TIn CalcInputGradient(TOut outputGradient);
 

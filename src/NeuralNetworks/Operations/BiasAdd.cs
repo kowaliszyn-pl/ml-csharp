@@ -1,6 +1,6 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: BiasAdd.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
@@ -17,13 +17,13 @@ namespace NeuralNetworks.Operations;
 public class BiasAdd(float[] bias) : ParamOperation2D<float[]>(bias)
 {
 
-    protected override float[,] CalcOutput(bool inference) 
+    protected override float[,] CalcOutput(bool inference)
         => Input.AddRow(Param);
 
     protected override float[] CalcParamGradient(float[,] outputGradient)
     {
         float[,] paramGrad = Param.AsOnes().MultiplyElementwise(outputGradient);
-        return paramGrad.AvgByRows(); // SumByRows
+        return paramGrad.MeanByColumn(); //AvgByRows(); // SumByColumns, by columns? TODO: check
         // return outputGradient.AvgBy(Dimension.Rows); ?
     }
 
@@ -36,9 +36,9 @@ public class BiasAdd(float[] bias) : ParamOperation2D<float[]>(bias)
         optimizer.Update(layer, Param, ParamGradient);
     }
 
-    protected override void EnsureSameShapeForParam(float[]? param, float[] paramGradient) 
+    protected override void EnsureSameShapeForParam(float[]? param, float[] paramGradient)
         => EnsureSameShape(param, paramGradient);
 
-    public override int GetParamCount() 
+    public override int GetParamCount()
         => Param.Length;
 }

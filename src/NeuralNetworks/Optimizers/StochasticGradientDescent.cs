@@ -1,12 +1,12 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: StochasticGradientDescent.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
 
-using MachineLearning.NeuralNetwork.LearningRates;
-
+using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
+using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
 
@@ -66,6 +66,7 @@ public class StochasticGradientDescent(LearningRate learningRate) : Optimizer(le
         }
     }
 
-    public override string ToString() => $"StochasticGradientDescent (learningRate={LearningRate})";
+    public override string ToString()
+        => $"StochasticGradientDescent (learningRate={LearningRate})";
 
 }

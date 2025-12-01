@@ -1,9 +1,8 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: Sigmoid.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
-// This class is derived from the content originally published in the book Deep Learning from Scratch: Building with
-// Python from First Principles by Seth Weidman. Some comments here are copied/modified from the original text.
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Operations;
 
@@ -12,7 +11,7 @@ namespace NeuralNetworks.Operations;
 /// </summary>
 public class Sigmoid : Operation2D
 {
-    protected override float[,] CalcOutput(bool inference) 
+    protected override float[,] CalcOutput(bool inference)
         => Input.Sigmoid();
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)

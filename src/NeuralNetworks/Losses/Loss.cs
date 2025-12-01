@@ -1,13 +1,10 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: Loss.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
-// This class is derived from the content originally published in the book Deep Learning from Scratch: Building with
-// Python from First Principles by Seth Weidman. Some comments here are copied/modified from the original text.
+
 
 using System.Diagnostics;
-
-using MachineLearning.NeuralNetwork.Exceptions;
 
 namespace NeuralNetworks.Losses;
 
@@ -19,9 +16,23 @@ public abstract class Loss<TPrediction>
     private TPrediction? _prediction;
     private TPrediction? _target;
 
-    public TPrediction Prediction => _prediction ?? throw new NotYetCalculatedException();
+    public TPrediction Prediction
+    {
+        get
+        {
+            Debug.Assert(_prediction != null, "Prediction must not be null here.");
+            return _prediction;
+        }
+    }
 
-    protected internal TPrediction Target => _target ?? throw new NotYetCalculatedException();
+    protected internal TPrediction Target
+    {
+        get
+        {
+            Debug.Assert(_target != null, "Target must not be null here.");
+            return _target;
+        }
+    }
 
     /// <summary>
     /// Computes the actual loss value

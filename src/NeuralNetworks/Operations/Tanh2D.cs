@@ -1,6 +1,8 @@
-﻿// Machine Learning Utils
-// File name: Tanh.cs
-// Code It Yourself with .NET, 2024
+﻿// Neural Networks in C♯
+// File name: Tanh2D.cs
+// www.kowaliszyn.pl, 2025
+
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Operations;
 

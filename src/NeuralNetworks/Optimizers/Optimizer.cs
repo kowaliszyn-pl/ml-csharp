@@ -1,14 +1,9 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: Optimizer.cs
-// Code It Yourself with .NET, 2024
-
-// This class is derived from the content originally published in the book Deep Learning from Scratch: Building with
-// Python from First Principles by Seth Weidman. Some comments here are copied/modified from the original text.
-
-
-using MachineLearning.NeuralNetwork.LearningRates;
+// www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Layers;
+using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
 

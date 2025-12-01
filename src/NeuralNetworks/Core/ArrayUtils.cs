@@ -1,6 +1,6 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: ArrayUtils.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -197,27 +197,27 @@ public class ArrayUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[] CreateZeros(int columns) 
+    public static float[] CreateZeros(int columns)
         => new float[columns];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] CreateZeros(float[,] matrix) 
+    public static float[,] CreateZeros(float[,] matrix)
         => new float[matrix.GetLength(0), matrix.GetLength(1)];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] CreateZeros(float[,,,] matrix) 
+    public static float[,,,] CreateZeros(float[,,,] matrix)
         => new float[matrix.GetLength(0), matrix.GetLength(1), matrix.GetLength(2), matrix.GetLength(3)];
 
     public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
     {
-        Debug.Assert(x.GetLength((int)Dimension.Rows) == y.GetLength((int)Dimension.Rows));
+        Debug.Assert(x.GetLength(0) == y.GetLength(0));
 
-        int[] indices = [.. Enumerable.Range(0, x.GetLength((int)Dimension.Rows)).OrderBy(i => random.Next())];
+        int[] indices = [.. Enumerable.Range(0, x.GetLength(0)).OrderBy(i => random.Next())];
 
         float[,] xPermuted = CreateZeros(x);
         float[,] yPermuted = CreateZeros(y);
 
-        for (int i = 0; i < x.GetLength((int)Dimension.Rows); i++)
+        for (int i = 0; i < x.GetLength(0); i++)
         {
             //xPermuted[i] = x[indices[i]];
             //yPermuted[i] = y[indices[i]];
@@ -230,14 +230,14 @@ public class ArrayUtils
 
     public static (float[,,,] xPermuted, float[,] yPermuted) PermuteData(float[,,,] x, float[,] y, Random random)
     {
-        Debug.Assert(x.GetLength((int)Dimension.Rows) == y.GetLength((int)Dimension.Rows));
+        Debug.Assert(x.GetLength(0) == y.GetLength(0));
 
-        int[] indices = [.. Enumerable.Range(0, x.GetLength((int)Dimension.Rows)).OrderBy(i => random.Next())];
+        int[] indices = [.. Enumerable.Range(0, x.GetLength(0)).OrderBy(i => random.Next())];
 
         float[,,,] xPermuted = CreateZeros(x);
         float[,] yPermuted = CreateZeros(y);
 
-        for (int i = 0; i < x.GetLength((int)Dimension.Rows); i++)
+        for (int i = 0; i < x.GetLength(0); i++)
         {
             //xPermuted[i] = x[indices[i]];
             //yPermuted[i] = y[indices[i]];

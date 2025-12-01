@@ -1,6 +1,8 @@
-﻿// Machine Learning Utils
-// File name: Array2DTrainer.cs
-// Code It Yourself with .NET, 2024
+﻿// Neural Networks in C♯
+// File name: Trainer2D.cs
+// www.kowaliszyn.pl, 2025
+
+using System.Diagnostics;
 
 using Microsoft.Extensions.Logging;
 
@@ -25,13 +27,9 @@ public class Trainer2D : Trainer<float[,], float[,]>
     /// <returns>An enumerable of batches.</returns>
     protected override IEnumerable<(float[,] xBatch, float[,] yBatch)> GenerateBatches(float[,] x, float[,] y, int batchSize)
     {
-        int trainRows = x.GetLength((int)Dimension.Rows);
-#if DEBUG
-        if (trainRows != y.GetLength((int)Dimension.Rows))
-        {
-            throw new ArgumentException("Number of samples in x and y do not match.");
-        }
-#endif
+        int trainRows = x.GetLength(0);
+        Debug.Assert(trainRows == y.GetLength(0), "Number of samples in x and y do not match.");
+
         for (int batchStart = 0; batchStart < trainRows; batchStart += batchSize)
         {
             int effectiveBatchSize = Math.Min(batchSize, trainRows - batchStart);
@@ -42,11 +40,11 @@ public class Trainer2D : Trainer<float[,], float[,]>
         }
     }
 
-    protected override (float[,], float[,]) PermuteData(float[,] x, float[,] y, Random random) 
+    protected override (float[,], float[,]) PermuteData(float[,] x, float[,] y, Random random)
         => ArrayUtils.PermuteData(x, y, random);
 
-    protected override float GetRows(float[,] x) 
-        => x.GetLength((int)Dimension.Rows);
+    protected override float GetRows(float[,] x)
+        => x.GetLength(0);
 
     // TODO: eval function
 }

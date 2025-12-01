@@ -1,10 +1,8 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: DenseLayer.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-
-using MachineLearning.Typed.NeuralNetwork.Operations;
 
 using NeuralNetworks.Operations;
 using NeuralNetworks.ParamInitializers;
@@ -32,10 +30,10 @@ public class DenseLayer : Layer<float[,], float[,]>
     {
         Debug.Assert(Input != null, "Input must not be null here.");
 
-        float[,] weights = _paramInitializer.InitWeights(Input.GetLength((int)Dimension.Columns), _neurons);
+        float[,] weights = _paramInitializer.InitWeights(Input.GetLength(1), _neurons);
         float[] biases = _paramInitializer.InitBiases(_neurons);
 
-        OperationListBuilder<float[,], float[,]> res = 
+        OperationListBuilder<float[,], float[,]> res =
             AddOperation(new WeightMultiply(weights))
             .AddOperation(new BiasAdd(biases))
             .AddOperation(_activationFunction);
@@ -52,6 +50,6 @@ public class DenseLayer : Layer<float[,], float[,]>
     protected override void EnsureSameShapeForOutput(float[,]? output, float[,]? outputGradient)
         => EnsureSameShape(output, outputGradient);
 
-    public override string ToString() 
+    public override string ToString()
         => $"DenseLayer (neurons={_neurons}, activation={_activationFunction}, paramInitializer={_paramInitializer}, dropout={_dropout})";
 }

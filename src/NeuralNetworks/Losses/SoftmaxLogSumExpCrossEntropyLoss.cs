@@ -1,6 +1,8 @@
-﻿// Machine Learning Utils
-// File name: SoftmaxCrossEntropyLoss.cs
-// Code It Yourself with .NET, 2024
+﻿// Neural Networks in C♯
+// File name: SoftmaxLogSumExpCrossEntropyLoss.cs
+// www.kowaliszyn.pl, 2025
+
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Losses;
 
@@ -20,14 +22,14 @@ public class SoftmaxLogSumExpCrossEntropyLoss(float eps = 1e-7f) : Loss2D
             .Subtract(
                 negativeTarget.Add(1f).MultiplyElementwise(softmaxPrediction.Multiply(-1f).Add(1f).Log())
             );
-        int batchSize = Prediction.GetLength((int)Dimension.Rows);
+        int batchSize = Prediction.GetLength(0);
         return softmaxCrossEntropyLoss.Sum() / batchSize;
     }
 
     protected override float[,] CalculateLossGradient()
     {
         float[,] softmaxPrediction = Prediction.SoftmaxLogSumExp();
-        int batchSize = Prediction.GetLength((int)Dimension.Rows);
+        int batchSize = Prediction.GetLength(0);
         return softmaxPrediction.Subtract(Target).Divide(batchSize);
     }
 }

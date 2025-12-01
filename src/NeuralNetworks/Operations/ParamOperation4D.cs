@@ -4,8 +4,6 @@
 
 using System.Diagnostics;
 
-using MachineLearning.NeuralNetwork.Exceptions;
-
 using NeuralNetworks.Layers;
 using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
@@ -28,7 +26,14 @@ public abstract class ParamOperation4D<TParam>(TParam param) : ParamOperation4D
 
     protected TParam Param => param;
 
-    internal TParam ParamGradient => _paramGradient ?? throw new NotYetCalculatedException();
+    internal TParam ParamGradient
+    {
+        get
+        {
+            Debug.Assert(_paramGradient != null, "ParamGradient must not be null here.");
+            return _paramGradient;
+        }
+    }
 
     public override float[,,,] Backward(float[,,,] outputGradient)
     {
