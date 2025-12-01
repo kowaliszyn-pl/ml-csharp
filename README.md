@@ -6,6 +6,14 @@ See https://www.kowaliszyn.pl/ for more information (in Polish).
 
 # Projects
 
-## Simple linear regression
+## Aps
 
-## Multiple linear regression with matrix operations
+### Simple linear regression
+
+### Multiple linear regression with matrix operations
+
+### First neural network - BostonHousingML
+
+## Libs
+
+### NeuralNetworks
