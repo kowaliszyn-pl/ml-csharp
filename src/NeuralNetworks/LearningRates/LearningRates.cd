@@ -1,38 +1,38 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="MachineLearning.NeuralNetwork.LearningRates.LearningRate">
+  <Class Name="NeuralNetworks.LearningRates.LearningRate">
     <Position X="1.75" Y="0.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
-      <FileName>NeuralNetwork\LearningRates\LearningRate.cs</FileName>
+      <FileName>LearningRates\LearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.LearningRates.ConstantLearningRate">
+  <Class Name="NeuralNetworks.LearningRates.ConstantLearningRate">
     <Position X="0.5" Y="3.25" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
-      <FileName>NeuralNetwork\LearningRates\ConstantLearningRate.cs</FileName>
+      <FileName>LearningRates\ConstantLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.LearningRates.LinearDecayLearningRate">
-    <Position X="2.5" Y="6.25" Width="2.25" />
+  <Class Name="NeuralNetworks.LearningRates.LinearDecayLearningRate">
+    <Position X="1.75" Y="6.25" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAQAAgAAAAAAAACEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>NeuralNetwork\LearningRates\LinearDecayLearningRate.cs</FileName>
+      <FileName>LearningRates\LinearDecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.LearningRates.DecayLearningRate">
+  <Class Name="NeuralNetworks.LearningRates.DecayLearningRate">
     <Position X="3.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
-      <FileName>NeuralNetwork\LearningRates\DecayLearningRate.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>LearningRates\DecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.LearningRates.ExponentialDecayLearningRate">
-    <Position X="5.5" Y="6.25" Width="2.25" />
+  <Class Name="NeuralNetworks.LearningRates.ExponentialDecayLearningRate">
+    <Position X="4.75" Y="6.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAQAAgAAAAAAAACEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>NeuralNetwork\LearningRates\ExponentialDecayLearningRate.cs</FileName>
+      <FileName>LearningRates\ExponentialDecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

@@ -1,6 +1,6 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: LayerList.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 
 using NeuralNetworks.Layers;
@@ -39,6 +39,6 @@ public class LayerList<TIn, TOut> : List<Layer>
         }
     }
 
-    internal LayerList<TIn, TOut> Clone() 
+    internal LayerList<TIn, TOut> Clone()
         => (LayerList<TIn, TOut>)MemberwiseClone();
 }

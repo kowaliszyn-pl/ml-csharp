@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="NeuralNetworks.Models.Model" Collapsed="true">
+    <Position X="1.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\Model.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Models.NeuralNetwork&lt;TInputData, TPrediction&gt;" Collapsed="true">
+    <Position X="1" Y="2.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAKAAAgCAIAgEAAgAAAAACAABAAEgBIAAAAAEBI=</HashCode>
+      <FileName>Models\Model.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

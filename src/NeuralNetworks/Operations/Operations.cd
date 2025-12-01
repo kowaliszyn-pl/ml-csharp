@@ -1,59 +1,126 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="MachineLearning.NeuralNetwork.Operations.Operation">
-    <Position X="4.25" Y="0.75" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Operation">
+    <Position X="1.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAACAIAIAAAAAAAAIAAAAEBAAAAAAEAAAAAAQABI=</HashCode>
-      <FileName>NeuralNetwork\Operations\Operation.cs</FileName>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAIAAAAAAACAAAAAAAI=</HashCode>
+      <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.Operations.ParamOperation">
-    <Position X="2" Y="5.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.ParamOperation2D&lt;TParam&gt;">
+    <Position X="0.5" Y="7.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAKAAAAAAAAAAAAAABAAAAAQAAAAEAAAAAAQAAA=</HashCode>
-      <FileName>NeuralNetwork\Operations\ParamOperation.cs</FileName>
+      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
+      <FileName>Operations\ParamOperation2D.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.Operations.Sigmoid">
-    <Position X="4.25" Y="5.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Sigmoid" Collapsed="true">
+    <Position X="2.25" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>NeuralNetwork\Operations\Sigmoid.cs</FileName>
+      <FileName>Operations\Sigmoid.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.Operations.Linear" Collapsed="true">
-    <Position X="6.5" Y="5.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Linear" Collapsed="true">
+    <Position X="7.5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>NeuralNetwork\Operations\Linear.cs</FileName>
+      <FileName>Operations\Linear.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.Operations.WeightMultiply">
-    <Position X="0.5" Y="9.5" Width="1.75" />
+  <Class Name="NeuralNetworks.Operations.WeightMultiply">
+    <Position X="0.5" Y="11" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>NeuralNetwork\Operations\WeightMultiply.cs</FileName>
+      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\WeightMultiply.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.Operations.BiasAdd">
-    <Position X="3.25" Y="9.5" Width="2" />
+  <Class Name="NeuralNetworks.Operations.BiasAdd">
+    <Position X="2.75" Y="11" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>NeuralNetwork\Operations\BiasAdd.cs</FileName>
+      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\BiasAdd.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.Operations.Tanh" Collapsed="true">
-    <Position X="8.75" Y="5.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Tanh2D" Collapsed="true">
+    <Position X="4" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>NeuralNetwork\Operations\Tanh.cs</FileName>
+      <FileName>Operations\Tanh2D.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MachineLearning.NeuralNetwork.Operations.Dropout" Collapsed="true">
-    <Position X="11.25" Y="5.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Operation2D" Collapsed="true">
+    <Position X="2.25" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAABAAAAAAQAAA=</HashCode>
-      <FileName>NeuralNetwork\Operations\Dropout.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\Operation2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Operation4D" Collapsed="true">
+    <Position X="9.75" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\Operation4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Operation&lt;TIn, TOut&gt;" Collapsed="true">
+    <Position X="6" Y="1" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAgAAACAAAIAAAAAAgAIAAAAEBIEAAAAEACAAAAQABI=</HashCode>
+      <FileName>Operations\Operation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ParamOperation4D" Collapsed="true">
+    <Position X="9.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\ParamOperation4D.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ParamOperation4D&lt;TParam&gt;" Collapsed="true">
+    <Position X="9.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
+      <FileName>Operations\ParamOperation4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ParamOperation2D" Collapsed="true">
+    <Position X="0.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\ParamOperation2D.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Tanh4D" Collapsed="true">
+    <Position X="11.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Tanh4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Dropout2D" Collapsed="true">
+    <Position X="5.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAgAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Dropout2D.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Dropout4D" Collapsed="true">
+    <Position X="13.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAgAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Dropout4D.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Conv2D" Collapsed="true">
+    <Position X="9.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Conv2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />
