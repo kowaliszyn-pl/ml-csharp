@@ -38,7 +38,7 @@ while (running)
             running = false;
             break;
     }
-    
+
     if (running)
     {
         Console.ForegroundColor = ConsoleColor.Cyan;
@@ -257,6 +257,20 @@ static void FirstNeuralNetwork()
         // Model structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
 
         // 5.1. Forward (prediction and error calculation)
+
+        /* 
+           W1 - weights for the first layer [ inputSize (no of columns/attributes of X) x hiddenSize ]
+           W2 - weights for the second layer [ hiddenSize x 1 ]
+           B1 - bias for the first layer (for every neuron in the first layer)
+           b2 - bias for the second layer (there is only one neuron in the second layer)
+           M1 - input multiplied by W1
+           N1 - input multiplied by W1 plus B1
+           O1 - result of the activation function applied to (input multiplied by W1 plus B1)
+           M2 - result of O1 (result of the activation function from the first layer) multiplied by W2
+           predictions - (M2 + b2)
+           errors - subtract predictions from YTrain
+           meanSquaredError - MSE, mean of errors squared
+        */
 
         // == The first layer (hidden) ==
         float[,] M1 = XTrain.MultiplyDot(W1);
