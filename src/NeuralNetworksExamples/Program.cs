@@ -11,7 +11,7 @@ Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 while (running)
 {
-    Console.WriteLine("Select a routine to run (Boston housing dataset):");
+    Console.WriteLine("Select a routine to run (Neural Networks Examples):");
     Console.WriteLine("1. Function data set");
     Console.WriteLine("2. Boston Housing data set");
     Console.WriteLine("3. MNIST data set");

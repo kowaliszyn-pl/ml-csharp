@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+using NeuralNetworks.Core;
+
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -330,7 +332,7 @@ static void FirstNeuralNetwork()
         float[,] dN1dM1 = M1.AsOnes();
 
         // [HiddenLayerSize]
-        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).SumByColumn();
+        float[] dLdBias1 = dN1dBias1.MultiplyElementwise(dLdN1).SumByColumns();
 
         // [nTrain, HiddenLayerSize]
         float[,] dLdM1 = dLdN1.MultiplyElementwise(dN1dM1);
@@ -524,7 +526,7 @@ static void FirstNeuralNetworkSimplified()
         // The first layer (hidden)
         float[,] dLdO1 = dLdP.MultiplyDot(W2.Transpose());
         float[,] dLdN1 = dLdO1.MultiplyElementwise(N1.SigmoidDerivative());
-        float[] dLdBias1 = dLdN1.SumByColumn();
+        float[] dLdBias1 = dLdN1.SumByColumns();
         float[,] dLdW1 = XTrainT.MultiplyDot(dLdN1);
 
         // Update parameters
