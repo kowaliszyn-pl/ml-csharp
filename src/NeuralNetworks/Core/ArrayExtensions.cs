@@ -30,6 +30,45 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddInPlace(this float[,] source, float scalar)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                source[row, col] += scalar;
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddInPlace(this float[,,,] source, float scalar)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        int depth = source.GetLength(2);
+        int channels = source.GetLength(3);
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                for (int k = 0; k < depth; k++)
+                {
+                    for (int l = 0; l < channels; l++)
+                    {
+                        source[i, j, k, l] += scalar;
+                    }
+                }
+            }
+        }
+
+    }
+
     /// <summary>
     /// Adds a row to the current matrix by elementwise addition with the specified matrix.
     /// </summary>
@@ -55,6 +94,33 @@ public static class ArrayExtensions
         }
 
         return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int[] Argmax(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        int[] array = new int[rows];
+
+        for (int row = 0; row < rows; row++)
+        {
+            float max = float.MinValue;
+            int maxIndex = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                float value = source[row, col];
+                if (value > max)
+                {
+                    max = value;
+                    maxIndex = col;
+                }
+            }
+            array[row] = maxIndex;
+        }
+
+        return array;
     }
 
     /// <summary>
@@ -216,6 +282,90 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void DivideInPlace(this float[,] source, float scalar)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                source[row, col] /= scalar;
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void DivideInPlace(this float[,,,] source, float scalar)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
+
+        for (int d1 = 0; d1 < dim1; d1++)
+        {
+            for (int d2 = 0; d2 < dim2; d2++)
+            {
+                for (int d3 = 0; d3 < dim3; d3++)
+                {
+                    for (int d4 = 0; d4 < dim4; d4++)
+                    {
+                        source[d1, d2, d3, d4] /= scalar;
+                    }
+                }
+            }
+        }
+
+    }
+
+    /// <summary>
+    /// Gets a submatrix containing the specified column from the current matrix. The shape is [rows, 1].
+    /// </summary>
+    /// <param name="column"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] GetColumn(this float[,] source, int column)
+    {
+        int rows = source.GetLength(0);
+
+        // Create an array to store the column.
+        float[,] res = new float[rows, 1];
+
+        for (int i = 0; i < rows; i++)
+        {
+            // Access each element in the specified column.
+            res[i, 0] = source[i, column];
+        }
+
+        return res;
+    }
+
+    /// <summary>
+    /// Gets a submatrix containing the specified range of columns from the current matrix. The shape is [rows, range].
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] GetColumns(this float[,] source, Range range)
+    {
+        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(1));
+
+        int rows = source.GetLength(0);
+        float[,] res = new float[rows, length];
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < length; j++)
+            {
+                res[i, j] = source[i, j + offset];
+            }
+        }
+
+        return res;
+    }
+
     /// <summary>
     /// Gets a row from the matrix.
     /// </summary>
@@ -366,12 +516,110 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Max(this float[,] source)
+    {
+        float max = float.MinValue;
+
+        int rows = source.GetLength(0);
+        int cols = source.GetLength(1);
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                max = Math.Max(max, source[row, col]);
+            }
+        }
+        return max;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Max(this float[,,,] source)
+    {
+        float max = float.MinValue;
+
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        max = Math.Max(max, source[i, j, k, l]);
+                    }
+                }
+            }
+        }
+
+        return max;
+    }
+
     /// <summary>
     /// Calculates the mean of all elements in the matrix.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Mean(this float[,] source)
         => source.Sum() / source.Length;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Min(this float[,] source)
+    {
+        float min = float.MaxValue;
+
+        int rows = source.GetLength(0);
+        int cols = source.GetLength(1);
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                min = Math.Min(min, source[row, col]);
+            }
+        }
+        return min;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Min(this float[,,,] source)
+    {
+        float min = float.MaxValue;
+
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        min = Math.Min(min, source[i, j, k, l]);
+                    }
+                }
+            }
+        }
+
+
+        return min;
+    }
+
+    /// <summary>
+    /// Calculates the mean of all elements in the matrix.
+    /// </summary>
+    /// <returns>The mean of all elements in the matrix.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Mean(this float[,,,] source) => source.Sum() / source.Length;
 
     /// <summary>
     /// Calculates the mean of each column in the matrix. 
@@ -1005,6 +1253,62 @@ public static class ArrayExtensions
         }
     }
 
+    /// <summary>
+    /// Calculates the standard deviation.
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Std(this float[,] source)
+    {
+        float mean = source.Mean();
+        float sum = 0;
+
+        int rows = source.GetLength(0);
+        int cols = source.GetLength(1);
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                sum += MathF.Pow(source[i, j] - mean, 2);
+            }
+        }
+
+        return MathF.Sqrt(sum / source.Length);
+    }
+
+    /// <summary>
+    /// Calculates the standard deviation.
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Std(this float[,,,] source)
+    {
+        float mean = source.Mean();
+        float sum = 0;
+
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        sum += MathF.Pow(source[i, j, k, l] - mean, 2);
+                    }
+                }
+            }
+        }
+
+        return MathF.Sqrt(sum / source.Length);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Subtract(this float[,,,] source, float[,,,] matrix)
     {
@@ -1088,6 +1392,34 @@ public static class ArrayExtensions
             for (int col = 0; col < cols; col++)
             {
                 sum += source[row, col];
+            }
+        }
+
+        return sum;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Sum(this float[,,,] source)
+    {
+        // Sum over all elements.
+        float sum = 0;
+
+        int rows = source.GetLength(0);
+        int cols = source.GetLength(1);
+        int depth = source.GetLength(2);
+        int channels = source.GetLength(3);
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                for (int k = 0; k < depth; k++)
+                {
+                    for (int l = 0; l < channels; l++)
+                    {
+                        sum += source[i, j, k, l];
+                    }
+                }
             }
         }
 

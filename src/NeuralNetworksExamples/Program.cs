@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+using NeuralNetworksExamples;
+
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -30,7 +32,7 @@ while (running)
             BostonHousing();
             break;
         case "3":
-            Mnist();
+            Mnist.Run();
             break;
 
         default:
@@ -51,8 +53,8 @@ while (running)
     }
 }
 
-void Mnist() => throw new NotImplementedException();
-
-void BostonHousing() => throw new NotImplementedException();
+static void BostonHousing()
+{
+}
 
 void Function() => throw new NotImplementedException();
