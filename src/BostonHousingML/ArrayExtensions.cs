@@ -307,9 +307,7 @@ public static class ArrayExtensions
                 // Swap row i with row j
                 for (int col = 0; col < columns; col++)
                 {
-                    float temp = source[i, col];
-                    source[i, col] = source[j, col];
-                    source[j, col] = temp;
+                    (source[j, col], source[i, col]) = (source[i, col], source[j, col]);
                 }
             }
         }
