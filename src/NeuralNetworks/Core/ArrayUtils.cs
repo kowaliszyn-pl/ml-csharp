@@ -9,9 +9,10 @@ namespace NeuralNetworks.Core;
 
 public class ArrayUtils
 {
-    public static float[,] LoadCsv(string filePath)
+    public static float[,] LoadCsv(string filePath, int skipHeaderLines = 0)
     {
-        string[] lines = File.ReadAllLines(filePath);
+        // string[] lines = File.ReadAllLines(filePath);
+        string[] lines = [.. File.ReadAllLines(filePath).Skip(skipHeaderLines)];
         int rows = lines.Length;
         int cols = lines[0].Split(',').Length;
         float[,] matrix = new float[rows, cols];
@@ -20,7 +21,8 @@ public class ArrayUtils
             string[] values = lines[i].Split(',');
             for (int j = 0; j < cols; j++)
             {
-                matrix[i, j] = float.Parse(values[j]);
+                string value = values[j].Trim('"');
+                matrix[i, j] = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
             }
         }
         return matrix;

@@ -6,6 +6,8 @@ using System.Diagnostics;
 
 using NeuralNetworks.Core;
 
+using static NeuralNetworks.Core.ArrayUtils;
+
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -638,20 +640,20 @@ static (float[,] TrainData, float[,] TestData) GetData()
     return bostonData.SplitRowsByRatio(TestSplitRatio);
 }
 
-static float[,] LoadCsv(string filePath)
-{
-    string[] lines = [.. File.ReadAllLines(filePath).Skip(1)];
-    int rows = lines.Length;
-    int cols = lines[0].Split(',').Length;
-    float[,] matrix = new float[rows, cols];
-    for (int i = 0; i < rows; i++)
-    {
-        string[] values = lines[i].Split(',');
-        for (int j = 0; j < cols; j++)
-        {
-            string value = values[j].Trim('"');
-            matrix[i, j] = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-        }
-    }
-    return matrix;
-}
+//static float[,] LoadCsv(string filePath)
+//{
+//    string[] lines = [.. File.ReadAllLines(filePath).Skip(1)];
+//    int rows = lines.Length;
+//    int cols = lines[0].Split(',').Length;
+//    float[,] matrix = new float[rows, cols];
+//    for (int i = 0; i < rows; i++)
+//    {
+//        string[] values = lines[i].Split(',');
+//        for (int j = 0; j < cols; j++)
+//        {
+//            string value = values[j].Trim('"');
+//            matrix[i, j] = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+//        }
+//    }
+//    return matrix;
+//}

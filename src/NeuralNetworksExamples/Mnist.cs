@@ -17,8 +17,6 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
-using Serilog;
-
 using static System.Console;
 using static NeuralNetworks.Core.ArrayUtils;
 
@@ -29,7 +27,6 @@ class MnistModel(SeededRandom? random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
-        // RangeInitializer initializer = new(-1f, 1f);
         GlorotInitializer initializer = new(Random);
         Dropout2D? dropout1 = new(0.85f, Random);
         Dropout2D? dropout2 = new(0.85f, Random);
@@ -51,19 +48,7 @@ class Mnist
 
     public static void Run()
     {
-        // Create ILogger using Serilog
-        Serilog.Core.Logger serilog = new LoggerConfiguration()
-            .WriteTo.File("..\\..\\..\\Logs\\log-.txt", rollingInterval: RollingInterval.Day)
-            .CreateLogger();
-
-        Log.Logger = serilog;
-        Log.Information("Logging started...");
-
-        // Create a LoggerFactory and add Serilog
-        ILoggerFactory loggerFactory = new LoggerFactory()
-            .AddSerilog(serilog);
-
-        ILogger<Trainer2D> logger = loggerFactory.CreateLogger<Trainer2D>();
+        ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
 
         // rows - batch
         // cols - features
@@ -74,6 +59,8 @@ class Mnist
         (float[,] xTest, float[,] yTest) = Split(test);
 
         // Standardize data
+        // We can standardize all features (columns) together because they are all in the same scale (pixel values from 0 to 255) and have similar meaning (brightness). We calculate mean and stdDev on the training set only, because in a real-world scenario we would not have access to the test set during training.
+        // This means that before inference, we need to apply the same standardization to new data as we did to the training data.
         WriteLine("Standardize to mean 0 and variance 1 for all features together...");
 
         float mean = xTrain.Mean();
