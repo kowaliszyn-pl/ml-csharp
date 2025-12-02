@@ -1,12 +1,12 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: FunctionDataSource.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
 
 namespace NeuralNetworks.DataSources;
 
-public class FunctionDataSource(float[,] arguments, Func<float[], float> function, float testRation = 0.7f, SeededRandom? random = null) 
+public class FunctionDataSource(float[,] arguments, Func<float[], float> function, float testRatio = 0.7f, SeededRandom? random = null)
     : DataSource<float[,], float[,]>
 {
     public override (float[,] xTrain, float[,] yTrain, float[,]? xTest, float[,]? yTest) GetData()
@@ -27,9 +27,9 @@ public class FunctionDataSource(float[,] arguments, Func<float[], float> functio
             yData[row, 0] = function(rowData);
         }
 
-        (float[,] xTrain, float[,]? xTest) = arguments.SplitRowsByRatio(testRation);
-        (float[,] yTrain, float[,]? yTest) = yData.SplitRowsByRatio(testRation);
+        (float[,] xTrain, float[,]? xTest) = arguments.SplitRowsByRatio(testRatio);
+        (float[,] yTrain, float[,]? yTest) = yData.SplitRowsByRatio(testRatio);
 
-        return (xTrain, yTrain, xTest, yTest);  
+        return (xTrain, yTrain, xTest, yTest);
     }
 }
