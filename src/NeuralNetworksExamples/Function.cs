@@ -15,6 +15,8 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
+using static System.Console;
+
 namespace NeuralNetworksExamples;
 
 class FunctionModel(SeededRandom? random)
@@ -24,11 +26,11 @@ class FunctionModel(SeededRandom? random)
     {
         GlorotInitializer initializer = new(Random);
 
-        return AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
+        return AddLayer(new DenseLayer(4, new ReLU(), initializer))
+            .AddLayer(new DenseLayer(4, new ReLU(), initializer))
+            .AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
             .AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
             .AddLayer(new DenseLayer(4, new Tanh2D(), initializer))
-            .AddLayer(new DenseLayer(4, new Tanh2D(), initializer))
-            .AddLayer(new DenseLayer(4, new ReLU(), initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
 
@@ -51,6 +53,7 @@ class Function
         //Func<float[], float> function = (float[] args) => 5 * args[0] - 3 * args[1] * args[1]  + 1.4f;
         var dataSource = new FunctionDataSource(arguments, function, 0.7f, random);
         (float[,] xTrain, float[,] yTrain, float[,]? xTest, float[,]? yTest) = dataSource.GetData();
+        int nTest = xTest!.GetLength(0);
 
         // Create model
         FunctionModel model = new(random);
@@ -64,14 +67,6 @@ class Function
             Program.LoggerFactory.CreateLogger<Trainer2D>()
         );
 
-        //xTrain,
-        //    yTrain,
-        //    xTest!,
-        //    yTest!,
-        //    new NeuralNetworks.Optimizers.AdamOptimizer(0.01f),
-        //    new ConstantLearningRate(0.01f),
-        //    batchSize: 32,
-        //    logger: Program.LoggerFactory.CreateLogger<NeuralNetworks.Trainers.Trainer2D>());
         // Train model
         trainer.Fit(
             dataSource,
@@ -80,5 +75,26 @@ class Function
             logEveryEpochs: 1_000,
             batchSize: 250
         );
+
+        WriteLine();
+        WriteLine("Sample predictions vs actual values:");
+        WriteLine();
+        WriteLine($"{"Sample No",14}{"Predicted",14}{"Actual",14}");
+        WriteLine();
+
+        // Show predictions for the test set
+
+        int[] showTestSamples = { 0, 1, 2, nTest - 3, nTest - 2, nTest - 1 };
+
+        // Do a forward pass for all test samples at once
+
+        float[,] predictions = model.Forward(xTest, true);
+        foreach (int sampleIndex in showTestSamples)
+        {
+            float predictedValue = predictions[sampleIndex, 0];
+            float actualValue = yTest![sampleIndex, 0];
+            WriteLine($"{sampleIndex + 1,14}{predictedValue,14:F4}{actualValue,14:F4}");
+        }
+
     }
 }
