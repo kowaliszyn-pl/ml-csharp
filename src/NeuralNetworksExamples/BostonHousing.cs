@@ -26,10 +26,10 @@ class BostonHousingModel(SeededRandom? random)
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
-        Dropout2D? dropout1 = new(0.85f, Random);
-        Dropout2D? dropout2 = new(0.85f, Random);
+        //Dropout2D? dropout1 = new(0.85f, Random);
+        //Dropout2D? dropout2 = new(0.85f, Random);
 
-        return AddLayer(new DenseLayer(4, new Sigmoid(), initializer, dropout1))
+        return AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
 
@@ -37,7 +37,7 @@ class BostonHousingModel(SeededRandom? random)
 
 class BostonHousing
 {
-    const int RandomSeed = 251203;
+    const int RandomSeed = 251113;
     const float TestSplitRatio = 0.7f;
     const int Epochs = 48_000;
     const int BatchSize = 400;
@@ -96,7 +96,8 @@ class BostonHousing
 
         WriteLine("\nStart training...\n");
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
+        LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);
+        //LearningRate learningRate = new ConstantLearningRate(0.0005f);
         Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
         {
             Memo = $"Class: {nameof(BostonHousing)}."
@@ -109,6 +110,27 @@ class BostonHousing
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize
         );
+
+        WriteLine();
+        WriteLine("Sample predictions vs actual values:");
+        WriteLine();
+        WriteLine($"{"Sample No",14}{"Predicted",14}{"Actual",14}");
+        WriteLine();
+
+        // Show predictions for the test set
+
+        int[] showTestSamples = { 0, 1, 2, nTest - 3, nTest - 2, nTest - 1 };
+
+        // Do a forward pass for all test samples at once
+
+        float[,] predictions = model.Forward(XTest, true);
+        foreach (int sampleIndex in showTestSamples)
+        {
+            float predictedValue = predictions[sampleIndex, 0];
+            float actualValue = YTest[sampleIndex, 0];
+            WriteLine($"{sampleIndex + 1,14}{predictedValue,14:F4}{actualValue,14:F4}");
+        }
+
     }
 
     static (float[,] TrainData, float[,] TestData) GetData()
