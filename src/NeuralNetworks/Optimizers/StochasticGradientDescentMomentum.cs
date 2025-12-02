@@ -146,10 +146,10 @@ public class StochasticGradientDescentMomentum(LearningRate learningRate, float 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using MachineLearning.NeuralNetwork.LearningRates;
-using MachineLearning.Typed.NeuralNetwork.Layers;
+using MachineLearning.Model.LearningRates;
+using MachineLearning.Typed.Model.Layers;
 
-namespace MachineLearning.Typed.NeuralNetwork.Optimizers;
+namespace MachineLearning.Typed.Model.Optimizers;
 
 public class StochasticGradientDescentMomentum(LearningRate learningRate, float momentum) : Optimizer(learningRate)
 {

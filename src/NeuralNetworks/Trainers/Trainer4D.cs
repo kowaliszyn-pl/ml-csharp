@@ -14,7 +14,7 @@ namespace NeuralNetworks.Trainers;
 
 public class Trainer4D : Trainer<float[,,,], float[,]>
 {
-    public Trainer4D(NeuralNetwork<float[,,,], float[,]> neuralNetwork, Optimizer optimizer, SeededRandom random, ILogger<Trainer4D> logger) : base(neuralNetwork, optimizer, random: random, logger: logger)
+    public Trainer4D(Model<float[,,,], float[,]> model, Optimizer optimizer, SeededRandom random, ILogger<Trainer4D> logger) : base(model, optimizer, random: random, logger: logger)
     {
     }
 

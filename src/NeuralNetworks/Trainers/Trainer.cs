@@ -21,7 +21,7 @@ namespace NeuralNetworks.Trainers;
 /// Represents a trainer for a neural network.
 /// </summary>
 public abstract class Trainer<TInputData, TPrediction>(
-    NeuralNetwork<TInputData, TPrediction> neuralNetwork,
+    Model<TInputData, TPrediction> model,
     Optimizer optimizer,
     ConsoleOutputMode consoleOutputMode = ConsoleOutputMode.OnlyOnEval,
     SeededRandom? random = null,
@@ -60,7 +60,7 @@ public abstract class Trainer<TInputData, TPrediction>(
     /// <param name="restart">A flag indicating whether to restart the training.</param>
     public void Fit(
         DataSource<TInputData, TPrediction> dataSource,
-        Func<NeuralNetwork<TInputData, TPrediction>, TInputData, TPrediction, float>? evalFunction = null,
+        Func<Model<TInputData, TPrediction>, TInputData, TPrediction, float>? evalFunction = null,
         int epochs = 100,
         int evalEveryEpochs = 10,
         int logEveryEpochs = 1,
@@ -74,11 +74,11 @@ public abstract class Trainer<TInputData, TPrediction>(
         logger?.LogInformation("===== Begin Log =====");
         logger?.LogInformation("Fit started with params: epochs: {epochs}, evalEveryEpochs: {evalEveryEpochs}, logEveryEpochs: {logEveryEpochs}, batchSize: {batchSize}, optimizer: {optimizer}, random: {random}.", epochs, evalEveryEpochs, logEveryEpochs, batchSize, optimizer, random);
         logger?.LogInformation("Model layers:");
-        foreach (Layer layer in neuralNetwork.Layers)
+        foreach (Layer layer in model.Layers)
         {
             logger?.LogInformation("Layer: {layer}.", layer);
         }
-        logger?.LogInformation("Loss function: {loss}", neuralNetwork.LossFunction);
+        logger?.LogInformation("Loss function: {loss}", model.LossFunction);
 
         if (Memo is not null)
             logger?.LogInformation("Memo: \"{memo}\".", Memo);
@@ -109,7 +109,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             // Epoch should be later than 1 to save the first checkpoint.
             //if (eval && epoch > 1)
             //{
-            //    neuralNetwork.SaveCheckpoint();
+            //    model.SaveCheckpoint();
             //    logger?.LogInformation("Checkpoint saved.");
             //}
 
@@ -133,9 +133,9 @@ public abstract class Trainer<TInputData, TPrediction>(
                     Write(stepInfo + "\r");
                 }
 
-                trainLoss = (trainLoss ?? 0) + neuralNetwork.TrainBatch(xBatch, yBatch);
-                //optimizer.Step(neuralNetwork);
-                neuralNetwork.UpdateParams(optimizer);
+                trainLoss = (trainLoss ?? 0) + model.TrainBatch(xBatch, yBatch);
+                //optimizer.Step(model);
+                model.UpdateParams(optimizer);
 
                 long elapsedMsPerStep = stepWatch.ElapsedMilliseconds / step;
                 stepsPerSecond = 1000.0f / elapsedMsPerStep;
@@ -155,8 +155,8 @@ public abstract class Trainer<TInputData, TPrediction>(
 
             if (eval)
             {
-                TPrediction testPredictions = neuralNetwork.Forward(xTest!, true);
-                float loss = neuralNetwork.LossFunction.Forward(testPredictions, yTest!);
+                TPrediction testPredictions = model.Forward(xTest!, true);
+                float loss = model.LossFunction.Forward(testPredictions, yTest!);
 
                 if (consoleOutputMode > ConsoleOutputMode.Disable)
                     WriteLine($"Test loss: {loss}");
@@ -164,7 +164,7 @@ public abstract class Trainer<TInputData, TPrediction>(
 
                 if (evalFunction is not null)
                 {
-                    float evalValue = evalFunction(neuralNetwork, xTest!, yTest!);
+                    float evalValue = evalFunction(model, xTest!, yTest!);
 
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
                         WriteLine($"Eval: {evalValue:P2}");
@@ -177,9 +177,9 @@ public abstract class Trainer<TInputData, TPrediction>(
                 }
                 else if (earlyStop)
                 {
-                    if (neuralNetwork.HasCheckpoint())
+                    if (model.HasCheckpoint())
                     {
-                        neuralNetwork.RestoreCheckpoint();
+                        model.RestoreCheckpoint();
                         logger?.LogInformation("Checkpoint restored.");
                     }
 
@@ -198,7 +198,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         if (consoleOutputMode > ConsoleOutputMode.Disable)
             WriteLine($"Fit finished in {elapsedSeconds:F2} s.");
 
-        int paramCount = neuralNetwork.GetParamCount();
+        int paramCount = model.GetParamCount();
         logger?.LogInformation("{paramCount:n0} parameters trained.", paramCount);
         if (consoleOutputMode > ConsoleOutputMode.Disable)
             WriteLine($"{paramCount:n0} parameters trained.");

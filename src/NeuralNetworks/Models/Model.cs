@@ -14,7 +14,7 @@ public abstract class Model
     public abstract void UpdateParams(Optimizer optimizer);
 }
 
-public abstract class NeuralNetwork<TInputData, TPrediction> : Model
+public abstract class Model<TInputData, TPrediction> : Model
     where TInputData : notnull
     where TPrediction : notnull
 {
@@ -22,7 +22,7 @@ public abstract class NeuralNetwork<TInputData, TPrediction> : Model
     private Loss<TPrediction> _lossFunction;
     private float _lastLoss;
 
-    public NeuralNetwork(Loss<TPrediction> lossFunction, SeededRandom? random)
+    public Model(Loss<TPrediction> lossFunction, SeededRandom? random)
     {
         _lossFunction = lossFunction;
         Random = random;
@@ -66,7 +66,7 @@ public abstract class NeuralNetwork<TInputData, TPrediction> : Model
 
     #region Checkpoint
 
-    private NeuralNetwork<TInputData, TPrediction>? _checkpoint;
+    private Model<TInputData, TPrediction>? _checkpoint;
 
     public void SaveCheckpoint() => _checkpoint = Clone();
 
@@ -88,9 +88,9 @@ public abstract class NeuralNetwork<TInputData, TPrediction> : Model
     /// Makes a deep copy of this neural network.
     /// </summary>
     /// <returns></returns>
-    public NeuralNetwork<TInputData, TPrediction> Clone()
+    public Model<TInputData, TPrediction> Clone()
     {
-        NeuralNetwork<TInputData, TPrediction> clone = (NeuralNetwork<TInputData, TPrediction>)MemberwiseClone();
+        Model<TInputData, TPrediction> clone = (Model<TInputData, TPrediction>)MemberwiseClone();
         clone._layers = _layers.Clone();
         clone._lossFunction = _lossFunction.Clone();
         return clone;
@@ -104,7 +104,7 @@ public abstract class NeuralNetwork<TInputData, TPrediction> : Model
 }
 
 /*
-public class NeuralNetwork(List<Layer> layers, Loss lossFunction)
+public class Model(List<Layer> layers, Loss lossFunction)
 {
     private List<Layer> _layers = layers;
     private Loss _lossFunction = lossFunction;
@@ -158,7 +158,7 @@ public class NeuralNetwork(List<Layer> layers, Loss lossFunction)
     internal Matrix[] GetAllParamGradients() => _layers.SelectMany(layer => layer.ParamGradients).ToArray();
 
 
-    private NeuralNetwork? _checkpoint;
+    private Model? _checkpoint;
 
     public void SaveCheckpoint() => _checkpoint = Clone();
 
@@ -180,9 +180,9 @@ public class NeuralNetwork(List<Layer> layers, Loss lossFunction)
     /// Makes a deep copy of this neural network.
     /// </summary>
     /// <returns></returns>
-    public NeuralNetwork Clone()
+    public Model Clone()
     {
-        NeuralNetwork clone = (NeuralNetwork)MemberwiseClone();
+        Model clone = (Model)MemberwiseClone();
         clone._layers = _layers.Select(l => l.Clone()).ToList();
         clone._lossFunction = _lossFunction.Clone();
         return clone;

@@ -7,8 +7,8 @@
       <FileName>Models\Model.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Models.NeuralNetwork&lt;TInputData, TPrediction&gt;" Collapsed="true">
-    <Position X="1" Y="2.75" Width="2.5" />
+  <Class Name="NeuralNetworks.Models.Model&lt;TInputData, TPrediction&gt;" Collapsed="true">
+    <Position X="1" Y="3" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AEAAAAKAAAgCAIAgEAAgAAAAACAABAAEgBIAAAAAEBI=</HashCode>
       <FileName>Models\Model.cs</FileName>
