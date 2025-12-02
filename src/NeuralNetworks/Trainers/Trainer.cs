@@ -70,7 +70,7 @@ public abstract class Trainer<TInputData, TPrediction>(
     {
         Stopwatch trainWatch = Stopwatch.StartNew();
 
-        logger?.LogInformation("");
+        logger?.LogInformation(string.Empty);
         logger?.LogInformation("===== Begin Log =====");
         logger?.LogInformation("Fit started with params: epochs: {epochs}, evalEveryEpochs: {evalEveryEpochs}, logEveryEpochs: {logEveryEpochs}, batchSize: {batchSize}, optimizer: {optimizer}, random: {random}.", epochs, evalEveryEpochs, logEveryEpochs, batchSize, optimizer, random);
         logger?.LogInformation("Model layers:");
@@ -204,7 +204,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             WriteLine($"{paramCount:n0} parameters trained.");
 
         logger?.LogInformation("===== End Log =====");
-
+        logger?.LogInformation(string.Empty);
     }
 
 

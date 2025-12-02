@@ -67,8 +67,8 @@ class Mnist
 
         // rows - batch
         // cols - features
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\mnist_train_small.csv");
-        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\mnist_test.csv");
+        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_train_small.csv");
+        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_test.csv");
 
         (float[,] xTrain, float[,] yTrain) = Split(train);
         (float[,] xTest, float[,] yTest) = Split(test);
@@ -108,7 +108,7 @@ class Mnist
         LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
         Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
         {
-            Memo = $"MNIST: batch={BatchSize}, seed={RandomSeed}, epochs={Epochs}."
+            Memo = $"Class: {nameof(Mnist)}."
         };
 
         trainer.Fit(
@@ -119,8 +119,6 @@ class Mnist
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize
         );
-
-        ReadLine();
     }
 
     private static float EvalFunction(Model<float[,], float[,]> neuralNetwork, float[,] xEvalTest, float[,] yEvalTest)
