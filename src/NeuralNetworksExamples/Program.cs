@@ -10,7 +10,7 @@ using NeuralNetworksExamples;
 
 using Serilog;
 
-internal class Program
+internal static class Program
 {
     internal static ILoggerFactory LoggerFactory { get; private set; }
 
@@ -66,7 +66,7 @@ internal class Program
             if (running)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"Elapsed time: ~{stopwatch.Elapsed.TotalSeconds:F2} seconds.");
+                Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalSeconds:F2} seconds.");
                 Console.ResetColor();
 
                 Console.WriteLine("\nPress any key to continue...");

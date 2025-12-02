@@ -106,7 +106,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             bool eval = xTest is not null && yTest is not null && evaluationEpoch;
 
             if ((logEpoch && consoleOutputMode == ConsoleOutputMode.OnlyOnEval) || consoleOutputMode == ConsoleOutputMode.Always)
-                WriteLine($"Epoch {epoch}/{epochs}...");
+                WriteLine($"\nEpoch {epoch}/{epochs}...");
 
             // Epoch should be later than 1 to save the first checkpoint.
             //if (eval && epoch > 1)
@@ -119,7 +119,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             optimizer.UpdateLearningRate(epoch, epochs);
 
             if(logEpoch)
-                WriteLine($"CurrentLearningRate: {optimizer.LearningRate.GetLearningRate()}, epoch: {epoch}, epochs: {epochs}");
+                WriteLine($"CurrentLearningRate: {optimizer.LearningRate.GetLearningRate()}.");
 
             float? trainLoss = null;
             int step = 0;

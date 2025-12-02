@@ -26,8 +26,6 @@ class BostonHousingModel(SeededRandom? random)
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
-        //Dropout2D? dropout1 = new(0.85f, Random);
-        //Dropout2D? dropout2 = new(0.85f, Random);
 
         return AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
@@ -94,10 +92,9 @@ class BostonHousing
 
         BostonHousingModel model = new(commonRandom);
 
-        WriteLine("\nStart training...\n");
+        WriteLine("\nStart training...");
 
         LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);
-        //LearningRate learningRate = new ConstantLearningRate(0.0005f);
         Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
         {
             Memo = $"Class: {nameof(BostonHousing)}."
