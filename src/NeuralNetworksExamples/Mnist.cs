@@ -73,28 +73,64 @@ class Mnist
         (float[,] xTrain, float[,] yTrain) = Split(train);
         (float[,] xTest, float[,] yTest) = Split(test);
 
-        // Scale xTrain and xTest to mean 0, variance 1
-        WriteLine("Scale data to mean 0...");
+        WriteLine("Scale xTrain and xTest to mean 0, variance 1...");
+        //WriteLine("Scale data to mean 0...");
 
-        float mean = xTrain.Mean();
-        xTrain.AddInPlace(-mean);
-        xTest.AddInPlace(-mean);
+        //float mean = xTrain.Mean();
+        //WriteLine($"mean: {mean}");
+        //xTrain.AddInPlace(-mean);
+        //xTest.AddInPlace(-mean);
+
+        //WriteLine($"xTrain min: {xTrain.Min()}");
+        //WriteLine($"xTest min: {xTest.Min()}");
+        //WriteLine($"xTrain max: {xTrain.Max()}");
+        //WriteLine($"xTest max: {xTest.Max()}");
+
+        //WriteLine("\nScale data to variance 1...");
+
+        //float std = xTrain.Std();
+        //WriteLine($"std: {std}");
+        //xTrain.DivideInPlace(std);
+        //xTest.DivideInPlace(std);
+
+        //xTrain.Standardize();
+        //xTest.Standardize();
+
+        for (int col = 0; col < xTrain.GetLength(1); col++)
+        {
+            float minTrain = float.MaxValue, maxTrain = float.MinValue;
+            float sum = 0, sumOfSquares = 0;
+            for (int row = 0; row < xTrain.GetLength(0); row++)
+            {
+                float v = xTrain[row, col];
+                sum += v;
+                sumOfSquares += v * v;
+                if (v < minTrain) minTrain = v;
+                if (v > maxTrain) maxTrain = v;
+            }
+            float meanCol = sum / xTrain.GetLength(0);
+            float stdDevCol = (float)Math.Sqrt((sumOfSquares / xTrain.GetLength(0)) - (meanCol * meanCol));
+            WriteLine($"Column {col}: xTrain min: {minTrain}, max: {maxTrain}, mean: {meanCol}, stdDev: {stdDevCol}");
+        }
+
+        StandardizeColumns(1f, xTrain, xTest);
 
         WriteLine($"xTrain min: {xTrain.Min()}");
         WriteLine($"xTest min: {xTest.Min()}");
         WriteLine($"xTrain max: {xTrain.Max()}");
         WriteLine($"xTest max: {xTest.Max()}");
 
-        WriteLine("\nScale data to variance 1...");
-
-        float std = xTrain.Std();
-        xTrain.DivideInPlace(std);
-        xTest.DivideInPlace(std);
-
-        WriteLine($"xTrain min: {xTrain.Min()}");
-        WriteLine($"xTest min: {xTest.Min()}");
-        WriteLine($"xTrain max: {xTrain.Max()}");
-        WriteLine($"xTest max: {xTest.Max()}");
+        for (int col = 0; col < xTrain.GetLength(1); col++)
+        {
+            float minTrain = float.MaxValue, maxTrain = float.MinValue;
+            for (int row = 0; row < xTrain.GetLength(0); row++)
+            {
+                float v = xTrain[row, col];
+                if (v < minTrain) minTrain = v;
+                if (v > maxTrain) maxTrain = v;
+            }
+            WriteLine($"Column {col}: xTrain min: {minTrain}, max: {maxTrain}");
+        }
 
         SimpleDataSource<float[,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
 

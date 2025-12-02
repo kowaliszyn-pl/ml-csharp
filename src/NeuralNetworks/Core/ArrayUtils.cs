@@ -247,4 +247,89 @@ public class ArrayUtils
 
         return (xPermuted, yPermuted);
     }
+
+    public static void StandardizeColumns(float minStdDev, params List<float[,]> sets)
+    {
+        // Assert all sets have the same number of columns
+        int columns = sets[0].GetLength(1);
+#if DEBUG
+        foreach (var set in sets)
+        {
+            if (set.GetLength(1) != columns)
+                throw new ArgumentException("All sets must have the same number of columns.");
+        }
+#endif
+
+        int rows = sets.Sum(s => s.GetLength(0));
+        //int rowsTrain = xTrain.GetLength(0);
+        //int rowsTest = xTest.GetLength(0);
+        //int columns = xTrain.GetLength(1);
+
+        // Compute mean and stdDev for each column using both train and test
+        float[] mean = new float[columns];
+        float[] stdDev = new float[columns];
+        float[] variance = new float[columns];
+
+        for (int col = 0; col < columns; col++)
+        {
+            float sum = 0f;
+            float sumOfSquares = 0f;
+            //int rows = rowsTrain + rowsTest;
+
+            // Calculate sum and sum of squares for the current column across all sets
+            foreach (var set in sets)
+            {
+                int rowsInSet = set.GetLength(0);
+                for (int row = 0; row < rowsInSet; row++)
+                {
+                    float val = set[row, col];
+                    sum += val;
+                    sumOfSquares += val * val;
+                }
+            }
+
+            //// Sum for train
+            //for (int row = 0; row < rowsTrain; row++)
+            //{
+            //    float val = xTrain[row, col];
+            //    sum += val;
+            //    sumOfSquares += val * val;
+            //}
+            //// Sum for test
+            //for (int row = 0; row < rowsTest; row++)
+            //{
+            //    float val = xTest[row, col];
+            //    sum += val;
+            //    sumOfSquares += val * val;
+            //}
+
+            mean[col] = sum / rows;
+            variance[col] = (sumOfSquares / rows) - (mean[col] * mean[col]);
+            stdDev[col] = MathF.Max(MathF.Sqrt(variance[col]), minStdDev);
+            if (stdDev[col] == 0f)
+            {
+                stdDev[col] = 1f; // Prevent division by zero
+            }
+        }
+
+        // Update each set
+        foreach (var set in sets)
+        {
+            int rowsInSet = set.GetLength(0);
+            // Standardize set
+            for (int row = 0; row < rowsInSet; row++)
+                for (int col = 0; col < columns; col++)
+                    set[row, col] = (set[row, col] - mean[col]) / stdDev[col];
+        }
+
+        //// Standardize train
+        //for (int row = 0; row < rowsTrain; row++)
+        //    for (int col = 0; col < columns; col++)
+        //        xTrain[row, col] = (xTrain[row, col] - mean[col]) / stdDev[col];
+
+        //// Standardize test
+        //for (int row = 0; row < rowsTest; row++)
+        //    for (int col = 0; col < columns; col++)
+        //        xTest[row, col] = (xTest[row, col] - mean[col]) / stdDev[col];
+    }
 }

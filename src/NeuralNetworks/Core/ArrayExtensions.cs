@@ -1144,7 +1144,7 @@ public static class ArrayExtensions
     /// Standardizes the matrix in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1.
     /// </summary>
     /// <param name="source">The matrix to standardize.</param>
-    /// <param name="column">
+    /// <param name="columnRange">
     /// Optional. The index of the column to standardize. If null, all columns are standardized.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
