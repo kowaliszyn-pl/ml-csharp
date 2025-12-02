@@ -1258,7 +1258,7 @@ public static class ArrayExtensions
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Std(this float[,] source)
+    public static float StdDev(this float[,] source)
     {
         float mean = source.Mean();
         float sum = 0;
@@ -1270,7 +1270,8 @@ public static class ArrayExtensions
         {
             for (int j = 0; j < cols; j++)
             {
-                sum += MathF.Pow(source[i, j] - mean, 2);
+                float value = source[i, j] - mean;
+                sum += value * value;
             }
         }
 
@@ -1282,7 +1283,7 @@ public static class ArrayExtensions
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Std(this float[,,,] source)
+    public static float StdDev(this float[,,,] source)
     {
         float mean = source.Mean();
         float sum = 0;
@@ -1300,7 +1301,8 @@ public static class ArrayExtensions
                 {
                     for (int l = 0; l < dim4; l++)
                     {
-                        sum += MathF.Pow(source[i, j, k, l] - mean, 2);
+                        float value = source[i, j, k, l] - mean; 
+                        sum += value * value;
                     }
                 }
             }

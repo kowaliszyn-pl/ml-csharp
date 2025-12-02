@@ -261,9 +261,6 @@ public class ArrayUtils
 #endif
 
         int rows = sets.Sum(s => s.GetLength(0));
-        //int rowsTrain = xTrain.GetLength(0);
-        //int rowsTest = xTest.GetLength(0);
-        //int columns = xTrain.GetLength(1);
 
         // Compute mean and stdDev for each column using both train and test
         float[] mean = new float[columns];
@@ -274,7 +271,6 @@ public class ArrayUtils
         {
             float sum = 0f;
             float sumOfSquares = 0f;
-            //int rows = rowsTrain + rowsTest;
 
             // Calculate sum and sum of squares for the current column across all sets
             foreach (var set in sets)
@@ -287,21 +283,6 @@ public class ArrayUtils
                     sumOfSquares += val * val;
                 }
             }
-
-            //// Sum for train
-            //for (int row = 0; row < rowsTrain; row++)
-            //{
-            //    float val = xTrain[row, col];
-            //    sum += val;
-            //    sumOfSquares += val * val;
-            //}
-            //// Sum for test
-            //for (int row = 0; row < rowsTest; row++)
-            //{
-            //    float val = xTest[row, col];
-            //    sum += val;
-            //    sumOfSquares += val * val;
-            //}
 
             mean[col] = sum / rows;
             variance[col] = (sumOfSquares / rows) - (mean[col] * mean[col]);
@@ -321,15 +302,5 @@ public class ArrayUtils
                 for (int col = 0; col < columns; col++)
                     set[row, col] = (set[row, col] - mean[col]) / stdDev[col];
         }
-
-        //// Standardize train
-        //for (int row = 0; row < rowsTrain; row++)
-        //    for (int col = 0; col < columns; col++)
-        //        xTrain[row, col] = (xTrain[row, col] - mean[col]) / stdDev[col];
-
-        //// Standardize test
-        //for (int row = 0; row < rowsTest; row++)
-        //    for (int col = 0; col < columns; col++)
-        //        xTest[row, col] = (xTest[row, col] - mean[col]) / stdDev[col];
     }
 }

@@ -41,15 +41,50 @@ class MnistModel(SeededRandom? random)
 
 }
 
+enum MnistActivation
+{
+    Tanh,
+    Relu,
+    LeakyRelu,
+    Sigmoid
+}
+
+enum MnistStandardization
+{
+    /// <summary>
+    /// No standardization applied.
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// Standardize to mean 0 and variance 1 for all features together.
+    /// </summary>
+    Mean0Variance1ForAll,
+
+    /// <summary>
+    /// Standardize to mean 0 and variance 1 for each column.
+    /// </summary>
+    Mean0Variance1ForColumns,
+
+    /// <summary>
+    /// Standardize to mean 0 and variance 1 for all features together, but if standard deviation is less than 1 then set it to 1 to avoid division by a small number.
+    /// </summary>
+    Mean0VarianceAtLeast1ForColumns
+
+    /*
+     * Other possibilities: ScaleFromMinus1To1ForColumns, ScaleFrom0To1ForColumns
+     */
+}
+
 class Mnist
 {
-    const int RandomSeed = 251202;
+    const int RandomSeed = 251201;
     const int Epochs = 10;
     const int BatchSize = 100;
     const int EvalEveryEpochs = 2;
     const int LogEveryEpochs = 1;
 
-    public static void Run()
+    public static void Run(MnistStandardization standardization)
     {
         // Create ILogger using Serilog
         Serilog.Core.Logger serilog = new LoggerConfiguration()
@@ -73,64 +108,54 @@ class Mnist
         (float[,] xTrain, float[,] yTrain) = Split(train);
         (float[,] xTest, float[,] yTest) = Split(test);
 
-        WriteLine("Scale xTrain and xTest to mean 0, variance 1...");
-        //WriteLine("Scale data to mean 0...");
-
-        //float mean = xTrain.Mean();
-        //WriteLine($"mean: {mean}");
-        //xTrain.AddInPlace(-mean);
-        //xTest.AddInPlace(-mean);
-
-        //WriteLine($"xTrain min: {xTrain.Min()}");
-        //WriteLine($"xTest min: {xTest.Min()}");
-        //WriteLine($"xTrain max: {xTrain.Max()}");
-        //WriteLine($"xTest max: {xTest.Max()}");
-
-        //WriteLine("\nScale data to variance 1...");
-
-        //float std = xTrain.Std();
-        //WriteLine($"std: {std}");
-        //xTrain.DivideInPlace(std);
-        //xTest.DivideInPlace(std);
-
-        //xTrain.Standardize();
-        //xTest.Standardize();
-
-        for (int col = 0; col < xTrain.GetLength(1); col++)
+        // Standardize data
+        switch (standardization)
         {
-            float minTrain = float.MaxValue, maxTrain = float.MinValue;
-            float sum = 0, sumOfSquares = 0;
-            for (int row = 0; row < xTrain.GetLength(0); row++)
-            {
-                float v = xTrain[row, col];
-                sum += v;
-                sumOfSquares += v * v;
-                if (v < minTrain) minTrain = v;
-                if (v > maxTrain) maxTrain = v;
-            }
-            float meanCol = sum / xTrain.GetLength(0);
-            float stdDevCol = (float)Math.Sqrt((sumOfSquares / xTrain.GetLength(0)) - (meanCol * meanCol));
-            WriteLine($"Column {col}: xTrain min: {minTrain}, max: {maxTrain}, mean: {meanCol}, stdDev: {stdDevCol}");
+            case MnistStandardization.None:
+                WriteLine("No standardization applied.");
+                break;
+
+            case MnistStandardization.Mean0Variance1ForAll:
+                WriteLine("Standardize to mean 0 and variance 1 for all features together.");
+                WriteLine("Scale data to mean 0...");
+
+                float mean = xTrain.Mean();
+                WriteLine($"mean: {mean}");
+                xTrain.AddInPlace(-mean);
+                xTest.AddInPlace(-mean);
+
+                WriteLine($"xTrain min: {xTrain.Min()}");
+                WriteLine($"xTest min: {xTest.Min()}");
+                WriteLine($"xTrain max: {xTrain.Max()}");
+                WriteLine($"xTest max: {xTest.Max()}");
+
+                WriteLine("\nScale data to variance 1...");
+
+                float std = xTrain.StdDev();
+                WriteLine($"stdDev: {std}");
+                xTrain.DivideInPlace(std);
+                xTest.DivideInPlace(std);
+                break;
+
+            case MnistStandardization.Mean0Variance1ForColumns:
+                WriteLine("Standardize to mean 0 and variance 1 for each column.");
+                StandardizeColumns(0f, xTrain, xTest);
+                break;
+
+            case MnistStandardization.Mean0VarianceAtLeast1ForColumns:
+                WriteLine("Standardize to mean 0 and variance 1 for all features together, but if standard deviation is less than 1 then set it to 1 to avoid division by a small number.");
+                StandardizeColumns(1f, xTrain, xTest);
+                break;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(standardization), "Unknown standardization method.");
         }
 
-        StandardizeColumns(1f, xTrain, xTest);
-
+        WriteLine("\nAfter standardization:");
         WriteLine($"xTrain min: {xTrain.Min()}");
         WriteLine($"xTest min: {xTest.Min()}");
         WriteLine($"xTrain max: {xTrain.Max()}");
         WriteLine($"xTest max: {xTest.Max()}");
-
-        for (int col = 0; col < xTrain.GetLength(1); col++)
-        {
-            float minTrain = float.MaxValue, maxTrain = float.MinValue;
-            for (int row = 0; row < xTrain.GetLength(0); row++)
-            {
-                float v = xTrain[row, col];
-                if (v < minTrain) minTrain = v;
-                if (v > maxTrain) maxTrain = v;
-            }
-            WriteLine($"Column {col}: xTrain min: {minTrain}, max: {maxTrain}");
-        }
 
         SimpleDataSource<float[,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
 
