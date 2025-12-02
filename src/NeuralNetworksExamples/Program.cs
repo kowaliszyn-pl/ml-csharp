@@ -14,10 +14,7 @@ while (running)
     Console.WriteLine("Select a routine to run (Neural Networks Examples):");
     Console.WriteLine("1. Function data set");
     Console.WriteLine("2. Boston Housing data set");
-    Console.WriteLine("3. MNIST data set (without normalization)");
-    Console.WriteLine("4. MNIST data set (with normalization for all)");
-    Console.WriteLine("5. MNIST data set (with normalization for columns)");
-    Console.WriteLine("6. MNIST data set (with normalization for columns, mean 0, variance at least 1)");
+    Console.WriteLine("3. MNIST data set");
     Console.WriteLine("Other: Exit");
     Console.WriteLine();
     Console.Write("Enter your choice: ");
@@ -35,16 +32,7 @@ while (running)
             BostonHousing();
             break;
         case "3":
-            Mnist.Run(MnistStandardization.None);
-            break;
-        case "4":
-            Mnist.Run(MnistStandardization.Mean0Variance1ForAll);
-            break;
-        case "5":
-            Mnist.Run(MnistStandardization.Mean0Variance1ForColumns);
-            break;
-        case "6":
-            Mnist.Run(MnistStandardization.Mean0VarianceAtLeast1ForColumns);
+            Mnist.Run();
             break;
 
         default:
