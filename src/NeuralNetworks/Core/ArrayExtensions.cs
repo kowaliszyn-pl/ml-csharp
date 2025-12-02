@@ -1430,7 +1430,7 @@ public static class ArrayExtensions
     /// Calculates the sum of each column in the matrix.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[] SumByColumn(this float[,] source)
+    public static float[] SumByColumns(this float[,] source)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);

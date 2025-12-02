@@ -73,6 +73,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         logger?.LogInformation(string.Empty);
         logger?.LogInformation("===== Begin Log =====");
         logger?.LogInformation("Fit started with params: epochs: {epochs}, evalEveryEpochs: {evalEveryEpochs}, logEveryEpochs: {logEveryEpochs}, batchSize: {batchSize}, optimizer: {optimizer}, random: {random}.", epochs, evalEveryEpochs, logEveryEpochs, batchSize, optimizer, random);
+        logger?.LogInformation("Model type: {modelType}.", model.GetType().Name);
         logger?.LogInformation("Model layers:");
         foreach (Layer layer in model.Layers)
         {

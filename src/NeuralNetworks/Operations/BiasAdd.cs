@@ -23,8 +23,9 @@ public class BiasAdd(float[] bias) : ParamOperation2D<float[]>(bias)
     protected override float[] CalcParamGradient(float[,] outputGradient)
     {
         float[,] paramGrad = Param.AsOnes().MultiplyElementwise(outputGradient);
-        return paramGrad.MeanByColumn(); //AvgByRows(); // SumByColumns, by columns? TODO: check
-        // return outputGradient.AvgBy(Dimension.Rows); ?
+        // We dont use AvgByRows here, because the outputGradient is already averaged over the batch size in the loss function.
+        return paramGrad.SumByColumns();
+        // return outputGradient.SumByColumns(); ?
     }
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
