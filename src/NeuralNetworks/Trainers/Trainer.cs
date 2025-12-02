@@ -132,7 +132,7 @@ public abstract class Trainer<TInputData, TPrediction>(
                 step++;
                 if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                 {
-                    string stepInfo = $"Step {step}/{allSteps}...";
+                    string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";
                     if (stepsPerSecond is not null)
                         stepInfo += $" {stepsPerSecond.Value:F2} steps/s";
                     Write(stepInfo + "\r");

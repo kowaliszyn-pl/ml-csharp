@@ -48,7 +48,7 @@ internal static class Program
             switch (choice)
             {
                 case "1":
-                    Function();
+                    Function.Run();
                     break;
                 case "2":
                     BostonHousing.Run();
@@ -74,7 +74,5 @@ internal static class Program
                 Console.WriteLine();
             }
         }
-
-        void Function() => throw new NotImplementedException();
     }
 }

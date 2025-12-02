@@ -8,7 +8,8 @@ namespace NeuralNetworks.Operations;
 
 public class Tanh2D : Operation2D
 {
-    protected override float[,] CalcOutput(bool inference) => Input.Tanh();
+    protected override float[,] CalcOutput(bool inference) 
+        => Input.Tanh();
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {
