@@ -14,5 +14,12 @@
       <FileName>DataSources\SimpleDataSource.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="NeuralNetworks.DataSources.FunctionDataSource" Collapsed="true">
+    <Position X="3.25" Y="3.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DataSources\FunctionDataSource.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

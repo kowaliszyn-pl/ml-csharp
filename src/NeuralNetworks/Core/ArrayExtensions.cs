@@ -893,6 +893,25 @@ public static class ArrayExtensions
         }
     }
 
+    public static void PermuteInPlace(this float[,] source, Random? random)
+    {
+        random ??= new();
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        for (int i = rows - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            if (i != j)
+            {
+                // Swap row i with row j
+                for (int col = 0; col < columns; col++)
+                {
+                    (source[j, col], source[i, col]) = (source[i, col], source[j, col]);
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// Raises each element of the matrix to the specified power.
     /// </summary>
