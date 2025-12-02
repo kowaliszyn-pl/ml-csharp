@@ -15,7 +15,7 @@ public class ExponentialDecayLearningRate(float initialLearningRate, float final
             CurrentLearningRate = _initialLearningRate;
         else
             CurrentLearningRate = _initialLearningRate * (float)Math.Pow(_finalLearningRate / _initialLearningRate, (float)(epoch - 1) / (epochs - 1));
-        Console.WriteLine($"CurrentLearningRate: {CurrentLearningRate}, epoch: {epoch}, epochs: {epochs}");
+        // Console.WriteLine($"CurrentLearningRate: {CurrentLearningRate}, epoch: {epoch}, epochs: {epochs}");
     }
 
     public override string ToString() => $"ExponentialDecayLearningRate (initialLearningRate={_initialLearningRate}, finalLearningRate={_finalLearningRate})";

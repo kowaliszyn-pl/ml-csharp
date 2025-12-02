@@ -12,7 +12,7 @@ namespace NeuralNetworks.Optimizers;
 /// </summary>
 public abstract class Optimizer(LearningRate learningRate)
 {
-    protected LearningRate LearningRate => learningRate;
+    public LearningRate LearningRate => learningRate;
 
     //public abstract void Step(Model neuralNetwork);
 

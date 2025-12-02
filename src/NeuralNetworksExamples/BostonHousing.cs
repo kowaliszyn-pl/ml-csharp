@@ -99,7 +99,7 @@ class BostonHousing
         LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
         Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
         {
-            Memo = $"Class: {nameof(Mnist)}."
+            Memo = $"Class: {nameof(BostonHousing)}."
         };
 
         trainer.Fit(

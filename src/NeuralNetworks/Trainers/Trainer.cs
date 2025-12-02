@@ -96,11 +96,12 @@ public abstract class Trainer<TInputData, TPrediction>(
 
         for (int epoch = 1; epoch <= epochs; epoch++)
         {
-            logger?.LogInformation("Epoch {epoch}/{epochs} started.", epoch, epochs);
-
             bool lastEpoch = epoch == epochs;
             bool evaluationEpoch = epoch % evalEveryEpochs == 0 || lastEpoch;
             bool logEpoch = epoch % logEveryEpochs == 0 || lastEpoch;
+
+            if(logEpoch)
+                logger?.LogInformation("Epoch {epoch}/{epochs} started.", epoch, epochs);
 
             bool eval = xTest is not null && yTest is not null && evaluationEpoch;
 
@@ -116,6 +117,9 @@ public abstract class Trainer<TInputData, TPrediction>(
 
             (xTrain, yTrain) = PermuteData(xTrain, yTrain, random ?? new Random());
             optimizer.UpdateLearningRate(epoch, epochs);
+
+            if(logEpoch)
+                WriteLine($"CurrentLearningRate: {optimizer.LearningRate.GetLearningRate()}, epoch: {epoch}, epochs: {epochs}");
 
             float? trainLoss = null;
             int step = 0;
