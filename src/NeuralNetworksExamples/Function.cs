@@ -27,10 +27,10 @@ class FunctionModel(SeededRandom? random)
         GlorotInitializer initializer = new(Random);
 
         return AddLayer(new DenseLayer(4, new ReLU(), initializer))
+            //.AddLayer(new DenseLayer(4, new ReLU(), initializer))
+            //.AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
             .AddLayer(new DenseLayer(4, new ReLU(), initializer))
-            .AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
-            .AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
-            .AddLayer(new DenseLayer(4, new Tanh2D(), initializer))
+            .AddLayer(new DenseLayer(4, new ReLU(), initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
 
@@ -49,8 +49,9 @@ class Function
             arguments[i, 0] = random.NextSingle() * 20 - 10;
             arguments[i, 1] = random.NextSingle() * 20 - 10;
         }
-        Func<float[], float> function = (float[] args) => MathF.Sin(args[0]) + MathF.Cos(args[1]);
-        //Func<float[], float> function = (float[] args) => 5 * args[0] - 3 * args[1] * args[1]  + 1.4f;
+        //Func<float[], float> function = (float[] args) => MathF.Sin(args[0]) + MathF.Cos(args[1]);
+        Func<float[], float> function = (float[] args) => 5 * args[0] - 3 * args[1] * args[1]  + 1.4f;
+        //Func<float[], float> function = (float[] x) => 2f * x[0] * x[0] - 6f * x[1] + 4.5f;
         var dataSource = new FunctionDataSource(arguments, function, 0.7f, random);
         (float[,] xTrain, float[,] yTrain, float[,]? xTest, float[,]? yTest) = dataSource.GetData();
         int nTest = xTest!.GetLength(0);

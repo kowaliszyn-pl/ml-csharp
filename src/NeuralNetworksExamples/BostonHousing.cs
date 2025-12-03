@@ -30,7 +30,6 @@ class BostonHousingModel(SeededRandom? random)
         return AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
-
 }
 
 class BostonHousing

@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.Extensions.Logging;
 
@@ -58,6 +59,8 @@ public abstract class Trainer<TInputData, TPrediction>(
     /// <param name="evalEveryEpochs">The number of epochs between evaluations.</param>
     /// <param name="batchSize">The batch size.</param>
     /// <param name="restart">A flag indicating whether to restart the training.</param>
+    [SuppressMessage("Usage", "CA2254:Template should be a static expression", Justification = "<Pending>")]
+    [SuppressMessage("Performance", "CA1873:Avoid potentially expensive logging", Justification = "<Pending>")]
     public void Fit(
         DataSource<TInputData, TPrediction> dataSource,
         Func<Model<TInputData, TPrediction>, TInputData, TPrediction, float>? evalFunction = null,
