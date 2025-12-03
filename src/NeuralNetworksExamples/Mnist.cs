@@ -35,7 +35,6 @@ class MnistModel(SeededRandom? random)
             .AddLayer(new DenseLayer(46, new Tanh2D(), initializer, dropout2))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
-
 }
 
 class Mnist

@@ -12,7 +12,7 @@ using Serilog;
 
 internal static class Program
 {
-    internal static ILoggerFactory LoggerFactory { get; private set; }
+    internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
 
     private static void Main(string[] args)
     {
@@ -44,7 +44,7 @@ internal static class Program
             string? choice = Console.ReadLine();
             Console.WriteLine();
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            //Stopwatch stopwatch = Stopwatch.StartNew();
             switch (choice)
             {
                 case "1":
@@ -65,9 +65,9 @@ internal static class Program
 
             if (running)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalSeconds:F2} seconds.");
-                Console.ResetColor();
+                //Console.ForegroundColor = ConsoleColor.Cyan;
+                //Console.WriteLine($"Elapsed time: {stopwatch.Elapsed.TotalSeconds:F2} seconds.");
+                //Console.ResetColor();
 
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();

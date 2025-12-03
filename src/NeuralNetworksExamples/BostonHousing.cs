@@ -91,8 +91,6 @@ class BostonHousing
 
         BostonHousingModel model = new(commonRandom);
 
-        WriteLine("\nStart training...");
-
         LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);
         Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
         {

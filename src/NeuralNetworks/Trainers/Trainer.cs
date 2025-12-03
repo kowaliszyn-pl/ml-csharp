@@ -200,16 +200,31 @@ public abstract class Trainer<TInputData, TPrediction>(
 
             }
         }
-        trainWatch.Stop();
-        float elapsedSeconds = trainWatch.ElapsedMilliseconds / 1000.0f;
-        logger?.LogInformation("Fit finished in {elapsedSecond:F2} s.", elapsedSeconds);
-        if (consoleOutputMode > ConsoleOutputMode.Disable)
-            WriteLine($"Fit finished in {elapsedSeconds:F2} s.");
 
+        trainWatch.Stop();
+
+        double elapsedSeconds = trainWatch.Elapsed.TotalSeconds;
+        logger?.LogInformation("Fit finished in {elapsedSecond:F2} s.", elapsedSeconds);
         int paramCount = model.GetParamCount();
         logger?.LogInformation("{paramCount:n0} parameters trained.", paramCount);
+
         if (consoleOutputMode > ConsoleOutputMode.Disable)
+        {
+            ForegroundColor = ConsoleColor.Cyan;
+            WriteLine($"\nFit finished in {elapsedSeconds:F2} s.");
             WriteLine($"{paramCount:n0} parameters trained.");
+            ForegroundColor = ConsoleColor.Yellow;
+            TPrediction testPredictions = model.Forward(xTest!, true);
+            float loss = model.LossFunction.Forward(testPredictions, yTest!);
+            WriteLine($"\nLoss on test data: {loss:F5}");
+            if(evalFunction is not null)
+            {
+                float evalValue = evalFunction(model, xTest!, yTest!);
+                WriteLine($"Eval on test data: {evalValue:P2}");
+            }
+            ResetColor();
+            WriteLine();
+        }
 
         logger?.LogInformation("===== End Log =====");
         logger?.LogInformation(string.Empty);
