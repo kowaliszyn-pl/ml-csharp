@@ -22,7 +22,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-class MnistModel(SeededRandom? random)
+file class MnistModel(SeededRandom? random)
     : Model<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
