@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: Mnist.cs
+// File name: MnistCnn.cs
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
@@ -23,22 +23,29 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-file class MnistModel(SeededRandom? random)
-    : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
+file class MnistConvModel(SeededRandom? random)
+    : BaseModel<float[,,,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
-    protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
+    protected override LayerListBuilder<float[,,,], float[,]> CreateLayerListBuilder()
     {
-        GlorotInitializer initializer = new(Random);
-        Dropout2D? dropout1 = new(0.85f, Random);
-        Dropout2D? dropout2 = new(0.85f, Random);
+        ParamInitializer initializer = new GlorotInitializer(Random);
+        // ParamInitializer initializer = new RangeInitializer(1, 1);
+        Dropout4D? dropout = new(0.85f, Random);
 
-        return AddLayer(new DenseLayer(178, new Tanh2D(), initializer, dropout1))
-            .AddLayer(new DenseLayer(46, new Tanh2D(), initializer, dropout2))
+        return AddLayer(new Conv2DLayer(
+                filters: 32, // 16,
+                kernelSize: 3,
+                activationFunction: new Tanh4D(),
+                paramInitializer: initializer,
+                dropout: dropout
+            ))
+            .AddLayer(new FlattenLayer())
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
+
 }
 
-class Mnist
+class MnistCnn
 {
     const int RandomSeed = 251203;
     const int Epochs = 10;
@@ -48,15 +55,15 @@ class Mnist
 
     public static void Run()
     {
-        ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
+        ILogger<Trainer4D> logger = Program.LoggerFactory.CreateLogger<Trainer4D>();
 
         // rows - batch
         // cols - features
         float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_train_small.csv");
         float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_test.csv");
 
-        (float[,] xTrain, float[,] yTrain) = Split(train);
-        (float[,] xTest, float[,] yTest) = Split(test);
+        (float[,,,] xTrain, float[,] yTrain) = Split(train);
+        (float[,,,] xTest, float[,] yTest) = Split(test);
 
         // Standardize data
         // We can standardize all features (columns) together because they are all in the same scale (pixel values from 0 to 255) and have similar meaning (brightness). We calculate mean and stdDev on the training set only, because in a real-world scenario we would not have access to the test set during training.
@@ -82,17 +89,17 @@ class Mnist
         WriteLine($"xTrain max: {xTrain.Max()}");
         WriteLine($"xTest max: {xTest.Max()}");
 
-        SimpleDataSource<float[,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
+        SimpleDataSource<float[,,,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);
 
         // Create a model
 
-        MnistModel model = new(commonRandom);
+        MnistConvModel model = new(commonRandom);
 
         WriteLine("\nStart training...");
 
         LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
-        Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
+        Trainer4D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
         {
             Memo = $"Class: {nameof(Mnist)}."
         };
@@ -107,7 +114,7 @@ class Mnist
         );
     }
 
-    private static float EvalFunction(Model<float[,], float[,]> model, float[,] xEvalTest, float[,] yEvalTest)
+    private static float EvalFunction(Model<float[,,,], float[,]> model, float[,,,] xEvalTest, float[,] yEvalTest)
     {
         // 'prediction' is a one-hot table with the predicted digit.
         float[,] prediction = model.Forward(xEvalTest, true);
@@ -129,21 +136,38 @@ class Mnist
         return accuracy;
     }
 
-    private static (float[,] xTest, float[,] yTest) Split(float[,] source)
+    private static (float[,,,] xTest, float[,] yTest) Split(float[,] source)
     {
         // Split into xTest (all columns except the first one) and yTest (a one-hot table from the first column with values from 0 to 9).
 
-        float[,] xTest = source.GetColumns(1..source.GetLength(1));
+        float[,] xTest2D = source.GetColumns(1..source.GetLength(1));
         float[,] yTest = source.GetColumn(0);
 
+        Debug.Assert(xTest2D.GetLength(1) == 28 * 28);
+
         // Convert yTest to a one-hot table.
-        float[,] oneHot = new float[yTest.GetLength(0), 10];
-        for (int row = 0; row < yTest.GetLength(0); row++)
+        int yTestRows = yTest.GetLength(0);
+        float[,] oneHot = new float[yTestRows, 10];
+        for (int row = 0; row < yTestRows; row++)
         {
             int value = Convert.ToInt32(yTest[row, 0]);
             oneHot[row, value] = 1f;
         }
 
-        return (xTest, oneHot);
+        int xTestRows = xTest2D.GetLength(0);
+        int xTestCols = xTest2D.GetLength(1);
+        float[,,,] xTest4D = new float[xTestRows, 1, 28, 28];
+
+        for (int row = 0; row < xTestRows; row++)
+        {
+            for (int col = 0; col < xTestCols; col++)
+            {
+                //int x = col % 28;
+                //int y = col / 28;
+                xTest4D[row, 0, col / 28, col % 28] = xTest2D[row, col];
+            }
+        }
+
+        return (xTest4D, oneHot);
     }
 }
