@@ -51,7 +51,7 @@ internal static class Program
                     Function.Run();
                     break;
                 case "2":
-                    BostonHousing.Run();
+                    BostonHousing.Run(false);
                     break;
                 case "3":
                     Mnist.Run();

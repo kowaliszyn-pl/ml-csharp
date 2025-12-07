@@ -17,7 +17,7 @@ public class LayerListBuilder<TIn, TOut> : LayerListBuilder
     where TIn : notnull
     where TOut : notnull
 {
-    internal LayerListBuilder(Layer<TIn, TOut> layer) : base()
+    public LayerListBuilder(Layer<TIn, TOut> layer) : base()
     {
         Layer = layer;
     }

@@ -41,7 +41,7 @@ class BostonHousing
     const int EvalEveryEpochs = 2_000;
     const int LogEveryEpochs = 2_000;
 
-    public static void Run()
+    public static void Run(bool useCustomModel)
     {
         ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
 
@@ -89,7 +89,21 @@ class BostonHousing
 
         // Build a model
 
-        BostonHousingModel model = new(commonRandom);
+        Model<float[,], float[,]> model;
+        if (useCustomModel)
+        {
+            model = new BostonHousingModel(commonRandom);
+        }
+        else
+        {
+            model = new GenericModel<float[,], float[,]>(
+                new LayerListBuilder<float[,], float[,]>(
+                    new DenseLayer(4, new Sigmoid(), new GlorotInitializer(commonRandom)))
+                .AddLayer(
+                    new DenseLayer(1, new Linear(), new GlorotInitializer(commonRandom))),
+                new MeanSquaredError(),
+                commonRandom);
+        }
 
         LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);
         Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
