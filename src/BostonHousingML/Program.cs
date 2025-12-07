@@ -258,7 +258,7 @@ static void FirstNeuralNetwork()
     float[,] XTrainT = XTrain.Transpose();
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
-        // Model structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
+        // GenericModel structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
 
         // 5.1. Forward (prediction and error calculation)
 
@@ -501,7 +501,7 @@ static void FirstNeuralNetworkSimplified()
     float negativeTwoOverN = -2.0f / nTrain;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
-        // Model structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
+        // GenericModel structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
 
         // 5.1. Forward (prediction and error calculation)
 

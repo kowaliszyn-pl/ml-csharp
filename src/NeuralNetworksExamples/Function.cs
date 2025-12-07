@@ -20,7 +20,7 @@ using static System.Console;
 namespace NeuralNetworksExamples;
 
 file class FunctionModel(SeededRandom? random)
-    : CustomModel<float[,], float[,]>(new MeanSquaredError(), random)
+    : BaseModel<float[,], float[,]>(new MeanSquaredError(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {

@@ -23,7 +23,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 file class MnistModel(SeededRandom? random)
-    : CustomModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
+    : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
@@ -106,7 +106,7 @@ class Mnist
         );
     }
 
-    private static float EvalFunction(BaseModel<float[,], float[,]> neuralNetwork, float[,] xEvalTest, float[,] yEvalTest)
+    private static float EvalFunction(Model<float[,], float[,]> neuralNetwork, float[,] xEvalTest, float[,] yEvalTest)
     {
         // 'prediction' is a one-hot table with the predicted digit.
         float[,] prediction = neuralNetwork.Forward(xEvalTest, true);

@@ -14,7 +14,7 @@ public abstract class Optimizer(LearningRate learningRate)
 {
     public LearningRate LearningRate => learningRate;
 
-    //public abstract void Step(Model neuralNetwork);
+    //public abstract void Step(GenericModel neuralNetwork);
 
     public virtual void UpdateLearningRate(int epoch, int epochs) => learningRate.Update(epoch, epochs);
 
