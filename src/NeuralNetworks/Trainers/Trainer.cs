@@ -122,7 +122,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             optimizer.UpdateLearningRate(epoch, epochs);
 
             if(logEpoch)
-                WriteLine($"CurrentLearningRate: {optimizer.LearningRate.GetLearningRate()}.");
+                WriteLine($"Current learning rate: {optimizer.LearningRate.GetLearningRate()}.");
 
             float? trainLoss = null;
             int step = 0;

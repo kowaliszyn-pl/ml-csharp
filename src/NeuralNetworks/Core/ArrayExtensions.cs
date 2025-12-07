@@ -7,10 +7,20 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides extension methods for performing mathematical and utility operations on multidimensional arrays of type
+/// <see cref="float"/>. These methods enable elementwise arithmetic, statistical calculations, source manipulation, and
+/// other common operations for arrays and matrices.
+/// </summary>
+/// <remarks>The <see cref="ArrayExtensions"/> class includes methods for both in-place and out-of-place
+/// operations, supporting 1D, 2D, and 4D float arrays. It offers functionality such as elementwise addition,
+/// multiplication, subtraction, standardization, transposition, and application of activation functions (e.g., sigmoid,
+/// softmax, tanh). Methods are designed to simplify array manipulation in numerical and machine learning scenarios.
+/// Thread safety is not guaranteed; callers should synchronize access if arrays are shared across threads.</remarks>
 public static class ArrayExtensions
 {
     /// <summary>
-    /// Adds a scalar value to each element of the matrix.
+    /// Adds a scalar value to each element of the source.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Add(this float[,] source, float scalar)
@@ -70,11 +80,11 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Adds a row to the current matrix by elementwise addition with the specified matrix.
+    /// Adds a row to the current source by elementwise addition with the specified source.
     /// </summary>
-    /// <param name="matrix">The matrix to add as a row.</param>
-    /// <returns>A new matrix with the row added.</returns>
-    /// <exception cref="Exception">Thrown when the number of columns in the specified matrix is not equal to the number of columns in the current matrix, or when the number of rows of the specified matrix is not equal to 1.</exception>
+    /// <param name="matrix">The source to add as a row.</param>
+    /// <returns>A new source with the row added.</returns>
+    /// <exception cref="Exception">Thrown when the number of columns in the specified source is not equal to the number of columns in the current source, or when the number of rows of the specified source is not equal to 1.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] AddRow(this float[,] source, float[] matrix)
     {
@@ -124,10 +134,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Creates a new matrix filled with ones, with the same dimensions as the specified matrix.
+    /// Creates a new source filled with ones, with the same dimensions as the specified source.
     /// </summary>
-    /// <param name="source">The matrix used to determine the dimensions of the new matrix.</param>
-    /// <returns>A new matrix filled with ones.</returns>
+    /// <param name="source">The source used to determine the dimensions of the new source.</param>
+    /// <returns>A new source filled with ones.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] AsOnes(this float[,,,] source)
     {
@@ -156,10 +166,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Creates a new matrix filled with ones, with the same dimensions as the specified matrix.
+    /// Creates a new source filled with ones, with the same dimensions as the specified source.
     /// </summary>
-    /// <param name="source">The matrix used to determine the dimensions of the new matrix.</param>
-    /// <returns>A new matrix filled with ones.</returns>
+    /// <param name="source">The source used to determine the dimensions of the new source.</param>
+    /// <returns>A new source filled with ones.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] AsOnes(this float[,] source)
     {
@@ -179,10 +189,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Creates a new matrix filled with ones, with the same dimensions as the specified matrix.
+    /// Creates a new source filled with ones, with the same dimensions as the specified source.
     /// </summary>
-    /// <param name="source">The matrix used to determine the dimensions of the new matrix.</param>
-    /// <returns>A new matrix filled with ones.</returns>
+    /// <param name="source">The source used to determine the dimensions of the new source.</param>
+    /// <returns>A new source filled with ones.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] AsOnes(this float[] source)
     {
@@ -245,11 +255,19 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] AsZeros(this float[,] source)
+        => new float[source.GetLength(0), source.GetLength(1)];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] AsZeros(this float[,,,] source)
+        => new float[source.GetLength(0), source.GetLength(1), source.GetLength(2), source.GetLength(3)];
+
     /// <summary>
-    /// Clips the values of the matrix in-place between the specified minimum and maximum values.
+    /// Clips the values of the source in-place between the specified minimum and maximum values.
     /// </summary>
-    /// <param name="min">The minimum value to clip the matrix elements to.</param>
-    /// <param name="max">The maximum value to clip the matrix elements to.</param>
+    /// <param name="min">The minimum value to clip the source elements to.</param>
+    /// <param name="max">The maximum value to clip the source elements to.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClipInPlace(this float[,] source, float min, float max)
     {
@@ -322,7 +340,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Gets a submatrix containing the specified column from the current matrix. The shape is [rows, 1].
+    /// Gets a submatrix containing the specified column from the current source. The shape is [rows, 1].
     /// </summary>
     /// <param name="column"></param>
     /// <returns></returns>
@@ -344,7 +362,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Gets a submatrix containing the specified range of columns from the current matrix. The shape is [rows, range].
+    /// Gets a submatrix containing the specified range of columns from the current source. The shape is [rows, range].
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -367,12 +385,12 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Gets a row from the matrix.
+    /// Gets a row from the source.
     /// </summary>
     /// <param name="row">The index of the row to retrieve.</param>
     /// <returns>A new <see cref="Matrix"/> object representing the specified row.</returns>
     /// <remarks>
-    /// The returned row is a new instance of the <see cref="Matrix"/> class and has the same number of columns as the original matrix.
+    /// The returned row is a new instance of the <see cref="Matrix"/> class and has the same number of columns as the original source.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] GetRow(this float[,] source, int row)
@@ -430,12 +448,12 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Gets a submatrix containing the specified range of rows from the current matrix.
+    /// Gets a submatrix containing the specified range of rows from the current source.
     /// </summary>
     /// <param name="range">The range of rows to retrieve.</param>
     /// <returns>A new <see cref="float[,]"/> object representing the submatrix.</returns>
     /// <remarks>
-    /// The returned rows are a new instance of the <see cref="float[,]"/> class and have the same number of columns as the original matrix.
+    /// The returned rows are a new instance of the <see cref="float[,]"/> class and have the same number of columns as the original source.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetRows(this float[,] source, Range range)
@@ -562,7 +580,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the mean of all elements in the matrix.
+    /// Calculates the mean of all elements in the source.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Mean(this float[,] source)
@@ -615,14 +633,14 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the mean of all elements in the matrix.
+    /// Calculates the mean of all elements in the source.
     /// </summary>
-    /// <returns>The mean of all elements in the matrix.</returns>
+    /// <returns>The mean of all elements in the source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Mean(this float[,,,] source) => source.Sum() / source.Length;
 
     /// <summary>
-    /// Calculates the mean of each column in the matrix. 
+    /// Calculates the mean of each column in the source. 
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] MeanByColumn(this float[,] source)
@@ -646,7 +664,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Multiplies each element of the matrix by a scalar value.
+    /// Multiplies each element of the source by a scalar value.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Multiply(this float[,] source, float scalar)
@@ -667,7 +685,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Multiplies each element of the matrix by a scalar value.
+    /// Multiplies each element of the source by a scalar value.
     /// </summary>
     /// <remarks>
     /// Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>
@@ -685,10 +703,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Multiplies each element of the matrix by a scalar value.
+    /// Multiplies each element of the source by a scalar value.
     /// </summary>
     /// <param name="scalar">The scalar value to multiply.</param>
-    /// <returns>A new matrix with each element multiplied by the scalar value.</returns>
+    /// <returns>A new source with each element multiplied by the scalar value.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Multiply(this float[,,,] source, float scalar)
     {
@@ -717,7 +735,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Multiplies the current matrix with another matrix using the dot product.
+    /// Multiplies the current source with another source using the dot product.
     /// </summary>
     /// <remarks>
     /// Complexity: O(n * m * p), where n = rows of <paramref name="source"/>, m = shared dimension, p = columns of <paramref name="matrix"/>
@@ -751,14 +769,14 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Performs elementwise multiplication between this matrix and another matrix.
+    /// Performs elementwise multiplication between this source and another source.
     /// </summary>
-    /// <param name="matrix">The matrix to multiply elementwise with.</param>
-    /// <returns>A new matrix resulting from the elementwise multiplication.</returns>
+    /// <param name="matrix">The source to multiply elementwise with.</param>
+    /// <returns>A new source resulting from the elementwise multiplication.</returns>
     /// <remarks>
-    /// Multiplies each element of the matrix with the corresponding element of another matrix.
-    /// If the dimensions of the two matrices are not the same, the smaller matrix is broadcasted to match the larger matrix.
-    /// If the size of this matrix is (a * b), and the size of matrix is (c * d), then the resulting size is (max(a,c) * max(b,d))
+    /// Multiplies each element of the source with the corresponding element of another source.
+    /// If the dimensions of the two matrices are not the same, the smaller source is broadcasted to match the larger source.
+    /// If the size of this source is (a * b), and the size of source is (c * d), then the resulting size is (max(a,c) * max(b,d))
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyElementwise(this float[,] source, float[,] matrix)
@@ -790,14 +808,14 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Performs elementwise multiplication between this matrix and another matrix.
+    /// Performs elementwise multiplication between this source and another source.
     /// </summary>
-    /// <param name="matrix">The matrix to multiply elementwise with.</param>
-    /// <returns>A new matrix resulting from the elementwise multiplication.</returns>
+    /// <param name="matrix">The source to multiply elementwise with.</param>
+    /// <returns>A new source resulting from the elementwise multiplication.</returns>
     /// <remarks>
-    /// Multiplies each element of the matrix with the corresponding element of another matrix.
-    /// If the dimensions of the two matrices are not the same, the smaller matrix is broadcasted to match the larger matrix.
-    /// If the size of this matrix is (a * b * c * d), and the size of matrix is (e * f * g * h), then the resulting size is (max(a,e) * max(b,f) * max(c,g) * max(d,h))
+    /// Multiplies each element of the source with the corresponding element of another source.
+    /// If the dimensions of the two matrices are not the same, the smaller source is broadcasted to match the larger source.
+    /// If the size of this source is (a * b * c * d), and the size of source is (e * f * g * h), then the resulting size is (max(a,e) * max(b,f) * max(c,g) * max(d,h))
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] MultiplyElementwise(this float[,,,] source, float[,,,] matrix)
@@ -835,14 +853,14 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Performs elementwise multiplication between this matrix and another matrix.
+    /// Performs elementwise multiplication between this source and another source.
     /// </summary>
-    /// <param name="matrix">The matrix to multiply elementwise with.</param>
-    /// <returns>A new matrix resulting from the elementwise multiplication.</returns>
+    /// <param name="matrix">The source to multiply elementwise with.</param>
+    /// <returns>A new source resulting from the elementwise multiplication.</returns>
     /// <remarks>
-    /// Multiplies each element of the matrix with the corresponding element of another matrix.
-    /// If the dimensions of the two matrices are not the same, the smaller matrix is broadcasted to match the larger matrix.
-    /// If the size of this matrix is (a), and the size of matrix is (c * d), then the resulting size is (max(a,c) * d)
+    /// Multiplies each element of the source with the corresponding element of another source.
+    /// If the dimensions of the two matrices are not the same, the smaller source is broadcasted to match the larger source.
+    /// If the size of this source is (a), and the size of source is (c * d), then the resulting size is (max(a,c) * d)
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyElementwise(this float[] source, float[,] matrix)
@@ -871,7 +889,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Randomly permutes the rows of the matrix in-place using the specified seed. It uses the Fisher-Yates shuffle algorithm.
+    /// Randomly permutes the rows of the source in-place using the specified seed. It uses the Fisher-Yates shuffle algorithm.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlace(this float[,] source, int seed)
@@ -913,7 +931,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Raises each element of the matrix to the specified power.
+    /// Raises each element of the source to the specified power.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Power(this float[,] source, int scalar)
@@ -934,7 +952,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Fills the matrix with random float values between -0.5 and 0.5 using the specified seed.
+    /// Fills the source with random float values between -0.5 and 0.5 using the specified seed.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RandomInPlace(this float[,] source, int seed)
@@ -952,11 +970,11 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Sets the values of a specific row in the matrix.
+    /// Sets the values of a specific row in the source.
     /// </summary>
     /// <param name="rowIndex">The index of the row to set.</param>
-    /// <param name="row">The matrix containing the values to set.</param>
-    /// <exception cref="Exception">Thrown when the number of columns in the specified matrix is not equal to the number of columns in the current matrix.</exception>
+    /// <param name="row">The source containing the values to set.</param>
+    /// <exception cref="Exception">Thrown when the number of columns in the specified source is not equal to the number of columns in the current source.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void SetRow(this float[,] source, int rowIndex, float[] row)
     {
@@ -993,9 +1011,9 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Applies the sigmoid function to each element of the matrix.
+    /// Applies the sigmoid function to each element of the source.
     /// </summary>
-    /// <returns>A new matrix with each element transformed by the sigmoid function with the same dimensions as the original matrix.</returns>
+    /// <returns>A new source with each element transformed by the sigmoid function with the same dimensions as the original source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Sigmoid(this float[,] source)
     {
@@ -1015,12 +1033,12 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the derivative of the sigmoid function for each element of the matrix.
+    /// Calculates the derivative of the sigmoid function for each element of the source.
     /// </summary>
     /// <remarks>
     /// The derivative of the sigmoid function is calculated as: sigmoid(x) * (1 - sigmoid(x)).
     /// </remarks>
-    /// <returns>A new matrix with each element transformed by the derivative of the sigmoid function with the same dimensions as the original matrix.</returns>
+    /// <returns>A new source with each element transformed by the derivative of the sigmoid function with the same dimensions as the original source.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] SigmoidDerivative(this float[,] source)
     {
@@ -1041,9 +1059,9 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Applies the softmax function to the matrix.
+    /// Applies the softmax function to the source.
     /// </summary>
-    /// <returns>A new matrix with softmax-applied values.</returns>
+    /// <returns>A new source with softmax-applied values.</returns>
     /// <remarks>Softmax formula: <c>exp(x) / sum(exp(x))</c>.</remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Softmax(this float[,] source)
@@ -1092,9 +1110,9 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Applies the softmax function (with log-sum-exp trick) to the matrix.
+    /// Applies the softmax function (with log-sum-exp trick) to the source.
     /// </summary>
-    /// <returns>A new matrix with softmax-applied values.</returns>
+    /// <returns>A new source with softmax-applied values.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] SoftmaxLogSumExp(this float[,] source)
     {
@@ -1130,7 +1148,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Splits the matrix into two sets of rows based on the specified ratio. 
+    /// Splits the source into two sets of rows based on the specified ratio. 
     /// </summary>
     /// <param name="ratio">The ratio for splitting the rows.</param>
     /// <returns>A tuple containing the two sets of rows.</returns>
@@ -1160,9 +1178,9 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Standardizes the matrix in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1.
+    /// Standardizes the source in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1.
     /// </summary>
-    /// <param name="source">The matrix to standardize.</param>
+    /// <param name="source">The source to standardize.</param>
     /// <param name="columnRange">
     /// Optional. The index of the column to standardize. If null, all columns are standardized.
     /// </param>
@@ -1219,9 +1237,9 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Standardizes the matrix in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1. Single loop version.
+    /// Standardizes the source in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1. Single loop version.
     /// </summary>
-    /// <param name="source">The matrix to standardize.</param>
+    /// <param name="source">The source to standardize.</param>
     /// <param name="column">
     /// Optional. The index of the column to standardize. If null, all columns are standardized.
     /// </param>
@@ -1358,7 +1376,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Subtracts the elements of the specified matrix from the current matrix.
+    /// Subtracts the elements of the specified source from the current source.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Subtract(this float[,] source, float[,] matrix)
@@ -1382,7 +1400,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Subtracts the elements of the specified matrix from the current matrix.
+    /// Subtracts the elements of the specified source from the current source.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] Subtract(this float[] source, float[] matrix)
@@ -1398,7 +1416,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the sum of all elements in the matrix.
+    /// Calculates the sum of all elements in the source.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Sum(this float[,] source)
@@ -1448,7 +1466,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the sum of each column in the matrix.
+    /// Calculates the sum of each column in the source.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] SumByColumns(this float[,] source)
@@ -1472,9 +1490,9 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Applies the hyperbolic tangent function element-wise to the matrix.
+    /// Applies the hyperbolic tangent function element-wise to the source.
     /// </summary>
-    /// <returns>A new matrix with the hyperbolic tangent applied element-wise.</returns>
+    /// <returns>A new source with the hyperbolic tangent applied element-wise.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Tanh(this float[,] source)
     {
@@ -1494,9 +1512,9 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Applies the hyperbolic tangent function element-wise to the matrix.
+    /// Applies the hyperbolic tangent function element-wise to the source.
     /// </summary>
-    /// <returns>A new matrix with the hyperbolic tangent applied element-wise.</returns>
+    /// <returns>A new source with the hyperbolic tangent applied element-wise.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Tanh(this float[,,,] source)
     {
@@ -1525,7 +1543,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Transposes the matrix by swapping its rows and columns.
+    /// Transposes the source by swapping its rows and columns.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Transpose(this float[,] source)
@@ -1547,12 +1565,12 @@ public static class ArrayExtensions
     }
 
     ///// <summary>
-    ///// Gets a row from the matrix.
+    ///// Gets a row from the source.
     ///// </summary>
     ///// <param name="row">The index of the row to retrieve.</param>
     ///// <returns>A new <see cref="Matrix"/> object representing the specified row.</returns>
     ///// <remarks>
-    ///// The returned row is a new instance of the <see cref="Matrix"/> class and has the same number of columns as the original matrix.
+    ///// The returned row is a new instance of the <see cref="Matrix"/> class and has the same number of columns as the original source.
     ///// </remarks>
     //[MethodImpl(MethodImplOptions.AggressiveInlining)]
     //public static float[] GetRow(this float[,] source, int row)

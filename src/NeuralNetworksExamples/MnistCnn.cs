@@ -98,10 +98,10 @@ class MnistCnn
 
         WriteLine("\nStart training...");
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
+        LearningRate learningRate = new ExponentialDecayLearningRate(0.01f, 0.001f);
         Trainer4D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
         {
-            Memo = $"Class: {nameof(Mnist)}."
+            Memo = $"Class: {nameof(MnistCnn)}."
         };
 
         trainer.Fit(
