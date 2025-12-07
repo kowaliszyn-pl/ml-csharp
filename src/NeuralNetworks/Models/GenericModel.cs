@@ -4,6 +4,7 @@
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Losses;
+using NeuralNetworks.Models.LayerList;
 
 namespace NeuralNetworks.Models;
 

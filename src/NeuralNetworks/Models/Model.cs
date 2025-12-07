@@ -5,6 +5,7 @@
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Losses;
+using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Optimizers;
 
 namespace NeuralNetworks.Models;

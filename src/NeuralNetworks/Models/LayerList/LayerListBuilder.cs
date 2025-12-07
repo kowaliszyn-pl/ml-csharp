@@ -4,7 +4,7 @@
 
 using NeuralNetworks.Layers;
 
-namespace NeuralNetworks.Models;
+namespace NeuralNetworks.Models.LayerList;
 
 public abstract class LayerListBuilder(LayerListBuilder? parent = null)
 {

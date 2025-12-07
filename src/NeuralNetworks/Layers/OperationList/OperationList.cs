@@ -2,7 +2,7 @@
 using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
 
-namespace NeuralNetworks.Layers;
+namespace NeuralNetworks.Layers.OperationList;
 
 public class OperationList<TIn, TOut> : List<Operation>
     where TIn : notnull

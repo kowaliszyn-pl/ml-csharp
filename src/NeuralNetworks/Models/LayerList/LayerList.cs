@@ -6,7 +6,7 @@
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
-namespace NeuralNetworks.Models;
+namespace NeuralNetworks.Models.LayerList;
 
 public class LayerList<TIn, TOut> : List<Layer>
     where TIn : notnull

@@ -4,10 +4,10 @@
 
 using NeuralNetworks.Operations;
 
-namespace NeuralNetworks.Layers;
+namespace NeuralNetworks.Layers.OperationList;
 
 /*
- *  OperationBuilder and OperationBuilder<TIn, TOut> are in the Layers namespace, because they are used to build layers.
+ *  OperationBuilder and OperationBuilder<TIn, TOut> are in the Layers.OperationList namespace, because they are used to build layers.
  */
 
 public abstract class OperationListBuilder(OperationListBuilder? parent = null)

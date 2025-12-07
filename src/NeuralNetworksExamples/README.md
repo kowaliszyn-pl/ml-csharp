@@ -5,5 +5,9 @@ This project shows the examples how to create and train neural networks using th
 It contains the following examples:
 
 - **Function data set** - demonstrates how to create and train a neural network to approximate a mathematical function.
-- **Boston Housing data set** - demonstrates how to create and train a neural network to predict housing prices in Boston.
-- **MNIST data set** - demonstrates how to create and train a neural network to recognize handwritten digits.
+- **Boston Housing data set** - demonstrates how to create and train a neural network to predict housing prices in Boston:
+	- using custom model,
+	- using generic model
+- **MNIST data set** - demonstrates how to create and train a neural network to recognize handwritten digits:
+	- using dense layers,
+	- using CNN layers.

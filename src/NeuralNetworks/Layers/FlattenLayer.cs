@@ -2,6 +2,7 @@
 // File name: FlattenLayer.cs
 // www.kowaliszyn.pl, 2025
 
+using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
 
 using static NeuralNetworks.Core.ArrayUtils;

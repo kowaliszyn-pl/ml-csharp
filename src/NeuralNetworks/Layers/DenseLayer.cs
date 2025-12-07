@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 
+using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.ParamInitializers;
 

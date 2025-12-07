@@ -2,6 +2,7 @@
 // File name: Conv2D.cs
 // Code It Yourself with .NET, 2024
 
+using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.ParamInitializers;
 

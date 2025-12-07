@@ -10,6 +10,7 @@ using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
+using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
@@ -97,11 +98,16 @@ class BostonHousing
         else
         {
             model = new GenericModel<float[,], float[,]>(
+
+                // layers
                 new LayerListBuilder<float[,], float[,]>(
                     new DenseLayer(4, new Sigmoid(), new GlorotInitializer(commonRandom)))
                 .AddLayer(
                     new DenseLayer(1, new Linear(), new GlorotInitializer(commonRandom))),
+
+                // loss function
                 new MeanSquaredError(),
+
                 commonRandom);
         }
 
