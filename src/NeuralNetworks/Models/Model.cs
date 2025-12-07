@@ -21,7 +21,7 @@ public abstract class Model<TInputData, TPrediction>
     {
         _lossFunction = lossFunction;
         Random = random;
-        _layers = (layerListBuilder ?? CreateLayerListBuilder()).Build();
+        _layers = (layerListBuilder ?? CreateLayerListBuilderInternal()).Build();
     }
 
     public IReadOnlyList<Layer> Layers => _layers;
@@ -30,7 +30,7 @@ public abstract class Model<TInputData, TPrediction>
 
     protected SeededRandom? Random { get; }
 
-    protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder();
+    internal protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal();
 
     public TPrediction Forward(TInputData input, bool inference)
     {
