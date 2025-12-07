@@ -99,16 +99,12 @@ class BostonHousing
         {
             model = new GenericModel<float[,], float[,]>(
 
-                // layers
-                new LayerListBuilder<float[,], float[,]>(
-                    new DenseLayer(4, new Sigmoid(), new GlorotInitializer(commonRandom)))
-                .AddLayer(
-                    new DenseLayer(1, new Linear(), new GlorotInitializer(commonRandom))),
+                layerListBuilder: LayerListBuilder<float[,], float[,]>
+                    .AddLayer(new DenseLayer(4, new Sigmoid(), new GlorotInitializer(commonRandom)))
+                    .AddLayer(new DenseLayer(1, new Linear(), new GlorotInitializer(commonRandom))),
 
-                // loss function
-                new MeanSquaredError(),
-
-                commonRandom);
+                lossFunction: new MeanSquaredError(),
+                random: commonRandom);
         }
 
         LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);

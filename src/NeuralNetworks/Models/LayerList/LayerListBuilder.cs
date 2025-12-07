@@ -31,6 +31,9 @@ public class LayerListBuilder<TIn, TOut> : LayerListBuilder
         where TNextOut : notnull
         => new(layer, this);
 
+    public static LayerListBuilder<TIn, TOut> AddLayer(Layer<TIn, TOut> layer)
+        => new(layer);
+
     public LayerList<TIn, TOut> Build()
     {
         // Traverse the builder tree to get all layers in the reverse order
