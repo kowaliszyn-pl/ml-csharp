@@ -22,6 +22,14 @@ public static class ArrayExtensions
     /// <summary>
     /// Adds a scalar value to each element of the source.
     /// </summary>
+    /// <remarks>
+    /// This method creates a new array and does not modify the original <paramref name="source"/> array.
+    /// <para/>
+    /// Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>.
+    /// </remarks>
+    /// <param name="source">The two-dimensional array to process.</param>
+    /// <param name="scalar">The value to add to each element.</param>
+    /// <returns>A new array of the same shape with the result of addition.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Add(this float[,] source, float scalar)
     {
@@ -40,6 +48,18 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Adds the specified scalar value to each element of the two-dimensional array in place.
+    /// </summary>
+    /// <remarks>
+    /// This method modifies the contents of the <paramref name="source"/> array directly. The array
+    /// must be initialized before calling this method.
+    /// <para/>
+    /// Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>.
+    /// </remarks>
+    /// <param name="source">The two-dimensional array of single-precision floating-point numbers whose elements will be incremented. Cannot
+    /// be null.</param>
+    /// <param name="scalar">The scalar value to add to each element of the array.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddInPlace(this float[,] source, float scalar)
     {
@@ -55,6 +75,16 @@ public static class ArrayExtensions
         }
     }
 
+    /// <summary>
+    /// Adds the specified scalar value to each element of the four-dimensional array in place.
+    /// </summary>
+    /// <remarks>
+    /// This method modifies the contents of the <paramref name="source"/> array directly.
+    /// <para/>
+    /// Complexity: O(a * b * c * d) for dimensions of <paramref name="source"/>.
+    /// </remarks>
+    /// <param name="source">The four-dimensional array whose elements will be incremented.</param>
+    /// <param name="scalar">The scalar value to add to each element of the array.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddInPlace(this float[,,,] source, float scalar)
     {
@@ -82,9 +112,14 @@ public static class ArrayExtensions
     /// <summary>
     /// Adds a row to the current source by elementwise addition with the specified source.
     /// </summary>
-    /// <param name="matrix">The source to add as a row.</param>
-    /// <returns>A new source with the row added.</returns>
-    /// <exception cref="Exception">Thrown when the number of columns in the specified source is not equal to the number of columns in the current source, or when the number of rows of the specified source is not equal to 1.</exception>
+    /// <remarks>
+    /// This method creates a new array and does not modify the original <paramref name="source"/> array. It adds <paramref name="matrix"/> to each row of <paramref name="source"/> elementwise.
+    /// <para/>
+    /// Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>.
+    /// </remarks>
+    /// <param name="source">The source two-dimensional array.</param>
+    /// <param name="matrix">The row values to be added elementwise to each row of the source. Length must equal the number of columns.</param>
+    /// <returns>A new array containing the elementwise sum of each row with <paramref name="matrix"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] AddRow(this float[,] source, float[] matrix)
     {
@@ -106,6 +141,11 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Computes the index of the maximum value for each row.
+    /// </summary>
+    /// <param name="source">The two-dimensional array to evaluate.</param>
+    /// <returns>An array of length equal to the number of rows, where each element is the column index of the maximum value in that row.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int[] Argmax(this float[,] source)
     {
@@ -189,10 +229,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Creates a new source filled with ones, with the same dimensions as the specified source.
+    /// Creates a new one-dimensional array filled with ones, with the same length as the specified source.
     /// </summary>
-    /// <param name="source">The source used to determine the dimensions of the new source.</param>
-    /// <returns>A new source filled with ones.</returns>
+    /// <param name="source">The one-dimensional array used to determine the length of the new array.</param>
+    /// <returns>A new one-dimensional array filled with ones.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] AsOnes(this float[] source)
     {
@@ -207,6 +247,13 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Creates a new two-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>, otherwise 0.
+    /// </summary>
+    /// <param name="source">The array used only for shape (rows and columns).</param>
+    /// <param name="onesProbability">Probability of placing 1 in a cell. Must be between 0 and 1.</param>
+    /// <param name="random">The random number generator instance.</param>
+    /// <returns>A new array with the same shape as <paramref name="source"/> containing zeros and ones.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] AsZeroOnes(this float[,] source, float onesProbability, Random random)
     {
@@ -227,6 +274,13 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Creates a new four-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>, otherwise 0.
+    /// </summary>
+    /// <param name="source">The array used only for shape in all four dimensions.</param>
+    /// <param name="onesProbability">Probability of placing 1 in a cell. Must be between 0 and 1.</param>
+    /// <param name="random">The random number generator instance.</param>
+    /// <returns>A new array with the same shape as <paramref name="source"/> containing zeros and ones.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] AsZeroOnes(this float[,,,] source, float onesProbability, Random random)
     {
@@ -255,10 +309,20 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Creates a new two-dimensional zero-filled array with the same shape as the source.
+    /// </summary>
+    /// <param name="source">The array used only for shape.</param>
+    /// <returns>A new zero-filled array.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] AsZeros(this float[,] source)
         => new float[source.GetLength(0), source.GetLength(1)];
 
+    /// <summary>
+    /// Creates a new four-dimensional zero-filled array with the same shape as the source.
+    /// </summary>
+    /// <param name="source">The array used only for shape.</param>
+    /// <returns>A new zero-filled array.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] AsZeros(this float[,,,] source)
         => new float[source.GetLength(0), source.GetLength(1), source.GetLength(2), source.GetLength(3)];
@@ -266,6 +330,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Clips the values of the source in-place between the specified minimum and maximum values.
     /// </summary>
+    /// <param name="source">The two-dimensional array to clip.</param>
     /// <param name="min">The minimum value to clip the source elements to.</param>
     /// <param name="max">The maximum value to clip the source elements to.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -282,6 +347,12 @@ public static class ArrayExtensions
         }
     }
 
+    /// <summary>
+    /// Divides each element of the two-dimensional array by a scalar and returns a new array.
+    /// </summary>
+    /// <param name="source">The array whose elements will be divided.</param>
+    /// <param name="scalar">The divisor.</param>
+    /// <returns>A new array containing the division results.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Divide(this float[,] source, float scalar)
     {
@@ -300,6 +371,11 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Divides each element of the two-dimensional array by a scalar in place.
+    /// </summary>
+    /// <param name="source">The array to modify.</param>
+    /// <param name="scalar">The divisor.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void DivideInPlace(this float[,] source, float scalar)
     {
@@ -315,6 +391,11 @@ public static class ArrayExtensions
         }
     }
 
+    /// <summary>
+    /// Divides each element of the four-dimensional array by a scalar in place.
+    /// </summary>
+    /// <param name="source">The array to modify.</param>
+    /// <param name="scalar">The divisor.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void DivideInPlace(this float[,,,] source, float scalar)
     {
@@ -342,8 +423,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Gets a submatrix containing the specified column from the current source. The shape is [rows, 1].
     /// </summary>
-    /// <param name="column"></param>
-    /// <returns></returns>
+    /// <param name="source">The array to slice.</param>
+    /// <param name="column">The zero-based column index.</param>
+    /// <returns>A new [rows, 1] array representing the selected column.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetColumn(this float[,] source, int column)
     {
@@ -364,7 +446,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Gets a submatrix containing the specified range of columns from the current source. The shape is [rows, range].
     /// </summary>
-    /// <returns></returns>
+    /// <param name="source">The array to slice.</param>
+    /// <param name="range">The range specifying the subset of columns.</param>
+    /// <returns>A new array with [rows, selectedColumns].</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetColumns(this float[,] source, Range range)
     {
@@ -387,10 +471,11 @@ public static class ArrayExtensions
     /// <summary>
     /// Gets a row from the source.
     /// </summary>
+    /// <param name="source">The two-dimensional array to slice.</param>
     /// <param name="row">The index of the row to retrieve.</param>
-    /// <returns>A new <see cref="Matrix"/> object representing the specified row.</returns>
+    /// <returns>A new <see cref="float[]"/> representing the specified row.</returns>
     /// <remarks>
-    /// The returned row is a new instance of the <see cref="Matrix"/> class and has the same number of columns as the original source.
+    /// The returned row is a new instance and has the same number of columns as the original source.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] GetRow(this float[,] source, int row)
@@ -408,6 +493,12 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Gets a three-dimensional slice (row) from a four-dimensional array at the specified first-dimension index.
+    /// </summary>
+    /// <param name="source">The four-dimensional array to slice.</param>
+    /// <param name="row">The zero-based index along dimension 0.</param>
+    /// <returns>A new three-dimensional array with shape [dim2, dim3, dim4] containing the selected row.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,] GetRow(this float[,,,] source, int row)
     {
@@ -433,6 +524,12 @@ public static class ArrayExtensions
 
     }
 
+    /// <summary>
+    /// Gets the specified row as a two-dimensional array with shape [1, columns].
+    /// </summary>
+    /// <param name="source">The two-dimensional array to slice.</param>
+    /// <param name="row">The zero-based row index.</param>
+    /// <returns>A new [1, columns] array containing the row values.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetRowAs2D(this float[,] source, int row)
     {
@@ -450,6 +547,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Gets a submatrix containing the specified range of rows from the current source.
     /// </summary>
+    /// <param name="source">The array to slice.</param>
     /// <param name="range">The range of rows to retrieve.</param>
     /// <returns>A new <see cref="float[,]"/> object representing the submatrix.</returns>
     /// <remarks>
@@ -474,6 +572,12 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Gets a contiguous range of rows (dimension 0) from a four-dimensional array.
+    /// </summary>
+    /// <param name="source">The four-dimensional array to slice.</param>
+    /// <param name="range">The range applied to dimension 0.</param>
+    /// <returns>A new four-dimensional array containing the selected rows.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] GetRows(this float[,,,] source, Range range)
     {
@@ -503,19 +607,42 @@ public static class ArrayExtensions
 
     }
 
+    /// <summary>
+    /// Checks whether two one-dimensional arrays have the same shape (length).
+    /// </summary>
+    /// <param name="source">The first array.</param>
+    /// <param name="matrix">The second array.</param>
+    /// <returns>True if both arrays have equal length; otherwise false.</returns>
     public static bool HasSameShape(this float[] source, float[] matrix)
         => source.GetLength(0) == matrix.GetLength(0);
 
+    /// <summary>
+    /// Checks whether two two-dimensional arrays have the same shape (rows and columns).
+    /// </summary>
+    /// <param name="source">The first array.</param>
+    /// <param name="matrix">The second array.</param>
+    /// <returns>True if both arrays have equal rows and columns; otherwise false.</returns>
     public static bool HasSameShape(this float[,] source, float[,] matrix)
         => source.GetLength(0) == matrix.GetLength(0) 
             && source.GetLength(1) == matrix.GetLength(1);
 
+    /// <summary>
+    /// Checks whether two four-dimensional arrays have the same shape across all dimensions.
+    /// </summary>
+    /// <param name="source">The first array.</param>
+    /// <param name="matrix">The second array.</param>
+    /// <returns>True if all corresponding dimensions are equal; otherwise false.</returns>
     public static bool HasSameShape(this float[,,,] source, float[,,,] matrix)
         => source.GetLength(0) == matrix.GetLength(0) 
             && source.GetLength(1) == matrix.GetLength(1) 
             && source.GetLength(2) == matrix.GetLength(2) 
             && source.GetLength(3) == matrix.GetLength(3);
 
+    /// <summary>
+    /// Computes the natural logarithm elementwise and returns a new array.
+    /// </summary>
+    /// <param name="source">The array whose elements will be transformed.</param>
+    /// <returns>A new array with <c>log(x)</c> applied elementwise.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Log(this float[,] source)
     {
@@ -534,6 +661,11 @@ public static class ArrayExtensions
         return res;
     }
 
+    /// <summary>
+    /// Returns the maximum element value across all elements of a two-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to scan.</param>
+    /// <returns>The maximum value found.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Max(this float[,] source)
     {
@@ -552,6 +684,11 @@ public static class ArrayExtensions
         return max;
     }
 
+    /// <summary>
+    /// Returns the maximum element value across all elements of a four-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to scan.</param>
+    /// <returns>The maximum value found.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Max(this float[,,,] source)
     {
@@ -582,10 +719,17 @@ public static class ArrayExtensions
     /// <summary>
     /// Calculates the mean of all elements in the source.
     /// </summary>
+    /// <param name="source">The array whose mean will be computed.</param>
+    /// <returns>The arithmetic mean of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Mean(this float[,] source)
         => source.Sum() / source.Length;
 
+    /// <summary>
+    /// Returns the minimum element value across all elements of a two-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to scan.</param>
+    /// <returns>The minimum value found.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Min(this float[,] source)
     {
@@ -604,6 +748,11 @@ public static class ArrayExtensions
         return min;
     }
 
+    /// <summary>
+    /// Returns the minimum element value across all elements of a four-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to scan.</param>
+    /// <returns>The minimum value found.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Min(this float[,,,] source)
     {
@@ -635,13 +784,16 @@ public static class ArrayExtensions
     /// <summary>
     /// Calculates the mean of all elements in the source.
     /// </summary>
-    /// <returns>The mean of all elements in the source.</returns>
+    /// <param name="source">The array whose mean will be computed.</param>
+    /// <returns>The arithmetic mean of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Mean(this float[,,,] source) => source.Sum() / source.Length;
 
     /// <summary>
     /// Calculates the mean of each column in the source. 
     /// </summary>
+    /// <param name="source">The two-dimensional array to process.</param>
+    /// <returns>A one-dimensional array where each element is the mean of a column.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] MeanByColumn(this float[,] source)
     {
@@ -666,6 +818,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Multiplies each element of the source by a scalar value.
     /// </summary>
+    /// <param name="source">The array whose elements will be multiplied.</param>
+    /// <param name="scalar">The multiplier.</param>
+    /// <returns>A new array with the multiplication results.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Multiply(this float[,] source, float scalar)
     {
@@ -690,6 +845,9 @@ public static class ArrayExtensions
     /// <remarks>
     /// Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>
     /// </remarks>
+    /// <param name="source">The one-dimensional array to multiply.</param>
+    /// <param name="scalar">The multiplier.</param>
+    /// <returns>A new array containing the multiplication results.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] Multiply(this float[] source, float scalar)
     {
@@ -705,8 +863,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Multiplies each element of the source by a scalar value.
     /// </summary>
-    /// <param name="scalar">The scalar value to multiply.</param>
-    /// <returns>A new source with each element multiplied by the scalar value.</returns>
+    /// <param name="source">The four-dimensional array to multiply.</param>
+    /// <param name="scalar">The multiplier.</param>
+    /// <returns>A new array with each element multiplied by the scalar value.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Multiply(this float[,,,] source, float scalar)
     {
@@ -740,6 +899,9 @@ public static class ArrayExtensions
     /// <remarks>
     /// Complexity: O(n * m * p), where n = rows of <paramref name="source"/>, m = shared dimension, p = columns of <paramref name="matrix"/>
     /// </remarks>
+    /// <param name="source">Left operand with shape [n, m].</param>
+    /// <param name="matrix">Right operand with shape [m, p].</param>
+    /// <returns>A new array with shape [n, p] containing the dot product result.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyDot(this float[,] source, float[,] matrix)
     {
@@ -771,6 +933,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Performs elementwise multiplication between this source and another source.
     /// </summary>
+    /// <param name="source">The left operand.</param>
     /// <param name="matrix">The source to multiply elementwise with.</param>
     /// <returns>A new source resulting from the elementwise multiplication.</returns>
     /// <remarks>
@@ -810,6 +973,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Performs elementwise multiplication between this source and another source.
     /// </summary>
+    /// <param name="source">The left operand.</param>
     /// <param name="matrix">The source to multiply elementwise with.</param>
     /// <returns>A new source resulting from the elementwise multiplication.</returns>
     /// <remarks>
@@ -853,14 +1017,13 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Performs elementwise multiplication between this source and another source.
+    /// Performs elementwise multiplication between a vector and a matrix, with broadcasting across rows if necessary.
     /// </summary>
-    /// <param name="matrix">The source to multiply elementwise with.</param>
-    /// <returns>A new source resulting from the elementwise multiplication.</returns>
+    /// <param name="source">The one-dimensional array treated as a row vector.</param>
+    /// <param name="matrix">The two-dimensional array to multiply elementwise.</param>
+    /// <returns>A new two-dimensional array of shape [matrixRows, max(columns)] containing the elementwise product.</returns>
     /// <remarks>
-    /// Multiplies each element of the source with the corresponding element of another source.
-    /// If the dimensions of the two matrices are not the same, the smaller source is broadcasted to match the larger source.
-    /// If the size of this source is (a), and the size of source is (c * d), then the resulting size is (max(a,c) * d)
+    /// If the dimensions are not the same, the smaller array is broadcasted across columns.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyElementwise(this float[] source, float[,] matrix)
@@ -891,6 +1054,8 @@ public static class ArrayExtensions
     /// <summary>
     /// Randomly permutes the rows of the source in-place using the specified seed. It uses the Fisher-Yates shuffle algorithm.
     /// </summary>
+    /// <param name="source">The two-dimensional array whose rows will be permuted.</param>
+    /// <param name="seed">The seed used to initialize the random number generator.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlace(this float[,] source, int seed)
     {
@@ -911,6 +1076,11 @@ public static class ArrayExtensions
         }
     }
 
+    /// <summary>
+    /// Randomly permutes the rows of the source in-place using the provided random instance (Fisher-Yates shuffle).
+    /// </summary>
+    /// <param name="source">The two-dimensional array whose rows will be permuted.</param>
+    /// <param name="random">The random number generator. If null, a new instance is created.</param>
     public static void PermuteInPlace(this float[,] source, Random? random)
     {
         random ??= new();
@@ -933,6 +1103,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Raises each element of the source to the specified power.
     /// </summary>
+    /// <param name="source">The two-dimensional array whose elements will be exponentiated.</param>
+    /// <param name="scalar">The exponent (integer).</param>
+    /// <returns>A new array with each element raised to <paramref name="scalar"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Power(this float[,] source, int scalar)
     {
@@ -954,6 +1127,8 @@ public static class ArrayExtensions
     /// <summary>
     /// Fills the source with random float values between -0.5 and 0.5 using the specified seed.
     /// </summary>
+    /// <param name="source">The two-dimensional array to fill with random values.</param>
+    /// <param name="seed">The seed used to initialize the random number generator.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RandomInPlace(this float[,] source, int seed)
     {
@@ -972,9 +1147,10 @@ public static class ArrayExtensions
     /// <summary>
     /// Sets the values of a specific row in the source.
     /// </summary>
+    /// <param name="source">The two-dimensional array to modify.</param>
     /// <param name="rowIndex">The index of the row to set.</param>
-    /// <param name="row">The source containing the values to set.</param>
-    /// <exception cref="Exception">Thrown when the number of columns in the specified source is not equal to the number of columns in the current source.</exception>
+    /// <param name="row">The array containing the values to set. Length must equal the number of columns.</param>
+    /// <exception cref="System.Diagnostics.Debug">Asserts when the row index is out of bounds or lengths mismatch.</exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void SetRow(this float[,] source, int rowIndex, float[] row)
     {
@@ -988,6 +1164,12 @@ public static class ArrayExtensions
         }
     }
 
+    /// <summary>
+    /// Sets the three-dimensional row slice at the specified index in a four-dimensional array.
+    /// </summary>
+    /// <param name="source">The four-dimensional array to modify.</param>
+    /// <param name="rowIndex">The zero-based index along dimension 0 to set.</param>
+    /// <param name="row">A three-dimensional array with shape [dim2, dim3, dim4] providing values.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void SetRow(this float[,,,] source, int rowIndex, float[,,] row)
     {
@@ -1014,6 +1196,7 @@ public static class ArrayExtensions
     /// Applies the sigmoid function to each element of the source.
     /// </summary>
     /// <returns>A new source with each element transformed by the sigmoid function with the same dimensions as the original source.</returns>
+    /// <param name="source">The two-dimensional array to transform.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Sigmoid(this float[,] source)
     {
@@ -1039,6 +1222,7 @@ public static class ArrayExtensions
     /// The derivative of the sigmoid function is calculated as: sigmoid(x) * (1 - sigmoid(x)).
     /// </remarks>
     /// <returns>A new source with each element transformed by the derivative of the sigmoid function with the same dimensions as the original source.</returns>
+    /// <param name="source">The two-dimensional array to transform.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] SigmoidDerivative(this float[,] source)
     {
@@ -1063,6 +1247,7 @@ public static class ArrayExtensions
     /// </summary>
     /// <returns>A new source with softmax-applied values.</returns>
     /// <remarks>Softmax formula: <c>exp(x) / sum(exp(x))</c>.</remarks>
+    /// <param name="source">The two-dimensional array to transform (softmax applied per row).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Softmax(this float[,] source)
     {
@@ -1113,6 +1298,7 @@ public static class ArrayExtensions
     /// Applies the softmax function (with log-sum-exp trick) to the source.
     /// </summary>
     /// <returns>A new source with softmax-applied values.</returns>
+    /// <param name="source">The two-dimensional array to transform (log-sum-exp softmax applied per row).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] SoftmaxLogSumExp(this float[,] source)
     {
@@ -1150,6 +1336,7 @@ public static class ArrayExtensions
     /// <summary>
     /// Splits the source into two sets of rows based on the specified ratio. 
     /// </summary>
+    /// <param name="source">The two-dimensional array to split.</param>
     /// <param name="ratio">The ratio for splitting the rows.</param>
     /// <returns>A tuple containing the two sets of rows.</returns>
     public static (float[,] Set1, float[,] Set2) SplitRowsByRatio(this float[,] source, float ratio)
@@ -1178,11 +1365,11 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Standardizes the source in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1.
+    /// Standardizes the source in-place so that each column (or a specified range of columns) has a mean of 0 and a standard deviation of 1.
     /// </summary>
     /// <param name="source">The source to standardize.</param>
     /// <param name="columnRange">
-    /// Optional. The index of the column to standardize. If null, all columns are standardized.
+    /// Optional. The range of columns to standardize. If null, all columns are standardized.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Standardize(this float[,] source, Range? columnRange = null)
@@ -1237,11 +1424,11 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Standardizes the source in-place so that each column (or a specified column) has a mean of 0 and a standard deviation of 1. Single loop version.
+    /// Standardizes the source in-place so that each column (or a specified range of columns) has mean 0 and standard deviation 1, computed in a single pass.
     /// </summary>
     /// <param name="source">The source to standardize.</param>
-    /// <param name="column">
-    /// Optional. The index of the column to standardize. If null, all columns are standardized.
+    /// <param name="columnRange">
+    /// Optional. The range of columns to standardize. If null, all columns are standardized.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void StandardizeSinglePass(this float[,] source, Range? columnRange = null)
@@ -1291,9 +1478,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the standard deviation.
+    /// Calculates the standard deviation for all elements of a two-dimensional array.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="source">The array whose standard deviation will be computed.</param>
+    /// <returns>The standard deviation of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float StdDev(this float[,] source)
     {
@@ -1316,9 +1504,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the standard deviation.
+    /// Calculates the standard deviation for all elements of a four-dimensional array.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="source">The array whose standard deviation will be computed.</param>
+    /// <returns>The standard deviation of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float StdDev(this float[,,,] source)
     {
@@ -1348,6 +1537,12 @@ public static class ArrayExtensions
         return MathF.Sqrt(sum / source.Length);
     }
 
+    /// <summary>
+    /// Subtracts the elements of the specified four-dimensional array from the current four-dimensional array.
+    /// </summary>
+    /// <param name="source">The minuend array.</param>
+    /// <param name="matrix">The subtrahend array. Must have the same shape as <paramref name="source"/>.</param>
+    /// <returns>A new array containing the elementwise difference.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Subtract(this float[,,,] source, float[,,,] matrix)
     {
@@ -1378,6 +1573,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Subtracts the elements of the specified source from the current source.
     /// </summary>
+    /// <param name="source">The two-dimensional minuend array.</param>
+    /// <param name="matrix">The two-dimensional subtrahend array. Must have the same shape.</param>
+    /// <returns>A new array containing the elementwise difference.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Subtract(this float[,] source, float[,] matrix)
     {
@@ -1400,8 +1598,11 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Subtracts the elements of the specified source from the current source.
+    /// Subtracts the elements of the specified one-dimensional array from the current one-dimensional array.
     /// </summary>
+    /// <param name="source">The minuend array.</param>
+    /// <param name="matrix">The subtrahend array. Must have the same length.</param>
+    /// <returns>A new array containing the elementwise difference.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] Subtract(this float[] source, float[] matrix)
     {
@@ -1416,8 +1617,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Calculates the sum of all elements in the source.
+    /// Calculates the sum of all elements in the two-dimensional array.
     /// </summary>
+    /// <param name="source">The array to sum.</param>
+    /// <returns>The sum of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Sum(this float[,] source)
     {
@@ -1437,6 +1640,11 @@ public static class ArrayExtensions
         return sum;
     }
 
+    /// <summary>
+    /// Calculates the sum of all elements in the four-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to sum.</param>
+    /// <returns>The sum of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float Sum(this float[,,,] source)
     {
@@ -1468,6 +1676,8 @@ public static class ArrayExtensions
     /// <summary>
     /// Calculates the sum of each column in the source.
     /// </summary>
+    /// <param name="source">The two-dimensional array to process.</param>
+    /// <returns>A one-dimensional array where each element is the sum of a column.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] SumByColumns(this float[,] source)
     {
@@ -1493,6 +1703,7 @@ public static class ArrayExtensions
     /// Applies the hyperbolic tangent function element-wise to the source.
     /// </summary>
     /// <returns>A new source with the hyperbolic tangent applied element-wise.</returns>
+    /// <param name="source">The two-dimensional array to transform.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Tanh(this float[,] source)
     {
@@ -1515,6 +1726,7 @@ public static class ArrayExtensions
     /// Applies the hyperbolic tangent function element-wise to the source.
     /// </summary>
     /// <returns>A new source with the hyperbolic tangent applied element-wise.</returns>
+    /// <param name="source">The four-dimensional array to transform.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Tanh(this float[,,,] source)
     {
@@ -1545,6 +1757,8 @@ public static class ArrayExtensions
     /// <summary>
     /// Transposes the source by swapping its rows and columns.
     /// </summary>
+    /// <param name="source">The two-dimensional array to transpose.</param>
+    /// <returns>A new array with shape [columns, rows].</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Transpose(this float[,] source)
     {

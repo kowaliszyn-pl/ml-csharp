@@ -198,10 +198,6 @@ public class ArrayUtils
         return res;
     }
 
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //public static float[] CreateZeros(int columns)
-    //    => new float[columns];
-
     public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
     {
         Debug.Assert(x.GetLength(0) == y.GetLength(0));
