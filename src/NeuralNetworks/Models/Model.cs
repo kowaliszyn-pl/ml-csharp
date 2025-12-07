@@ -9,24 +9,52 @@ using NeuralNetworks.Optimizers;
 
 namespace NeuralNetworks.Models;
 
-public abstract class Model
-{
-    public abstract void UpdateParams(Optimizer optimizer);
-}
+//public abstract class Model
+//{
+//    public abstract void UpdateParams(Optimizer optimizer);
+//}
 
-public abstract class Model<TInputData, TPrediction> : Model
+//public abstract class ModelBuilder<TInputData, TPrediction>
+//    where TInputData : notnull
+//    where TPrediction : notnull
+//{
+//    private readonly LayerListBuilder<TInputData, TPrediction>? _layerListBuilder;
+
+//    public ModelBuilder(LayerListBuilder<TInputData, TPrediction>? layerListBuilder)
+//    {
+//        _layerListBuilder = layerListBuilder;
+//    }
+
+//    protected virtual LayerListBuilder<TInputData, TPrediction> GetLayerListBuilder()
+//    {
+//        return _layerListBuilder ?? CreateListBuilder();
+//    }
+//}
+
+public abstract class BaseModel<TInputData, TPrediction> //: Model
     where TInputData : notnull
     where TPrediction : notnull
 {
     private LayerList<TInputData, TPrediction> _layers;
     private Loss<TPrediction> _lossFunction;
     private float _lastLoss;
+    private readonly LayerListBuilder<TInputData, TPrediction>? _layerListBuilder;
 
-    public Model(Loss<TPrediction> lossFunction, SeededRandom? random)
+    protected BaseModel(LayerListBuilder<TInputData, TPrediction>? layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random)
     {
         _lossFunction = lossFunction;
         Random = random;
-        _layers = CreateLayerListBuilder().Build();
+        // _layers = CreateLayerListBuilder().Build();
+        // _layers = GetLayers();
+        // _layers = layerListBuilder.Build();
+        _layerListBuilder = layerListBuilder;
+        _layers = BuildLayers();
+    }
+
+    protected virtual LayerList<TInputData, TPrediction> BuildLayers()
+    {
+        LayerListBuilder<TInputData, TPrediction> layerListBuilder = _layerListBuilder ?? CreateLayerListBuilder();
+        return layerListBuilder.Build();
     }
 
     public IReadOnlyList<Layer> Layers => _layers;
@@ -35,11 +63,9 @@ public abstract class Model<TInputData, TPrediction> : Model
 
     protected SeededRandom? Random { get; }
 
-    protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder();
+    //protected abstract LayerList<TInputData, TPrediction> GetLayers();
 
-    protected static LayerListBuilder<TInputData, TLayerOut> AddLayer<TLayerOut>(Layer<TInputData, TLayerOut> layer)
-        where TLayerOut : notnull
-        => new(layer);
+    protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder();
 
     public TPrediction Forward(TInputData input, bool inference)
     {
@@ -59,7 +85,7 @@ public abstract class Model<TInputData, TPrediction> : Model
         return _lastLoss;
     }
 
-    public override void UpdateParams(Optimizer optimizer)
+    public void UpdateParams(Optimizer optimizer)
     {
         _layers.UpdateParams(optimizer);
     }
@@ -101,6 +127,34 @@ public abstract class Model<TInputData, TPrediction> : Model
 
     #endregion Checkpoint
 
+}
+
+public class Model<TInputData, TPrediction>: BaseModel<TInputData, TPrediction>
+    where TInputData : notnull
+    where TPrediction : notnull
+{
+    public Model(LayerListBuilder<TInputData, TPrediction> layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random)
+        : base(layerListBuilder, lossFunction, random)
+    {
+    }
+
+    protected override LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder() => throw new InvalidOperationException();
+
+    // protected override LayerList<TInputData, TPrediction> GetLayers() => _layerList;
+}
+
+public abstract class CustomModel<TInputData, TPrediction> : BaseModel<TInputData, TPrediction>
+    where TInputData : notnull
+    where TPrediction : notnull
+{
+    public CustomModel(Loss<TPrediction> lossFunction, SeededRandom? random)
+        : base(null, lossFunction, random)
+    {
+    }
+
+    protected static LayerListBuilder<TInputData, TLayerOut> AddLayer<TLayerOut>(Layer<TInputData, TLayerOut> layer)
+        where TLayerOut : notnull
+        => new(layer);
 }
 
 /*

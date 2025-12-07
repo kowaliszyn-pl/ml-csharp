@@ -22,7 +22,7 @@ namespace NeuralNetworks.Trainers;
 /// Represents a trainer for a neural network.
 /// </summary>
 public abstract class Trainer<TInputData, TPrediction>(
-    Model<TInputData, TPrediction> model,
+    BaseModel<TInputData, TPrediction> model,
     Optimizer optimizer,
     ConsoleOutputMode consoleOutputMode = ConsoleOutputMode.OnlyOnEval,
     SeededRandom? random = null,
@@ -63,7 +63,7 @@ public abstract class Trainer<TInputData, TPrediction>(
     [SuppressMessage("Performance", "CA1873:Avoid potentially expensive logging", Justification = "<Pending>")]
     public void Fit(
         DataSource<TInputData, TPrediction> dataSource,
-        Func<Model<TInputData, TPrediction>, TInputData, TPrediction, float>? evalFunction = null,
+        Func<BaseModel<TInputData, TPrediction>, TInputData, TPrediction, float>? evalFunction = null,
         int epochs = 100,
         int evalEveryEpochs = 10,
         int logEveryEpochs = 1,
