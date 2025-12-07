@@ -16,20 +16,12 @@ public abstract class Model<TInputData, TPrediction>
     private LayerList<TInputData, TPrediction> _layers;
     private Loss<TPrediction> _lossFunction;
     private float _lastLoss;
-    private readonly LayerListBuilder<TInputData, TPrediction>? _layerListBuilder;
 
     protected Model(LayerListBuilder<TInputData, TPrediction>? layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random)
     {
         _lossFunction = lossFunction;
         Random = random;
-        _layerListBuilder = layerListBuilder;
-        _layers = BuildLayers();
-    }
-
-    protected virtual LayerList<TInputData, TPrediction> BuildLayers()
-    {
-        LayerListBuilder<TInputData, TPrediction> layerListBuilder = _layerListBuilder ?? CreateLayerListBuilder();
-        return layerListBuilder.Build();
+        _layers = (layerListBuilder ?? CreateLayerListBuilder()).Build();
     }
 
     public IReadOnlyList<Layer> Layers => _layers;
