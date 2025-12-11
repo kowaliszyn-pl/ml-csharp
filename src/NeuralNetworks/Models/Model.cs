@@ -10,6 +10,16 @@ using NeuralNetworks.Optimizers;
 
 namespace NeuralNetworks.Models;
 
+/// <summary>
+/// Represents an abstract neural network model that processes input data and produces predictions. Provides core
+/// functionality for forward and backward passes, training, parameter updates, and checkpointing.
+/// </summary>
+/// <remarks>This class serves as a base for implementing neural network models with customizable layers and loss
+/// functions. It supports training workflows, including batch training and parameter optimization, and provides
+/// mechanisms for saving and restoring model checkpoints. Derived classes must implement the method for constructing
+/// the layer list. Thread safety is not guaranteed; concurrent access should be managed externally.</remarks>
+/// <typeparam name="TInputData">The type of input data provided to the model. Must not be null.</typeparam>
+/// <typeparam name="TPrediction">The type of prediction output produced by the model. Must not be null.</typeparam>
 public abstract class Model<TInputData, TPrediction> 
     where TInputData : notnull
     where TPrediction : notnull

@@ -231,6 +231,13 @@ public static class ArrayExtensions
     /// <summary>
     /// Creates a new one-dimensional array filled with ones, with the same length as the specified source.
     /// </summary>
+    /// <remarks>
+    /// Example: 
+    /// <code>
+    /// float[] source = new float[] { 2.0f, 3.0f, 4.0f };
+    /// var res = source.AsOnes(); // returns new float[] { 1.0f, 1.0f, 1.0f }
+    /// </code>
+    /// </remarks>
     /// <param name="source">The one-dimensional array used to determine the length of the new array.</param>
     /// <returns>A new one-dimensional array filled with ones.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
