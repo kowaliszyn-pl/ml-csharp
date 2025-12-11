@@ -20,8 +20,8 @@ namespace NeuralNetworks.Models;
 /// <example>
 /// Example of creating a generic model for float[,] input and output:
 /// <code>
-/// model = new GenericModel<float[,], float[,]>(
-///        layerListBuilder: LayerListBuilder<float[,], float[,]>
+/// model = new GenericModel&lt;float[,], float[,]&gt;(
+///        layerListBuilder: LayerListBuilder&lt;float[,], float[,]&gt;
 ///                 .AddLayer(new DenseLayer(4, new Sigmoid(), new GlorotInitializer(commonRandom)))
 ///                 .AddLayer(new DenseLayer(1, new Linear(), new GlorotInitializer(commonRandom))),
 ///        lossFunction: new MeanSquaredError(),
@@ -35,6 +35,26 @@ public class GenericModel<TInputData, TPrediction> : Model<TInputData, TPredicti
     where TInputData : notnull
     where TPrediction : notnull
 {
+    /// <summary>
+    /// Initializes a new instance of the GenericModel class with the specified layer configuration, loss function, and
+    /// optional random seed.
+    /// </summary>
+    /// <remarks>
+    /// <example>
+    /// Example of creating a generic model for float[,] input and output:
+    /// <code>
+    /// model = new GenericModel&lt;float[,], float[,]&gt;(
+    ///        layerListBuilder: LayerListBuilder&lt;float[,], float[,]&gt;
+    ///                 .AddLayer(new DenseLayer(4, new Sigmoid(), new GlorotInitializer(commonRandom)))
+    ///                 .AddLayer(new DenseLayer(1, new Linear(), new GlorotInitializer(commonRandom))),
+    ///        lossFunction: new MeanSquaredError(),
+    ///        random: commonRandom);
+    /// </code>
+    /// </example>
+    /// </remarks>
+    /// <param name="layerListBuilder">The builder that defines the sequence and configuration of layers for the model. Must not be null.</param>
+    /// <param name="lossFunction">The loss function used to evaluate prediction accuracy during training. Must not be null.</param>
+    /// <param name="random">An optional seeded random number generator used for reproducible initialization. If null, a default random generator is used.</param>
     public GenericModel(LayerListBuilder<TInputData, TPrediction> layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random)
         : base(layerListBuilder, lossFunction, random)
     {
