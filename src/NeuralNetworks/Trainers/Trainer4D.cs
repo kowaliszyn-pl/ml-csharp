@@ -40,8 +40,9 @@ public class Trainer4D : Trainer<float[,,,], float[,]>
         }
     }
 
-    protected override (float[,,,], float[,]) PermuteData(float[,,,] x, float[,] y, Random random)
-        => ArrayUtils.PermuteData(x, y, random);
+    protected override void PermuteData(float[,,,] x, float[,] y, Random random)
+        // => ArrayUtils.PermuteData(x, y, random);
+        => x.PermuteInPlaceTogetherWith(y, random);
 
     protected override float GetRows(float[,,,] x)
         => x.GetLength(0);

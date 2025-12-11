@@ -198,6 +198,7 @@ public class ArrayUtils
         return res;
     }
 
+    [Obsolete]
     public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
     {
         Debug.Assert(x.GetLength(0) == y.GetLength(0));
@@ -218,6 +219,7 @@ public class ArrayUtils
         return (xPermuted, yPermuted);
     }
 
+    [Obsolete]
     public static (float[,,,] xPermuted, float[,] yPermuted) PermuteData(float[,,,] x, float[,] y, Random random)
     {
         Debug.Assert(x.GetLength(0) == y.GetLength(0));

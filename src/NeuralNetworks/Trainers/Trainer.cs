@@ -46,7 +46,7 @@ public abstract class Trainer<TInputData, TPrediction>(
     /// <returns>An enumerable of batches.</returns>
     protected abstract IEnumerable<(TInputData xBatch, TPrediction yBatch)> GenerateBatches(TInputData x, TPrediction y, int batchSize = 32);
 
-    protected abstract (TInputData, TPrediction) PermuteData(TInputData x, TPrediction y, Random random);
+    protected abstract void PermuteData(TInputData x, TPrediction y, Random random);
 
     protected abstract float GetRows(TInputData x);
 
@@ -118,7 +118,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             //    logger?.LogInformation("Checkpoint saved.");
             //}
 
-            (xTrain, yTrain) = PermuteData(xTrain, yTrain, random ?? new Random());
+            PermuteData(xTrain, yTrain, random ?? new Random());
             optimizer.UpdateLearningRate(epoch, epochs);
 
             if(logEpoch)
