@@ -1268,6 +1268,22 @@ public static class ArrayExtensions
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] ReLU(this float[,] source, float alpha = 1f)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                res[i, j] = MathF.Max(0, source[i, j]) * alpha;
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Sets the values of a specific row in the source.
     /// </summary>
