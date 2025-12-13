@@ -1,6 +1,6 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: Layer.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
 
