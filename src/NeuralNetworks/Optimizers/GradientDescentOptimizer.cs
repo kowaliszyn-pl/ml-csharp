@@ -10,8 +10,23 @@ using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
 
+/// <summary>
+/// Implements the classic "Stochastic" Gradient Descent (SGD) optimizer for neural network training.
+/// Updates parameters by subtracting the scaled gradient using a specified learning rate.
+/// </summary>
+/// <remarks>
+/// This optimizer supports parameter updates for 1D, 2D, and 4D float arrays.
+/// <para/>
+/// There is no actual "stochastic" aspect implemented here, so the name of this class reflects that ("GradientDescentOptimizer" instead of "StochasticGradientDescentOptimizer").
+/// </remarks>
 public class GradientDescentOptimizer(LearningRate learningRate) : Optimizer(learningRate)
 {
+    /// <summary>
+    /// Updates a 1D parameter array using the gradient and the current learning rate.
+    /// </summary>
+    /// <param name="layer">The layer whose parameters are being updated (may be null).</param>
+    /// <param name="param">The parameter array to update.</param>
+    /// <param name="paramGradient">The gradient array corresponding to <paramref name="param"/>.</param>
     public override void Update(Layer? layer, float[] param, float[] paramGradient)
     {
         Debug.Assert(param.HasSameShape(paramGradient));
@@ -24,6 +39,12 @@ public class GradientDescentOptimizer(LearningRate learningRate) : Optimizer(lea
         }
     }
 
+    /// <summary>
+    /// Updates a 2D parameter array using the gradient and the current learning rate.
+    /// </summary>
+    /// <param name="layer">The layer whose parameters are being updated (may be null).</param>
+    /// <param name="param">The 2D parameter array to update.</param>
+    /// <param name="paramGradient">The 2D gradient array corresponding to <paramref name="param"/>.</param>
     public override void Update(Layer? layer, float[,] param, float[,] paramGradient)
     {
         Debug.Assert(param.HasSameShape(paramGradient));
@@ -41,6 +62,12 @@ public class GradientDescentOptimizer(LearningRate learningRate) : Optimizer(lea
         }
     }
 
+    /// <summary>
+    /// Updates a 4D parameter array using the gradient and the current learning rate.
+    /// </summary>
+    /// <param name="layer">The layer whose parameters are being updated (may be null).</param>
+    /// <param name="param">The 4D parameter array to update.</param>
+    /// <param name="paramGradient">The 4D gradient array corresponding to <paramref name="param"/>.</param>
     public override void Update(Layer? layer, float[,,,] param, float[,,,] paramGradient)
     {
         Debug.Assert(param.HasSameShape(paramGradient));
@@ -66,7 +93,10 @@ public class GradientDescentOptimizer(LearningRate learningRate) : Optimizer(lea
         }
     }
 
+    /// <summary>
+    /// Returns a string representation of the optimizer, including the learning rate.
+    /// </summary>
+    /// <returns>A string describing the optimizer and its learning rate.</returns>
     public override string ToString()
         => $"StochasticGradientDescent (learningRate={LearningRate})";
-
 }

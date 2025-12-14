@@ -11,6 +11,14 @@ using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
 
+/// <summary>
+/// Implements the classic "Stochastic" Gradient Descent (SGD) optimizer with momentum for neural network training.
+/// Updates parameters by applying momentum to the previous update and subtracting the scaled gradient using a specified learning rate.
+/// </summary>
+/// <remarks>
+/// This optimizer supports parameter updates for 1D, 2D, and 4D float arrays.
+/// The momentum term helps accelerate gradients in the relevant direction and dampens oscillations.
+/// </remarks>
 public class GradientDescentMomentumOptimizer(LearningRate learningRate, float momentum) : Optimizer(learningRate)
 {
     private readonly Dictionary<float[], float[]> _velocities1D = [];
