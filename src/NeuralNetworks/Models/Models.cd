@@ -39,7 +39,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Models.LayerList.LayerList&lt;TIn, TOut&gt;" Collapsed="true">
-    <Position X="6.25" Y="1" Width="1.75" />
+    <Position X="7.25" Y="1" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABI=</HashCode>
       <FileName>Models\LayerList\LayerList.cs</FileName>

@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: StochasticGradientDescent.cs
+// File name: GradientDescentOptimizer.cs
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
@@ -10,7 +10,7 @@ using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
 
-public class StochasticGradientDescent(LearningRate learningRate) : Optimizer(learningRate)
+public class GradientDescentOptimizer(LearningRate learningRate) : Optimizer(learningRate)
 {
     public override void Update(Layer? layer, float[] param, float[] paramGradient)
     {

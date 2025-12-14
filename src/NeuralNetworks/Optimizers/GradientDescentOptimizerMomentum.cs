@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: StochasticGradientDescentMomentum.cs
+// File name: GradientDescentOptimizerMomentum.cs
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
@@ -11,7 +11,7 @@ using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
 
-public class StochasticGradientDescentMomentum(LearningRate learningRate, float momentum) : Optimizer(learningRate)
+public class GradientDescentOptimizerMomentum(LearningRate learningRate, float momentum) : Optimizer(learningRate)
 {
     private readonly Dictionary<float[], float[]> _velocities1D = [];
     private readonly Dictionary<float[,], float[,]> _velocities2D = [];
@@ -151,7 +151,7 @@ using MachineLearning.Typed.GenericModel.Layers;
 
 namespace MachineLearning.Typed.GenericModel.Optimizers;
 
-public class StochasticGradientDescentMomentum(LearningRate learningRate, float momentum) : Optimizer(learningRate)
+public class GradientDescentOptimizerMomentum(LearningRate learningRate, float momentum) : Optimizer(learningRate)
 {
     private Dictionary<Array, Array> _velocities = new();
 
@@ -217,7 +217,7 @@ public class StochasticGradientDescentMomentum(LearningRate learningRate, float 
         }
     }
 
-    public override string ToString() => $"StochasticGradientDescentMomentum (learningRate={LearningRate}, momentum={momentum})";
+    public override string ToString() => $"GradientDescentOptimizerMomentum (learningRate={LearningRate}, momentum={momentum})";
 }
 
 

@@ -1,24 +1,65 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="NeuralNetworks.Optimizers.Optimizer">
-    <Position X="3" Y="0.75" Width="1.5" />
+    <Position X="2" Y="0.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAQAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
       <FileName>Optimizers\Optimizer.cs</FileName>
     </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="LearningRate" />
+    </ShowAsAssociation>
   </Class>
-  <Class Name="NeuralNetworks.Optimizers.StochasticGradientDescent">
-    <Position X="1" Y="3.5" Width="2.25" />
+  <Class Name="NeuralNetworks.Optimizers.GradientDescentOptimizer" Collapsed="true">
+    <Position X="0.5" Y="3.25" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAQAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Optimizers\StochasticGradientDescent.cs</FileName>
+      <FileName>Optimizers\GradientDescentOptimizer.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Optimizers.StochasticGradientDescentMomentum" Collapsed="true">
-    <Position X="4.25" Y="3.5" Width="3" />
+    <Position X="3" Y="3.25" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAQAAAAAAAAAAAAEAAAAAAAAAAAgAAAAAAAAAAQAAAA=</HashCode>
       <FileName>Optimizers\StochasticGradientDescentMomentum.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.LearningRates.LearningRate">
+    <Position X="6.75" Y="0.75" Width="1.5" />
+    <Members>
+      <Method Name="GetLearningRate" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>LearningRates\LearningRate.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.LearningRates.ConstantLearningRate" Collapsed="true">
+    <Position X="7.75" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>LearningRates\ConstantLearningRate.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.LearningRates.DecayLearningRate" Collapsed="true">
+    <Position X="6" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAIAA=</HashCode>
+      <FileName>LearningRates\DecayLearningRate.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.LearningRates.ExponentialDecayLearningRate" Collapsed="true">
+    <Position X="4.25" Y="4.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAgAAAAAAAACEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LearningRates\ExponentialDecayLearningRate.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.LearningRates.LinearDecayLearningRate" Collapsed="true">
+    <Position X="7" Y="4.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAgAAAAAAAACEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LearningRates\LinearDecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

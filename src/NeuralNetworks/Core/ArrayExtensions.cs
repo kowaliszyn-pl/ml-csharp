@@ -1437,6 +1437,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Applies the softmax function (with log-sum-exp trick) to the source.
     /// </summary>
+    /// <remarks>
+    /// The trick improves numerical stability by subtracting the maximum value in each row before exponentiation. This prevents overflow issues when dealing with large input values.
+    /// </remarks>
     /// <returns>A new source with softmax-applied values.</returns>
     /// <param name="source">The two-dimensional array to transform (log-sum-exp softmax applied per row).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

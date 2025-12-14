@@ -108,7 +108,11 @@ class BostonHousing
         }
 
         LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);
-        Trainer2D trainer = new(model, new StochasticGradientDescentMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
+        Trainer2D trainer = new(
+            model, 
+            new GradientDescentOptimizerMomentum(learningRate, 0.9f), 
+            random: commonRandom, 
+            logger: logger)
         {
             Memo = $"Class: {nameof(BostonHousing)}."
         };
