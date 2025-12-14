@@ -110,7 +110,7 @@ class BostonHousing
         LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);
         Trainer2D trainer = new(
             model, 
-            new GradientDescentOptimizerMomentum(learningRate, 0.9f), 
+            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             random: commonRandom, 
             logger: logger)
         {

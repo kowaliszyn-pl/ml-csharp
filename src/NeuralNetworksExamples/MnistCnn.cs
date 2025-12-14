@@ -99,7 +99,7 @@ class MnistCnn
         WriteLine("\nStart training...");
 
         LearningRate learningRate = new ExponentialDecayLearningRate(0.01f, 0.001f);
-        Trainer4D trainer = new(model, new GradientDescentOptimizerMomentum(learningRate, 0.9f), random: commonRandom, logger: logger)
+        Trainer4D trainer = new(model, new GradientDescentMomentumOptimizer(learningRate, 0.9f), random: commonRandom, logger: logger)
         {
             Memo = $"Class: {nameof(MnistCnn)}."
         };

@@ -64,7 +64,7 @@ class Function
         LearningRate learningRate = new ExponentialDecayLearningRate(0.01f, 0.005f);
         var trainer = new Trainer2D(
             model,
-            new GradientDescentOptimizerMomentum(learningRate, 0.9f),
+            new GradientDescentMomentumOptimizer(learningRate, 0.9f),
             random,
             Program.LoggerFactory.CreateLogger<Trainer2D>()
         );
