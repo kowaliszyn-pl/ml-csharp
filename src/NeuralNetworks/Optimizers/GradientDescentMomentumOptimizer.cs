@@ -146,7 +146,7 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
     }
 
     public override string ToString()
-        => $"StochasticGradientDescentMomentum (learningRate={LearningRate}, momentum={momentum})";
+        => $"GradientDescentMomentum (learningRate={LearningRate}, momentum={momentum})";
 }
 
 /*

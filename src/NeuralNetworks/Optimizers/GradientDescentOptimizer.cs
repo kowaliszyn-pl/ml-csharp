@@ -98,5 +98,5 @@ public class GradientDescentOptimizer(LearningRate learningRate) : Optimizer(lea
     /// </summary>
     /// <returns>A string describing the optimizer and its learning rate.</returns>
     public override string ToString()
-        => $"StochasticGradientDescent (learningRate={LearningRate})";
+        => $"GradientDescent (learningRate={LearningRate})";
 }

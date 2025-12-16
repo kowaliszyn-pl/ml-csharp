@@ -20,11 +20,14 @@ public class AdamOptimizer : Optimizer
     private readonly float _beta1;
     private readonly float _beta2;
     private readonly float _epsilon;
-    private int _t = 0;
 
     private readonly Dictionary<float[], (float[] m, float[] v)> _moments1D = [];
     private readonly Dictionary<float[,], (float[,] m, float[,] v)> _moments2D = [];
     private readonly Dictionary<float[,,,], (float[,,,] m, float[,,,] v)> _moments4D = [];
+
+    private readonly Dictionary<float[], int> _steps1D = [];
+    private readonly Dictionary<float[,], int> _steps2D = [];
+    private readonly Dictionary<float[,,,], int> _steps4D = [];
 
     public AdamOptimizer(LearningRate learningRate, float beta1 = 0.9f, float beta2 = 0.999f, float epsilon = 1e-8f)
         : base(learningRate)
@@ -49,14 +52,16 @@ public class AdamOptimizer : Optimizer
          */
 
         Debug.Assert(param.HasSameShape(paramGradient));
-        _t++;
+        int t = IncrementStep(param); // Use the correct dictionary for each array type
+        float beta1t = MathF.Pow(_beta1, t);
+        float beta2t = MathF.Pow(_beta2, t);
 
         (float[]? m, float[]? v) = GetOrCreateMoments(param);
 
         float lr = LearningRate.GetLearningRate();
+        WarnIfLearningRateIsSuspicious(lr);
+
         int length = param.Length;
-        float beta1t = MathF.Pow(_beta1, _t);
-        float beta2t = MathF.Pow(_beta2, _t);
 
         for (int i = 0; i < length; i++)
         {
@@ -73,15 +78,17 @@ public class AdamOptimizer : Optimizer
     public override void Update(Layer? layer, float[,] param, float[,] paramGradient)
     {
         Debug.Assert(param.HasSameShape(paramGradient));
-        _t++;
+        int t = IncrementStep(param); // Use the correct dictionary for each array type
+        float beta1t = MathF.Pow(_beta1, t);
+        float beta2t = MathF.Pow(_beta2, t);
 
         (float[,]? m, float[,]? v) = GetOrCreateMoments(param);
 
         float lr = LearningRate.GetLearningRate();
+        WarnIfLearningRateIsSuspicious(lr);
+
         int dim1 = param.GetLength(0);
         int dim2 = param.GetLength(1);
-        float beta1t = MathF.Pow(_beta1, _t);
-        float beta2t = MathF.Pow(_beta2, _t);
 
         for (int i = 0; i < dim1; i++)
         {
@@ -101,17 +108,19 @@ public class AdamOptimizer : Optimizer
     public override void Update(Layer? layer, float[,,,] param, float[,,,] paramGradient)
     {
         Debug.Assert(param.HasSameShape(paramGradient));
-        _t++;
+        int t = IncrementStep(param); // Use the correct dictionary for each array type
+        float beta1t = MathF.Pow(_beta1, t);
+        float beta2t = MathF.Pow(_beta2, t);
 
         (float[,,,]? m, float[,,,]? v) = GetOrCreateMoments(param);
 
         float lr = LearningRate.GetLearningRate();
+        WarnIfLearningRateIsSuspicious(lr);
+
         int dim1 = param.GetLength(0);
         int dim2 = param.GetLength(1);
         int dim3 = param.GetLength(2);
         int dim4 = param.GetLength(3);
-        float beta1t = MathF.Pow(_beta1, _t);
-        float beta2t = MathF.Pow(_beta2, _t);
 
         for (int i = 0; i < dim1; i++)
         {
@@ -171,6 +180,75 @@ public class AdamOptimizer : Optimizer
         var v = new float[param.GetLength(0), param.GetLength(1), param.GetLength(2), param.GetLength(3)];
         _moments4D.Add(param, (m, v));
         return (m, v);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int IncrementStep(float[] param)
+    {
+        if (_steps1D.TryGetValue(param, out int t))
+        {
+            t++;
+            _steps1D[param] = t;
+            return t;
+        }
+        else
+        {
+            _steps1D[param] = 1;
+            return 1;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int IncrementStep(float[,] param)
+    {
+        if (_steps2D.TryGetValue(param, out int t))
+        {
+            t++;
+            _steps2D[param] = t;
+            return t;
+        }
+        else
+        {
+            _steps2D[param] = 1;
+            return 1;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int IncrementStep(float[,,,] param)
+    {
+        if (_steps4D.TryGetValue(param, out int t))
+        {
+            t++;
+            _steps4D[param] = t;
+            return t;
+        }
+        else
+        {
+            _steps4D[param] = 1;
+            return 1;
+        }
+    }
+
+    static bool s_warningEmitted = false;
+
+    [Conditional("DEBUG")]
+    private static void WarnIfLearningRateIsSuspicious(float lr)
+    {
+        if (!s_warningEmitted)
+        {
+            // Adam typically works best with lr in [0.0001, 0.01]
+            if (lr > 0.05f)
+            {
+                Debug.WriteLine($"[AdamOptimizer WARNING] Learning rate {lr} is unusually high for Adam. Typical values are 0.0001–0.01.");
+                s_warningEmitted = true;
+            }
+            else if (lr < 1e-5f)
+            {
+                Debug.WriteLine($"[AdamOptimizer WARNING] Learning rate {lr} is very low and may cause slow convergence.");
+                s_warningEmitted = true;
+            }
+        }
     }
 
     public override string ToString()

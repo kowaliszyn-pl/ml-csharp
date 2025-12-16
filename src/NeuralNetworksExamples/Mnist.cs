@@ -91,8 +91,14 @@ class Mnist
 
         WriteLine("\nStart training...");
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
-        Trainer2D trainer = new(model, new GradientDescentMomentumOptimizer(learningRate, 0.9f), random: commonRandom, logger: logger)
+        //LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
+        LearningRate learningRate = new ExponentialDecayLearningRate(0.005f, 0.0009f);
+        Trainer2D trainer = new(
+            model, 
+            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
+            // new AdamOptimizer(learningRate),
+            random: commonRandom, 
+            logger: logger)
         {
             Memo = $"Class: {nameof(Mnist)}."
         };
