@@ -3,7 +3,6 @@
 // www.kowaliszyn.pl, 2025
 
 using System;
-using System.Security.Cryptography;
 
 using BenchmarkDotNet.Attributes;
 
@@ -16,103 +15,101 @@ namespace PermuteBenchmark;
 [CPUUsageDiagnoser]
 public class PermuteBenchmarks
 {
-
-    float[,,,] x4;
-    float[,] x2;
-    float[,] y;
-
-    public void CreateArrays4()
+    public PermuteBenchmarks()
     {
-        x4 = new float[10000, 100, 5, 5];
-        // x4 = new float[10000, 100];
-        y = new float[10000, 10];
+        CreateX4();
+        CreateX2();
+        CreateY();
+    }
+
+    private const int Rows = 10000;
+    private float[,,,] _x4;
+    private float[,] _x2;
+    private float[,] _y;
+
+    private void CreateX4()
+    {
+        _x4 = new float[Rows, 100, 5, 5];
         SeededRandom random = new(251207);
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < Rows; i++)
         {
             for (int j = 0; j < 100; j++)
             {
-                // x4[i, j] = random.NextSingle();
+                // _x4[i, j] = random.NextSingle();
                 for (int k = 0; k < 5; k++)
                 {
                     for (int l = 0; l < 5; l++)
                     {
-                        x4[i, j, k, l] = random.NextSingle();
+                        _x4[i, j, k, l] = random.NextSingle();
                     }
                 }
             }
-            for (int j = 0; j < 10; j++)
-            {
-                y[i, j] = random.NextSingle();
-            }
         }
     }
 
-    public void CreateArrays2()
+    private void CreateX2()
     {
-        x2 = new float[10000, 100];
-        // x4 = new float[10000, 100];
-        y = new float[10000, 10];
+        _x2 = new float[Rows, 100];
         SeededRandom random = new(251207);
-        for (int i = 0; i < 10000; i++)
+        for (int i = 0; i < Rows; i++)
         {
             for (int j = 0; j < 100; j++)
             {
-                x2[i, j] = random.NextSingle();
-                //for (int k = 0; k < 5; k++)
-                //{
-                //    for (int l = 0; l < 5; l++)
-                //    {
-                //        x4[i, j, k, l] = random.NextSingle();
-                //    }
-                //}
-            }
-            for (int j = 0; j < 10; j++)
-            {
-                y[i, j] = random.NextSingle();
+                _x2[i, j] = random.NextSingle();
             }
         }
     }
 
-    [Benchmark]
-    public void PermuteOld4()
+    private void CreateY()
     {
-        CreateArrays4();
-        Random random = new SeededRandom(251207);
-        (float[,,,] newX, float[,] newY) = ArrayUtils.PermuteData(x4, y, random);
-        //(float[,] newX, float[,] newY) = ArrayUtils.PermuteData(x4, y, random);
+        _y = new float[Rows, 1];
+        SeededRandom random = new(251207);
+        for (int i = 0; i < Rows; i++)
+        {
+            _y[i, 0] = random.NextSingle();
+        }
     }
 
     [Benchmark]
-    public void PermuteNew4()
+    public void PermuteData4()
     {
-        CreateArrays4();
         Random random = new SeededRandom(251207);
-        x4.PermuteInPlaceTogetherWith(y, random);
+        (float[,,,] newX, float[,] newY) = ArrayUtils.PermuteData(_x4, _y, random);
     }
 
     [Benchmark]
-    public void PermuteNew4SetRow()
+    public void PermuteData2()
     {
-        CreateArrays4();
         Random random = new SeededRandom(251207);
-        x4.PermuteInPlaceTogetherWithSetRow(y, random);
+        (float[,] newX, float[,] newY) = ArrayUtils.PermuteData(_x2, _y, random);
     }
 
     [Benchmark]
-    public void PermuteOld2()
+    public void PermuteInPlaceTogetherWith4()
     {
-        CreateArrays2();
         Random random = new SeededRandom(251207);
-        (float[,] newX, float[,] newY) = ArrayUtils.PermuteData(x2, y, random);
-        //(float[,] newX, float[,] newY) = ArrayUtils.PermuteData(x4, y, random);
+        _x4.PermuteInPlaceTogetherWith(_y, random);
     }
 
     [Benchmark]
-    public void PermuteNew2()
+    public void PermuteInPlaceTogetherWith2()
     {
-        CreateArrays2();
         Random random = new SeededRandom(251207);
-        x2.PermuteInPlaceTogetherWith(y, random);
+        _x2.PermuteInPlaceTogetherWith(_y, random);
+    }
+
+    [Benchmark]
+    public void PermuteInPlaceTogetherWithSetRow4()
+    {
+        Random random = new SeededRandom(251207);
+        _x4.PermuteInPlaceTogetherWithSetRow(_y, random);
+    }
+
+    [Benchmark]
+    public void PermuteInPlaceTogetherWithSetRow2()
+    {
+        Random random = new SeededRandom(251207);
+        _x2.PermuteInPlaceTogetherWithSetRow(_y, random);
     }
 
 }

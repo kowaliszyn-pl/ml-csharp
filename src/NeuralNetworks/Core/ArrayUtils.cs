@@ -198,7 +198,6 @@ public class ArrayUtils
         return res;
     }
 
-    [Obsolete]
     public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
     {
         Debug.Assert(x.GetLength(0) == y.GetLength(0));
@@ -219,7 +218,16 @@ public class ArrayUtils
         return (xPermuted, yPermuted);
     }
 
-    [Obsolete]
+    /// <summary>
+    /// Permutes the data in the input arrays x and y using the provided random number generator.
+    /// </summary>
+    /// <remarks>
+    /// This method is the quickest way to permute data for 4D input arrays.
+    /// </remarks>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="random"></param>
+    /// <returns></returns>
     public static (float[,,,] xPermuted, float[,] yPermuted) PermuteData(float[,,,] x, float[,] y, Random random)
     {
         Debug.Assert(x.GetLength(0) == y.GetLength(0));

@@ -630,7 +630,7 @@ public static class ArrayExtensions
     /// <param name="matrix">The second array.</param>
     /// <returns>True if both arrays have equal dim1 and dim2; otherwise false.</returns>
     public static bool HasSameShape(this float[,] source, float[,] matrix)
-        => source.GetLength(0) == matrix.GetLength(0) 
+        => source.GetLength(0) == matrix.GetLength(0)
             && source.GetLength(1) == matrix.GetLength(1);
 
     /// <summary>
@@ -640,9 +640,9 @@ public static class ArrayExtensions
     /// <param name="matrix">The second array.</param>
     /// <returns>True if all corresponding dimensions are equal; otherwise false.</returns>
     public static bool HasSameShape(this float[,,,] source, float[,,,] matrix)
-        => source.GetLength(0) == matrix.GetLength(0) 
-            && source.GetLength(1) == matrix.GetLength(1) 
-            && source.GetLength(2) == matrix.GetLength(2) 
+        => source.GetLength(0) == matrix.GetLength(0)
+            && source.GetLength(1) == matrix.GetLength(1)
+            && source.GetLength(2) == matrix.GetLength(2)
             && source.GetLength(3) == matrix.GetLength(3);
 
     /// <summary>
@@ -1074,7 +1074,7 @@ public static class ArrayExtensions
             int j = rand.Next(i + 1);
             if (i != j)
             {
-                // Swap row i with row i2
+                // Swap row i with row j
                 for (int col = 0; col < columns; col++)
                 {
                     (source[j, col], source[i, col]) = (source[i, col], source[j, col]);
@@ -1098,7 +1098,7 @@ public static class ArrayExtensions
             int j = random.Next(i + 1);
             if (i != j)
             {
-                // Swap row i with row i2
+                // Swap row i with row j
                 for (int col = 0; col < columns; col++)
                 {
                     (source[j, col], source[i, col]) = (source[i, col], source[j, col]);
@@ -1113,7 +1113,10 @@ public static class ArrayExtensions
     /// </summary>
     /// <remarks>This method performs an in-place permutation of the dim1 of both matrices, maintaining the
     /// correspondence between dim1. This is useful when shuffling paired data, such as features and labels, for machine
-    /// learning tasks. The operation modifies the input matrices directly.</remarks>
+    /// learning tasks. The operation modifies the input matrices directly.
+    /// <para/>
+    /// This method is the quickest for permuting two 2D matrices together.
+    /// </remarks>
     /// <param name="source">The first matrix whose dim1 will be permuted. Must have the same number of dim1 as <paramref
     /// name="secondMatrix"/>.</param>
     /// <param name="secondMatrix">The second matrix whose dim1 will be permuted in tandem with <paramref name="source"/>. Must have the same
@@ -1134,7 +1137,7 @@ public static class ArrayExtensions
             int j = random.Next(i + 1);
             if (i != j)
             {
-                // Swap row i with row i2
+                // Swap row i with row j
                 for (int col = 0; col < columns; col++)
                 {
                     (source[j, col], source[i, col]) = (source[i, col], source[j, col]);
@@ -1153,11 +1156,9 @@ public static class ArrayExtensions
         random ??= new();
         int dim1 = source.GetLength(0);
         int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
 
         int secondColumns = secondMatrix.GetLength(1);
-        
+
         Debug.Assert(dim1 == secondMatrix.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
 
         for (int i = dim1 - 1; i > 0; i--)
@@ -1165,7 +1166,7 @@ public static class ArrayExtensions
             int i2 = random.Next(i + 1);
             if (i != i2)
             {
-                // Swap row i with row i2
+                // Swap row i with row j
                 for (int j = 0; j < dim2; j++)
                 {
                     for (int k = 0; k < source.GetLength(2); k++)
@@ -1184,42 +1185,48 @@ public static class ArrayExtensions
         }
     }
 
+    public static void PermuteInPlaceTogetherWithSetRow(this float[,] source, float[,] secondMatrix, Random? random)
+    {
+        random ??= new();
+        int rows = source.GetLength(0);
+
+        Debug.Assert(rows == secondMatrix.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
+
+        for (int i = rows - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            if (i != j)
+            {
+                float[] tempI = source.GetRow(i);
+                source.SetRow(i, source.GetRow(j));
+                source.SetRow(j, tempI);
+
+                tempI = secondMatrix.GetRow(i);
+                secondMatrix.SetRow(i, secondMatrix.GetRow(j));
+                secondMatrix.SetRow(j, tempI);
+            }
+        }
+    }
+
     public static void PermuteInPlaceTogetherWithSetRow(this float[,,,] source, float[,] secondMatrix, Random? random)
     {
         random ??= new();
         int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
-
-        int secondColumns = secondMatrix.GetLength(1);
 
         Debug.Assert(dim1 == secondMatrix.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
 
         for (int i = dim1 - 1; i > 0; i--)
         {
-            int i2 = random.Next(i + 1);
-            if (i != i2)
+            int j = random.Next(i + 1);
+            if (i != j)
             {
-                source.SetRow(i2, source.GetRow(i));
-                // Swap row i with row i2
-                //for (int j = 0; j < dim2; j++)
-                //{
-                //    for (int k = 0; k < source.GetLength(2); k++)
-                //    {
-                //        for (int l = 0; l < source.GetLength(3); l++)
-                //        {
-                //            source.SetRow(i2, source.GetRow(i));
-                //            //(source[i2, j, k, l], source[i, j, k, l]) = (source[i, j, k, l], source[i2, j, k, l]);
-                //        }
-                //    }
-                //}
-                secondMatrix.SetRow(i2, secondMatrix.GetRow(i));
-                //for (int col = 0; col < secondColumns; col++)
-                //{
-                //    //secondMatrix.SetRow(i2, secondMatrix.GetRow(i));
-                //    //(secondMatrix[i2, col], secondMatrix[i, col]) = (secondMatrix[i, col], secondMatrix[i2, col]);
-                //}
+                float[,,] tempI3 = source.GetRow(i);
+                source.SetRow(i, source.GetRow(j));
+                source.SetRow(j, tempI3);
+
+                float[] tempI1 = secondMatrix.GetRow(i);
+                secondMatrix.SetRow(i, secondMatrix.GetRow(j));
+                secondMatrix.SetRow(j, tempI1);
             }
         }
     }
@@ -1418,14 +1425,14 @@ public static class ArrayExtensions
         //for (int i = 0; i < dim1; i++)
         //{
         //    float sum = 0;
-        //    for (int i2 = 0; i2 < dim2; i2++)
+        //    for (int j = 0; j < dim2; j++)
         //    {
-        //        sum += expCache[i, i2];
+        //        sum += expCache[i, j];
         //    }
 
-        //    for (int i2 = 0; i2 < dim2; i2++)
+        //    for (int j = 0; j < dim2; j++)
         //    {
-        //        res[i, i2] = expCache[i, i2] / sum;
+        //        res[i, j] = expCache[i, j] / sum;
         //    }
         //}
 
@@ -1670,7 +1677,7 @@ public static class ArrayExtensions
                 {
                     for (int l = 0; l < dim4; l++)
                     {
-                        float value = source[i, j, k, l] - mean; 
+                        float value = source[i, j, k, l] - mean;
                         sum += value * value;
                     }
                 }
