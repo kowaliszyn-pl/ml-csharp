@@ -33,14 +33,14 @@ file class BostonHousingModel(SeededRandom? random)
     }
 }
 
-class BostonHousing
+internal class BostonHousing
 {
-    const int RandomSeed = 251113;
-    const float TestSplitRatio = 0.7f;
-    const int Epochs = 48_000;
-    const int BatchSize = 400;
-    const int EvalEveryEpochs = 2_000;
-    const int LogEveryEpochs = 2_000;
+    private const int RandomSeed = 251113;
+    private const float TestSplitRatio = 0.7f;
+    private const int Epochs = 48_000;
+    private const int BatchSize = 400;
+    private const int EvalEveryEpochs = 2_000;
+    private const int LogEveryEpochs = 2_000;
 
     public static void Run(bool useCustomModel)
     {
@@ -100,18 +100,22 @@ class BostonHousing
             model = new GenericModel<float[,], float[,]>(
 
                 layerListBuilder: LayerListBuilder<float[,], float[,]>
-                    .AddLayer(new DenseLayer(4, new Sigmoid(), new GlorotInitializer(commonRandom)))
-                    .AddLayer(new DenseLayer(1, new Linear(), new GlorotInitializer(commonRandom))),
+                    .AddLayer(new DenseLayer(neurons: 4, new Sigmoid(), new GlorotInitializer(commonRandom)))
+                    .AddLayer(new DenseLayer(neurons: 1, new Linear(), new GlorotInitializer(commonRandom))),
 
                 lossFunction: new MeanSquaredError(),
                 random: commonRandom);
         }
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(0.0009f, 0.0005f);
+        ExponentialDecayLearningRate learningRate = new(
+            initialLearningRate: 0.0009f,
+            finalLearningRate: 0.0005f
+        );
+
         Trainer2D trainer = new(
-            model, 
-            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
-            random: commonRandom, 
+            model,
+            new GradientDescentMomentumOptimizer(learningRate, 0.9f),
+            random: commonRandom,
             logger: logger)
         {
             Memo = $"Class: {nameof(BostonHousing)}."
@@ -147,7 +151,7 @@ class BostonHousing
 
     }
 
-    static (float[,] TrainData, float[,] TestData) GetData()
+    private static (float[,] TrainData, float[,] TestData) GetData()
     {
         float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv", 1);
 
