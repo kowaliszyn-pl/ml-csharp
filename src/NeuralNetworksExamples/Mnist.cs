@@ -95,8 +95,8 @@ class Mnist
         LearningRate learningRate = new ExponentialDecayLearningRate(0.005f, 0.0009f);
         Trainer2D trainer = new(
             model, 
-            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
-            // new AdamOptimizer(learningRate),
+            // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
+            new AdamOptimizer(learningRate),
             random: commonRandom, 
             logger: logger)
         {

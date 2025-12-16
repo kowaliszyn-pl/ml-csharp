@@ -21,13 +21,9 @@ public class AdamOptimizer : Optimizer
     private readonly float _beta2;
     private readonly float _epsilon;
 
-    private readonly Dictionary<float[], (float[] m, float[] v)> _moments1D = [];
-    private readonly Dictionary<float[,], (float[,] m, float[,] v)> _moments2D = [];
-    private readonly Dictionary<float[,,,], (float[,,,] m, float[,,,] v)> _moments4D = [];
-
-    private readonly Dictionary<float[], int> _steps1D = [];
-    private readonly Dictionary<float[,], int> _steps2D = [];
-    private readonly Dictionary<float[,,,], int> _steps4D = [];
+    private readonly Dictionary<float[], State1D> _states1D = [];
+    private readonly Dictionary<float[,], State2D> _states2D = [];
+    private readonly Dictionary<float[,,,], State4D> _states4D = [];
 
     public AdamOptimizer(LearningRate learningRate, float beta1 = 0.9f, float beta2 = 0.999f, float epsilon = 1e-8f)
         : base(learningRate)
@@ -52,11 +48,14 @@ public class AdamOptimizer : Optimizer
          */
 
         Debug.Assert(param.HasSameShape(paramGradient));
-        int t = IncrementStep(param); // Use the correct dictionary for each array type
+
+        // int t = IncrementStep(param); // Use the correct dictionary for each array type
+        (int t, float[] m, float[] v) = GetOrCreateState(param);
+
         float beta1t = MathF.Pow(_beta1, t);
         float beta2t = MathF.Pow(_beta2, t);
 
-        (float[]? m, float[]? v) = GetOrCreateMoments(param);
+        //(float[] m, float[] v) = GetOrCreateMoments(param);
 
         float lr = LearningRate.GetLearningRate();
         WarnIfLearningRateIsSuspicious(lr);
@@ -78,11 +77,11 @@ public class AdamOptimizer : Optimizer
     public override void Update(Layer? layer, float[,] param, float[,] paramGradient)
     {
         Debug.Assert(param.HasSameShape(paramGradient));
-        int t = IncrementStep(param); // Use the correct dictionary for each array type
+        // int t = IncrementStep(param); // Use the correct dictionary for each array type
+        (int t, float[,] m, float[,] v) = GetOrCreateState(param);
+
         float beta1t = MathF.Pow(_beta1, t);
         float beta2t = MathF.Pow(_beta2, t);
-
-        (float[,]? m, float[,]? v) = GetOrCreateMoments(param);
 
         float lr = LearningRate.GetLearningRate();
         WarnIfLearningRateIsSuspicious(lr);
@@ -108,11 +107,13 @@ public class AdamOptimizer : Optimizer
     public override void Update(Layer? layer, float[,,,] param, float[,,,] paramGradient)
     {
         Debug.Assert(param.HasSameShape(paramGradient));
-        int t = IncrementStep(param); // Use the correct dictionary for each array type
+        // int t = IncrementStep(param); // Use the correct dictionary for each array type
+
+        (int t, float[,,,] m, float[,,,] v) = GetOrCreateState(param);
         float beta1t = MathF.Pow(_beta1, t);
         float beta2t = MathF.Pow(_beta2, t);
 
-        (float[,,,]? m, float[,,,]? v) = GetOrCreateMoments(param);
+        
 
         float lr = LearningRate.GetLearningRate();
         WarnIfLearningRateIsSuspicious(lr);
@@ -144,91 +145,119 @@ public class AdamOptimizer : Optimizer
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (float[] m, float[] v) GetOrCreateMoments(float[] param)
+    private State1D GetOrCreateState(float[] param)
     {
-        if (_moments1D.TryGetValue(param, out (float[] m, float[] v) moments))
+        if (_states1D.TryGetValue(param, out State1D? state))
         {
-            return moments;
+            state.T++;
+            return state;
         }
-        var m = new float[param.Length];
-        var v = new float[param.Length];
-        _moments1D.Add(param, (m, v));
-        return (m, v);
+        var newState = new State1D(param);
+        _states1D[param] = newState;
+        return newState;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (float[,] m, float[,] v) GetOrCreateMoments(float[,] param)
+    private State2D GetOrCreateState(float[,] param)
     {
-        if (_moments2D.TryGetValue(param, out (float[,] m, float[,] v) moments))
+        if (_states2D.TryGetValue(param, out State2D? state))
         {
-            return moments;
+            state.T++;
+            return state;
         }
-        var m = new float[param.GetLength(0), param.GetLength(1)];
-        var v = new float[param.GetLength(0), param.GetLength(1)];
-        _moments2D.Add(param, (m, v));
-        return (m, v);
+        var newState = new State2D(param);
+        _states2D[param] = newState;
+        return newState;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (float[,,,] m, float[,,,] v) GetOrCreateMoments(float[,,,] param)
+    private State4D GetOrCreateState(float[,,,] param)
     {
-        if (_moments4D.TryGetValue(param, out (float[,,,] m, float[,,,] v) moments))
+        if (_states4D.TryGetValue(param, out State4D? state))
         {
-            return moments;
+            state.T++;
+            return state;
         }
-        var m = new float[param.GetLength(0), param.GetLength(1), param.GetLength(2), param.GetLength(3)];
-        var v = new float[param.GetLength(0), param.GetLength(1), param.GetLength(2), param.GetLength(3)];
-        _moments4D.Add(param, (m, v));
-        return (m, v);
+        var newState = new State4D(param);
+        _states4D[param] = newState;
+        return newState;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int IncrementStep(float[] param)
-    {
-        if (_steps1D.TryGetValue(param, out int t))
-        {
-            t++;
-            _steps1D[param] = t;
-            return t;
-        }
-        else
-        {
-            _steps1D[param] = 1;
-            return 1;
-        }
-    }
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //private (int t, float[,] m, float[,] v) GetOrCreateMomentsAndStep(float[,] param)
+    //{
+    //    if (_moments2D.TryGetValue(param, out (int t, float[,] m, float[,] v) moments))
+    //    {
+    //        moments.t++;
+    //        return moments;
+    //    }
+    //    var m = new float[param.GetLength(0), param.GetLength(1)];
+    //    var v = new float[param.GetLength(0), param.GetLength(1)];
+    //    int t = 1;
+    //    _moments2D[param] = (t, m, v);
+    //    return (t, m, v);
+    //}
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int IncrementStep(float[,] param)
-    {
-        if (_steps2D.TryGetValue(param, out int t))
-        {
-            t++;
-            _steps2D[param] = t;
-            return t;
-        }
-        else
-        {
-            _steps2D[param] = 1;
-            return 1;
-        }
-    }
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //private (float[,,,] m, float[,,,] v) GetOrCreateMoments(float[,,,] param)
+    //{
+    //    if (_moments4D.TryGetValue(param, out (float[,,,] m, float[,,,] v) moments))
+    //    {
+    //        return moments;
+    //    }
+    //    var m = new float[param.GetLength(0), param.GetLength(1), param.GetLength(2), param.GetLength(3)];
+    //    var v = new float[param.GetLength(0), param.GetLength(1), param.GetLength(2), param.GetLength(3)];
+    //    _moments4D.Add(param, (m, v));
+    //    return (m, v);
+    //}
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int IncrementStep(float[,,,] param)
-    {
-        if (_steps4D.TryGetValue(param, out int t))
-        {
-            t++;
-            _steps4D[param] = t;
-            return t;
-        }
-        else
-        {
-            _steps4D[param] = 1;
-            return 1;
-        }
-    }
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //private int IncrementStep(float[] param)
+    //{
+    //    if (_steps1D.TryGetValue(param, out int t))
+    //    {
+    //        t++;
+    //        _steps1D[param] = t;
+    //        return t;
+    //    }
+    //    else
+    //    {
+    //        _steps1D[param] = 1;
+    //        return 1;
+    //    }
+    //}
+
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //private int IncrementStep(float[,] param)
+    //{
+    //    if (_steps2D.TryGetValue(param, out int t))
+    //    {
+    //        t++;
+    //        _steps2D[param] = t;
+    //        return t;
+    //    }
+    //    else
+    //    {
+    //        _steps2D[param] = 1;
+    //        return 1;
+    //    }
+    //}
+
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //private int IncrementStep(float[,,,] param)
+    //{
+    //    if (_steps4D.TryGetValue(param, out int t))
+    //    {
+    //        t++;
+    //        _steps4D[param] = t;
+    //        return t;
+    //    }
+    //    else
+    //    {
+    //        _steps4D[param] = 1;
+    //        return 1;
+    //    }
+    //}
 
     static bool s_warningEmitted = false;
 
@@ -253,4 +282,62 @@ public class AdamOptimizer : Optimizer
 
     public override string ToString()
         => $"Adam (learningRate={LearningRate}, beta1={_beta1}, beta2={_beta2}, epsilon={_epsilon})";
+
+    private sealed class State1D(float[] param)
+    {
+        public int T { get; set; } = 1;
+        public float[] M { get; } = new float[param.Length];
+        public float[] V { get; } = new float[param.Length];
+
+        public void Deconstruct(out int t, out float[] m, out float[] v)
+        {
+            t = T;
+            m = M;
+            v = V;
+        }
+    }
+
+    private sealed class State2D
+    {
+        public int T { get; set; } = 1;
+        public float[,] M { get; }
+        public float[,] V { get; }
+
+        public State2D(float[,] param)
+        {
+            int rows = param.GetLength(0);
+            int cols = param.GetLength(1);
+            M = new float[rows, cols];
+            V = new float[rows, cols];
+        }
+
+        public void Deconstruct(out int t, out float[,] m, out float[,] v)
+        {
+            t = T;
+            m = M;
+            v = V;
+        }
+    }
+
+    private sealed class State4D
+    {
+        public int T { get; set; } = 1;
+        public float[,,,] M { get; }
+        public float[,,,] V { get; }
+        public State4D(float[,,,] param)
+        {
+            int dim1 = param.GetLength(0);
+            int dim2 = param.GetLength(1);
+            int dim3 = param.GetLength(2);
+            int dim4 = param.GetLength(3);
+            M = new float[dim1, dim2, dim3, dim4];
+            V = new float[dim1, dim2, dim3, dim4];
+        }
+        public void Deconstruct(out int t, out float[,,,] m, out float[,,,] v)
+        {
+            t = T;
+            m = M;
+            v = V;
+        }
+    }
 }
