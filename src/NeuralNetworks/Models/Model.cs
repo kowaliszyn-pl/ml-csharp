@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: GenericModel.cs
+// File name: Model.cs
 // www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
@@ -20,55 +20,48 @@ namespace NeuralNetworks.Models;
 /// the layer list. Thread safety is not guaranteed; concurrent access should be managed externally.</remarks>
 /// <typeparam name="TInputData">The type of input data provided to the model. Must not be null.</typeparam>
 /// <typeparam name="TPrediction">The type of prediction output produced by the model. Must not be null.</typeparam>
-public abstract class Model<TInputData, TPrediction> 
+public abstract class Model<TInputData, TPrediction>
     where TInputData : notnull
     where TPrediction : notnull
 {
     private LayerList<TInputData, TPrediction> _layers;
-    private Loss<TPrediction> _lossFunction;
     private float _lastLoss;
 
     protected Model(LayerListBuilder<TInputData, TPrediction>? layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random)
     {
-        _lossFunction = lossFunction;
+        LossFunction = lossFunction;
         Random = random;
         _layers = (layerListBuilder ?? CreateLayerListBuilderInternal()).Build();
     }
 
     public IReadOnlyList<Layer> Layers => _layers;
 
-    public Loss<TPrediction> LossFunction => _lossFunction;
+    public Loss<TPrediction> LossFunction { get; private set; }
 
     protected SeededRandom? Random { get; }
 
-    internal protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal();
+    protected internal abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal();
 
-    public TPrediction Forward(TInputData input, bool inference)
-    {
-        return _layers.Forward(input, inference);
-    }
+    public TPrediction Forward(TInputData input, bool inference) 
+        => _layers.Forward(input, inference);
 
-    public void Backward(TPrediction lossGrad)
-    {
-        _layers.Backward(lossGrad);
-    }
+    public void Backward(TPrediction lossGrad) 
+        => _layers.Backward(lossGrad);
 
     public float TrainBatch(TInputData xBatch, TPrediction yBatch)
     {
         TPrediction predictions = Forward(xBatch, false);
-        _lastLoss = _lossFunction.Forward(predictions, yBatch);
-        Backward(_lossFunction.Backward());
+        _lastLoss = LossFunction.Forward(predictions, yBatch);
+        Backward(LossFunction.Backward());
         return _lastLoss;
     }
 
-    public void UpdateParams(Optimizer optimizer)
-    {
-        _layers.UpdateParams(optimizer);
-    }
+    public void UpdateParams(Optimizer optimizer) 
+        => _layers.UpdateParams(optimizer);
 
     #region Checkpoint
 
-    private GenericModel<TInputData, TPrediction>? _checkpoint;
+    private Model<TInputData, TPrediction>? _checkpoint;
 
     public void SaveCheckpoint() => _checkpoint = Clone();
 
@@ -82,7 +75,7 @@ public abstract class Model<TInputData, TPrediction>
         }
         // _checkpoint is already a deep copy so we can just copy its fields.
         _layers = _checkpoint._layers;
-        _lossFunction = _checkpoint._lossFunction;
+        LossFunction = _checkpoint.LossFunction;
         _lastLoss = _checkpoint._lastLoss;
     }
 
@@ -90,11 +83,11 @@ public abstract class Model<TInputData, TPrediction>
     /// Makes a deep copy of this neural network.
     /// </summary>
     /// <returns></returns>
-    public GenericModel<TInputData, TPrediction> Clone()
+    public Model<TInputData, TPrediction> Clone()
     {
-        GenericModel<TInputData, TPrediction> clone = (GenericModel<TInputData, TPrediction>)MemberwiseClone();
+        Model<TInputData, TPrediction> clone = (Model<TInputData, TPrediction>)MemberwiseClone();
         clone._layers = _layers.Clone();
-        clone._lossFunction = _lossFunction.Clone();
+        clone.LossFunction = LossFunction.Clone();
         return clone;
     }
 

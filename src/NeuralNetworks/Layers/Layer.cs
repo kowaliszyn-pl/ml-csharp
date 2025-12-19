@@ -90,10 +90,8 @@ public abstract class Layer<TIn, TOut> : Layer
     public abstract OperationListBuilder<TIn, TOut> CreateOperationListBuilder();
 
     protected virtual void SetupLayer()
-    {
-        // Build the operations list.
-        _operations = CreateOperationListBuilder().Build();
-    }
+        // Build the operation list
+        => _operations = CreateOperationListBuilder().Build();
 
     protected static OperationListBuilder<TIn, TOpOut> AddOperation<TOpOut>(Operation<TIn, TOpOut> operation)
         where TOpOut : notnull

@@ -2,8 +2,6 @@
 // File name: Loss.cs
 // www.kowaliszyn.pl, 2025
 
-
-
 using System.Diagnostics;
 
 namespace NeuralNetworks.Losses;
