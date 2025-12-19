@@ -26,14 +26,20 @@ namespace NeuralNetworksExamples;
 file class MnistModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
+    private const float Dropout1KeepProb = 0.85f;
+    private const float Dropout2KeepProb = 0.85f;
+
+    private readonly Operation2D activationFunction1 = new ReLU();
+    private readonly Operation2D activationFunction2 = new Tanh2D();
+
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
-        Dropout2D? dropout1 = new(0.85f, Random);
-        Dropout2D? dropout2 = new(0.85f, Random);
+        Dropout2D? dropout1 = new(Dropout1KeepProb, Random);
+        Dropout2D? dropout2 = new(Dropout2KeepProb, Random);
 
-        return AddLayer(new DenseLayer(178, new Tanh2D(), initializer, dropout1))
-            .AddLayer(new DenseLayer(46, new Tanh2D(), initializer, dropout2))
+        return AddLayer(new DenseLayer(178, activationFunction1, initializer, dropout1))
+            .AddLayer(new DenseLayer(46, activationFunction2, initializer, dropout2))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
 }
@@ -41,10 +47,15 @@ file class MnistModel(SeededRandom? random)
 class Mnist
 {
     const int RandomSeed = 251203;
-    const int Epochs = 10;
+    const int Epochs = 12;
     const int BatchSize = 100;
     const int EvalEveryEpochs = 2;
     const int LogEveryEpochs = 1;
+
+    const float InitialLearningRate = 0.0025f;
+    const float FinalLearningRate = 0.00065f;
+    const float AdamBeta1 = 0.89f;
+    const float AdamBeta2 = 0.999f;
 
     public static void Run()
     {
@@ -91,12 +102,11 @@ class Mnist
 
         WriteLine("\nStart training...");
 
-        //LearningRate learningRate = new ExponentialDecayLearningRate(0.19f, 0.05f);
-        LearningRate learningRate = new ExponentialDecayLearningRate(0.005f, 0.0009f);
+        LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate);
         Trainer2D trainer = new(
             model, 
-            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
-            // new AdamOptimizer(learningRate),
+            // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
+            new AdamOptimizer(learningRate, beta1: AdamBeta1, beta2: AdamBeta2),
             random: commonRandom, 
             logger: logger)
         {
