@@ -52,8 +52,8 @@ class Mnist
 
         // rows - batch
         // cols - features
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_train_small.csv");
-        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_test.csv");
+        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
+        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
 
         (float[,] xTrain, float[,] yTrain) = Split(train);
         (float[,] xTest, float[,] yTest) = Split(test);
@@ -95,8 +95,8 @@ class Mnist
         LearningRate learningRate = new ExponentialDecayLearningRate(0.005f, 0.0009f);
         Trainer2D trainer = new(
             model, 
-            // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
-            new AdamOptimizer(learningRate),
+            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
+            // new AdamOptimizer(learningRate),
             random: commonRandom, 
             logger: logger)
         {
