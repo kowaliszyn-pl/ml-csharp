@@ -81,6 +81,7 @@ public abstract class Trainer<TInputData, TPrediction>(
 
         displayDescriptionOnStart &= consoleOutputMode != ConsoleOutputMode.Disable;
 
+        // Describe the trainer configuration
         List<string> description = DescribeFit();
         WriteLineIfLogging();
         foreach (string line in description)
@@ -95,20 +96,6 @@ public abstract class Trainer<TInputData, TPrediction>(
                 WriteLine(message);
             logger?.LogInformation(message);
         }
-
-        /*
-        logger?.LogInformation("Fit started with params: epochs: {epochs}, evalEveryEpochs: {evalEveryEpochs}, logEveryEpochs: {logEveryEpochs}, batchSize: {batchSize}, optimizer: {optimizer}, random: {random}.", epochs, evalEveryEpochs, logEveryEpochs, batchSize, optimizer, random);
-        logger?.LogInformation("Model type: {modelType}.", model.GetType().Name);
-        logger?.LogInformation("Model layers:");
-        foreach (Layer layer in model.Layers)
-        {
-            logger?.LogInformation("Layer: {layer}.", layer);
-        }
-        logger?.LogInformation("Loss function: {loss}", model.LossFunction);
-
-        if (Memo is not null)
-            logger?.LogInformation("Memo: \"{memo}\".", Memo);
-        */
 
 #if DEBUG
         string environment = "Debug";
@@ -165,7 +152,6 @@ public abstract class Trainer<TInputData, TPrediction>(
                 }
 
                 trainLoss = (trainLoss ?? 0) + model.TrainBatch(xBatch, yBatch);
-                //optimizer.Step(model);
                 model.UpdateParams(optimizer);
 
                 long elapsedMsPerStep = stepWatch.ElapsedMilliseconds / step;
