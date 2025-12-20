@@ -106,6 +106,7 @@ public abstract class Trainer<TInputData, TPrediction>(
 
         (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
         int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
+        long allStepsInTraining = allSteps * epochs;
 
         for (int epoch = 1; epoch <= epochs; epoch++)
         {
@@ -147,7 +148,16 @@ public abstract class Trainer<TInputData, TPrediction>(
                 {
                     string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";
                     if (stepsPerSecond is not null)
-                        stepInfo += $" {stepsPerSecond.Value:F2} steps/s";
+                    {
+                        long stepsDone = (epoch - 1) * allSteps + step;
+                        long remainingSteps = allStepsInTraining - stepsDone;
+
+                        double milisecondsPerStep = trainWatch.Elapsed.TotalMilliseconds / stepsDone;
+                        double remainingMiliseconds = remainingSteps * milisecondsPerStep;
+
+                        TimeSpan eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
+                        stepInfo += $" {stepsPerSecond.Value:F2} steps/s - {eta.Hours}h {eta.Minutes}m {eta.Seconds}s left   ";
+                    }
                     Write(stepInfo + "\r");
                 }
 
