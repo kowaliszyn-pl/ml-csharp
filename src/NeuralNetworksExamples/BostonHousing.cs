@@ -21,7 +21,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-file class BostonHousingModel(SeededRandom? random)
+class BostonHousingModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new MeanSquaredError(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
