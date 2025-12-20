@@ -24,7 +24,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 class MnistModel(SeededRandom? random)
-    : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
+    : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss2(), random)
 {
     private const float Dropout1KeepProb = 0.85f;
     private const float Dropout2KeepProb = 0.85f;
