@@ -70,24 +70,33 @@ public abstract class Trainer<TInputData, TPrediction>(
         int batchSize = 32,
         bool earlyStop = false,
         bool restart = true,
-        bool displayDescriptionOnStart = false
+        bool displayDescriptionOnStart = true
     )
     {
-        if (displayDescriptionOnStart)
-        {
-            List<string> description = DescribeFit();
-            WriteLine();
-            foreach (string line in description)
-            {
-                WriteLine(line);
-            }
-            WriteLine();
-        }
-
         Stopwatch trainWatch = Stopwatch.StartNew();
 
         logger?.LogInformation(string.Empty);
         logger?.LogInformation("===== Begin Log =====");
+        logger?.LogInformation("Fit started");
+
+        displayDescriptionOnStart &= consoleOutputMode != ConsoleOutputMode.Disable;
+
+        List<string> description = DescribeFit();
+        WriteLineIfLogging();
+        foreach (string line in description)
+        {
+            WriteLineIfLogging(line);
+        }
+        WriteLineIfLogging();
+
+        void WriteLineIfLogging(string message = "")
+        {
+            if (displayDescriptionOnStart)
+                WriteLine(message);
+            logger?.LogInformation(message);
+        }
+
+        /*
         logger?.LogInformation("Fit started with params: epochs: {epochs}, evalEveryEpochs: {evalEveryEpochs}, logEveryEpochs: {logEveryEpochs}, batchSize: {batchSize}, optimizer: {optimizer}, random: {random}.", epochs, evalEveryEpochs, logEveryEpochs, batchSize, optimizer, random);
         logger?.LogInformation("Model type: {modelType}.", model.GetType().Name);
         logger?.LogInformation("Model layers:");
@@ -99,6 +108,7 @@ public abstract class Trainer<TInputData, TPrediction>(
 
         if (Memo is not null)
             logger?.LogInformation("Memo: \"{memo}\".", Memo);
+        */
 
 #if DEBUG
         string environment = "Debug";
@@ -245,7 +255,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         List<string> DescribeFit()
         {
             List<string> res = [];
-            res.Add($"Fit (epochs={epochs}, batchSize={batchSize})");
+            res.Add($"Fit (epochs={epochs}, batchSize={batchSize}, evalEveryEpochs={evalEveryEpochs}, logEveryEpochs={logEveryEpochs})");
             res.AddRange(Describe(Constants.Indentation));
             return res;
         }

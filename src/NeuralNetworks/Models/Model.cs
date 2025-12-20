@@ -103,10 +103,17 @@ public abstract class Model<TInputData, TPrediction>
     {
         string indent = new(' ', indentation);
         string newIndent = new(' ', indentation + Constants.Indentation);
+        string layerIndent = new(' ', indentation + 2 * Constants.Indentation);
         List<string> res = [];
         res.Add($"{indent}Model");
+        res.Add($"{newIndent}Type: {this}");
         res.Add($"{newIndent}Random: {Random}");
         res.Add($"{newIndent}LossFunction: {LossFunction}");
+        res.Add($"{newIndent}Layers");
+        foreach (Layer layer in _layers)
+        {
+            res.Add($"{layerIndent}{layer}");
+        }
         return res;
     }
 }
