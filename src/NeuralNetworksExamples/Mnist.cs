@@ -29,8 +29,8 @@ class MnistModel(SeededRandom? random)
     private const float Dropout1KeepProb = 0.85f;
     private const float Dropout2KeepProb = 0.85f;
 
-    private readonly Operation2D activationFunction1 = new ReLU();
-    private readonly Operation2D activationFunction2 = new Tanh2D();
+    private readonly Operation2D activationFunction1 = new ReLU(); 
+    private readonly Operation2D activationFunction2 = new LeakyReLU();
 
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
@@ -48,7 +48,7 @@ class Mnist
 {
     const int RandomSeed = 251203;
     const int Epochs = 15;
-    const int BatchSize = 150;
+    const int BatchSize = 100;
     const int EvalEveryEpochs = 2;
     const int LogEveryEpochs = 1;
 

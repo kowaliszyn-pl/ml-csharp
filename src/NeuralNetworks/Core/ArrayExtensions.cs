@@ -645,6 +645,23 @@ public static class ArrayExtensions
             && source.GetLength(2) == matrix.GetLength(2)
             && source.GetLength(3) == matrix.GetLength(3);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] LeakyReLU(this float[,] source, float negativeAlpha = 0.5f, float alpha = 1f)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                float value = source[i, j];
+                res[i, j] = value >= 0 ? value * alpha : value * negativeAlpha;
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Computes the natural logarithm elementwise and returns a new array.
     /// </summary>
