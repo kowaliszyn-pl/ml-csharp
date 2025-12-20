@@ -47,13 +47,13 @@ file class MnistModel(SeededRandom? random)
 class Mnist
 {
     const int RandomSeed = 251203;
-    const int Epochs = 12;
-    const int BatchSize = 100;
+    const int Epochs = 15;
+    const int BatchSize = 150;
     const int EvalEveryEpochs = 2;
     const int LogEveryEpochs = 1;
 
-    const float InitialLearningRate = 0.0025f;
-    const float FinalLearningRate = 0.00065f;
+    const float InitialLearningRate = 0.002f;
+    const float FinalLearningRate = 0.0005f;
     const float AdamBeta1 = 0.89f;
     const float AdamBeta2 = 0.999f;
 
@@ -110,7 +110,7 @@ class Mnist
             random: commonRandom, 
             logger: logger)
         {
-            Memo = $"Class: {nameof(Mnist)}."
+            Memo = $"Calling class: {nameof(Mnist)}."
         };
 
         trainer.Fit(
@@ -119,7 +119,8 @@ class Mnist
             epochs: Epochs,
             evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
-            batchSize: BatchSize
+            batchSize: BatchSize,
+            displayDescriptionOnStart: true
         );
     }
 

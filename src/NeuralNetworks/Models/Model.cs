@@ -2,6 +2,9 @@
 // File name: Model.cs
 // www.kowaliszyn.pl, 2025
 
+using System;
+using System.Reflection;
+
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Losses;
@@ -96,4 +99,14 @@ public abstract class Model<TInputData, TPrediction>
 
     #endregion Checkpoint
 
+    public List<string> Describe(int indentation)
+    {
+        string indent = new(' ', indentation);
+        string newIndent = new(' ', indentation + Constants.Indentation);
+        List<string> res = [];
+        res.Add($"{indent}Model");
+        res.Add($"{newIndent}Random: {Random}");
+        res.Add($"{newIndent}LossFunction: {LossFunction}");
+        return res;
+    }
 }

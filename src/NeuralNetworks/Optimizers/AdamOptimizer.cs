@@ -19,18 +19,18 @@ public class AdamOptimizer : Optimizer
 {
     private readonly float _beta1;
     private readonly float _beta2;
-    private readonly float _epsilon;
+    private readonly float _eps;
 
     private readonly Dictionary<float[], State1D> _states1D = [];
     private readonly Dictionary<float[,], State2D> _states2D = [];
     private readonly Dictionary<float[,,,], State4D> _states4D = [];
 
-    public AdamOptimizer(LearningRate learningRate, float beta1 = 0.9f, float beta2 = 0.999f, float epsilon = 1e-8f)
+    public AdamOptimizer(LearningRate learningRate, float beta1 = 0.9f, float beta2 = 0.999f, float eps = 1e-8f)
         : base(learningRate)
     {
         _beta1 = beta1;
         _beta2 = beta2;
-        _epsilon = epsilon;
+        _eps = eps;
     }
 
     public override void Update(Layer? layer, float[] param, float[] paramGradient)
@@ -67,7 +67,7 @@ public class AdamOptimizer : Optimizer
             float mHat = m[i] / (1 - beta1t);
             float vHat = v[i] / (1 - beta2t);
 
-            param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _epsilon);
+            param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
         }
     }
 
@@ -96,7 +96,7 @@ public class AdamOptimizer : Optimizer
                 float mHat = m[i, j] / (1 - beta1t);
                 float vHat = v[i, j] / (1 - beta2t);
 
-                param[i, j] -= lr * mHat / (MathF.Sqrt(vHat) + _epsilon);
+                param[i, j] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
             }
         }
     }
@@ -131,7 +131,7 @@ public class AdamOptimizer : Optimizer
                         float mHat = m[i, j, k, l] / (1 - beta1t);
                         float vHat = v[i, j, k, l] / (1 - beta2t);
 
-                        param[i, j, k, l] -= lr * mHat / (MathF.Sqrt(vHat) + _epsilon);
+                        param[i, j, k, l] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
                     }
                 }
             }
@@ -199,7 +199,7 @@ public class AdamOptimizer : Optimizer
     }
 
     public override string ToString()
-        => $"Adam (learningRate={LearningRate}, beta1={_beta1}, beta2={_beta2}, epsilon={_epsilon})";
+        => $"Adam (learningRate={LearningRate}, beta1={_beta1}, beta2={_beta2}, eps={_eps})";
 
     private sealed class State1D(float[] param)
     {

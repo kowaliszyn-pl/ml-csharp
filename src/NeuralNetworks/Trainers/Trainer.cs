@@ -69,8 +69,21 @@ public abstract class Trainer<TInputData, TPrediction>(
         int logEveryEpochs = 1,
         int batchSize = 32,
         bool earlyStop = false,
-        bool restart = true)
+        bool restart = true,
+        bool displayDescriptionOnStart = false
+    )
     {
+        if (displayDescriptionOnStart)
+        {
+            List<string> description = DescribeFit();
+            WriteLine();
+            foreach (string line in description)
+            {
+                WriteLine(line);
+            }
+            WriteLine();
+        }
+
         Stopwatch trainWatch = Stopwatch.StartNew();
 
         logger?.LogInformation(string.Empty);
@@ -228,7 +241,26 @@ public abstract class Trainer<TInputData, TPrediction>(
 
         logger?.LogInformation("===== End Log =====");
         logger?.LogInformation(string.Empty);
+
+        List<string> DescribeFit()
+        {
+            List<string> res = [];
+            res.Add($"Fit (epochs={epochs}, batchSize={batchSize})");
+            res.AddRange(Describe(Constants.Indentation));
+            return res;
+        }
     }
 
-
+    public List<string> Describe(int indentation)
+    {
+        string indent = new(' ', indentation);
+        string newIndent = new(' ', indentation + Constants.Indentation);
+        List<string> res = [];
+        res.Add($"{indent}Trainer");
+        res.Add($"{newIndent}Memo: \"{Memo}\"");
+        res.Add($"{newIndent}Random: {random}");
+        res.Add($"{newIndent}Optimizer: {optimizer}");
+        res.AddRange(model.Describe(indentation + Constants.Indentation));
+        return res;
+    }
 }

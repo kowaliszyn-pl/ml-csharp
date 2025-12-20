@@ -31,4 +31,6 @@ public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss2D
         int batchSize = Prediction.GetLength(0);
         return softmaxPrediction.Subtract(Target).Divide(batchSize);
     }
+
+    override public string ToString() => $"SoftmaxCrossEntropyLoss (eps={eps})";
 }
