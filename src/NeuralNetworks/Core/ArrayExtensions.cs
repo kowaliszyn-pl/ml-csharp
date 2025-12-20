@@ -334,6 +334,22 @@ public static class ArrayExtensions
     public static float[,,,] AsZeros(this float[,,,] source)
         => new float[source.GetLength(0), source.GetLength(1), source.GetLength(2), source.GetLength(3)];
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Clip(this float[,] source, float min, float max)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                res[row, col] = MathF.Max(min, MathF.Min(max, source[row, col]));
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Clips the values of the source in-place between the specified minimum and maximum values.
     /// </summary>

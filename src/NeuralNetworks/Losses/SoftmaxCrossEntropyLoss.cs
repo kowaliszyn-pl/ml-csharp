@@ -1,36 +1,39 @@
 ﻿// Neural Networks in C♯
-// File name: SoftmaxCrossEntropyLoss.cs
+// File name: SoftmaxCrossEntropyLoss2.cs
 // www.kowaliszyn.pl, 2025
+
+using System.Diagnostics;
 
 using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Losses;
 
+/// <summary>
+/// Categorical Cross-Entropy Loss combined with Softmax activation function.
+/// </summary>
+/// <param name="eps"></param>
 public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss2D
 {
+    private float[,]? _softmaxPrediction;
+
     protected override float CalculateLoss()
     {
         // Calculate the probabilities for the whole batch.
-        float[,] softmaxPrediction = Prediction.Softmax();
+        _softmaxPrediction = Prediction.Softmax();
 
         // Clip the probabilities to avoid log(0).
-        softmaxPrediction.ClipInPlace(eps, 1 - eps);
+        float[,] clippedSoftmax = _softmaxPrediction.Clip(eps, 1 - eps);
 
-        float[,] negativeTarget = Target.Multiply(-1f);
-        float[,] softmaxCrossEntropyLoss = negativeTarget.MultiplyElementwise(softmaxPrediction.Log())
-            .Subtract(
-                negativeTarget.Add(1f).MultiplyElementwise(softmaxPrediction.Multiply(-1f).Add(1f).Log())
-            );
-        int batchSize = Prediction.GetLength(0);
-        return softmaxCrossEntropyLoss.Sum() / batchSize;
+        return -clippedSoftmax.Log().MultiplyElementwise(Target).Mean();
     }
 
     protected override float[,] CalculateLossGradient()
     {
-        float[,] softmaxPrediction = Prediction.Softmax();
+        Debug.Assert(_softmaxPrediction != null, "_softmaxPrediction should not be null here.");
+
         int batchSize = Prediction.GetLength(0);
-        return softmaxPrediction.Subtract(Target).Divide(batchSize);
+        return _softmaxPrediction.Subtract(Target).Divide(batchSize);
     }
 
-    override public string ToString() => $"SoftmaxCrossEntropyLoss (eps={eps})";
+    public override string ToString() => $"SoftmaxCrossEntropyLoss (eps={eps})";
 }
