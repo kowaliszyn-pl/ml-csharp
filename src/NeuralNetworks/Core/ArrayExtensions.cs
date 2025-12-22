@@ -662,7 +662,7 @@ public static class ArrayExtensions
             && source.GetLength(3) == matrix.GetLength(3);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] LeakyReLU(this float[,] source, float negativeAlpha = 0.5f, float alpha = 1f)
+    public static float[,] LeakyReLU(this float[,] source, float alpha = 0.01f, float beta = 1f)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
@@ -672,7 +672,7 @@ public static class ArrayExtensions
             for (int j = 0; j < columns; j++)
             {
                 float value = source[i, j];
-                res[i, j] = value >= 0 ? value * alpha : value * negativeAlpha;
+                res[i, j] = value >= 0 ? value * beta : value * alpha;
             }
         }
         return res;
@@ -1309,7 +1309,7 @@ public static class ArrayExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] ReLU(this float[,] source, float alpha = 1f)
+    public static float[,] ReLU(this float[,] source, float beta = 1f)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
@@ -1318,7 +1318,7 @@ public static class ArrayExtensions
         {
             for (int j = 0; j < columns; j++)
             {
-                res[i, j] = MathF.Max(0, source[i, j]) * alpha;
+                res[i, j] = MathF.Max(0, source[i, j]) * beta;
             }
         }
         return res;

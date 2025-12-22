@@ -44,3 +44,4 @@ The following results were obtained on the MNIST data set using dense layers for
 |23 | 0,0025       | 0,00065       | ReLU 1  | Tanh     | 0,83      | 0,85       | softmax cross entropy | Adam, beta 0,89        | 12     | 97,30%       |
 |24 | 0,0025       | 0,00065       | ReLU 1  | ReLU 0,5     | 0,85      | 0,85       | softmax cross entropy | Adam, beta 0,89        | 12     | 97,28%       |
 |25 | 0,0025       | 0,00065       | ReLU 1  | ReLU 1     | 0,85      | 0,85       | softmax cross entropy | Adam, beta 0,89        | 12     | 97,18%       |
+|26 | 0,0025       | 0,0005       | ReLU 1  | Tanh     | 0,85      | 0,85       | softmax cross entropy | Adam, beta 0,89        | 12     | 97,18%       |

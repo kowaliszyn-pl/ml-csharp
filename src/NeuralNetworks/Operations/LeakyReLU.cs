@@ -6,10 +6,10 @@ using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Operations;
 
-public class LeakyReLU(float negativeAlpha = 0.5f, float alpha = 1f) : Operation2D
+public class LeakyReLU(float alfa = 0.01f, float beta = 1f) : Operation2D
 {
     protected override float[,] CalcOutput(bool inference)
-        => Input.LeakyReLU(negativeAlpha, alpha);
+        => Input.LeakyReLU(alfa, beta);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {
@@ -20,12 +20,12 @@ public class LeakyReLU(float negativeAlpha = 0.5f, float alpha = 1f) : Operation
         {
             for (int j = 0; j < cols; j++)
             {
-                inputGradient[i, j] = Input[i, j] > 0 ? outputGradient[i, j] * alpha : outputGradient[i, j] * negativeAlpha;
+                inputGradient[i, j] = Input[i, j] > 0 ? outputGradient[i, j] * beta : outputGradient[i, j] * alfa;
             }
         }
         return inputGradient;
 
     }
 
-    public override string ToString() => $"LeakyReLU (negativeAlpha={negativeAlpha}, alpha={alpha})";
+    public override string ToString() => $"LeakyReLU (alfa={alfa}, beta={beta})";
 }

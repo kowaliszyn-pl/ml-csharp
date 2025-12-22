@@ -6,10 +6,10 @@ using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Operations;
 
-public class ReLU(float alpha = 1f) : Operation2D
+public class ReLU(float beta = 1f) : Operation2D
 {
     protected override float[,] CalcOutput(bool inference)
-        => Input.ReLU(alpha);
+        => Input.ReLU(beta);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {
@@ -20,11 +20,11 @@ public class ReLU(float alpha = 1f) : Operation2D
         {
             for (int j = 0; j < cols; j++)
             {
-                inputGradient[i, j] = Input[i, j] > 0 ? outputGradient[i, j] * alpha : 0f;
+                inputGradient[i, j] = Input[i, j] > 0 ? outputGradient[i, j] * beta : 0f;
             }
         }
         return inputGradient;
     }
 
-    public override string ToString() => $"ReLU (alpha={alpha})";
+    public override string ToString() => $"ReLU (beta={beta})";
 }
