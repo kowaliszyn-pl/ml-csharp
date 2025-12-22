@@ -1318,7 +1318,8 @@ public static class ArrayExtensions
         {
             for (int j = 0; j < columns; j++)
             {
-                res[i, j] = MathF.Max(0, source[i, j]) * beta;
+                float value = source[i, j];
+                res[i, j] = value >= 0 ? value * beta : 0;
             }
         }
         return res;
