@@ -101,7 +101,7 @@ void Variables()
 
             // Prediction and error calculation
             float prediction = a1 * x1 + a2 * x2 + a3 * x3 + b;
-            float error = y - prediction;
+            float error = prediction - y;
 
             // Accumulate squared error for MSE calculation
             sumSquaredError += error * error;
@@ -114,11 +114,11 @@ void Variables()
         }
 
         // Calculate gradients (partial derivatives of MSE)
-        // ∂MSE/∂a1 = -2/n * Σ(error * x1)
-        float deltaA1 = -2.0f / n * sumErrorForA1;
-        float deltaA2 = -2.0f / n * sumErrorForA2;
-        float deltaA3 = -2.0f / n * sumErrorForA3;
-        float deltaB = -2.0f / n * sumErrorForB;
+        // ∂MSE/∂a1 = 2/n * Σ(error * x1)
+        float deltaA1 = 2.0f / n * sumErrorForA1;
+        float deltaA2 = 2.0f / n * sumErrorForA2;
+        float deltaA3 = 2.0f / n * sumErrorForA3;
+        float deltaB = 2.0f / n * sumErrorForB;
 
         // Update regression parameters using gradient descent
         a1 -= LearningRate * deltaA1;
@@ -181,7 +181,7 @@ void Tables()
             {
                 prediction += a[i] * x[i];
             }
-            float error = y - prediction;
+            float error = prediction - y;
 
             // Accumulate squared error for MSE calculation
             sumSquaredError += error * error;
@@ -197,15 +197,15 @@ void Tables()
         }
 
         // Calculate gradients (partial derivatives of MSE)
-        // ∂MSE/∂ai = -2/n * Σ(error * xi)
+        // ∂MSE/∂ai = 2/n * Σ(error * xi)
         float[] deltaA = new float[numCoefficients];
         for (int i = 0; i < numCoefficients; i++)
         {
-            deltaA[i] = -2.0f / n * sumErrorForA[i];
+            deltaA[i] = 2.0f / n * sumErrorForA[i];
         }
 
-        // ∂MSE/∂b = -2/n * Σ(error)
-        float deltaB = -2.0f / n * sumErrorForB;
+        // ∂MSE/∂b = 2/n * Σ(error)
+        float deltaB = 2.0f / n * sumErrorForB;
 
         // Update regression parameters using gradient descent
         for (int i = 0; i < numCoefficients; i++)
@@ -266,16 +266,16 @@ void Matrices()
         // Make predictions for all samples at once: predictions = X * a + b
         float[,] predictions = X.MultiplyDot(A).Add(b);
 
-        // Calculate errors for all samples: errors = Y - predictions
-        float[,] errors = Y.Subtract(predictions);
+        // Calculate errors for all samples: errors = predictions - Y
+        float[,] errors = predictions.Subtract(Y);
 
-        // Calculate the gradient for the coefficients 'a': ∂MSE/∂a = -2/n * X^T * errors
+        // Calculate the gradient for the coefficients 'a': ∂MSE/∂a = 2/n * X^T * errors
         // X.Transpose() aligns features with their corresponding errors for the dot product
-        // We can pre-calculate X.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity
-        float[,] deltaA = X.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
+        // We can pre-calculate X.Transpose() and (2.0f / n) for efficiency, but let's leave it as is for clarity
+        float[,] deltaA = X.Transpose().MultiplyDot(errors).Multiply(2.0f / n);
 
-        // ∂MSE/∂b = -2/n * sum(errors)
-        float deltaB = -2.0f / n * errors.Sum();
+        // ∂MSE/∂b = 2/n * sum(errors)
+        float deltaB = 2.0f / n * errors.Sum();
 
         // Update regression parameters using gradient descent
         A = A.Subtract(deltaA.Multiply(LearningRate));
@@ -333,13 +333,13 @@ void MatricesWithBias()
         // Make predictions for all samples at once: predictions = XAnd1 * AB
         float[,] predictions = XAnd1.MultiplyDot(AB);
 
-        // Calculate errors for all samples: errors = Y - predictions
-        float[,] errors = Y.Subtract(predictions);
+        // Calculate errors for all samples: errors = predictions - Y
+        float[,] errors = predictions.Subtract(Y);
 
-        // Calculate the gradient for the coefficients 'AB': ∂MSE/∂AB = -2/n * XAnd1^T * errors
+        // Calculate the gradient for the coefficients 'AB': ∂MSE/∂AB = 2/n * XAnd1^T * errors
         // XAnd1.Transpose() aligns features and the additional column for the bias term with their corresponding errors for the dot product
-        // We can pre-calculate XAnd1.Transpose() and (-2.0f / n) for efficiency, but let's leave it as is for clarity
-        float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(-2.0f / n);
+        // We can pre-calculate XAnd1.Transpose() and (2.0f / n) for efficiency, but let's leave it as is for clarity
+        float[,] deltaAB = XAnd1.Transpose().MultiplyDot(errors).Multiply(2.0f / n);
 
         // Update regression parameters using gradient descent
         AB = AB.Subtract(deltaAB.Multiply(LearningRate));
