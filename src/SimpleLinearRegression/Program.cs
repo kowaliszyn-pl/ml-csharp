@@ -42,7 +42,7 @@ for (int iteration = 1; iteration <= Iterations; iteration++)
 
         // Prediction and error calculation
         float prediction = a * x + b;
-        float error = y - prediction;
+        float error = prediction - y;
 
         // Accumulate squared error and parts needed for gradient calculation
         squaredError += error * error;
@@ -51,8 +51,8 @@ for (int iteration = 1; iteration <= Iterations; iteration++)
     }
 
     // Calculate gradients (partial derivatives of MSE)
-    float deltaA = -2.0f / n * sumErrorValue;
-    float deltaB = -2.0f / n * sumError;
+    float deltaA = 2.0f / n * sumErrorValue;
+    float deltaB = 2.0f / n * sumError;
 
     // Update regression parameters
     a -= LearningRate * deltaA;

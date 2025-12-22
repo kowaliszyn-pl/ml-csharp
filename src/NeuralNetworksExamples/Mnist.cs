@@ -29,8 +29,8 @@ class MnistModel(SeededRandom? random)
     private const float Dropout1KeepProb = 0.85f;
     private const float Dropout2KeepProb = 0.85f;
 
-    private readonly Operation2D activationFunction1 = new ReLU(); 
-    private readonly Operation2D activationFunction2 = new LeakyReLU();
+    private readonly Operation2D activationFunction1 = new ReLU(0.9f); 
+    private readonly Operation2D activationFunction2 = new LeakyReLU(0.02f, 1.1f);
 
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
