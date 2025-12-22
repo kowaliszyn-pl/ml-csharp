@@ -119,7 +119,7 @@ static void MultipleLinearRegression()
     // 4. Training loop
 
     float[,] XTrainAnd1T = XTrainAnd1.Transpose();
-    float negativeTwoOverN = -2.0f / nTrain;
+    float twoOverN = 2.0f / nTrain;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
         // Prediction and error calculation
@@ -127,11 +127,11 @@ static void MultipleLinearRegression()
         // Make predictions for all samples at once: predictions = XTrainAnd1 * AB
         float[,] predictions = XTrainAnd1.MultiplyDot(AB);
 
-        // Calculate errors for all samples: errors = YTrain - predictions
-        float[,] errors = YTrain.Subtract(predictions);
+        // Calculate errors for all samples: errors = predictions - YTrain
+        float[,] errors = predictions.Subtract(YTrain);
 
-        // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = -2/n * XTrainAnd1^T * errors
-        float[,] deltaAB = XTrainAnd1T.MultiplyDot(errors).Multiply(negativeTwoOverN);
+        // Calculate gradient for coefficients 'AB': ∂MSE/∂AB = 2/n * XTrainAnd1^T * errors
+        float[,] deltaAB = XTrainAnd1T.MultiplyDot(errors).Multiply(twoOverN);
 
         // Update regression parameters using gradient descent
         AB = AB.Subtract(deltaAB.Multiply(LearningRate));
@@ -286,15 +286,15 @@ static void FirstNeuralNetwork()
         float[,] M2 = O1.MultiplyDot(W2);
         float[,] predictions = M2.Add(b2);
 
-        // Calculate errors for all samples: errors = YTrain - predictions
-        float[,] errors = YTrain.Subtract(predictions);
+        // Calculate errors for all samples: errors = predictions - YTrain
+        float[,] errors = predictions.Subtract(YTrain);
 
         // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order.
 
         // == The second layer (output) ==
 
         // [nTrain, 1]
-        float[,] dLdP = errors.Multiply(-2.0f / nTrain);
+        float[,] dLdP = errors.Multiply(2.0f / nTrain);
 
         // [nTrain, 1]
         float[,] dPdM2 = M2.AsOnes();
@@ -498,7 +498,7 @@ static void FirstNeuralNetworkSimplified()
     // 5. Training loop
 
     float[,] XTrainT = XTrain.Transpose();
-    float negativeTwoOverN = -2.0f / nTrain;
+    float twoOverN = 2.0f / nTrain;
     for (int iteration = 1; iteration <= Iterations; iteration++)
     {
         // GenericModel structure: XTrain → [W1, B1] → sigmoid → [W2, b2] → output
@@ -515,13 +515,13 @@ static void FirstNeuralNetworkSimplified()
         float[,] M2 = O1.MultiplyDot(W2);
         float[,] predictions = M2.Add(b2);
 
-        // Calculate errors for all samples: errors = YTrain - predictions
-        float[,] errors = YTrain.Subtract(predictions);
+        // Calculate errors for all samples: errors = predictions - YTrain
+        float[,] errors = predictions.Subtract(YTrain);
 
         // 5.2. Back (gradient calculation and parameters update). We do all calculations in backward order. This time a little bit simplified.
 
         // The second layer (output)
-        float[,] dLdP = errors.Multiply(negativeTwoOverN);
+        float[,] dLdP = errors.Multiply(twoOverN);
         float dLdBias2 = dLdP.Sum();
         float[,] dLdW2 = O1.Transpose().MultiplyDot(dLdP);
 
@@ -639,21 +639,3 @@ static (float[,] TrainData, float[,] TestData) GetData()
     // Return train and test data split by ratio
     return bostonData.SplitRowsByRatio(TestSplitRatio);
 }
-
-//static float[,] LoadCsv(string filePath)
-//{
-//    string[] lines = [.. File.ReadAllLines(filePath).Skip(1)];
-//    int rows = lines.Length;
-//    int cols = lines[0].Split(',').Length;
-//    float[,] matrix = new float[rows, cols];
-//    for (int i = 0; i < rows; i++)
-//    {
-//        string[] values = lines[i].Split(',');
-//        for (int j = 0; j < cols; j++)
-//        {
-//            string value = values[j].Trim('"');
-//            matrix[i, j] = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-//        }
-//    }
-//    return matrix;
-//}
