@@ -1517,6 +1517,22 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Softplus(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                res[i, j] = MathF.Log(1 + MathF.Exp(source[i, j]));
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Splits the source into two sets of dim1 based on the specified ratio. 
     /// </summary>
