@@ -3,7 +3,7 @@
   <Class Name="NeuralNetworks.Operations.Operation">
     <Position X="1.25" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAIAAAAAAACAAAAAAAI=</HashCode>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAKAAAAAAQCAAAAAAAI=</HashCode>
       <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -20,14 +20,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Sigmoid" Collapsed="true">
-    <Position X="2.25" Y="5.25" Width="1.5" />
+    <Position X="6.75" Y="6" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Sigmoid.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Linear" Collapsed="true">
-    <Position X="7.5" Y="5.25" Width="1.5" />
+    <Position X="6.75" Y="11" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Linear.cs</FileName>
@@ -54,21 +54,21 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Tanh2D" Collapsed="true">
-    <Position X="4" Y="5.25" Width="1.5" />
+    <Position X="6.75" Y="5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Tanh2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Operation2D" Collapsed="true">
-    <Position X="2.25" Y="3" Width="1.5" />
+    <Position X="4.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\Operation2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Operation4D" Collapsed="true">
-    <Position X="9.75" Y="3" Width="1.5" />
+    <Position X="11" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\Operation4D.cs</FileName>
@@ -112,7 +112,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Dropout2D" Collapsed="true">
-    <Position X="5.75" Y="5.25" Width="1.5" />
+    <Position X="2.75" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAgAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Dropout2D.cs</FileName>
@@ -132,6 +132,34 @@
     <TypeIdentifier>
       <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Conv2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Softplus" Collapsed="true">
+    <Position X="6.75" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Softplus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ReLU" Collapsed="true">
+    <Position X="6.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\ReLU.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.LeakyReLU" Collapsed="true">
+    <Position X="6.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\LeakyReLU.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.BipolarSigmoid" Collapsed="true">
+    <Position X="6.75" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\BipolarSigmoid.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />
