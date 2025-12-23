@@ -2,9 +2,6 @@
 // File name: Model.cs
 // www.kowaliszyn.pl, 2025
 
-using System;
-using System.Reflection;
-
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Losses;

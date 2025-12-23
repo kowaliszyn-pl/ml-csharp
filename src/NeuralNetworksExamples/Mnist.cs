@@ -23,23 +23,18 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
+// For the current configuration and hyperparameters, the model achieves 97,58% accuracy.
+
 class MnistModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
-    private const float Dropout1KeepProb = 0.85f;
-    private const float Dropout2KeepProb = 0.85f;
-
-    private readonly Operation2D activationFunction1 = new ReLU(); 
-    private readonly Operation2D activationFunction2 = new Tanh2D();
-
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
-        Dropout2D? dropout1 = new(Dropout1KeepProb, Random);
-        Dropout2D? dropout2 = new(Dropout2KeepProb, Random);
 
-        return AddLayer(new DenseLayer(178, activationFunction1, initializer, dropout1))
-            .AddLayer(new DenseLayer(46, activationFunction2, initializer, dropout2))
+        return 
+             AddLayer(new DenseLayer(178, new LeakyReLU(), initializer, new Dropout2D(0.85f, Random)))
+            .AddLayer(new DenseLayer(46, new Tanh2D(), initializer, new Dropout2D(0.85f, Random)))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
 }
@@ -55,7 +50,7 @@ class Mnist
     const float InitialLearningRate = 0.0025f;
     const float FinalLearningRate = 0.0005f;
     const float AdamBeta1 = 0.89f;
-    const float AdamBeta2 = 0.999f;
+    const float AdamBeta2 = 0.99f;
 
     public static void Run()
     {

@@ -42,6 +42,7 @@ public class LayerListBuilder<TIn, TOut> : LayerListBuilder
         LayerListBuilder? builder = this;
         while (builder != null)
         {
+            builder.Layer.SetRegistered();
             layers.Insert(0, builder.Layer);
             builder = builder.Parent;
         }

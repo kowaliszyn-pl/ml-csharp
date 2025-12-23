@@ -43,6 +43,7 @@ public class OperationListBuilder<TIn, TOut> : OperationListBuilder
         OperationListBuilder? builder = this;
         while (builder != null)
         {
+            builder.Operation.SetRegistered();
             operations.Insert(0, builder.Operation);
             builder = builder.Parent;
         }

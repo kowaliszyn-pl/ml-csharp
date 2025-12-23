@@ -12,6 +12,15 @@ namespace NeuralNetworks.Layers;
 
 public abstract class Layer
 {
+    bool _registered = false;
+
+    public void SetRegistered()
+    {
+        if (_registered)
+            throw new InvalidOperationException("Layer is already registered.");
+        _registered = true;
+    }
+
     public abstract Type GetOutputType();
     public abstract Type GetInputType();
     public abstract object Forward(object input, bool inference);

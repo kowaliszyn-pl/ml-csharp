@@ -8,6 +8,16 @@ namespace NeuralNetworks.Operations;
 
 public abstract class Operation
 {
+    bool _registered = false;
+
+    public void SetRegistered()
+    {
+        if(_registered)
+            throw new InvalidOperationException($"Operation '{this}' is already registered.");
+
+        _registered = true;
+    }
+
     public abstract Type GetOutputType();
     public abstract Type GetInputType();
     public abstract object Forward(object input, bool inference);
