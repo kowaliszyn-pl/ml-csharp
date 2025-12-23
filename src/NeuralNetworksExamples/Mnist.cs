@@ -25,27 +25,6 @@ namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves 97,69% accuracy.
 
-public class BipolarSigmoid(float scale) : Operation2D
-{
-    protected override float[,] CalcOutput(bool inference)
-        => Input.Sigmoid().Add(-0.5f).Multiply(scale);
-
-    protected override float[,] CalcInputGradient(float[,] outputGradient)
-    {
-        Debug.Assert(scale != 0f, "Scale must be non-zero.");
-
-        // Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
-        // Output = scale * (σ(x) - 0.5)  =>  σ(x) = (Output/scale) + 0.5
-        // d/dx[scale * (σ(x) - 0.5)] = scale * σ(x) * (1 - σ(x))
-        // Therefore, the input gradient is computed as: dL/dx = dL/dy * scale * σ(x) * (1 - σ(x)).
-        float[,] sigma = Output.Divide(scale).Add(0.5f);
-        float[,] sigmoidBackward = sigma.MultiplyElementwise(sigma.AsOnes().Subtract(sigma)).Multiply(scale);
-        return outputGradient.MultiplyElementwise(sigmoidBackward);
-    }
-
-    public override string ToString() => $"BipolarSigmoid (scale={scale})";
-}
-
 class MnistModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
