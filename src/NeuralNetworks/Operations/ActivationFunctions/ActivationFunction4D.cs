@@ -9,16 +9,14 @@ using System.Text;
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
 /// <summary>
-/// Represents an abstract 4-dimensional activation function operation.
+/// Defines an abstract 4D activation function operation applied element-wise to convolutional tensors.
 /// </summary>
 /// <remarks>
-/// Activation functions introduce non-linearity into neural network computations.
-/// This base class defines the contract for operations that transform 4D tensors,
-/// typically in the shape of <c>(batch, channels, height, width)</c>.
-/// Concrete implementations should provide the forward and (optionally) backward
-/// passes by deriving from <c>Operation4D</c>.
+/// Activation functions introduce non-linearity into neural network computations. This base class specifies
+/// the contract for operations that transform 4D tensors, typically shaped as <code>(batch, channels, height, width)</code>
+/// in convolutional pipelines. Concrete implementations should provide the forward activation and, where applicable,
+/// support gradient computation for backpropagation by deriving from <see cref="Operation4D"/>.
 /// </remarks>
-/// <seealso cref="Operation4D"/>
 public abstract class ActivationFunction4D : Operation4D
 {
 }
