@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
+using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.ParamInitializers;
 
 using static NeuralNetworks.Core.ArrayUtils;
@@ -15,11 +16,11 @@ namespace NeuralNetworks.Layers;
 public class DenseLayer : Layer<float[,], float[,]>
 {
     private readonly int _neurons;
-    private readonly Operation2D _activationFunction;
+    private readonly ActivationFunction2D _activationFunction;
     private readonly ParamInitializer _paramInitializer;
     private readonly Dropout2D? _dropout;
 
-    public DenseLayer(int neurons, Operation2D activationFunction, ParamInitializer paramInitializer, Dropout2D? dropout = null)
+    public DenseLayer(int neurons, ActivationFunction2D activationFunction, ParamInitializer paramInitializer, Dropout2D? dropout = null)
     {
         _neurons = neurons;
         _activationFunction = activationFunction;
