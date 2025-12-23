@@ -2,14 +2,19 @@
 // File name: Sigmoid.cs
 // www.kowaliszyn.pl, 2025
 
+
+// Neural Networks in C♯
+// File name: Sigmoid.cs
+// www.kowaliszyn.pl, 2025
+
 using NeuralNetworks.Core;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.ActivationFunctions;
 
 /// <summary>
 /// Sigmoid activation function.
 /// </summary>
-public class Sigmoid : Operation2D
+public class Sigmoid : ActivationFunction2D
 {
     protected override float[,] CalcOutput(bool inference)
         => Input.Sigmoid();

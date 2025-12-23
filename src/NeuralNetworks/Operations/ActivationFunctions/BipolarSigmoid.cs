@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using NeuralNetworks.Core;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.ActivationFunctions;
 
 /// <summary>
 /// Represents a bipolar sigmoid activation operation that applies a scaled sigmoid function shifted to the range [-0.5,
@@ -20,7 +20,7 @@ namespace NeuralNetworks.Operations;
 /// </para>
 /// </remarks>
 /// <param name="scale">The scaling factor applied to the output of the sigmoid function. Must be non-zero.</param>
-public class BipolarSigmoid(float scale) : Operation2D
+public class BipolarSigmoid(float scale) : ActivationFunction2D
 {
     protected override float[,] CalcOutput(bool inference)
         => Input.Sigmoid().Add(-0.5f).Multiply(scale);

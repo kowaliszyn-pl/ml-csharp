@@ -2,6 +2,8 @@
 // File name: Tanh4DTests.cs
 // Code It Yourself with .NET, 2024
 
+using NeuralNetworks.Operations.ActivationFunctions;
+
 namespace NeuralNetworks.Operations.Tests;
 
 [TestClass]

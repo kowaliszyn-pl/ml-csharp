@@ -2,11 +2,16 @@
 // File name: Softplus.cs
 // www.kowaliszyn.pl, 2025
 
+
+// Neural Networks in C♯
+// File name: Softplus.cs
+// www.kowaliszyn.pl, 2025
+
 using NeuralNetworks.Core;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class Softplus : Operation2D
+public class Softplus : ActivationFunction2D
 {
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {

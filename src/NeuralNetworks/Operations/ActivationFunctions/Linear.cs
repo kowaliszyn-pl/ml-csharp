@@ -2,12 +2,12 @@
 // File name: Linear.cs
 // Code It Yourself with .NET, 2024
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.ActivationFunctions;
 
 /// <summary>
 /// "Identity" activation function
 /// </summary>
-public class Linear : Operation2D
+public class Linear : ActivationFunction2D
 {
     protected override float[,] CalcOutput(bool inference) => Input;
 

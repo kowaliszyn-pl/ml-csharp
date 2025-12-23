@@ -11,7 +11,7 @@ using NeuralNetworks.LearningRates;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
-using NeuralNetworks.Operations;
+using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;

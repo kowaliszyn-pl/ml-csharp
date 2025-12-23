@@ -1,15 +1,15 @@
 ﻿// Neural Networks in C♯
-// File name: LeakyReLU.cs
+// File name: ReLU.cs
 // www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class LeakyReLU(float alfa = 0.01f, float beta = 1f) : Operation2D
+public class ReLU(float beta = 1f) : ActivationFunction2D
 {
     protected override float[,] CalcOutput(bool inference)
-        => Input.LeakyReLU(alfa, beta);
+        => Input.ReLU(beta);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {
@@ -20,12 +20,11 @@ public class LeakyReLU(float alfa = 0.01f, float beta = 1f) : Operation2D
         {
             for (int j = 0; j < cols; j++)
             {
-                inputGradient[i, j] = Input[i, j] > 0 ? outputGradient[i, j] * beta : outputGradient[i, j] * alfa;
+                inputGradient[i, j] = Input[i, j] > 0 ? outputGradient[i, j] * beta : 0f;
             }
         }
         return inputGradient;
-
     }
 
-    public override string ToString() => $"LeakyReLU (alfa={alfa}, beta={beta})";
+    public override string ToString() => $"ReLU (beta={beta})";
 }

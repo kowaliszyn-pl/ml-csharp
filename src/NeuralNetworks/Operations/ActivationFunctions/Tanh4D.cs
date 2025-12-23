@@ -1,17 +1,21 @@
 ﻿// Neural Networks in C♯
-// File name: Tanh2D.cs
+// File name: Tanh4D.cs
+// www.kowaliszyn.pl, 2025
+
+
+// Neural Networks in C♯
+// File name: Tanh4D.cs
 // www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class Tanh2D : Operation2D
+public class Tanh4D : ActivationFunction4D
 {
-    protected override float[,] CalcOutput(bool inference) 
-        => Input.Tanh();
+    protected override float[,,,] CalcOutput(bool inference) => Input.Tanh();
 
-    protected override float[,] CalcInputGradient(float[,] outputGradient)
+    protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
     {
         // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
         // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
@@ -21,9 +25,9 @@ public class Tanh2D : Operation2D
         // tanh(x) => Output
         // dL/dy => outputGradient
         // dl/dx => inputGradient
-        float[,] tanhBackward = Output.AsOnes().Subtract(Output.MultiplyElementwise(Output));
+        float[,,,] tanhBackward = Output.AsOnes().Subtract(Output.MultiplyElementwise(Output));
         return outputGradient.MultiplyElementwise(tanhBackward);
     }
 
-    public override string ToString() => "Tanh2D";
+    public override string ToString() => "Tanh4D";
 }
