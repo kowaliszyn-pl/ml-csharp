@@ -12,7 +12,7 @@ public class GlorotInitializer(SeededRandom? random = null) : RandomInitializer(
 {
     internal override float[,] InitWeights(int inputColumns, int neurons)
     {
-        float stdDev = (float)Math.Sqrt(2.0 / (inputColumns + neurons));
+        float stdDev = MathF.Sqrt(2.0f / (inputColumns + neurons));
         return CreateRandomNormal(inputColumns, neurons, Random, 0, stdDev);
     }
 
