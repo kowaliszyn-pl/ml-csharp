@@ -84,7 +84,7 @@ public class AdamOptimizer : Optimizer
     {
         /*
          * The process of updating parameters using Adam optimizer involves the following steps:
-         * 1. Compute the first moment (m) and second moment (v) estimates.
+         * 1. Compute the first moment (mean, m) and second moment (variance, v) estimates.
          * 2. Update biased first moment estimate.
          * 3. Update biased second moment estimate.
          * 4. Compute bias-corrected first moment estimate.
@@ -102,10 +102,13 @@ public class AdamOptimizer : Optimizer
 
         for (int i = 0; i < param.Length; i++)
         {
-            m[i] = _beta1 * m[i] + (1 - _beta1) * paramGradient[i];
-            v[i] = _beta2 * v[i] + (1 - _beta2) * paramGradient[i] * paramGradient[i];
-            float mHat = m[i] / (1 - beta1t);
-            float vHat = v[i] / (1 - beta2t);
+            float paramGrad = paramGradient[i];
+            float mean = _beta1 * m[i] + (1 - _beta1) * paramGrad; // first moment
+            float variance = _beta2 * v[i] + (1 - _beta2) * paramGrad * paramGrad; // second moment
+            float mHat = mean / (1 - beta1t);
+            float vHat = variance / (1 - beta2t);
+            m[i] = mean;
+            v[i] = variance;
             param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
         }
     }
