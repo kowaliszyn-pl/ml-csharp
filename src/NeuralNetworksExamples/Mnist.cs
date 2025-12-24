@@ -24,7 +24,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-// For the current configuration and hyperparameters, the model achieves 97,51% accuracy (changed after changing the implementation of Glorot initializer).
+// For the current configuration and hyperparameters, the model achieves  97,54% accuracy (changed after changing the implementation of Glorot initializer).
 
 class MnistModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
@@ -34,8 +34,8 @@ class MnistModel(SeededRandom? random)
         GlorotInitializer initializer = new(Random);
 
         return 
-             AddLayer(new DenseLayer(178, new LeakyReLU(0.005f), initializer, new Dropout2D(0.85f, Random)))
-            .AddLayer(new DenseLayer(46, new BipolarSigmoid(1.5f), initializer, new Dropout2D(0.85f, Random)))
+             AddLayer(new DenseLayer(178, new LeakyReLU(0.005f), initializer, new InvertedDropout2D(0.82f, Random)))
+            .AddLayer(new DenseLayer(46, new BipolarSigmoid(1.5f), initializer, new InvertedDropout2D(0.82f, Random)))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
 }

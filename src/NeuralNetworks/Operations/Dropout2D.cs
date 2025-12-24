@@ -5,14 +5,11 @@
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Operations.Interfaces;
 
 namespace NeuralNetworks.Operations;
 
-public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : Operation2D, IParameterCountProvider
+public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : BaseDropout2D
 {
-    private float[,]? _mask;
-
     protected override float[,] CalcOutput(bool inference)
     {
         if (inference)
@@ -21,20 +18,20 @@ public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : Ope
         }
         else
         {
-            _mask = Input.AsZeroOnes(keepProb, random ?? new());
-            return Input.MultiplyElementwise(_mask);
+            Mask = Input.AsZeroOnes(keepProb, random ?? new());
+            return Input.MultiplyElementwise(Mask);
         }
     }
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {
-        Debug.Assert(_mask != null, "Mask must not be null here.");
-        return outputGradient.MultiplyElementwise(_mask);
+        Debug.Assert(Mask != null, "Mask must not be null here.");
+
+        return outputGradient.MultiplyElementwise(Mask);
     }
 
     public override string ToString() => $"Dropout2D (keepProb={keepProb}, seed={random?.Seed})";
 
-    public int GetParamCount()
-        => _mask?.Length ?? 0;
+
 
 }

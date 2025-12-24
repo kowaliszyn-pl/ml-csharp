@@ -18,9 +18,9 @@ public class DenseLayer : Layer<float[,], float[,]>
     private readonly int _neurons;
     private readonly ActivationFunction2D _activationFunction;
     private readonly ParamInitializer _paramInitializer;
-    private readonly Dropout2D? _dropout;
+    private readonly BaseDropout2D? _dropout;
 
-    public DenseLayer(int neurons, ActivationFunction2D activationFunction, ParamInitializer paramInitializer, Dropout2D? dropout = null)
+    public DenseLayer(int neurons, ActivationFunction2D activationFunction, ParamInitializer paramInitializer, BaseDropout2D? dropout = null)
     {
         _neurons = neurons;
         _activationFunction = activationFunction;
