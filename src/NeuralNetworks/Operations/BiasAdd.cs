@@ -21,21 +21,14 @@ public class BiasAdd(float[] bias) : ParamOperation2D<float[]>(bias)
         => Input.AddRow(Param);
 
     protected override float[] CalcParamGradient(float[,] outputGradient)
-    {
-        float[,] paramGrad = Param.AsOnes().MultiplyElementwise(outputGradient);
-        // We dont use AvgByRows here, because the outputGradient is already averaged over the batch size in the loss function.
-        return paramGrad.SumByColumns();
-        // return outputGradient.SumByColumns(); ?
-    }
+       // outputGradient is already averaged over the batch size in the loss function, so we just need to sum by columns
+       => outputGradient.SumByColumns();
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
-        => Input.AsOnes().MultiplyElementwise(outputGradient);
-    //  => outputGradient ?
+      => outputGradient; // => Input.AsOnes().MultiplyElementwise(outputGradient);
 
-    public override void UpdateParams(Layer? layer, Optimizer optimizer)
-    {
-        optimizer.Update(layer, Param, ParamGradient);
-    }
+    public override void UpdateParams(Layer? layer, Optimizer optimizer) 
+        => optimizer.Update(layer, Param, ParamGradient);
 
     protected override void EnsureSameShapeForParam(float[]? param, float[] paramGradient)
         => EnsureSameShape(param, paramGradient);

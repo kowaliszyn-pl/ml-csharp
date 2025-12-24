@@ -1,6 +1,6 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: WeightMultiply.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025
 
 // This class is derived from the content originally published in the book Deep Learning from Scratch: Building with
 // Python from First Principles by Seth Weidman. Some comments here are copied/modified from the original text.
@@ -28,12 +28,9 @@ public class WeightMultiply(float[,] weights) : ParamOperation2D<float[,]>(weigh
     protected override float[,] CalcParamGradient(float[,] outputGradient)
         => Input.Transpose().MultiplyDot(outputGradient);
 
-    public override void UpdateParams(Layer? layer, Optimizer optimizer)
-    {
-        optimizer.Update(layer, Param, ParamGradient);
-    }
+    public override void UpdateParams(Layer? layer, Optimizer optimizer) => optimizer.Update(layer, Param, ParamGradient);
 
-    protected override void EnsureSameShapeForParam(float[,]? param, float[,] paramGradient) 
+    protected override void EnsureSameShapeForParam(float[,]? param, float[,] paramGradient)
         => EnsureSameShape(param, paramGradient);
 
     public override int GetParamCount()
