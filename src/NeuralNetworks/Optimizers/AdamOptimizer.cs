@@ -3,7 +3,9 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
+using System.Numerics.Tensors;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
@@ -51,22 +53,49 @@ public class AdamOptimizer : Optimizer
 
         (int t, float[] m, float[] v) = GetOrCreateState(param);
 
-        float beta1t = MathF.Pow(_beta1, t);
-        float beta2t = MathF.Pow(_beta2, t);
+        //float beta1t = MathF.Pow(_beta1, t);
+        //float beta2t = MathF.Pow(_beta2, t);
 
+        //float lr = LearningRate.GetLearningRate();
+        //WarnIfLearningRateIsSuspicious(lr);
+
+        ApplyUpdate(
+            param.AsSpan(),
+            paramGradient.AsSpan(),
+            v.AsSpan(),
+            m.AsSpan(),
+            t,
+            _beta1,
+            _beta2);
+
+        //int length = param.Length;
+
+        //for (int i = 0; i < length; i++)
+        //{
+        //    m[i] = _beta1 * m[i] + (1 - _beta1) * paramGradient[i];
+        //    v[i] = _beta2 * v[i] + (1 - _beta2) * paramGradient[i] * paramGradient[i];
+
+        //    float mHat = m[i] / (1 - beta1t);
+        //    float vHat = v[i] / (1 - beta2t);
+
+        //    param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
+        //}
+    }
+
+    private void ApplyUpdate(Span<float> param, ReadOnlySpan<float> paramGradient, Span<float> v, Span<float> m, int t, float beta1, float beta2)
+    {
         float lr = LearningRate.GetLearningRate();
         WarnIfLearningRateIsSuspicious(lr);
 
-        int length = param.Length;
+        float beta1t = MathF.Pow(_beta1, t);
+        float beta2t = MathF.Pow(_beta2, t);
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < param.Length; i++)
         {
-            m[i] = _beta1 * m[i] + (1 - _beta1) * paramGradient[i];
-            v[i] = _beta2 * v[i] + (1 - _beta2) * paramGradient[i] * paramGradient[i];
-
+            m[i] = beta1 * m[i] + (1 - beta1) * paramGradient[i];
+            v[i] = beta2 * v[i] + (1 - beta2) * paramGradient[i] * paramGradient[i];
             float mHat = m[i] / (1 - beta1t);
             float vHat = v[i] / (1 - beta2t);
-
             param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
         }
     }
@@ -77,28 +106,37 @@ public class AdamOptimizer : Optimizer
 
         (int t, float[,] m, float[,] v) = GetOrCreateState(param);
 
-        float beta1t = MathF.Pow(_beta1, t);
-        float beta2t = MathF.Pow(_beta2, t);
+        ApplyUpdate(
+            MemoryMarshal.CreateSpan(ref param[0, 0], param.Length),
+            MemoryMarshal.CreateReadOnlySpan(ref paramGradient[0, 0], param.Length),
+            MemoryMarshal.CreateSpan(ref v[0, 0], param.Length),
+            MemoryMarshal.CreateSpan(ref m[0, 0], param.Length),
+            t,
+            _beta1,
+            _beta2);
 
-        float lr = LearningRate.GetLearningRate();
-        WarnIfLearningRateIsSuspicious(lr);
+        //float beta1t = MathF.Pow(_beta1, t);
+        //float beta2t = MathF.Pow(_beta2, t);
 
-        int dim1 = param.GetLength(0);
-        int dim2 = param.GetLength(1);
+        //float lr = LearningRate.GetLearningRate();
+        //WarnIfLearningRateIsSuspicious(lr);
 
-        for (int i = 0; i < dim1; i++)
-        {
-            for (int j = 0; j < dim2; j++)
-            {
-                m[i, j] = _beta1 * m[i, j] + (1 - _beta1) * paramGradient[i, j];
-                v[i, j] = _beta2 * v[i, j] + (1 - _beta2) * paramGradient[i, j] * paramGradient[i, j];
+        //int dim1 = param.GetLength(0);
+        //int dim2 = param.GetLength(1);
 
-                float mHat = m[i, j] / (1 - beta1t);
-                float vHat = v[i, j] / (1 - beta2t);
+        //for (int i = 0; i < dim1; i++)
+        //{
+        //    for (int j = 0; j < dim2; j++)
+        //    {
+        //        m[i, j] = _beta1 * m[i, j] + (1 - _beta1) * paramGradient[i, j];
+        //        v[i, j] = _beta2 * v[i, j] + (1 - _beta2) * paramGradient[i, j] * paramGradient[i, j];
 
-                param[i, j] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
-            }
-        }
+        //        float mHat = m[i, j] / (1 - beta1t);
+        //        float vHat = v[i, j] / (1 - beta2t);
+
+        //        param[i, j] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
+        //    }
+        //}
     }
 
     public override void Update(Layer? layer, float[,,,] param, float[,,,] paramGradient)
@@ -106,36 +144,47 @@ public class AdamOptimizer : Optimizer
         Debug.Assert(param.HasSameShape(paramGradient));
 
         (int t, float[,,,] m, float[,,,] v) = GetOrCreateState(param);
-        float beta1t = MathF.Pow(_beta1, t);
-        float beta2t = MathF.Pow(_beta2, t);
 
-        float lr = LearningRate.GetLearningRate();
-        WarnIfLearningRateIsSuspicious(lr);
+        ApplyUpdate(
+            MemoryMarshal.CreateSpan(ref param[0, 0, 0, 0], param.Length),
+            MemoryMarshal.CreateReadOnlySpan(ref paramGradient[0, 0, 0, 0], param.Length),
+            MemoryMarshal.CreateSpan(ref v[0, 0, 0, 0], param.Length),
+            MemoryMarshal.CreateSpan(ref m[0, 0, 0, 0], param.Length),
+            t,
+            _beta1,
+            _beta2);
 
-        int dim1 = param.GetLength(0);
-        int dim2 = param.GetLength(1);
-        int dim3 = param.GetLength(2);
-        int dim4 = param.GetLength(3);
 
-        for (int i = 0; i < dim1; i++)
-        {
-            for (int j = 0; j < dim2; j++)
-            {
-                for (int k = 0; k < dim3; k++)
-                {
-                    for (int l = 0; l < dim4; l++)
-                    {
-                        m[i, j, k, l] = _beta1 * m[i, j, k, l] + (1 - _beta1) * paramGradient[i, j, k, l];
-                        v[i, j, k, l] = _beta2 * v[i, j, k, l] + (1 - _beta2) * paramGradient[i, j, k, l] * paramGradient[i, j, k, l];
+        //float beta1t = MathF.Pow(_beta1, t);
+        //float beta2t = MathF.Pow(_beta2, t);
 
-                        float mHat = m[i, j, k, l] / (1 - beta1t);
-                        float vHat = v[i, j, k, l] / (1 - beta2t);
+        //float lr = LearningRate.GetLearningRate();
+        //WarnIfLearningRateIsSuspicious(lr);
 
-                        param[i, j, k, l] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
-                    }
-                }
-            }
-        }
+        //int dim1 = param.GetLength(0);
+        //int dim2 = param.GetLength(1);
+        //int dim3 = param.GetLength(2);
+        //int dim4 = param.GetLength(3);
+
+        //for (int i = 0; i < dim1; i++)
+        //{
+        //    for (int j = 0; j < dim2; j++)
+        //    {
+        //        for (int k = 0; k < dim3; k++)
+        //        {
+        //            for (int l = 0; l < dim4; l++)
+        //            {
+        //                m[i, j, k, l] = _beta1 * m[i, j, k, l] + (1 - _beta1) * paramGradient[i, j, k, l];
+        //                v[i, j, k, l] = _beta2 * v[i, j, k, l] + (1 - _beta2) * paramGradient[i, j, k, l] * paramGradient[i, j, k, l];
+
+        //                float mHat = m[i, j, k, l] / (1 - beta1t);
+        //                float vHat = v[i, j, k, l] / (1 - beta2t);
+
+        //                param[i, j, k, l] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,19 +264,11 @@ public class AdamOptimizer : Optimizer
         }
     }
 
-    private sealed class State2D
+    private sealed class State2D(float[,] param)
     {
         public int T { get; set; } = 1;
-        public float[,] M { get; }
-        public float[,] V { get; }
-
-        public State2D(float[,] param)
-        {
-            int rows = param.GetLength(0);
-            int cols = param.GetLength(1);
-            M = new float[rows, cols];
-            V = new float[rows, cols];
-        }
+        public float[,] M { get; } = param.AsZeros();
+        public float[,] V { get; } = param.AsZeros();
 
         public void Deconstruct(out int t, out float[,] m, out float[,] v)
         {
@@ -237,20 +278,12 @@ public class AdamOptimizer : Optimizer
         }
     }
 
-    private sealed class State4D
+    private sealed class State4D(float[,,,] param)
     {
         public int T { get; set; } = 1;
-        public float[,,,] M { get; }
-        public float[,,,] V { get; }
-        public State4D(float[,,,] param)
-        {
-            int dim1 = param.GetLength(0);
-            int dim2 = param.GetLength(1);
-            int dim3 = param.GetLength(2);
-            int dim4 = param.GetLength(3);
-            M = new float[dim1, dim2, dim3, dim4];
-            V = new float[dim1, dim2, dim3, dim4];
-        }
+        public float[,,,] M { get; } = param.AsZeros();
+        public float[,,,] V { get; } = param.AsZeros();
+
         public void Deconstruct(out int t, out float[,,,] m, out float[,,,] v)
         {
             t = T;

@@ -113,7 +113,7 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
         }
         else
         {
-            velocities = new float[param.GetLength(0), param.GetLength(1)];
+            velocities = param.AsZeros();
             _velocities2D.Add(param, velocities);
             return velocities;
         }
@@ -128,7 +128,7 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
         }
         else
         {
-            velocities = new float[param.GetLength(0), param.GetLength(1), param.GetLength(2), param.GetLength(3)];
+            velocities = param.AsZeros();
             _velocities4D.Add(param, velocities);
             return velocities;
         }
