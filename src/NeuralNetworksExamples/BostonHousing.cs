@@ -28,7 +28,7 @@ class BostonHousingModel(SeededRandom? random)
     {
         GlorotInitializer initializer = new(Random);
 
-        return AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
+        return AddLayer(new DenseLayer(4, new Tanh2D(), initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
 }
@@ -100,7 +100,7 @@ internal class BostonHousing
             model = new GenericModel<float[,], float[,]>(
 
                 layerListBuilder: LayerListBuilder<float[,], float[,]>
-                    .AddLayer(new DenseLayer(neurons: 4, new Sigmoid(), new GlorotInitializer(commonRandom)))
+                    .AddLayer(new DenseLayer(neurons: 4, new Tanh2D(), new GlorotInitializer(commonRandom)))
                     .AddLayer(new DenseLayer(neurons: 1, new Linear(), new GlorotInitializer(commonRandom))),
 
                 lossFunction: new MeanSquaredError(),
@@ -115,6 +115,7 @@ internal class BostonHousing
         Trainer2D trainer = new(
             model,
             new GradientDescentMomentumOptimizer(learningRate, 0.9f),
+            // new AdamOptimizer(learningRate),
             random: commonRandom,
             logger: logger)
         {
