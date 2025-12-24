@@ -102,17 +102,6 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
             _velocities1D.Add(param, velocities);
             return velocities;
         }
-
-        //if (_velocities1D.ContainsKey(param))
-        //{
-        //    return _velocities1D[param];
-        //}
-        //else
-        //{
-        //    float[] velocities = new float[param.Length];
-        //    _velocities1D.Add(param, velocities);
-        //    return velocities;
-        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -148,85 +137,3 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
     public override string ToString()
         => $"GradientDescentMomentum (learningRate={LearningRate}, momentum={momentum})";
 }
-
-/*
- 
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
-using MachineLearning.GenericModel.LearningRates;
-using MachineLearning.Typed.GenericModel.Layers;
-
-namespace MachineLearning.Typed.GenericModel.Optimizers;
-
-public class GradientDescentMomentumOptimizer(LearningRate learningRate, float momentum) : Optimizer(learningRate)
-{
-    private Dictionary<Array, Array> _velocities = new();
-
-    public override void Update(Layer layer, float[] param, float[] paramGradient)
-    {
-        UpdateParameters(param, paramGradient, momentum);
-    }
-
-    public override void Update(Layer layer, float[,] param, float[,] paramGradient)
-    {
-        UpdateParameters(param, paramGradient, momentum);
-    }
-
-    public override void Update(Layer layer, float[,,,] param, float[,,,] paramGradient)
-    {
-        UpdateParameters(param, paramGradient, momentum);
-    }
-
-    private void UpdateParameters<T>(T param, T paramGradient, float momentum) where T : Array
-    {
-        Debug.Assert(param.HasSameShape(paramGradient));
-
-        float learningRate = LearningRate.GetLearningRate();
-        T velocities = GetOrCreateVelocities(param);
-
-        int[] indices = new int[param.Rank];
-        UpdateRecursive(param, paramGradient, velocities, learningRate, momentum, indices, 0);
-    }
-
-    private void UpdateRecursive<T>(T param, T paramGradient, T velocities, float learningRate, float momentum, int[] indices, int dimension) where T : Array
-    {
-        int length = param.GetLength(dimension);
-        for (int i = 0; i < length; i++)
-        {
-            indices[dimension] = i;
-            if (dimension == param.Rank - 1)
-            {
-                float velocity = (float)velocities.GetValue(indices);
-                float gradient = (float)paramGradient.GetValue(indices);
-                velocity = velocity * momentum + learningRate * gradient;
-                velocities.SetValue(velocity, indices);
-                param.SetValue((float)param.GetValue(indices) - velocity, indices);
-            }
-            else
-            {
-                UpdateRecursive(param, paramGradient, velocities, learningRate, momentum, indices, dimension + 1);
-            }
-        }
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private T GetOrCreateVelocities<T>(T param) where T : Array
-    {
-        if (_velocities.TryGetValue(param, out Array? velocities))
-        {
-            return (T)velocities;
-        }
-        else
-        {
-            T newVelocities = (T)Activator.CreateInstance(typeof(T), param.GetLengths());
-            _velocities.Add(param, newVelocities);
-            return newVelocities;
-        }
-    }
-
-    public override string ToString() => $"GradientDescentMomentumOptimizer (learningRate={LearningRate}, momentum={momentum})";
-}
-
-
- */

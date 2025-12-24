@@ -146,7 +146,7 @@ public class AdamOptimizer : Optimizer
             state.T++;
             return state;
         }
-        var newState = new State1D(param);
+        State1D newState = new(param);
         _states1D[param] = newState;
         return newState;
     }
@@ -159,7 +159,7 @@ public class AdamOptimizer : Optimizer
             state.T++;
             return state;
         }
-        var newState = new State2D(param);
+        State2D newState = new(param);
         _states2D[param] = newState;
         return newState;
     }
@@ -172,7 +172,7 @@ public class AdamOptimizer : Optimizer
             state.T++;
             return state;
         }
-        var newState = new State4D(param);
+        State4D newState = new(param);
         _states4D[param] = newState;
         return newState;
     }
