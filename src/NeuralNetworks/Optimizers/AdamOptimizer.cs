@@ -3,7 +3,6 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-using System.Numerics.Tensors;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -37,67 +36,17 @@ public class AdamOptimizer : Optimizer
 
     public override void Update(Layer? layer, float[] param, float[] paramGradient)
     {
-        /*
-         * The process of updating parameters using Adam optimizer involves the following steps:
-         * 1. Compute the first moment (m) and second moment (v) estimates.
-         * 2. Update biased first moment estimate.
-         * 3. Update biased second moment estimate.
-         * 4. Compute bias-corrected first moment estimate.
-         * 5. Compute bias-corrected second moment estimate.
-         * 6. Update parameters using the Adam update rule: param -= learningRate * mHat / (sqrt(vHat) + epsilon), 
-         *    where epsilon is a small constant to prevent division by zero, mHat is the bias-corrected first moment estimate,
-         *    and vHat is the bias-corrected second moment estimate.
-         */
-
         Debug.Assert(param.HasSameShape(paramGradient));
 
         (int t, float[] m, float[] v) = GetOrCreateState(param);
-
-        //float beta1t = MathF.Pow(_beta1, t);
-        //float beta2t = MathF.Pow(_beta2, t);
-
-        //float lr = LearningRate.GetLearningRate();
-        //WarnIfLearningRateIsSuspicious(lr);
 
         ApplyUpdate(
             param.AsSpan(),
             paramGradient.AsSpan(),
             v.AsSpan(),
             m.AsSpan(),
-            t,
-            _beta1,
-            _beta2);
-
-        //int length = param.Length;
-
-        //for (int i = 0; i < length; i++)
-        //{
-        //    m[i] = _beta1 * m[i] + (1 - _beta1) * paramGradient[i];
-        //    v[i] = _beta2 * v[i] + (1 - _beta2) * paramGradient[i] * paramGradient[i];
-
-        //    float mHat = m[i] / (1 - beta1t);
-        //    float vHat = v[i] / (1 - beta2t);
-
-        //    param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
-        //}
-    }
-
-    private void ApplyUpdate(Span<float> param, ReadOnlySpan<float> paramGradient, Span<float> v, Span<float> m, int t, float beta1, float beta2)
-    {
-        float lr = LearningRate.GetLearningRate();
-        WarnIfLearningRateIsSuspicious(lr);
-
-        float beta1t = MathF.Pow(_beta1, t);
-        float beta2t = MathF.Pow(_beta2, t);
-
-        for (int i = 0; i < param.Length; i++)
-        {
-            m[i] = beta1 * m[i] + (1 - beta1) * paramGradient[i];
-            v[i] = beta2 * v[i] + (1 - beta2) * paramGradient[i] * paramGradient[i];
-            float mHat = m[i] / (1 - beta1t);
-            float vHat = v[i] / (1 - beta2t);
-            param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
-        }
+            t
+        );
     }
 
     public override void Update(Layer? layer, float[,] param, float[,] paramGradient)
@@ -111,32 +60,8 @@ public class AdamOptimizer : Optimizer
             MemoryMarshal.CreateReadOnlySpan(ref paramGradient[0, 0], param.Length),
             MemoryMarshal.CreateSpan(ref v[0, 0], param.Length),
             MemoryMarshal.CreateSpan(ref m[0, 0], param.Length),
-            t,
-            _beta1,
-            _beta2);
-
-        //float beta1t = MathF.Pow(_beta1, t);
-        //float beta2t = MathF.Pow(_beta2, t);
-
-        //float lr = LearningRate.GetLearningRate();
-        //WarnIfLearningRateIsSuspicious(lr);
-
-        //int dim1 = param.GetLength(0);
-        //int dim2 = param.GetLength(1);
-
-        //for (int i = 0; i < dim1; i++)
-        //{
-        //    for (int j = 0; j < dim2; j++)
-        //    {
-        //        m[i, j] = _beta1 * m[i, j] + (1 - _beta1) * paramGradient[i, j];
-        //        v[i, j] = _beta2 * v[i, j] + (1 - _beta2) * paramGradient[i, j] * paramGradient[i, j];
-
-        //        float mHat = m[i, j] / (1 - beta1t);
-        //        float vHat = v[i, j] / (1 - beta2t);
-
-        //        param[i, j] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
-        //    }
-        //}
+            t
+        );
     }
 
     public override void Update(Layer? layer, float[,,,] param, float[,,,] paramGradient)
@@ -150,41 +75,39 @@ public class AdamOptimizer : Optimizer
             MemoryMarshal.CreateReadOnlySpan(ref paramGradient[0, 0, 0, 0], param.Length),
             MemoryMarshal.CreateSpan(ref v[0, 0, 0, 0], param.Length),
             MemoryMarshal.CreateSpan(ref m[0, 0, 0, 0], param.Length),
-            t,
-            _beta1,
-            _beta2);
+            t
+        );
+    }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ApplyUpdate(Span<float> param, ReadOnlySpan<float> paramGradient, Span<float> v, Span<float> m, int t)
+    {
+        /*
+         * The process of updating parameters using Adam optimizer involves the following steps:
+         * 1. Compute the first moment (m) and second moment (v) estimates.
+         * 2. Update biased first moment estimate.
+         * 3. Update biased second moment estimate.
+         * 4. Compute bias-corrected first moment estimate.
+         * 5. Compute bias-corrected second moment estimate.
+         * 6. Update parameters using the Adam update rule: param -= learningRate * mHat / (sqrt(vHat) + epsilon), 
+         *    where epsilon is a small constant to prevent division by zero, mHat is the bias-corrected first moment estimate,
+         *    and vHat is the bias-corrected second moment estimate.
+         */
 
-        //float beta1t = MathF.Pow(_beta1, t);
-        //float beta2t = MathF.Pow(_beta2, t);
+        float lr = LearningRate.GetLearningRate();
+        WarnIfLearningRateIsSuspicious(lr);
 
-        //float lr = LearningRate.GetLearningRate();
-        //WarnIfLearningRateIsSuspicious(lr);
+        float beta1t = MathF.Pow(_beta1, t);
+        float beta2t = MathF.Pow(_beta2, t);
 
-        //int dim1 = param.GetLength(0);
-        //int dim2 = param.GetLength(1);
-        //int dim3 = param.GetLength(2);
-        //int dim4 = param.GetLength(3);
-
-        //for (int i = 0; i < dim1; i++)
-        //{
-        //    for (int j = 0; j < dim2; j++)
-        //    {
-        //        for (int k = 0; k < dim3; k++)
-        //        {
-        //            for (int l = 0; l < dim4; l++)
-        //            {
-        //                m[i, j, k, l] = _beta1 * m[i, j, k, l] + (1 - _beta1) * paramGradient[i, j, k, l];
-        //                v[i, j, k, l] = _beta2 * v[i, j, k, l] + (1 - _beta2) * paramGradient[i, j, k, l] * paramGradient[i, j, k, l];
-
-        //                float mHat = m[i, j, k, l] / (1 - beta1t);
-        //                float vHat = v[i, j, k, l] / (1 - beta2t);
-
-        //                param[i, j, k, l] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
-        //            }
-        //        }
-        //    }
-        //}
+        for (int i = 0; i < param.Length; i++)
+        {
+            m[i] = _beta1 * m[i] + (1 - _beta1) * paramGradient[i];
+            v[i] = _beta2 * v[i] + (1 - _beta2) * paramGradient[i] * paramGradient[i];
+            float mHat = m[i] / (1 - beta1t);
+            float vHat = v[i] / (1 - beta2t);
+            param[i] -= lr * mHat / (MathF.Sqrt(vHat) + _eps);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

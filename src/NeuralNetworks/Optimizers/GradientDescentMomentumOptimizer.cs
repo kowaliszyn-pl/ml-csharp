@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
@@ -32,12 +33,13 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
         float learningRate = LearningRate.GetLearningRate();
 
         float[] velocities = GetOrCreateVelocities(param);
-        int length = param.Length;
-        for (int i = 0; i < length; i++)
-        {
-            velocities[i] = velocities[i] * momentum + learningRate * paramGradient[i];
-            param[i] -= velocities[i];
-        }
+
+        ApplyMomentumUpdate(
+            param.AsSpan(),
+            paramGradient.AsSpan(),
+            velocities.AsSpan(),
+            learningRate
+        );
     }
 
     public override void Update(Layer? layer, float[,] param, float[,] paramGradient)
@@ -48,16 +50,12 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
 
         float[,] velocities = GetOrCreateVelocities(param);
 
-        int dim1 = param.GetLength(0);
-        int dim2 = param.GetLength(1);
-        for (int i = 0; i < dim1; i++)
-        {
-            for (int j = 0; j < dim2; j++)
-            {
-                velocities[i, j] = velocities[i, j] * momentum + learningRate * paramGradient[i, j];
-                param[i, j] -= velocities[i, j];
-            }
-        }
+        ApplyMomentumUpdate(
+             MemoryMarshal.CreateSpan(ref param[0, 0], param.Length),
+             MemoryMarshal.CreateReadOnlySpan(ref paramGradient[0, 0], paramGradient.Length),
+             MemoryMarshal.CreateSpan(ref velocities[0, 0], velocities.Length),
+             learningRate
+        );
     }
 
     public override void Update(Layer? layer, float[,,,] param, float[,,,] paramGradient)
@@ -68,23 +66,26 @@ public class GradientDescentMomentumOptimizer(LearningRate learningRate, float m
 
         float[,,,] velocities = GetOrCreateVelocities(param);
 
-        int dim1 = param.GetLength(0);
-        int dim2 = param.GetLength(1);
-        int dim3 = param.GetLength(2);
-        int dim4 = param.GetLength(3);
-        for (int i = 0; i < dim1; i++)
+        ApplyMomentumUpdate(
+            MemoryMarshal.CreateSpan(ref param[0, 0, 0, 0], param.Length),
+            MemoryMarshal.CreateReadOnlySpan(ref paramGradient[0, 0, 0, 0], paramGradient.Length),
+            MemoryMarshal.CreateSpan(ref velocities[0, 0, 0, 0], velocities.Length),
+            learningRate
+        );
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void ApplyMomentumUpdate(Span<float> parameters, ReadOnlySpan<float> gradients, Span<float> velocities, float learningRate)
+    {
+        Debug.Assert(parameters.Length == gradients.Length);
+        Debug.Assert(parameters.Length == velocities.Length);
+
+        int length = parameters.Length;
+        for (int i = 0; i < length; i++)
         {
-            for (int j = 0; j < dim2; j++)
-            {
-                for (int k = 0; k < dim3; k++)
-                {
-                    for (int l = 0; l < dim4; l++)
-                    {
-                        velocities[i, j, k, l] = velocities[i, j, k, l] * momentum + learningRate * paramGradient[i, j, k, l];
-                        param[i, j, k, l] -= velocities[i, j, k, l];
-                    }
-                }
-            }
+            float v = velocities[i] * momentum + learningRate * gradients[i];
+            velocities[i] = v;
+            parameters[i] -= v;
         }
     }
 
