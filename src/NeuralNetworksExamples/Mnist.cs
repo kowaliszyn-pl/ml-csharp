@@ -24,7 +24,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-// For the current configuration and hyperparameters, the model achieves 97,69% accuracy.
+// For the current configuration and hyperparameters, the model achieves 97,47% accuracy (changed after changing the implementation of Glorot initializer).
 
 class MnistModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
@@ -42,7 +42,7 @@ class MnistModel(SeededRandom? random)
 
 class Mnist
 {
-    const int RandomSeed = 251203;
+    const int RandomSeed = 251224;
     const int Epochs = 15;
     const int BatchSize = 100;
     const int EvalEveryEpochs = 2;

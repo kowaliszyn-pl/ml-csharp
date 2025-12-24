@@ -74,8 +74,10 @@ public class ArrayUtils
         float BoxMuller() // TODO: Move to RandomUtils
         {
             // uniform(0,1] random doubles
-            double u1 = random.NextDouble();
-            double u2 = random.NextDouble();
+            // NextDouble returns [0,1), so to convert to (0,1], we use 1 - NextDouble()
+            // Zero must be excluded because log(0) is undefined.
+            double u1 = 1 - random.NextDouble();
+            double u2 = 1 - random.NextDouble();
 
             //random normal(0,1)
             float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
