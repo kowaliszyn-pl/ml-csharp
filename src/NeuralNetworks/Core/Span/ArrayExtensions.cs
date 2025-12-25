@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: ArrayExtensionsSpan.cs
+// File name: ArrayExtensions.cs
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
