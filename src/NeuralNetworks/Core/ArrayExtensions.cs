@@ -962,7 +962,7 @@ public static class ArrayExtensions
         int d3 = outputGradient.GetLength(3);
 
         Debug.Assert(d0 > 0 && d1 > 0 && d2 > 0 && d3 > 0, "All dimensions must be greater than zero.");
-        Debug.Assert(output.GetLength(0) != d0 && output.GetLength(1) != d1 && output.GetLength(2) != d2 && output.GetLength(3) != d3, "Shapes of outputGradient and output must match for elementwise operations.");
+        Debug.Assert(output.GetLength(0) == d0 && output.GetLength(1) == d1 && output.GetLength(2) == d2 && output.GetLength(3) == d3, "Shapes of outputGradient and output must match for elementwise operations.");
 
         float[,,,] result = new float[d0, d1, d2, d3];
 

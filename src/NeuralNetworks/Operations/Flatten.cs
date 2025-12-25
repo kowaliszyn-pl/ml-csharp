@@ -21,4 +21,7 @@ public class Flatten : Operation<float[,,,], float[,]>
 
     protected override void EnsureSameShapeForOutput(float[,]? output, float[,] outputGradient)
         => EnsureSameShape(output, outputGradient);
+
+    public override string ToString() 
+        => "Flatten";
 }

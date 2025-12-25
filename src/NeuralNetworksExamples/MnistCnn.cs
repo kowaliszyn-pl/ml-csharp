@@ -24,7 +24,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-file class MnistConvModel(SeededRandom? random)
+class MnistConvModel(SeededRandom? random)
     : BaseModel<float[,,,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,,,], float[,]> CreateLayerListBuilder()
@@ -48,10 +48,10 @@ file class MnistConvModel(SeededRandom? random)
 
 class MnistCnn
 {
-    const int RandomSeed = 251203;
+    const int RandomSeed = 251225;
     const int Epochs = 15;
     const int BatchSize = 100;
-    const int EvalEveryEpochs = 2;
+    const int EvalEveryEpochs = 3;
     const int LogEveryEpochs = 1;
 
     public static void Run()
@@ -99,11 +99,12 @@ class MnistCnn
 
         WriteLine("\nStart training...");
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(0.01f, 0.001f);
+        LearningRate learningRate = new ExponentialDecayLearningRate(0.003f, 0.0004f);
         Trainer4D trainer = new(
-            model, 
-            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
-            random: commonRandom, 
+            model,
+            // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
+            new AdamOptimizer(learningRate, 0.89f, 0.99f),
+            random: commonRandom,
             logger: logger
         )
         {

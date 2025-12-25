@@ -98,9 +98,39 @@ public class ArrayUtils
         float BoxMuller() // TODO: Move to RandomUtils
         {
             // uniform(0,1] random doubles
-            double u1 = random.NextDouble();
-            double u2 = random.NextDouble();
+            double u1 = 1 - random.NextDouble();
+            double u2 = 1 - random.NextDouble();
 
+            //random normal(0,1)
+            float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
+            return randStdNormal;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] CreateRandomNormal(int dim1, int dim2, int dim3, int dim4, Random random, float mean = 0, float stdDev = 1)
+    {
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        res[i, j, k, l] = BoxMuller() * stdDev + mean;
+                    }
+                }
+            }
+        }
+        return res;
+
+        float BoxMuller() // TODO: Move to RandomUtils
+        {
+            // uniform(0,1] random doubles
+            double u1 = 1 - random.NextDouble();
+            double u2 = 1 - random.NextDouble();
             //random normal(0,1)
             float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
             return randStdNormal;
