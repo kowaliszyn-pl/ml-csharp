@@ -34,4 +34,16 @@ public class SpanBenchmarks
     {
         NeuralNetworks.Core.ArrayExtensions.MultiplyByTanhDerivative(array1, array2);
     }
+
+    [Benchmark]
+    public void TanhSpan()
+    {
+        NeuralNetworks.Core.Span.ArrayExtensions.Tanh(array1);
+    }
+
+    [Benchmark]
+    public void Tanh()
+    {
+        NeuralNetworks.Core.ArrayExtensions.Tanh(array1);
+    }
 }

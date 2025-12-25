@@ -11,6 +11,39 @@ namespace NeuralNetworks.Core.Span;
 public static class ArrayExtensions
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Flatten(this float[,,,] source)
+    {
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
+
+        Debug.Assert(dim0 > 0 && dim1 > 0 && dim2 > 0 && dim3 > 0, "All dimensions must be greater than zero.");
+
+        float[,] res = new float[dim0, dim1 * dim2 * dim3];
+        ref float sourceRef = ref source[0, 0, 0, 0];
+        ref float resRef = ref res[0, 0];
+        ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref sourceRef, source.Length);
+        Span<float> resSpan = MemoryMarshal.CreateSpan(ref resRef, res.Length);
+        for (int b = 0; b < dim0; b++)
+        {
+            for (int c = 0; c < dim1; c++)
+            {
+                for (int h = 0; h < dim2; h++)
+                {
+                    for (int w = 0; w < dim3; w++)
+                    {
+                        int index = c * dim2 * dim3 + h * dim3 + w;
+                        resSpan[b * (dim1 * dim2 * dim3) + index] =
+                            sourceSpan[b * (dim1 * dim2 * dim3) + c * (dim2 * dim3) + h * dim3 + w];
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] MultiplyByTanhDerivative(this float[,,,] outputGradient, float[,,,] output)
     {
         // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
@@ -94,5 +127,40 @@ public static class ArrayExtensions
         }*/
 
         return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] Unflatten(this float[,] source, float[,,,] targetSize)
+    {
+        int dim0 = targetSize.GetLength(0);
+        int dim1 = targetSize.GetLength(1);
+        int dim2 = targetSize.GetLength(2);
+        int dim3 = targetSize.GetLength(3);
+
+        Debug.Assert(dim0 > 0 && dim1 > 0 && dim2 > 0 && dim3 > 0, "All dimensions must be greater than zero.");
+        Debug.Assert(source.GetLength(0) == dim0 && source.GetLength(1) == dim1 * dim2 * dim3, "Source shape does not match target size for unflattening.");
+
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
+        ref float sourceRef = ref source[0, 0];
+        ref float resRef = ref res[0, 0, 0, 0];
+        ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref sourceRef, source.Length);
+        Span<float> resSpan = MemoryMarshal.CreateSpan(ref resRef, res.Length);
+        for (int b = 0; b < dim0; b++)
+        {
+            for (int c = 0; c < dim1; c++)
+            {
+                for (int h = 0; h < dim2; h++)
+                {
+                    for (int w = 0; w < dim3; w++)
+                    {
+                        int index = c * dim2 * dim3 + h * dim3 + w;
+                        resSpan[b * (dim1 * dim2 * dim3) + c * (dim2 * dim3) + h * dim3 + w] =
+                            sourceSpan[b * (dim1 * dim2 * dim3) + index];
+                    }
+                }
+            }
+        }
+        return res;
+
     }
 }
