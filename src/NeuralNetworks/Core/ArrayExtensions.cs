@@ -1731,6 +1731,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Calculates the standard deviation for all elements of a two-dimensional array.
     /// </summary>
+    /// <remarks>
+    /// Standard deviation is calculated using the formula: <c>sqrt(sum((x - mean)^2) / N)</c>, where N is the number of all elements in the array.
+    /// </remarks>
     /// <param name="source">The array whose standard deviation will be computed.</param>
     /// <returns>The standard deviation of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1757,6 +1760,9 @@ public static class ArrayExtensions
     /// <summary>
     /// Calculates the standard deviation for all elements of a four-dimensional array.
     /// </summary>
+    /// <remarks>
+    /// Standard deviation is calculated using the formula: <c>sqrt(sum((x - mean)^2) / N)</c>, where N is the number of all elements in the array.
+    /// </remarks>
     /// <param name="source">The array whose standard deviation will be computed.</param>
     /// <returns>The standard deviation of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -2006,10 +2012,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Transposes the source by swapping its dim1 and dim2.
+    /// Transposes the source by swapping its rows and columns.
     /// </summary>
     /// <param name="source">The two-dimensional array to transpose.</param>
-    /// <returns>A new array with shape [dim2, dim1].</returns>
+    /// <returns>A new array with shape [columns, rows].</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Transpose(this float[,] source)
     {
