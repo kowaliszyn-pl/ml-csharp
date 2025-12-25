@@ -945,6 +945,40 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] MultiplyByTanhDerivative(this float[,,,] outputGradient, float[,,,] output)
+    {
+        int d0 = outputGradient.GetLength(0);
+        int d1 = outputGradient.GetLength(1);
+        int d2 = outputGradient.GetLength(2);
+        int d3 = outputGradient.GetLength(3);
+
+        Debug.Assert(d0 > 0 && d1 > 0 && d2 > 0 && d3 > 0, "All dimensions must be greater than zero.");
+        Debug.Assert(output.GetLength(0) != d0 && output.GetLength(1) != d1 && output.GetLength(2) != d2 && output.GetLength(3) != d3, "Shapes of outputGradient and output must match for elementwise operations.");
+
+        float[,,,] result = new float[d0, d1, d2, d3];
+
+        for (int i = 0; i < d0; i++)
+        {
+            for (int j = 0; j < d1; j++)
+            {
+                for (int k = 0; k < d2; k++)
+                {
+                    for (int l = 0; l < d3; l++)
+                    {
+                        float y = output[i, j, k, l];
+                        float dy = outputGradient[i, j, k, l];
+                        float tanhDerivative = 1f - (y * y);
+                        result[i, j, k, l] = dy * tanhDerivative;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+
     /// <summary>
     /// Multiplies the current source with another source using the dot product.
     /// </summary>

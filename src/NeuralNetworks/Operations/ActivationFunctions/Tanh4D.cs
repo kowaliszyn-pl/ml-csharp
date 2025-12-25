@@ -13,7 +13,8 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 
 public class Tanh4D : ActivationFunction4D
 {
-    protected override float[,,,] CalcOutput(bool inference) => Input.Tanh();
+    protected override float[,,,] CalcOutput(bool inference) 
+        => Input.Tanh();
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
     {
@@ -25,8 +26,11 @@ public class Tanh4D : ActivationFunction4D
         // tanh(x) => Output
         // dL/dy => outputGradient
         // dl/dx => inputGradient
-        float[,,,] tanhBackward = Output.AsOnes().Subtract(Output.MultiplyElementwise(Output));
-        return outputGradient.MultiplyElementwise(tanhBackward);
+        
+        //float[,,,] tanhBackward = Output.AsOnes().Subtract(Output.MultiplyElementwise(Output));
+        //return outputGradient.MultiplyElementwise(tanhBackward);
+
+        return outputGradient.MultiplyByTanhDerivative(Output);
     }
 
     public override string ToString() => "Tanh4D";

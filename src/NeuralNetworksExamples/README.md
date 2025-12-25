@@ -52,4 +52,4 @@ Runs
 
 1. Epochs: 15, Learning rate: 0.01 - 0.001, Dropout keep prob: 0,85, Optimizer: GDMomentum 0,9, Activations: Tanh4D, Filters: 32, Kernel size: 3
 
-Accuracy: 
+Accuracy: 96.78 %
