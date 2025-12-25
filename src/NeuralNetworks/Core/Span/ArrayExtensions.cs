@@ -207,34 +207,54 @@ public static class ArrayExtensions
         ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
         Span<float> outputSpan = MemoryMarshal.CreateSpan(ref outputRef, output.Length);
 
+        // pre-compute some offsets
+        int outputSpanDim0 = outputChannels * outputHeight * outputWidth;
+        int outputSpanDim1 = outputHeight * outputWidth;
+        int inputSpanDim0 = inputChannels * inputHeight * inputWidth;
+        int inputSpanDim1 = inputHeight * inputWidth;
+        int weightsSpanDim0 = outputChannels * kernelHeight * kernelWidth;
+        int weightsSpanDim1 = kernelHeight * kernelWidth;
+
         for (int b = 0; b < batchSize; b++)
         {
             for (int oc = 0; oc < outputChannels; oc++)
             {
                 for (int oh = 0; oh < outputHeight; oh++)
                 {
+                    int ohMinusPad = oh - pad;
                     for (int ow = 0; ow < outputWidth; ow++)
                     {
+                        int owMinusPad = ow - pad;
                         float sum = 0f;
                         for (int ic = 0; ic < inputChannels; ic++)
                         {
                             for (int kh = 0; kh < kernelHeight; kh++)
                             {
-                                for (int kw = 0; kw < kernelWidth; kw++)
+                                // int ih = oh + kh - pad;
+                                int ih = kh + ohMinusPad;
+                                if (ih >= 0 && ih < inputHeight)
                                 {
-                                    int ih = oh + kh - pad;
-                                    int iw = ow + kw - pad;
-                                    if (ih >= 0 && ih < inputHeight && iw >= 0 && iw < inputWidth)
+                                    for (int kw = 0; kw < kernelWidth; kw++)
                                     {
-                                        // sum += input[b, ic, ih, iw] * weights[ic, oc, kh, kw];
-                                        sum += inputSpan[b * (inputChannels * inputHeight * inputWidth) + ic * (inputHeight * inputWidth) + ih * inputWidth + iw] *
-                                               weightsSpan[ic * (outputChannels * kernelHeight * kernelWidth) + oc * (kernelHeight * kernelWidth) + kh * kernelWidth + kw];
+                                        //int ih = oh + kh - pad;
+                                        // int iw = ow + kw - pad;
+                                        int iw = kw + owMinusPad;
+                                        if (/*ih >= 0 && ih < inputHeight &&*/ iw >= 0 && iw < inputWidth)
+                                        {
+                                            // sum += input[b, ic, ih, iw] * weights[ic, oc, kh, kw];
+                                            // sum += inputSpan[b * (inputChannels * inputHeight * inputWidth) + ic * (inputHeight * inputWidth) + ih * inputWidth + iw] *
+                                            //       weightsSpan[ic * (outputChannels * kernelHeight * kernelWidth) + oc * (kernelHeight * kernelWidth) + kh * kernelWidth + kw];
+
+                                            sum += inputSpan[b * inputSpanDim0 + ic * inputSpanDim1 + ih * inputWidth + iw] *
+                                                   weightsSpan[ic * weightsSpanDim0 + oc * weightsSpanDim1 + kh * kernelWidth + kw];
+                                        }
                                     }
                                 }
                             }
                         }
                         // output[b, oc, oh, ow] = sum;
-                        outputSpan[b * (outputChannels * outputHeight * outputWidth) + oc * (outputHeight * outputWidth) + oh * outputWidth + ow] = sum;
+                        //outputSpan[b * (outputChannels * outputHeight * outputWidth) + oc * (outputHeight * outputWidth) + oh * outputWidth + ow] = sum;
+                        outputSpan[b * outputSpanDim0 + oc * outputSpanDim1 + oh * outputWidth + ow] = sum;
                     }
                 }
             }
@@ -279,10 +299,20 @@ public static class ArrayExtensions
         ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradientRef, outputGradient.Length);
         Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradientRef, inputGradient.Length);
 
+        // pre-compute some offsets
+        int outputGradientSpanDim0 = outputChannels * outputGradientHeight * outputGradientWidth;
+        int outputGradientSpanDim1 = outputGradientHeight * outputGradientWidth;
+        int weightsSpanDim0 = outputChannels * kernelHeight * kernelWidth;
+        int weightsSpanDim1 = kernelHeight * kernelWidth;
+        int inputGradientSpanDim0 = inputChannels * inputHeight * inputWidth;
+        int inputGradientSpanDim1 = inputHeight * inputWidth;
+
         for (int b = 0; b < batchSize; b++)
         {
+            int bOffset = b * outputGradientSpanDim0;
             for (int ic = 0; ic < inputChannels; ic++)
             {
+                int icOffset = ic * weightsSpanDim0;
                 for (int ih = 0; ih < inputHeight; ih++)
                 {
                     for (int iw = 0; iw < inputWidth; iw++)
@@ -290,23 +320,30 @@ public static class ArrayExtensions
                         float sum = 0f;
                         for (int oc = 0; oc < outputChannels; oc++)
                         {
+                            int ocOffset = oc * outputGradientSpanDim1;
+                            int ocWeightOffset = oc * weightsSpanDim1;
                             for (int kh = 0; kh < kernelHeight; kh++)
                             {
-                                for (int kw = 0; kw < kernelWidth; kw++)
+                                int oh = ih - kh + pad;
+                                if (oh >= 0 && oh < outputGradientHeight)
                                 {
-                                    int oh = ih - kh + pad;
-                                    int ow = iw - kw + pad;
-                                    if (oh >= 0 && oh < outputGradientHeight && ow >= 0 && ow < outputGradientWidth)
+                                    int ohOffset = oh * outputGradientWidth;
+                                    for (int kw = 0; kw < kernelWidth; kw++)
                                     {
-                                        // sum += outputGradient[b, oc, oh, ow] * weights[ic, oc, kh, kw];
-                                        sum += outputGradientSpan[b * (outputChannels * outputGradientHeight * outputGradientWidth) + oc * (outputGradientHeight * outputGradientWidth) + oh * outputGradientWidth + ow] *
-                                               weightsSpan[ic * (outputChannels * kernelHeight * kernelWidth) + oc * (kernelHeight * kernelWidth) + kh * kernelWidth + kw];
+
+                                        int ow = iw - kw + pad;
+                                        if (/*oh >= 0 && oh < outputGradientHeight &&*/ ow >= 0 && ow < outputGradientWidth)
+                                        {
+                                            // sum += outputGradient[b, oc, oh, ow] * weights[ic, oc, kh, kw];
+                                            sum += outputGradientSpan[bOffset + ocOffset + ohOffset + ow] *
+                                                   weightsSpan[icOffset + ocWeightOffset + kh * kernelWidth + kw];
+                                        }
                                     }
                                 }
                             }
                         }
                         // inputGradient[b, ic, ih, iw] = sum;
-                        inputGradientSpan[b * (inputChannels * inputHeight * inputWidth) + ic * (inputHeight * inputWidth) + ih * inputWidth + iw] = sum;
+                        inputGradientSpan[b * inputGradientSpanDim0 + ic * inputGradientSpanDim1 + ih * inputWidth + iw] = sum;
                     }
                 }
             }
