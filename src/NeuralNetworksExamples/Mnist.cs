@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
+using System.Reflection;
 
 using Microsoft.Extensions.Logging;
 
@@ -111,7 +112,7 @@ class Mnist
 
         trainer.Fit(
             dataSource,
-            EvalFunction,
+            s_evalFunction,
             epochs: Epochs,
             evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
@@ -120,10 +121,19 @@ class Mnist
         );
     }
 
-    private static float EvalFunction(Model<float[,], float[,]> model, float[,] xEvalTest, float[,] yEvalTest)
+    private static readonly EvalFunction<float[,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
     {
-        // 'prediction' is a one-hot table with the predicted digit.
-        float[,] prediction = model.Forward(xEvalTest, true);
+        float[,] prediction;
+        if (predictionLogits != null)
+        {
+            prediction = predictionLogits;
+        }
+        else
+        {
+            prediction = model.Forward(xEvalTest, true);
+        }
+
+        // predictionArgmax is an array of predicted digits for each sample.
         int[] predictionArgmax = prediction.Argmax();
 
         int rows = predictionArgmax.GetLength(0);
@@ -134,13 +144,15 @@ class Mnist
         for (int row = 0; row < rows; row++)
         {
             int predictedDigit = predictionArgmax[row];
+
+            // yEvalTest is a one-hot table.
             if (yEvalTest[row, predictedDigit] == 1f)
                 hits++;
         }
 
         float accuracy = (float)hits / rows;
         return accuracy;
-    }
+    };
 
     private static (float[,] xTest, float[,] yTest) Split(float[,] source)
     {

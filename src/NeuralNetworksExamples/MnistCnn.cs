@@ -49,7 +49,7 @@ file class MnistConvModel(SeededRandom? random)
 class MnistCnn
 {
     const int RandomSeed = 251203;
-    const int Epochs = 10;
+    const int Epochs = 15;
     const int BatchSize = 100;
     const int EvalEveryEpochs = 2;
     const int LogEveryEpochs = 1;
@@ -100,14 +100,19 @@ class MnistCnn
         WriteLine("\nStart training...");
 
         LearningRate learningRate = new ExponentialDecayLearningRate(0.01f, 0.001f);
-        Trainer4D trainer = new(model, new GradientDescentMomentumOptimizer(learningRate, 0.9f), random: commonRandom, logger: logger)
+        Trainer4D trainer = new(
+            model, 
+            new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
+            random: commonRandom, 
+            logger: logger
+        )
         {
             Memo = $"Class: {nameof(MnistCnn)}."
         };
 
         trainer.Fit(
             dataSource,
-            EvalFunction,
+            s_evalFunction,
             epochs: Epochs,
             evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
@@ -115,10 +120,19 @@ class MnistCnn
         );
     }
 
-    private static float EvalFunction(Model<float[,,,], float[,]> model, float[,,,] xEvalTest, float[,] yEvalTest)
+    private static readonly EvalFunction<float[,,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
     {
-        // 'prediction' is a one-hot table with the predicted digit.
-        float[,] prediction = model.Forward(xEvalTest, true);
+        float[,] prediction;
+        if (predictionLogits != null)
+        {
+            prediction = predictionLogits;
+        }
+        else
+        {
+            prediction = model.Forward(xEvalTest, true);
+        }
+
+        // predictionArgmax is an array of predicted digits for each sample.
         int[] predictionArgmax = prediction.Argmax();
 
         int rows = predictionArgmax.GetLength(0);
@@ -129,13 +143,15 @@ class MnistCnn
         for (int row = 0; row < rows; row++)
         {
             int predictedDigit = predictionArgmax[row];
+
+            // yEvalTest is a one-hot table.
             if (yEvalTest[row, predictedDigit] == 1f)
                 hits++;
         }
 
         float accuracy = (float)hits / rows;
         return accuracy;
-    }
+    };
 
     private static (float[,,,] xTest, float[,] yTest) Split(float[,] source)
     {

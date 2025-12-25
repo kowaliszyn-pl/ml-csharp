@@ -63,7 +63,7 @@ public abstract class Trainer<TInputData, TPrediction>(
     [SuppressMessage("Performance", "CA1873:Avoid potentially expensive logging", Justification = "<Pending>")]
     public void Fit(
         DataSource<TInputData, TPrediction> dataSource,
-        Func<Model<TInputData, TPrediction>, TInputData, TPrediction, float>? evalFunction = null,
+        EvalFunction<TInputData, TPrediction>? evalFunction = null,
         int epochs = 100,
         int evalEveryEpochs = 10,
         int logEveryEpochs = 1,
@@ -191,7 +191,7 @@ public abstract class Trainer<TInputData, TPrediction>(
 
                 if (evalFunction is not null)
                 {
-                    float evalValue = evalFunction(model, xTest!, yTest!);
+                    float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
 
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
                         WriteLine($"Eval: {evalValue:P2}");
@@ -238,7 +238,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             WriteLine($"\nLoss on test data: {loss:F5}");
             if(evalFunction is not null)
             {
-                float evalValue = evalFunction(model, xTest!, yTest!);
+                float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
                 WriteLine($"Eval on test data: {evalValue:P2}");
             }
             ResetColor();
