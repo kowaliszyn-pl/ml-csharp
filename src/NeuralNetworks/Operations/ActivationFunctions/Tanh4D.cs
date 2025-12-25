@@ -2,7 +2,7 @@
 // File name: Tanh4D.cs
 // www.kowaliszyn.pl, 2025
 
-using NeuralNetworks.Core;
+using NeuralNetworks.Core.Span;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
@@ -39,7 +39,7 @@ public class Tanh4D : ActivationFunction4D
     /// derivative of the Tanh function at that position.
     /// </returns>
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
-        => outputGradient.MultiplyByTanhDerivativeSpan(Output);
+        => outputGradient.MultiplyByTanhDerivative(Output);
 
     public override string ToString() => "Tanh4D";
 }

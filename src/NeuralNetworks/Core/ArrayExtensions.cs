@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core;
 
@@ -983,46 +982,6 @@ public static class ArrayExtensions
                 }
             }
         }
-        return result;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] MultiplyByTanhDerivativeSpan(this float[,,,] outputGradient, float[,,,] output)
-    {
-        // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
-        // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
-        // The derivative of the Tanh function tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x)) is 1 - tanh(x)^2.
-        // Therefore, the input gradient is computed as: dL/dx = dL/dy * (1 - tanh(x)^2).
-        // The elementwise multiplication of the output gradient and the derivative of the Tanh function is returned as the input gradient.
-        // tanh(x) => Output
-        // dL/dy => outputGradient
-        // dl/dx => inputGradient
-
-        int d0 = outputGradient.GetLength(0);
-        int d1 = outputGradient.GetLength(1);
-        int d2 = outputGradient.GetLength(2);
-        int d3 = outputGradient.GetLength(3);
-
-        Debug.Assert(d0 > 0 && d1 > 0 && d2 > 0 && d3 > 0, "All dimensions must be greater than zero.");
-        Debug.Assert(output.GetLength(0) != d0 && output.GetLength(1) != d1 && output.GetLength(2) != d2 && output.GetLength(3) != d3, "Shapes of outputGradient and output must match for elementwise operations.");
-
-        float[,,,] result = new float[d0, d1, d2, d3];
-
-        ref float ogRef = ref outputGradient[0, 0, 0, 0];
-        ref float outRef = ref output[0, 0, 0, 0];
-        ref float resRef = ref result[0, 0, 0, 0];
-
-        ReadOnlySpan<float> ogSpan = MemoryMarshal.CreateReadOnlySpan(ref ogRef, outputGradient.Length);
-        ReadOnlySpan<float> outSpan = MemoryMarshal.CreateReadOnlySpan(ref outRef, output.Length);
-        Span<float> resSpan = MemoryMarshal.CreateSpan(ref resRef, result.Length);
-
-        for (int i = 0; i < resSpan.Length; i++)
-        {
-            float y = outSpan[i];
-            float dy = ogSpan[i];
-            resSpan[i] = dy * (1f - (y * y));
-        }
-
         return result;
     }
 
