@@ -61,7 +61,7 @@ public static class ArrayExtensions
         int d3 = outputGradient.GetLength(3);
 
         Debug.Assert(d0 > 0 && d1 > 0 && d2 > 0 && d3 > 0, "All dimensions must be greater than zero.");
-        Debug.Assert(output.GetLength(0) != d0 && output.GetLength(1) != d1 && output.GetLength(2) != d2 && output.GetLength(3) != d3, "Shapes of outputGradient and output must match for elementwise operations.");
+        Debug.Assert(output.GetLength(0) == d0 && output.GetLength(1) == d1 && output.GetLength(2) == d2 && output.GetLength(3) == d3, "Shapes of outputGradient and output must match for elementwise operations.");
 
         float[,,,] result = new float[d0, d1, d2, d3];
 
@@ -145,6 +145,7 @@ public static class ArrayExtensions
         ref float resRef = ref res[0, 0, 0, 0];
         ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref sourceRef, source.Length);
         Span<float> resSpan = MemoryMarshal.CreateSpan(ref resRef, res.Length);
+
         for (int b = 0; b < dim0; b++)
         {
             for (int c = 0; c < dim1; c++)
@@ -162,5 +163,263 @@ public static class ArrayExtensions
         }
         return res;
 
+    }
+
+    /// <summary>
+    /// 2D convolution forward pass on NHWC-like 4D tensors:
+    /// Input: [batch, inChannels, inHeight, inWidth]
+    /// Weights: [inChannels, outChannels, kernelH, kernelW]
+    /// Output: [batch, outChannels, outHeight, outWidth]
+    /// Padding is symmetric and computed as kernelSize / 2 (same padding) if not specified.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] Convolve2DForward(this float[,,,] input, float[,,,] weights, int? padding = null)
+    {
+        int batchSize = input.GetLength(0);
+        int inputChannels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int wInChannels = weights.GetLength(0);
+        int outputChannels = weights.GetLength(1);
+        int kernelH = weights.GetLength(2);
+        int kernelW = weights.GetLength(3);
+
+        Debug.Assert(wInChannels == inputChannels);
+        Debug.Assert(kernelH == kernelW);
+
+        int pad = padding ?? (kernelH / 2);
+
+        int outputHeight = inputHeight - kernelH + 1 + 2 * pad;
+        int outputWidth = inputWidth - kernelW + 1 + 2 * pad;
+
+        float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
+
+        ref float inputRef = ref input[0, 0, 0, 0];
+        ref float weightsRef = ref weights[0, 0, 0, 0];
+        ref float outputRef = ref output[0, 0, 0, 0];
+
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
+        ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
+        Span<float> outputSpan = MemoryMarshal.CreateSpan(ref outputRef, output.Length);
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int oc = 0; oc < outputChannels; oc++)
+            {
+                for (int oh = 0; oh < outputHeight; oh++)
+                {
+                    for (int ow = 0; ow < outputWidth; ow++)
+                    {
+                        float sum = 0f;
+                        for (int ic = 0; ic < inputChannels; ic++)
+                        {
+                            for (int kh = 0; kh < kernelH; kh++)
+                            {
+                                for (int kw = 0; kw < kernelW; kw++)
+                                {
+                                    int ih = oh + kh - pad;
+                                    int iw = ow + kw - pad;
+                                    if (ih >= 0 && ih < inputHeight && iw >= 0 && iw < inputWidth)
+                                    {
+                                        sum += inputSpan[b * (inputChannels * inputHeight * inputWidth) + ic * (inputHeight * inputWidth) + ih * inputWidth + iw] *
+                                               weightsSpan[ic * (outputChannels * kernelH * kernelW) + oc * (kernelH * kernelW) + kh * kernelW + kw];
+                                    }
+                                }
+                            }
+                        }
+                        outputSpan[b * (outputChannels * outputHeight * outputWidth) + oc * (outputHeight * outputWidth) + oh * outputWidth + ow] = sum;
+
+                        /*
+                        float sum = 0f;
+                        for (int ic = 0; ic < inputChannels; ic++)
+                        {
+                            for (int kh = 0; kh < kernelH; kh++)
+                            {
+                                for (int kw = 0; kw < kernelW; kw++)
+                                {
+                                    int ih = oh + kh - pad;
+                                    int iw = ow + kw - pad;
+                                    if (ih >= 0 && ih < inputHeight && iw >= 0 && iw < inputWidth)
+                                    {
+                                        sum += input[b, ic, ih, iw] * weights[ic, oc, kh, kw];
+                                    }
+                                }
+                            }
+                        }
+                        output[b, oc, oh, ow] = sum;*/
+                    }
+                }
+            }
+        }
+
+        return output;
+    }
+
+    /// <summary>
+    /// Backward pass w.r.t. input for 2D convolution.
+    /// inputGrad shape: [batch, inChannels, inHeight, inWidth]
+    /// outputGrad shape: [batch, outChannels, outHeight, outWidth]
+    /// weights shape: [inChannels, outChannels, kernelH, kernelW]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] Convolve2DBackwardInput(this float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    {
+        int batchSize = outputGradient.GetLength(0);
+        int inputChannels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int outputChannels = outputGradient.GetLength(1);
+        int kernelH = weights.GetLength(2);
+        int kernelW = weights.GetLength(3);
+        int outGradH = outputGradient.GetLength(2);
+        int outGradW = outputGradient.GetLength(3);
+
+        Debug.Assert(weights.GetLength(0) == inputChannels);
+        Debug.Assert(weights.GetLength(1) == outputChannels);
+        Debug.Assert(kernelH == kernelW);
+
+        int pad = padding ?? (kernelH / 2);
+
+        float[,,,] inputGradient = new float[batchSize, inputChannels, inputHeight, inputWidth];
+
+        ref float weightsRef = ref weights[0, 0, 0, 0];
+        ref float outputGradRef = ref outputGradient[0, 0, 0, 0];
+        ref float inputGradRef = ref inputGradient[0, 0, 0, 0];
+
+        ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
+        ReadOnlySpan<float> outputGradSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradRef, outputGradient.Length);
+        Span<float> inputGradSpan = MemoryMarshal.CreateSpan(ref inputGradRef, inputGradient.Length);
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int ic = 0; ic < inputChannels; ic++)
+            {
+                for (int ih = 0; ih < inputHeight; ih++)
+                {
+                    for (int iw = 0; iw < inputWidth; iw++)
+                    {
+                        float sum = 0f;
+                        for (int oc = 0; oc < outputChannels; oc++)
+                        {
+                            for (int kh = 0; kh < kernelH; kh++)
+                            {
+                                for (int kw = 0; kw < kernelW; kw++)
+                                {
+                                    int oh = ih - kh + pad;
+                                    int ow = iw - kw + pad;
+                                    if (oh >= 0 && oh < outGradH && ow >= 0 && ow < outGradW)
+                                    {
+                                        sum += outputGradSpan[b * (outputChannels * outGradH * outGradW) + oc * (outGradH * outGradW) + oh * outGradW + ow] *
+                                               weightsSpan[ic * (outputChannels * kernelH * kernelW) + oc * (kernelH * kernelW) + kh * kernelW + kw];
+                                    }
+                                }
+                            }
+                        }
+                        inputGradSpan[b * (inputChannels * inputHeight * inputWidth) + ic * (inputHeight * inputWidth) + ih * inputWidth + iw] = sum;
+
+                        /*
+                        float sum = 0f;
+                        for (int oc = 0; oc < outputChannels; oc++)
+                        {
+                            for (int kh = 0; kh < kernelH; kh++)
+                            {
+                                for (int kw = 0; kw < kernelW; kw++)
+                                {
+                                    int oh = ih - kh + pad;
+                                    int ow = iw - kw + pad;
+                                    if (oh >= 0 && oh < outGradH && ow >= 0 && ow < outGradW)
+                                    {
+                                        sum += outputGradient[b, oc, oh, ow] * weights[ic, oc, kh, kw];
+                                    }
+                                }
+                            }
+                        }
+                        inputGradient[b, ic, ih, iw] = sum;*/
+                    }
+                }
+            }
+        }
+
+        return inputGradient;
+    }
+
+    /// <summary>
+    /// Backward pass w.r.t. weights (parameters) for 2D convolution.
+    /// Returns gradient with shape [inChannels, outChannels, kernelH, kernelW].
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] Convolve2DBackwardWeights(this float[,,,] input, float[,,,] outputGradient, int kernelH, int kernelW, int? padding = null)
+    {
+        int batchSize = outputGradient.GetLength(0);
+        int inputChannels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int outputChannels = outputGradient.GetLength(1);
+        int outGradH = outputGradient.GetLength(2);
+        int outGradW = outputGradient.GetLength(3);
+
+        Debug.Assert(kernelH == kernelW);
+        int pad = padding ?? (kernelH / 2);
+
+        float[,,,] paramGradient = new float[inputChannels, outputChannels, kernelH, kernelW];
+
+        ref float inputRef = ref input[0, 0, 0, 0];
+        ref float outputGradRef = ref outputGradient[0, 0, 0, 0];
+
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
+        ReadOnlySpan<float> outputGradSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradRef, outputGradient.Length);
+        Span<float> paramGradSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0, 0, 0], paramGradient.Length);
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int ic = 0; ic < inputChannels; ic++)
+            {
+                for (int oc = 0; oc < outputChannels; oc++)
+                {
+                    for (int kh = 0; kh < kernelH; kh++)
+                    {
+                        for (int kw = 0; kw < kernelW; kw++)
+                        {
+                            float sum = 0f;
+                            for (int oh = 0; oh < outGradH; oh++)
+                            {
+                                for (int ow = 0; ow < outGradW; ow++)
+                                {
+                                    int ih = oh + kh - pad;
+                                    int iw = ow + kw - pad;
+                                    if (ih >= 0 && ih < inputHeight && iw >= 0 && iw < inputWidth)
+                                    {
+                                        sum += outputGradSpan[b * (outputChannels * outGradH * outGradW) + oc * (outGradH * outGradW) + oh * outGradW + ow] *
+                                               inputSpan[b * (inputChannels * inputHeight * inputWidth) + ic * (inputHeight * inputWidth) + ih * inputWidth + iw];
+                                    }
+                                }
+                            }
+                            paramGradSpan[ic * (outputChannels * kernelH * kernelW) + oc * (kernelH * kernelW) + kh * kernelW + kw] += sum;
+
+                            /*
+                            float sum = 0f;
+                            for (int oh = 0; oh < outGradH; oh++)
+                            {
+                                for (int ow = 0; ow < outGradW; ow++)
+                                {
+                                    int ih = oh + kh - pad;
+                                    int iw = ow + kw - pad;
+                                    if (ih >= 0 && ih < inputHeight && iw >= 0 && iw < inputWidth)
+                                    {
+                                        sum += outputGradient[b, oc, oh, ow] * input[b, ic, ih, iw];
+                                    }
+                                }
+                            }
+                            paramGradient[ic, oc, kh, kw] += sum;*/
+                        }
+                    }
+                }
+            }
+        }
+
+        return paramGradient;
     }
 }

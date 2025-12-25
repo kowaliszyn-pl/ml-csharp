@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
+using NeuralNetworks.Core.Span;
 
 using static NeuralNetworks.Core.ArrayUtils;
 
@@ -24,6 +25,8 @@ public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
     
     protected override float[,,,] CalcOutput(bool inference)
     {
+        return Input.Convolve2DForward(Param);
+        /*
         int batchSize = Input.GetLength(0);
         int inputChannels = Input.GetLength(1);
         int inputHeight = Input.GetLength(2);
@@ -72,11 +75,13 @@ public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
             }
         }
 
-        return output;
+        return output;*/
     }
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
     {
+        return Input.Convolve2DBackwardInput(Param, outputGradient);
+        /*
         int batchSize = outputGradient.GetLength(0);
         int inputChannels = Input.GetLength(1);
         int inputHeight = Input.GetLength(2);
@@ -124,11 +129,14 @@ public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
             }
         }
 
-        return inputGradient;
+        return inputGradient;*/
     }
 
     protected override float[,,,] CalcParamGradient(float[,,,] outputGradient)
     {
+        int kernelSize = Param.GetLength(2);
+        return Input.Convolve2DBackwardWeights(outputGradient, kernelSize, kernelSize);
+        /*
         int batchSize = outputGradient.GetLength(0);
         int inputChannels = Input.GetLength(1);
         int inputHeight = Input.GetLength(2);
@@ -176,7 +184,7 @@ public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
             }
         }
 
-        return paramGradient;
+        return paramGradient;*/
     }
 
     public override void UpdateParams(Layer? layer, Optimizer optimizer)
