@@ -1,0 +1,40 @@
+﻿// Neural Networks in C♯
+// File name: SpanBenchmarks.cs
+// www.kowaliszyn.pl, 2025
+
+using System;
+using System.Security.Cryptography;
+
+using BenchmarkDotNet.Attributes;
+
+using Microsoft.VSDiagnostics;
+
+using NeuralNetworks.Core;
+
+namespace SpanBenchmark;
+// For more information on the VS BenchmarkDotNet Diagnosers see https://learn.microsoft.com/visualstudio/profiling/profiling-with-benchmark-dotnet
+[CPUUsageDiagnoser]
+public class SpanBenchmarks
+{
+    private float[,,,] array1;
+    private float[,,,] array2;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        array1 = ArrayUtils.CreateRandom(100, 100, 3, 3, new Random(42));
+        array2 = ArrayUtils.CreateRandom(100, 100, 3, 3, new Random(43));
+    }
+
+    [Benchmark]
+    public void MultiplyByTanhDerivativeSpan()
+    {
+        array1.MultiplyByTanhDerivativeSpan(array2);
+    }
+
+    [Benchmark]
+    public void MultiplyByTanhDerivative()
+    {
+        array1.MultiplyByTanhDerivative(array2);
+    }
+}

@@ -2,6 +2,12 @@
 // File name: Flatten.cs
 // Code It Yourself with .NET, 2024
 
+#define SPAN
+
+#if SPAN
+using System.Runtime.InteropServices;
+#endif
+
 using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworks.Operations;
@@ -16,7 +22,25 @@ public class Flatten : Operation<float[,,,], float[,]>
         int width = Input.GetLength(3);
 
         float[,,,] inputGrad = new float[batchSize, channels, height, width];
-
+#if SPAN
+        ReadOnlySpan<float> outputGradSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+        Span<float> inputGradSpan = MemoryMarshal.CreateSpan(ref inputGrad[0, 0, 0, 0], inputGrad.Length);
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < height; h++)
+                {
+                    for (int w = 0; w < width; w++)
+                    {
+                        int index = c * height * width + h * width + w;
+                        inputGradSpan[b * (channels * height * width) + c * (height * width) + h * width + w] =
+                            outputGradSpan[b * (channels * height * width) + index];
+                    }
+                }
+            }
+        }
+#else
         for (int b = 0; b < batchSize; b++)
         {
             for (int c = 0; c < channels; c++)
@@ -31,7 +55,7 @@ public class Flatten : Operation<float[,,,], float[,]>
                 }
             }
         }
-
+#endif
         return inputGrad;
     }
 
