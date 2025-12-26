@@ -8,7 +8,7 @@
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
-using static NeuralNetworks.Core.Span.OperationOps;
+using static NeuralNetworks.Core.Gpu.OperationOps;
 using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworks.Operations;

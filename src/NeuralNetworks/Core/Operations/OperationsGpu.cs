@@ -1,49 +1,35 @@
 ﻿// Neural Networks in C♯
-// File name: OperationOps.cs
+// File name: OperationsGpu.cs
 // www.kowaliszyn.pl, 2025
 
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 using ILGPU;
 using ILGPU.Runtime;
 using ILGPU.Runtime.CPU;
 using ILGPU.Runtime.Cuda;
 
-namespace NeuralNetworks.Core.Gpu;
+namespace NeuralNetworks.Core.Operations;
 
-public static class OperationOps
+internal class OperationsGpu: OperationsSpan, IDisposable
 {
     private static readonly Context s_context;
     private static readonly Accelerator s_accelerator;
+    private bool _disposedValue;
 
-    private static readonly object s_disposeLock = new();
-    private static bool s_disposed;
-
-    static OperationOps()
+    public OperationsGpu()
     {
+        // Initialize ILGPU context and accelerator
         s_context = Context.Create(builder => builder.Cuda().CPU());
         s_accelerator = s_context.GetPreferredDevice(preferCPU: false).CreateAccelerator(s_context);
-        AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
-    }
-
-    public static void Dispose()
-    {
-        lock (s_disposeLock)
-        {
-            if (s_disposed)
-            {
-                return;
-            }
-
-            s_accelerator.Dispose();
-            s_context.Dispose();
-            s_disposed = true;
-        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    public float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
     {
         int batchSize = input.GetLength(0);
         int inputFeatures = input.GetLength(1);
@@ -71,7 +57,7 @@ public static class OperationOps
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    public float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
     {
         int batchSize = outputGradient.GetLength(0);
         int outputFeatures = outputGradient.GetLength(1);
@@ -99,7 +85,7 @@ public static class OperationOps
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    public float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
     {
         int batchSize = input.GetLength(0);
         int inputFeatures = input.GetLength(1);
@@ -182,5 +168,34 @@ public static class OperationOps
         }
 
         paramGradient[row, col] = sum;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                // TODO: dispose managed state (managed objects)
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            _disposedValue = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~OperationsGpu()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    void IDisposable.Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
