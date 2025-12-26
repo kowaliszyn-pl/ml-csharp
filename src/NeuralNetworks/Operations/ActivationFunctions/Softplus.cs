@@ -2,11 +2,6 @@
 // File name: Softplus.cs
 // www.kowaliszyn.pl, 2025
 
-
-// Neural Networks in C♯
-// File name: Softplus.cs
-// www.kowaliszyn.pl, 2025
-
 using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;

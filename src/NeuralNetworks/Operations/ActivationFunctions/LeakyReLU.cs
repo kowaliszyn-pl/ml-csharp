@@ -2,11 +2,6 @@
 // File name: LeakyReLU.cs
 // www.kowaliszyn.pl, 2025
 
-
-// Neural Networks in C♯
-// File name: LeakyReLU.cs
-// www.kowaliszyn.pl, 2025
-
 using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
