@@ -4,6 +4,8 @@
 
 using NeuralNetworks.Core.Span;
 
+using static NeuralNetworks.Core.Span.OperationOps;
+
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
 public class Tanh4D : ActivationFunction4D
@@ -15,7 +17,7 @@ public class Tanh4D : ActivationFunction4D
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
     /// </summary>
     /// <remarks>
-    /// This method is typically used during backpropagation in neural network training to propagate
+    /// This method is used during backpropagation in neural network training to propagate
     /// gradients through a Tanh activation layer. The returned array has the same shape as <paramref
     /// name="outputGradient"/>.
     /// <para>
@@ -39,7 +41,7 @@ public class Tanh4D : ActivationFunction4D
     /// derivative of the Tanh function at that position.
     /// </returns>
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
-        => outputGradient.MultiplyByTanhDerivative(Output);
+        => MultiplyByTanhDerivative(outputGradient, Output);
 
     public override string ToString() => "Tanh4D";
 }

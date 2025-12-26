@@ -2,11 +2,11 @@
 // File name: Conv2D.cs
 // www.kowaliszyn.pl, 2025
 
-using NeuralNetworks.Core.Span;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
 using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.Span.OperationOps;
 
 namespace NeuralNetworks.Operations;
 
@@ -22,15 +22,15 @@ public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
 {
 
     protected override float[,,,] CalcOutput(bool inference) 
-        => Input.Convolve2DForward(Param);
+        => Convolve2DForward(Input, Param);
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
-        => Input.Convolve2DBackwardInput(Param, outputGradient);
+        => Convolve2DBackwardInput(Input, Param, outputGradient);
 
     protected override float[,,,] CalcParamGradient(float[,,,] outputGradient)
     {
         int kernelSize = Param.GetLength(2);
-        return Input.Convolve2DBackwardWeights(outputGradient, kernelSize, kernelSize);
+        return Convolve2DBackwardWeights(Input, outputGradient, kernelSize, kernelSize);
     }
 
     public override void UpdateParams(Layer? layer, Optimizer optimizer)
