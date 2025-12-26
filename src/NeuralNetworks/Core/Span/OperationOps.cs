@@ -293,13 +293,9 @@ public static class OperationOps
         return paramGradient;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
     {
-        /* // Clip the probabilities to avoid log(0).
-           float[,] clippedSoftmax = predicted.Clip(eps, 1 - eps);
-           return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
-        */
-
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         float loss = 0f;
@@ -312,7 +308,7 @@ public static class OperationOps
         ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predictedRef, predicted.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref targetRef, target.Length);
 
-        for(int i = 0; i < targetSpan.Length; i++)
+        for (int i = 0; i < targetSpan.Length; i++)
         {
             float p = Math.Clamp(predictedSpan[i], eps, 1 - eps);
             loss += targetSpan[i] * MathF.Log(p);
@@ -321,12 +317,9 @@ public static class OperationOps
         return -loss / (batchSize * numClasses);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
     {
-        /* int batchSize = Prediction.GetLength(0);
-            return _softmaxPrediction.Subtract(Target).Divide(batchSize);
-        */
-
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = predicted.GetLength(0);
@@ -341,7 +334,7 @@ public static class OperationOps
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref targetRef, target.Length);
         Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradientRef, gradient.Length);
 
-        for(int i = 0; i < gradientSpan.Length; i++)
+        for (int i = 0; i < gradientSpan.Length; i++)
         {
             gradientSpan[i] = (predictedSpan[i] - targetSpan[i]) / batchSize;
         }
@@ -389,5 +382,126 @@ public static class OperationOps
         }
 
         return result;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    {
+        int batchSize = input.GetLength(0);
+        int inputFeatures = input.GetLength(1);
+        int outputFeatures = weights.GetLength(1);
+
+        Debug.Assert(weights.GetLength(0) == inputFeatures, "Input features must match weight input dimension.");
+
+        float[,] output = new float[batchSize, outputFeatures];
+
+        ref float inputRef = ref input[0, 0];
+        ref float weightsRef = ref weights[0, 0];
+        ref float outputRef = ref output[0, 0];
+
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
+        ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
+        Span<float> outputSpan = MemoryMarshal.CreateSpan(ref outputRef, output.Length);
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            int inputBIndex = b * inputFeatures;
+            int outputBIndex = b * outputFeatures;
+            for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            {
+                float sum = 0f;
+                for (int ifeature = 0; ifeature < inputFeatures; ifeature++)
+                {
+                    // sum += input[b, inputFeature] * weights[inputFeature, outputFeature];
+                    sum += inputSpan[inputBIndex + ifeature] * weightsSpan[ifeature * outputFeatures + ofeature];
+                }
+                // output[b, outputFeature] = sum;
+                outputSpan[outputBIndex + ofeature] = sum;
+            }
+        }
+
+        Debug.Assert(output.Length == batchSize * outputFeatures, "Output shape is incorrect.");
+
+        return output;
+    }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    {
+        // outputGradient.MultiplyDot(weights.Transpose());
+
+        int batchSize = outputGradient.GetLength(0); // 100
+        int inputFeatures = weights.GetLength(0); // 46
+        int outputFeatures = weights.GetLength(1); // 10
+        int outputGradientFeatures = outputGradient.GetLength(1); // 10
+
+        Debug.Assert(outputGradientFeatures == outputFeatures, "Output features of output gradient must match weight output dimension.");
+
+        float[,] inputGradient = new float[batchSize, inputFeatures];
+        ref float outputGradientRef = ref outputGradient[0, 0];
+        ref float weightsRef = ref weights[0, 0];
+        ref float inputGradientRef = ref inputGradient[0, 0];
+
+        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradientRef, outputGradient.Length);
+        ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
+        Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradientRef, inputGradient.Length);
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            int outputGradientBIndex = b * outputFeatures;
+            int inputGradientBIndex = b * inputFeatures;
+            for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
+            {
+                float sum = 0f;
+                for (int outputFeature = 0; outputFeature < outputFeatures; outputFeature++)
+                {
+                    // sum += outputGradient[b, outputFeature] * weights[inputFeature, outputFeature];
+                    sum += outputGradientSpan[outputGradientBIndex + outputFeature] * weightsSpan[inputFeature * outputFeatures + outputFeature];
+                }
+                // inputGradient[b, inputFeature] = sum;
+                inputGradientSpan[inputGradientBIndex + inputFeature] = sum;
+            }
+        }
+
+        return inputGradient;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    { 
+        // input.Transpose().MultiplyDot(outputGradient);
+
+        int batchSize = input.GetLength(0);
+        int inputFeatures = input.GetLength(1);
+        int outputFeatures = outputGradient.GetLength(1);
+
+        Debug.Assert(outputGradient.GetLength(0) == batchSize, "Batch size of output gradient must match batch size of input.");
+
+        float[,] paramGradient = new float[inputFeatures, outputFeatures];
+        ref float inputRef = ref input[0, 0];
+        ref float outputGradientRef = ref outputGradient[0, 0];
+        ref float paramGradientRef = ref paramGradient[0, 0];
+
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
+        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradientRef, outputGradient.Length);
+        Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradientRef, paramGradient.Length);
+
+        for (int ifeature = 0; ifeature < inputFeatures; ifeature++)
+        {
+            int paramGradientInputFeatureIndex = ifeature * outputFeatures;
+            for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            {
+                float sum = 0f;
+                for (int b = 0; b < batchSize; b++)
+                {
+                    // sum += input[b, inputFeature] * outputGradient[b, outputFeature];
+                    sum += inputSpan[b * inputFeatures + ifeature] * outputGradientSpan[b * outputFeatures + ofeature];
+                }
+                // paramGradient[inputFeature, outputFeature] = sum;
+                paramGradientSpan[paramGradientInputFeatureIndex + ofeature] = sum;
+            }
+        }
+        return paramGradient;
     }
 }

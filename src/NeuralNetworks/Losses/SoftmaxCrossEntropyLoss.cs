@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: SoftmaxCrossEntropyLoss2.cs
+// File name: SoftmaxCrossEntropyLoss.cs
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
@@ -22,11 +22,6 @@ public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss2D
     {
         // Calculate the probabilities for the whole batch.
         _softmaxPrediction = Prediction.Softmax();
-
-        //// Clip the probabilities to avoid log(0).
-        //float[,] clippedSoftmax = _softmaxPrediction.Clip(eps, 1 - eps);
-
-        //return -clippedSoftmax.Log().MultiplyElementwise(Target).Mean();
         return CrossEntropyLoss(_softmaxPrediction, Target, eps);
     }
 
@@ -34,8 +29,6 @@ public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss2D
     {
         Debug.Assert(_softmaxPrediction != null, "_softmaxPrediction should not be null here.");
 
-        //int batchSize = Prediction.GetLength(0);
-        //return _softmaxPrediction.Subtract(Target).Divide(batchSize);
         return CrossEntropyLossGradient(_softmaxPrediction, Target);
     }
 
