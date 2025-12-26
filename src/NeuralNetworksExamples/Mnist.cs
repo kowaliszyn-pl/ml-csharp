@@ -35,7 +35,7 @@ class MnistModel(SeededRandom? random)
         GlorotInitializer initializer = new(Random);
 
         return 
-             AddLayer(new DenseLayer(178, new LeakyReLU(0.005f), initializer, new InvertedDropout2D(0.82f, Random)))
+             AddLayer(new DenseLayer(178, new LeakyReLU2D(0.005f), initializer, new InvertedDropout2D(0.82f, Random)))
             .AddLayer(new DenseLayer(46, new BipolarSigmoid(1.5f), initializer, new InvertedDropout2D(0.82f, Random)))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
