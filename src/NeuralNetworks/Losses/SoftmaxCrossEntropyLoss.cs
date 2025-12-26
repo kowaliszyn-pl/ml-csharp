@@ -34,8 +34,9 @@ public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss2D
     {
         Debug.Assert(_softmaxPrediction != null, "_softmaxPrediction should not be null here.");
 
-        int batchSize = Prediction.GetLength(0);
-        return _softmaxPrediction.Subtract(Target).Divide(batchSize);
+        //int batchSize = Prediction.GetLength(0);
+        //return _softmaxPrediction.Subtract(Target).Divide(batchSize);
+        return CrossEntropyLossGradient(_softmaxPrediction, Target);
     }
 
     public override string ToString() => $"SoftmaxCrossEntropyLoss (eps={eps})";
