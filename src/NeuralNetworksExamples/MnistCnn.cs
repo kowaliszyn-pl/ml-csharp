@@ -24,19 +24,20 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
+// For the current configuration and hyperparameters, the model achieves  97,61% accuracy (changed after changing the implementation of Glorot initializer).
+
 class MnistConvModel(SeededRandom? random)
     : BaseModel<float[,,,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,,,], float[,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
-        // ParamInitializer initializer = new RangeInitializer(1, 1);
-        Dropout4D? dropout = new(0.85f, Random);
+        Dropout4D? dropout = new(0.82f, Random);
 
         return AddLayer(new Conv2DLayer(
                 filters: 32, // 16,
                 kernelSize: 3,
-                activationFunction: new Tanh4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer,
                 dropout: dropout
             ))

@@ -342,6 +342,33 @@ public static class OperationOps
         return gradient;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
+    {
+        int dim0 = outputGradient.GetLength(0);
+        int dim1 = outputGradient.GetLength(1);
+        int dim2 = outputGradient.GetLength(2);
+        int dim3 = outputGradient.GetLength(3);
+
+        Debug.Assert(dim0 > 0 && dim1 > 0 && dim2 > 0 && dim3 > 0, "All dimensions must be greater than zero.");
+        Debug.Assert(input.GetLength(0) == dim0 && input.GetLength(1) == dim1 && input.GetLength(2) == dim2 && input.GetLength(3) == dim3, "Shapes of outputGradient and input must match for elementwise operations.");
+
+        float[,,,] result = new float[dim0, dim1, dim2, dim3];
+        ref float outputGradientRef = ref outputGradient[0, 0, 0, 0];
+        ref float inputRef = ref input[0, 0, 0, 0];
+        ref float resultRef = ref result[0, 0, 0, 0];
+
+        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradientRef, outputGradient.Length);
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
+        Span<float> resultSpan = MemoryMarshal.CreateSpan(ref resultRef, result.Length);
+
+        for (int i = 0; i < resultSpan.Length; i++)
+        {
+            resultSpan[i] = inputSpan[i] > 0 ? outputGradientSpan[i] * beta : outputGradientSpan[i] * alfa;
+        }
+        return result;
+    }
+
     /// <param name="outputGradient"></param>
     /// <param name="output"></param>
     /// <returns>InputGradient</returns>

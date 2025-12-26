@@ -27,5 +27,5 @@ public class LeakyReLU2D(float alfa = 0.01f, float beta = 1f) : ActivationFuncti
 
     }
 
-    public override string ToString() => $"LeakyReLU (alfa={alfa}, beta={beta})";
+    public override string ToString() => $"LeakyReLU2D (alfa={alfa}, beta={beta})";
 }
