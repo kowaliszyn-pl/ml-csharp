@@ -6,6 +6,8 @@ using System.Diagnostics;
 
 using NeuralNetworks.Core;
 
+using static NeuralNetworks.Core.Arrays.OperationOps;
+
 namespace NeuralNetworks.Losses;
 
 /// <summary>
@@ -21,10 +23,11 @@ public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss2D
         // Calculate the probabilities for the whole batch.
         _softmaxPrediction = Prediction.Softmax();
 
-        // Clip the probabilities to avoid log(0).
-        float[,] clippedSoftmax = _softmaxPrediction.Clip(eps, 1 - eps);
+        //// Clip the probabilities to avoid log(0).
+        //float[,] clippedSoftmax = _softmaxPrediction.Clip(eps, 1 - eps);
 
-        return -clippedSoftmax.Log().MultiplyElementwise(Target).Mean();
+        //return -clippedSoftmax.Log().MultiplyElementwise(Target).Mean();
+        return CrossEntropyLoss(_softmaxPrediction, Target, eps);
     }
 
     protected override float[,] CalculateLossGradient()
