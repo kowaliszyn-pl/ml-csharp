@@ -19,7 +19,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Core\Arrays\" />
 	  <Folder Include="Core\IO\" />
 	</ItemGroup>
 
