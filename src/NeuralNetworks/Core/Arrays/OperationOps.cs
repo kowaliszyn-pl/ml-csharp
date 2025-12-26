@@ -2,19 +2,17 @@
 // File name: OperationOps.cs
 // www.kowaliszyn.pl, 2025
 
-using System.Diagnostics;
-
 namespace NeuralNetworks.Core.Arrays;
 
 public static class OperationOps
 {
     public static float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
     {
-        /* // Clip the probabilities to avoid log(0).
-           float[,] clippedSoftmax = predicted.Clip(eps, 1 - eps);
-           return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
-        */
+        // Clip the probabilities to avoid log(0).
+        float[,] clippedSoftmax = predicted.Clip(eps, 1 - eps);
+        return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
 
+        /*
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         float loss = 0f;
@@ -29,14 +27,15 @@ public static class OperationOps
             }
         }
         return -loss / (batchSize * numClasses);
+        */
     }
 
     public static float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
     {
-        /* int batchSize = Prediction.GetLength(0);
-            return _softmaxPrediction.Subtract(Target).Divide(batchSize);
-        */
+        int batchSize = predicted.GetLength(0);
+        return predicted.Subtract(target).Divide(batchSize);
 
+        /*
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = predicted.GetLength(0);
@@ -51,5 +50,6 @@ public static class OperationOps
         }
         
         return gradient;
+        */
     }
 }
