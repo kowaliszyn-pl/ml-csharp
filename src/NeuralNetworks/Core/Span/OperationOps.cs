@@ -452,7 +452,6 @@ public static class OperationOps
         return output;
     }
 
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
     {
@@ -531,4 +530,5 @@ public static class OperationOps
         }
         return paramGradient;
     }
+
 }
