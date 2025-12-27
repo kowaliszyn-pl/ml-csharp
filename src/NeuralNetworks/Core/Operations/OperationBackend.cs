@@ -6,26 +6,30 @@ namespace NeuralNetworks.Core.Operations;
 
 public static class OperationBackend
 {
+    static OperationBackend()
+    {
+        AppDomain.CurrentDomain.ProcessExit += (s, e) => DisposeCurrentOperationBackend();
+    }
 
     public static OperationBackendType CurrentType
     {
         get
         {
-            if(Current is OperationsArray)
-            {
-                return OperationBackendType.Cpu_Arrays;
-            }
-            else if(Current is OperationsSpan)
-            {
-                return OperationBackendType.Cpu_Spans;
-            }
-            else if(Current is OperationsGpu)
+            if (Current is OperationsGpu)
             {
                 return OperationBackendType.Gpu;
             }
+            else if (Current is OperationsSpan)
+            {
+                return OperationBackendType.Cpu_Spans;
+            }
+            else if (Current is OperationsArray)
+            {
+                return OperationBackendType.Cpu_Arrays;
+            }
             else
             {
-                throw new NotSupportedException("The current operation backend type is not supported.");
+                throw new NotSupportedException("The current operation backend type is not valid.");
             }
         }
     }
@@ -38,13 +42,7 @@ public static class OperationBackend
 
     public static void Use(OperationBackendType backendType)
     {
-        if(Current != null)
-        {
-            if (Current is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
+        DisposeCurrentOperationBackend();
 
         Current = backendType switch
         {
@@ -53,6 +51,18 @@ public static class OperationBackend
             OperationBackendType.Gpu => new OperationsGpu(),
             _ => throw new NotSupportedException($"The specified backend type '{backendType}' is not supported."),
         };
+    }
+
+    private static void DisposeCurrentOperationBackend()
+    {
+        if (Current != null)
+        {
+            if (Current is IDisposable disposable)
+            {
+                disposable.Dispose();
+            };
+            Current = null!;
+        }
     }
 
     internal static float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)

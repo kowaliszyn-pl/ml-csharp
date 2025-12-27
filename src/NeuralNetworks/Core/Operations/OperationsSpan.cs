@@ -633,5 +633,4 @@ internal class OperationsSpan : OperationsArray
 
         return res;
     }
-
 }

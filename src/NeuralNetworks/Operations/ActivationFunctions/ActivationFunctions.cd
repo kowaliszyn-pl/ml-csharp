@@ -42,11 +42,11 @@
       <FileName>Operations\ActivationFunctions\BipolarSigmoid.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.ActivationFunctions.LeakyReLU" Collapsed="true">
+  <Class Name="NeuralNetworks.Operations.ActivationFunctions.LeakyReLU2D" Collapsed="true">
     <Position X="2.25" Y="7.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\ActivationFunctions\LeakyReLU.cs</FileName>
+      <FileName>Operations\ActivationFunctions\LeakyReLU2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.Sigmoid" Collapsed="true">
@@ -82,6 +82,13 @@
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\Softplus.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ActivationFunctions.LeakyReLU4D" Collapsed="true">
+    <Position X="4.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\ActivationFunctions\LeakyReLU4D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

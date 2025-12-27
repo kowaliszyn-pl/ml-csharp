@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+using ILGPU.Runtime.Cuda;
+
 namespace NeuralNetworks.Core.Operations;
 
 internal class OperationsArray : IOperations
@@ -241,9 +243,39 @@ internal class OperationsArray : IOperations
         return outputGradient.MultiplyElementwise(tanhBackward);
     }
 
-    public virtual float[,] Flatten(float[,,,] source) => throw new NotImplementedException();
-    public virtual float[,,,] LeakyReLU(float[,,,] source, float alpha = 0.01F, float beta = 1) => throw new NotImplementedException();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public virtual float[,] Flatten(float[,,,] source)
+    {
+        // Flattent the input for each batch
+
+        int batchSize = source.GetLength(0);
+        int channels = source.GetLength(1);
+        int height = source.GetLength(2);
+        int width = source.GetLength(3);
+
+        float[,] output = new float[batchSize, channels * height * width];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < height; h++)
+                {
+                    for (int w = 0; w < width; w++)
+                    {
+                        int index = c * height * width + h * width + w;
+                        output[b, index] = source[b, c, h, w];
+                    }
+                }
+            }
+        }
+
+        return output;
+    }
     
+    public virtual float[,,,] LeakyReLU(float[,,,] source, float alpha = 0.01F, float beta = 1) => throw new NotImplementedException();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float[,,,] Tanh(float[,,,] source)
     {
         int dim1 = source.GetLength(0);
@@ -270,5 +302,31 @@ internal class OperationsArray : IOperations
         return res;
     }
 
-    public virtual float[,,,] Unflatten(float[,] source, float[,,,] targetSize) => throw new NotImplementedException();
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public virtual float[,,,] Unflatten(float[,] source, float[,,,] targetSize)
+    {
+        int batchSize = targetSize.GetLength(0);
+        int channels = targetSize.GetLength(1);
+        int height = targetSize.GetLength(2);
+        int width = targetSize.GetLength(3);
+
+        float[,,,] inputGrad = new float[batchSize, channels, height, width];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < height; h++)
+                {
+                    for (int w = 0; w < width; w++)
+                    {
+                        int index = c * height * width + h * width + w;
+                        inputGrad[b, c, h, w] = source[b, index];
+                    }
+                }
+            }
+        }
+
+        return inputGrad;
+    }
 }

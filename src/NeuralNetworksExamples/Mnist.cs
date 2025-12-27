@@ -3,7 +3,6 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-using System.Reflection;
 
 using Microsoft.Extensions.Logging;
 
@@ -28,37 +27,37 @@ namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves  97,54% accuracy (changed after changing the implementation of Glorot initializer).
 
-class MnistModel(SeededRandom? random)
+internal class MnistModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
 
-        return 
+        return
              AddLayer(new DenseLayer(178, new LeakyReLU2D(0.005f), initializer, new InvertedDropout2D(0.82f, Random)))
             .AddLayer(new DenseLayer(46, new BipolarSigmoid(1.5f), initializer, new InvertedDropout2D(0.82f, Random)))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
 }
 
-class Mnist
+internal class Mnist
 {
-    const int RandomSeed = 44; // From Mickiewicz's poetry.
-    const int Epochs = 15;
-    const int BatchSize = 100;
-    const int EvalEveryEpochs = 2;
-    const int LogEveryEpochs = 1;
+    private const int RandomSeed = 44; // From Mickiewicz's poetry.
+    private const int Epochs = 15;
+    private const int BatchSize = 100;
+    private const int EvalEveryEpochs = 2;
+    private const int LogEveryEpochs = 1;
 
-    const float InitialLearningRate = 0.0025f;
-    const float FinalLearningRate = 0.0005f;
-    const float AdamBeta1 = 0.89f;
-    const float AdamBeta2 = 0.99f;
+    private const float InitialLearningRate = 0.0025f;
+    private const float FinalLearningRate = 0.0005f;
+    private const float AdamBeta1 = 0.89f;
+    private const float AdamBeta2 = 0.99f;
 
     public static void Run()
     {
         ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
-        OperationBackend.Use(OperationBackendType.Cpu_Arrays);
+        OperationBackend.Use(OperationBackendType.Gpu);
 
         // rows - batch
         // cols - features
@@ -103,10 +102,10 @@ class Mnist
 
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate);
         Trainer2D trainer = new(
-            model, 
+            model,
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             new AdamOptimizer(learningRate, beta1: AdamBeta1, beta2: AdamBeta2),
-            random: commonRandom, 
+            random: commonRandom,
             logger: logger)
         {
             Memo = $"Calling class: {nameof(Mnist)}."

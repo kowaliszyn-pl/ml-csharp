@@ -103,7 +103,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         string environment = "Release";
 #endif
         logger?.LogInformation("Environment: {environment}.", environment);
-        logger?.LogInformation("Operation backend: {operationBackend}", OperationBackend.CurrentType);
+        //logger?.LogInformation("Operation backend: {operationBackend}", OperationBackend.CurrentType);
 
         (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
         int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
@@ -140,7 +140,8 @@ public abstract class Trainer<TInputData, TPrediction>(
             int step = 0;
 
             float? stepsPerSecond = null;
-            TimeSpan? eta = null;
+            TimeSpan eta;
+            long calculatedOn = -500;
 
             Stopwatch stepWatch = Stopwatch.StartNew();
             foreach ((TInputData xBatch, TPrediction yBatch) in GenerateBatches(xTrain, yTrain, batchSize))
@@ -149,31 +150,33 @@ public abstract class Trainer<TInputData, TPrediction>(
                 if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                 {
                     string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";
-                    double calculatedOn = -500;
+                    string speedAndEtaInfo = string.Empty;
 
                     if (stepsPerSecond is not null)
                     {
-                        double currentTimeInMlliseconds = trainWatch.Elapsed.TotalMilliseconds;
-
+                        long currentTimeInMlliseconds = trainWatch.ElapsedMilliseconds;
+                        
                         // Update the speed and ETA every 500 milliseconds
                         if (currentTimeInMlliseconds - calculatedOn >= 500)
                         {
                             long stepsDone = (epoch - 1) * allSteps + step;
                             long remainingSteps = allStepsInTraining - stepsDone;
 
-                            double milisecondsPerStep = currentTimeInMlliseconds / stepsDone;
-                            double remainingMiliseconds = remainingSteps * milisecondsPerStep;
+                            long milisecondsPerStep = currentTimeInMlliseconds / stepsDone;
+                            long remainingMiliseconds = remainingSteps * milisecondsPerStep;
 
                             eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
                             calculatedOn = currentTimeInMlliseconds;
+                            // WriteLine("test");
+                            speedAndEtaInfo = $" {stepsPerSecond.Value:F2} steps/s - {eta.Hours}h {eta.Minutes}m {eta.Seconds}s left   ";
                         }
 
-                        if (eta is not null)
-                            stepInfo += $" {stepsPerSecond.Value:F2} steps/s - {eta.Value.Hours}h {eta.Value.Minutes}m {eta.Value.Seconds}s left   ";
+                        //if (eta is not null)
+                        //    stepInfo += $" {stepsPerSecond.Value:F2} steps/s - {eta.Value.Hours}h {eta.Value.Minutes}m {eta.Value.Seconds}s left   ";
 
                     }
 
-                    Write(stepInfo + "\r");
+                    Write(stepInfo + speedAndEtaInfo + "\r");
                 }
 
                 trainLoss = (trainLoss ?? 0) + model.TrainBatch(xBatch, yBatch);
@@ -281,6 +284,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         res.Add($"{newIndent}Memo: \"{Memo}\"");
         res.Add($"{newIndent}Random: {random}");
         res.Add($"{newIndent}Optimizer: {optimizer}");
+        res.Add($"{newIndent}Operation backend: {OperationBackend.CurrentType}");
         res.AddRange(model.Describe(indentation + Constants.Indentation));
         return res;
     }
