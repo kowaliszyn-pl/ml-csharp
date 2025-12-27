@@ -45,6 +45,7 @@ public static class ArrayExtensions
 
         ref float sourceRef = ref source[0, 0, 0, 0];
         ref float resRef = ref res[0, 0, 0, 0];
+
         ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref sourceRef, source.Length);
         Span<float> resSpan = MemoryMarshal.CreateSpan(ref resRef, res.Length);
         

@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using NeuralNetworks.Core;
 
-using static NeuralNetworks.Core.Span.OperationOps;
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Losses;
 

@@ -26,7 +26,7 @@ public class SpanBenchmarks
     [Benchmark]
     public void MultiplyByTanhDerivativeSpan()
     {
-        NeuralNetworks.Core.Span.OperationOps.MultiplyByTanhDerivative(array1, array2);
+        //new NeuralNetworks.Core.Span.OperationOps.MultiplyByTanhDerivative(array1, array2);
     }
 
     [Benchmark]

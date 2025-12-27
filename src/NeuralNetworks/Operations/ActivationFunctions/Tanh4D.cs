@@ -4,7 +4,7 @@
 
 using NeuralNetworks.Core.Span;
 
-using static NeuralNetworks.Core.Span.OperationOps;
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
