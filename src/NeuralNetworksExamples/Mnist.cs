@@ -8,6 +8,7 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Operations;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;
@@ -57,6 +58,7 @@ class Mnist
     public static void Run()
     {
         ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
+        OperationBackend.Use(OperationBackendType.Cpu_Arrays);
 
         // rows - batch
         // cols - features

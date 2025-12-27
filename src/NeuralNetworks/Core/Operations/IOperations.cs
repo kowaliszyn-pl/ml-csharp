@@ -4,7 +4,7 @@
 
 namespace NeuralNetworks.Core.Operations;
 
-internal interface IOperations
+public interface IOperations
 {
     public float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null);
     public float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null);

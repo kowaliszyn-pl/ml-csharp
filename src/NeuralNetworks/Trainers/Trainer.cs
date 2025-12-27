@@ -8,8 +8,8 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Operations;
 using NeuralNetworks.DataSources;
-using NeuralNetworks.Layers;
 using NeuralNetworks.Models;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.Trainers.Logging;
@@ -103,6 +103,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         string environment = "Release";
 #endif
         logger?.LogInformation("Environment: {environment}.", environment);
+        logger?.LogInformation("Operation backend: {operationBackend}", OperationBackend.CurrentType);
 
         (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
         int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
@@ -114,7 +115,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             bool evaluationEpoch = epoch % evalEveryEpochs == 0 || lastEpoch;
             bool logEpoch = epoch % logEveryEpochs == 0 || lastEpoch;
 
-            if(logEpoch)
+            if (logEpoch)
                 logger?.LogInformation("Epoch {epoch}/{epochs} started.", epoch, epochs);
 
             bool eval = xTest is not null && yTest is not null && evaluationEpoch;
@@ -132,7 +133,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             PermuteData(xTrain, yTrain, random ?? new Random());
             optimizer.UpdateLearningRate(epoch, epochs);
 
-            if(logEpoch)
+            if (logEpoch)
                 WriteLine($"Current learning rate: {optimizer.LearningRate.GetLearningRate()}.");
 
             float? trainLoss = null;
@@ -167,9 +168,9 @@ public abstract class Trainer<TInputData, TPrediction>(
                             calculatedOn = currentTimeInMlliseconds;
                         }
 
-                        if(eta is not null)
+                        if (eta is not null)
                             stepInfo += $" {stepsPerSecond.Value:F2} steps/s - {eta.Value.Hours}h {eta.Value.Minutes}m {eta.Value.Seconds}s left   ";
-                        
+
                     }
 
                     Write(stepInfo + "\r");
@@ -250,7 +251,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             TPrediction testPredictions = model.Forward(xTest!, true);
             float loss = model.LossFunction.Forward(testPredictions, yTest!);
             WriteLine($"\nLoss on test data: {loss:F5}");
-            if(evalFunction is not null)
+            if (evalFunction is not null)
             {
                 float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
                 WriteLine($"Eval on test data: {evalValue:P2}");

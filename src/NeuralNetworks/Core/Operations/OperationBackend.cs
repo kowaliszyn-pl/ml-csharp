@@ -4,24 +4,40 @@
 
 namespace NeuralNetworks.Core.Operations;
 
-internal static class OperationBackend
+public static class OperationBackend
 {
 
     public static OperationBackendType CurrentType
     {
-        get;
-        private set;
+        get
+        {
+            if(Current is OperationsArray)
+            {
+                return OperationBackendType.Cpu_Arrays;
+            }
+            else if(Current is OperationsSpan)
+            {
+                return OperationBackendType.Cpu_Spans;
+            }
+            else if(Current is OperationsGpu)
+            {
+                return OperationBackendType.Gpu;
+            }
+            else
+            {
+                throw new NotSupportedException("The current operation backend type is not supported.");
+            }
+        }
     }
 
-    public static IOperations Current
+    internal static IOperations Current
     {
         get;
         private set;
-    } = null!;
+    } = new OperationsArray();
 
     public static void Use(OperationBackendType backendType)
     {
-        CurrentType = backendType;
         if(Current != null)
         {
             if (Current is IDisposable disposable)
@@ -39,33 +55,33 @@ internal static class OperationBackend
         };
     }
 
-    public static float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
+    internal static float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
         => Current.Convolve2DForward(input, weights, padding);
 
-    public static float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    internal static float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
         => Current.Convolve2DBackwardInput(input, weights, outputGradient, padding);
 
-    public static float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
+    internal static float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
         => Current.Convolve2DBackwardWeights(input, outputGradient, kernelHeight, kernelWidth, padding);
 
-    public static float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
+    internal static float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
         => Current.CrossEntropyLoss(predicted, target, eps);
 
-    public static float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
+    internal static float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
         => Current.CrossEntropyLossGradient(predicted, target);
 
-    public static float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
+    internal static float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
         => Current.LeakyReLUCalcInputGradient(outputGradient, input, alfa, beta);
 
-    public static float[,,,] MultiplyByTanhDerivative(float[,,,] outputGradient, float[,,,] output)
+    internal static float[,,,] MultiplyByTanhDerivative(float[,,,] outputGradient, float[,,,] output)
         => Current.MultiplyByTanhDerivative(outputGradient, output);
 
-    public static float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    internal static float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
         => Current.WeightMultiplyCalcOutput(input, weights);
 
-    public static float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    internal static float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
         => Current.WeightMultiplyCalcInputGradient(outputGradient, weights);
 
-    public static float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    internal static float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
         => Current.WeightMultiplyCalcParamGradient(input, outputGradient);
 }
