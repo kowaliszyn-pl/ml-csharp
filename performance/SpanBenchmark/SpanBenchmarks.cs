@@ -38,12 +38,12 @@ public class SpanBenchmarks
     [Benchmark]
     public void TanhSpan()
     {
-        NeuralNetworks.Core.Span.ArrayExtensions.Tanh(array1);
+        //NeuralNetworks.Core.Span.ArrayExtensions.Tanh(array1);
     }
 
     [Benchmark]
     public void Tanh()
     {
-        NeuralNetworks.Core.ArrayExtensions.Tanh(array1);
+        //NeuralNetworks.Core.ArrayExtensions.Tanh(array1);
     }
 }

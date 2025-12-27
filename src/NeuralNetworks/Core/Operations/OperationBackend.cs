@@ -70,11 +70,28 @@ public static class OperationBackend
     internal static float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
         => Current.CrossEntropyLossGradient(predicted, target);
 
+    internal static float[,] Flatten(float[,,,] source)
+        => Current.Flatten(source);
+
+    internal static float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01f, float beta = 1f)
+        => Current.LeakyReLU(input, alpha, beta);
+
     internal static float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
         => Current.LeakyReLUCalcInputGradient(outputGradient, input, alfa, beta);
 
     internal static float[,,,] MultiplyByTanhDerivative(float[,,,] outputGradient, float[,,,] output)
         => Current.MultiplyByTanhDerivative(outputGradient, output);
+
+    /// <summary>
+    /// Applies the hyperbolic tangent function element-wise to the source.
+    /// </summary>
+    /// <returns>A new source with the hyperbolic tangent applied element-wise.</returns>
+    /// <param name="source">The four-dimensional array to transform.</param>
+    internal static float[,,,] Tanh(float[,,,] source)
+        => Current.Tanh(source);
+
+    internal static float[,,,] Unflatten(float[,] source, float[,,,] targetSize) 
+        => Current.Unflatten(source, targetSize);
 
     internal static float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
         => Current.WeightMultiplyCalcOutput(input, weights);

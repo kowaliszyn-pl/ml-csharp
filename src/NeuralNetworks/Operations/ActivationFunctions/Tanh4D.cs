@@ -2,8 +2,6 @@
 // File name: Tanh4D.cs
 // www.kowaliszyn.pl, 2025
 
-using NeuralNetworks.Core.Span;
-
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
@@ -11,7 +9,7 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 public class Tanh4D : ActivationFunction4D
 {
     protected override float[,,,] CalcOutput(bool inference)
-        => Input.Tanh();
+        => Tanh(Input);
 
     /// <summary>
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
@@ -43,5 +41,6 @@ public class Tanh4D : ActivationFunction4D
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
         => MultiplyByTanhDerivative(outputGradient, Output);
 
-    public override string ToString() => "Tanh4D";
+    public override string ToString() 
+        => "Tanh4D";
 }

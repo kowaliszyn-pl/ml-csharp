@@ -240,4 +240,35 @@ internal class OperationsArray : IOperations
         float[,,,] tanhBackward = output.AsOnes().Subtract(output.MultiplyElementwise(output));
         return outputGradient.MultiplyElementwise(tanhBackward);
     }
+
+    public virtual float[,] Flatten(float[,,,] source) => throw new NotImplementedException();
+    public virtual float[,,,] LeakyReLU(float[,,,] source, float alpha = 0.01F, float beta = 1) => throw new NotImplementedException();
+    
+    public virtual float[,,,] Tanh(float[,,,] source)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
+
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        res[i, j, k, l] = MathF.Tanh(source[i, j, k, l]);
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    public virtual float[,,,] Unflatten(float[,] source, float[,,,] targetSize) => throw new NotImplementedException();
 }
