@@ -17,8 +17,8 @@ namespace NeuralNetworks.Core.Operations;
 
 internal class OperationsGpu: OperationsSpan, IDisposable
 {
-    private static readonly Context s_context;
-    private static readonly Accelerator s_accelerator;
+    private readonly Context s_context;
+    private readonly Accelerator s_accelerator;
     private bool _disposedValue;
 
     public OperationsGpu()
@@ -29,7 +29,7 @@ internal class OperationsGpu: OperationsSpan, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    public override float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
     {
         int batchSize = input.GetLength(0);
         int inputFeatures = input.GetLength(1);
@@ -57,7 +57,7 @@ internal class OperationsGpu: OperationsSpan, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    public override float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
     {
         int batchSize = outputGradient.GetLength(0);
         int outputFeatures = outputGradient.GetLength(1);
@@ -85,7 +85,7 @@ internal class OperationsGpu: OperationsSpan, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    public override float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
     {
         int batchSize = input.GetLength(0);
         int inputFeatures = input.GetLength(1);
@@ -111,6 +111,8 @@ internal class OperationsGpu: OperationsSpan, IDisposable
         paramGradientDev.View.CopyToCPU(paramGradient);
         return paramGradient;
     }
+
+    #region GPU Kernels
 
     private static void WeightMultiplyOutputKernel(Index2D index, ArrayView2D<float, Stride2D.DenseX> input, ArrayView2D<float, Stride2D.DenseX> weights, ArrayView2D<float, Stride2D.DenseX> output, int kDim)
     {
@@ -170,6 +172,8 @@ internal class OperationsGpu: OperationsSpan, IDisposable
         paramGradient[row, col] = sum;
     }
 
+    #endregion
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposedValue)
@@ -179,18 +183,20 @@ internal class OperationsGpu: OperationsSpan, IDisposable
                 // TODO: dispose managed state (managed objects)
             }
 
-            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // Free unmanaged resources (unmanaged objects) and override finalizer
+            s_accelerator.Dispose();
+            s_context.Dispose();
             // TODO: set large fields to null
             _disposedValue = true;
         }
     }
 
-    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    // ~OperationsGpu()
-    // {
-    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-    //     Dispose(disposing: false);
-    // }
+    // Override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    ~OperationsGpu()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: false);
+    }
 
     void IDisposable.Dispose()
     {

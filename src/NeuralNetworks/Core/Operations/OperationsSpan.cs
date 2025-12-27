@@ -23,7 +23,7 @@ internal class OperationsSpan: OperationsArray
     /// </summary>
     /// <returns>Output</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
+    public override float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
     {
         int batchSize = input.GetLength(0);
 
@@ -120,7 +120,7 @@ internal class OperationsSpan: OperationsArray
     /// </summary>
     /// <returns>InputGradient</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    public override float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -215,7 +215,7 @@ internal class OperationsSpan: OperationsArray
     /// </summary>
     /// <returns>ParamGradient</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
+    public override float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -347,7 +347,7 @@ internal class OperationsSpan: OperationsArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
+    public override float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
     {
         int dim0 = outputGradient.GetLength(0);
         int dim1 = outputGradient.GetLength(1);
@@ -377,7 +377,7 @@ internal class OperationsSpan: OperationsArray
     /// <param name="output"></param>
     /// <returns>InputGradient</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] MultiplyByTanhDerivative(float[,,,] outputGradient, float[,,,] output)
+    public override float[,,,] MultiplyByTanhDerivative(float[,,,] outputGradient, float[,,,] output)
     {
         // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
         // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).

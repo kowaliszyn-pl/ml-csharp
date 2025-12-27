@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="NeuralNetworks.Core.Operations.OperationsArray">
+    <Position X="0.75" Y="0.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAACAAAAIAAAMAAAAAAAAgQAAAAAAgA=</HashCode>
+      <FileName>Core\Operations\OperationsArray.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NeuralNetworks.Core.Operations.OperationsSpan">
+    <Position X="0.75" Y="4" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAABAAAACAAAAIAgAMAAAAAAAAgQAAAAAAgA=</HashCode>
+      <FileName>Core\Operations\OperationsSpan.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Core.Operations.OperationsGpu">
+    <Position X="0.75" Y="8" Width="2.75" />
+    <Members>
+      <Method Name="WeightMultiplyInputGradientKernel" Hidden="true" />
+      <Method Name="WeightMultiplyOutputKernel" Hidden="true" />
+      <Method Name="WeightMultiplyParamGradientKernel" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AgAAAAAgACAAAAAAgEIAIAAAEAAAAQAAAAABAAAAIAA=</HashCode>
+      <FileName>Core\Operations\OperationsGpu.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
