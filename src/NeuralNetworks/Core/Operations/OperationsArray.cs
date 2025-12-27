@@ -1,11 +1,9 @@
 ﻿// Neural Networks in C♯
-// File name: OperationArray.cs
+// File name: OperationsArray.cs
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-
-using ILGPU.Runtime.Cuda;
 
 namespace NeuralNetworks.Core.Operations;
 
@@ -216,9 +214,9 @@ internal class OperationsArray : IOperations
         {
             for (int j = 0; j < dim2; j++)
             {
-                for(int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim3; k++)
                 {
-                    for(int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim4; l++)
                     {
                         inputGradient[i, j, k, l] = input[i, j, k, l] > 0 ? outputGradient[i, j, k, l] * beta : outputGradient[i, j, k, l] * alfa;
                     }

@@ -2,11 +2,8 @@
 // File name: OperationsGpu.cs
 // www.kowaliszyn.pl, 2025
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 using ILGPU;
 using ILGPU.Runtime;
@@ -15,7 +12,7 @@ using ILGPU.Runtime.Cuda;
 
 namespace NeuralNetworks.Core.Operations;
 
-internal class OperationsGpu: OperationsSpan, IDisposable
+internal class OperationsGpu : OperationsSpan, IDisposable
 {
     private readonly Context s_context;
     private readonly Accelerator s_accelerator;
@@ -174,6 +171,8 @@ internal class OperationsGpu: OperationsSpan, IDisposable
 
     #endregion
 
+    #region Dispose pattern
+
     protected virtual void Dispose(bool disposing)
     {
         if (!_disposedValue)
@@ -204,4 +203,6 @@ internal class OperationsGpu: OperationsSpan, IDisposable
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
+
+    #endregion
 }

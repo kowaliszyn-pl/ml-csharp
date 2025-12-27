@@ -1,17 +1,14 @@
 ﻿// Neural Networks in C♯
-// File name: OperationSpan.cs
+// File name: OperationsSpan.cs
 // www.kowaliszyn.pl, 2025
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace NeuralNetworks.Core.Operations;
 
-internal class OperationsSpan: OperationsArray
+internal class OperationsSpan : OperationsArray
 {
 
     /// <summary>
