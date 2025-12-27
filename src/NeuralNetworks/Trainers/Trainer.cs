@@ -139,6 +139,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             int step = 0;
 
             float? stepsPerSecond = null;
+            TimeSpan? eta = null;
 
             Stopwatch stepWatch = Stopwatch.StartNew();
             foreach ((TInputData xBatch, TPrediction yBatch) in GenerateBatches(xTrain, yTrain, batchSize))
@@ -147,17 +148,30 @@ public abstract class Trainer<TInputData, TPrediction>(
                 if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                 {
                     string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";
+                    double calculatedOn = -500;
+
                     if (stepsPerSecond is not null)
                     {
-                        long stepsDone = (epoch - 1) * allSteps + step;
-                        long remainingSteps = allStepsInTraining - stepsDone;
+                        double currentTimeInMlliseconds = trainWatch.Elapsed.TotalMilliseconds;
 
-                        double milisecondsPerStep = trainWatch.Elapsed.TotalMilliseconds / stepsDone;
-                        double remainingMiliseconds = remainingSteps * milisecondsPerStep;
+                        // Update the speed and ETA every 500 milliseconds
+                        if (currentTimeInMlliseconds - calculatedOn >= 500)
+                        {
+                            long stepsDone = (epoch - 1) * allSteps + step;
+                            long remainingSteps = allStepsInTraining - stepsDone;
 
-                        TimeSpan eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
-                        stepInfo += $" {stepsPerSecond.Value:F2} steps/s - {eta.Hours}h {eta.Minutes}m {eta.Seconds}s left   ";
+                            double milisecondsPerStep = currentTimeInMlliseconds / stepsDone;
+                            double remainingMiliseconds = remainingSteps * milisecondsPerStep;
+
+                            eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
+                            calculatedOn = currentTimeInMlliseconds;
+                        }
+
+                        if(eta is not null)
+                            stepInfo += $" {stepsPerSecond.Value:F2} steps/s - {eta.Value.Hours}h {eta.Value.Minutes}m {eta.Value.Seconds}s left   ";
+                        
                     }
+
                     Write(stepInfo + "\r");
                 }
 

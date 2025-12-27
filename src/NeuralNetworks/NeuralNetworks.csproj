@@ -20,6 +20,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Core\Arrays\" />
+	  <Folder Include="Core\Gpu\" />
 	  <Folder Include="Core\IO\" />
 	</ItemGroup>
 
