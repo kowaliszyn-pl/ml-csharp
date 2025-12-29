@@ -27,6 +27,8 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         s_accelerator = s_context.GetPreferredDevice(preferCPU: false).CreateAccelerator(s_context);
     }
 
+    public override OperationBackendType BackendType => OperationBackendType.Gpu;
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
     {

@@ -20,4 +20,6 @@ public interface IOperations
     public float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights);
     public float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights);
     public float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient);
+
+    OperationBackendType BackendType { get; }
 }

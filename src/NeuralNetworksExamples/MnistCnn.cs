@@ -59,7 +59,6 @@ class MnistCnn
     public static void Run()
     {
         ILogger<Trainer4D> logger = Program.LoggerFactory.CreateLogger<Trainer4D>();
-        OperationBackend.Use(OperationBackendType.Cpu_Spans_Parallel);
 
         // rows - batch
         // cols - features

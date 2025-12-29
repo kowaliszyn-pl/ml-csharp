@@ -10,6 +10,7 @@ namespace NeuralNetworks.Core.Operations;
 
 internal class OperationsSpan : OperationsArray
 {
+    public override OperationBackendType BackendType => OperationBackendType.Cpu_Spans;
 
     /// <summary>
     /// 2D convolution forward pass on NHWC-like 4D tensors:

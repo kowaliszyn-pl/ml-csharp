@@ -57,7 +57,6 @@ internal class Mnist
     public static void Run()
     {
         ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
-        OperationBackend.Use(OperationBackendType.Gpu);
 
         // rows - batch
         // cols - features

@@ -12,32 +12,8 @@ public static class OperationBackend
         AppDomain.CurrentDomain.ProcessExit += (s, e) => DisposeCurrentOperationBackend();
     }
 
-    public static OperationBackendType CurrentType
-    {
-        get
-        {
-            if (Current is OperationsGpu)
-            {
-                return OperationBackendType.Gpu;
-            }
-            else if (Current is OperationsSpanParallel)
-            {
-                return OperationBackendType.Cpu_Spans_Parallel;
-            }
-            else if (Current is OperationsSpan)
-            {
-                return OperationBackendType.Cpu_Spans;
-            }
-            else if (Current is OperationsArray)
-            {
-                return OperationBackendType.Cpu_Arrays;
-            }
-            else
-            {
-                throw new NotSupportedException("The current operation backend type is not valid.");
-            }
-        }
-    }
+    public static OperationBackendType CurrentType => Current.BackendType;
+
 
     internal static IOperations Current
     {

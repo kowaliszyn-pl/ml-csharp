@@ -245,7 +245,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             if (consoleOutputMode > ConsoleOutputMode.Disable)
             {
                 ForegroundColor = ConsoleColor.Cyan;
-                WriteLine($"\nFit finished in {elapsedSeconds:F2} s.");
+                WriteLine($"\nFit finished in {elapsedSeconds:F2} s. using {OperationBackend.CurrentType}.");
                 WriteLine($"{paramCount:n0} parameters trained.");
                 ForegroundColor = ConsoleColor.Yellow;
                 TPrediction testPredictions = model.Forward(xTest!, true);

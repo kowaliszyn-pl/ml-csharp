@@ -2,9 +2,9 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025
 
-using System.Diagnostics;
-
 using Microsoft.Extensions.Logging;
+
+using NeuralNetworks.Core.Operations;
 
 using NeuralNetworksExamples;
 
@@ -33,7 +33,9 @@ internal static class Program
 
         while (running)
         {
+            bool fromSubmenu = false;
             Console.WriteLine("Select a routine to run (Neural Networks Examples):");
+            Console.WriteLine("0. Select operation backend");
             Console.WriteLine("1. Function data set");
             Console.WriteLine("2. Boston Housing data set (custom model)");
             Console.WriteLine("3. Boston Housing data set (generic model)");
@@ -48,6 +50,11 @@ internal static class Program
 
             switch (choice)
             {
+                case "0":
+                    SelectOperationBackend();
+                    Console.WriteLine();
+                    fromSubmenu = true;
+                    break;
                 case "1":
                     Function.Run();
                     break;
@@ -70,12 +77,48 @@ internal static class Program
                     break;
             }
 
-            if (running)
+            if (running && !fromSubmenu)
             {
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadKey();
                 Console.WriteLine();
             }
+        }
+    }
+
+    private static void SelectOperationBackend()
+    {
+        Console.WriteLine("Select operation backend:");
+        Console.WriteLine("1. CPU - Arrays");
+        Console.WriteLine("2. CPU - Spans");
+        Console.WriteLine("3. CPU - Spans Parallel");
+        Console.WriteLine("4. GPU");
+        Console.WriteLine("Other: Exit");
+        Console.WriteLine();
+        Console.Write("Enter your choice: ");
+        string? backendChoice = Console.ReadLine();
+        Console.WriteLine();
+        switch (backendChoice)
+        {
+            case "1":
+                OperationBackend.Use(OperationBackendType.Cpu_Arrays);
+                Console.WriteLine("Using CPU - Arrays backend.");
+                break;
+            case "2":
+                OperationBackend.Use(OperationBackendType.Cpu_Spans);
+                Console.WriteLine("Using CPU - Spans backend.");
+                break;
+            case "3":
+                OperationBackend.Use(OperationBackendType.Cpu_Spans_Parallel);
+                Console.WriteLine("Using CPU - Spans Parallel backend.");
+                break;
+            case "4":
+                OperationBackend.Use(OperationBackendType.Gpu);
+                Console.WriteLine("Using GPU backend.");
+                break;
+            default:
+                Console.WriteLine("No changes made to the operation backend.");
+                break;
         }
     }
 }

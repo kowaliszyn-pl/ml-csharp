@@ -11,6 +11,8 @@ namespace NeuralNetworks.Core.Operations;
 
 internal class OperationsArray : IOperations
 {
+    public virtual OperationBackendType BackendType => OperationBackendType.Cpu_Arrays;
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
     {
