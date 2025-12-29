@@ -9,5 +9,6 @@ public enum OperationBackendType
     None,
     Cpu_Arrays,
     Cpu_Spans,
+    Cpu_Spans_Parallel,
     Gpu
 }

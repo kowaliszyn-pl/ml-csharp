@@ -59,34 +59,34 @@ internal class OperationsSpan : OperationsArray
         int weightsCSize = outputChannels * kernelHeight * kernelWidth;
         int weightsOutputCSize = kernelHeight * kernelWidth;
 
-        for (int b = 0; b < batchSize; b++)
+        for (int b = 0; b < batchSize; b++) // ~100
         {
             int inputBIndex = b * inputBSize;
             int outputBIndex = b * outputBSize;
-            for (int oc = 0; oc < outputChannels; oc++)
+            for (int oc = 0; oc < outputChannels; oc++) // ~32
             {
                 int weightsOutputCIndex = oc * weightsOutputCSize;
                 int outputCIndex = oc * outputCSize;
-                for (int oh = 0; oh < outputHeight; oh++)
+                for (int oh = 0; oh < outputHeight; oh++) // ~28
                 {
                     int outputHIndex = oh * outputWidth;
                     int ohMinusPad = oh - pad;
-                    for (int ow = 0; ow < outputWidth; ow++)
+                    for (int ow = 0; ow < outputWidth; ow++) // ~28
                     {
                         int owMinusPad = ow - pad;
                         float sum = 0f;
-                        for (int ic = 0; ic < inputChannels; ic++)
+                        for (int ic = 0; ic < inputChannels; ic++) // 1 (black&white) or 3 (RGB)
                         {
                             int inputCIndex = ic * inputCSize;
                             int weightsInputCIndex = ic * weightsCSize;
-                            for (int kh = 0; kh < kernelHeight; kh++)
+                            for (int kh = 0; kh < kernelHeight; kh++) // ~3
                             {
                                 int weightsKernelHIndex = kh * kernelWidth;
                                 int ih = kh + ohMinusPad;
                                 if (ih >= 0 && ih < inputHeight)
                                 {
                                     int inputHIndex = ih * inputWidth;
-                                    for (int kw = 0; kw < kernelWidth; kw++)
+                                    for (int kw = 0; kw < kernelWidth; kw++) // ~3
                                     {
                                         int iw = kw + owMinusPad;
                                         if (iw >= 0 && iw < inputWidth)

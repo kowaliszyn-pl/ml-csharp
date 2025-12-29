@@ -59,7 +59,7 @@ class MnistCnn
     public static void Run()
     {
         ILogger<Trainer4D> logger = Program.LoggerFactory.CreateLogger<Trainer4D>();
-        OperationBackend.Use(OperationBackendType.Cpu_Arrays);
+        OperationBackend.Use(OperationBackendType.Cpu_Spans_Parallel);
 
         // rows - batch
         // cols - features
@@ -185,7 +185,7 @@ class MnistCnn
             {
                 //int x = col % 28;
                 //int y = col / 28;
-                xTest4D[row, 0, col / 28, col % 28] = xTest2D[row, col];
+                xTest4D[row, 0 /* one input channel */, col / 28, col % 28] = xTest2D[row, col];
             }
         }
 

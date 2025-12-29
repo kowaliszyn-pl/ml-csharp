@@ -6,6 +6,7 @@ namespace NeuralNetworks.Core.Operations;
 
 public static class OperationBackend
 {
+
     static OperationBackend()
     {
         AppDomain.CurrentDomain.ProcessExit += (s, e) => DisposeCurrentOperationBackend();
@@ -18,6 +19,10 @@ public static class OperationBackend
             if (Current is OperationsGpu)
             {
                 return OperationBackendType.Gpu;
+            }
+            else if (Current is OperationsSpanParallel)
+            {
+                return OperationBackendType.Cpu_Spans_Parallel;
             }
             else if (Current is OperationsSpan)
             {
@@ -48,6 +53,7 @@ public static class OperationBackend
         {
             OperationBackendType.Cpu_Arrays => new OperationsArray(),
             OperationBackendType.Cpu_Spans => new OperationsSpan(),
+            OperationBackendType.Cpu_Spans_Parallel => new OperationsSpanParallel(),
             OperationBackendType.Gpu => new OperationsGpu(),
             _ => throw new NotSupportedException($"The specified backend type '{backendType}' is not supported."),
         };
@@ -60,7 +66,8 @@ public static class OperationBackend
             if (Current is IDisposable disposable)
             {
                 disposable.Dispose();
-            };
+                Console.WriteLine("Disposed current operation backend.");
+            }
             Current = null!;
         }
     }

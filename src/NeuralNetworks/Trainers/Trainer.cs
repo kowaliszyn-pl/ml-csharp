@@ -73,198 +73,202 @@ public abstract class Trainer<TInputData, TPrediction>(
         bool displayDescriptionOnStart = true
     )
     {
-        Stopwatch trainWatch = Stopwatch.StartNew();
-
-        logger?.LogInformation(string.Empty);
-        logger?.LogInformation("===== Begin Log =====");
-        logger?.LogInformation("Fit started");
-
-        displayDescriptionOnStart &= consoleOutputMode != ConsoleOutputMode.Disable;
-
-        // Describe the trainer configuration
-        List<string> description = DescribeFit();
-        WriteLineIfLogging();
-        foreach (string line in description)
+        try
         {
-            WriteLineIfLogging(line);
-        }
-        WriteLineIfLogging();
+            Stopwatch trainWatch = Stopwatch.StartNew();
 
-        void WriteLineIfLogging(string message = "")
-        {
-            if (displayDescriptionOnStart)
-                WriteLine(message);
-            logger?.LogInformation(message);
-        }
+            logger?.LogInformation(string.Empty);
+            logger?.LogInformation("===== Begin Log =====");
+            logger?.LogInformation("Fit started");
+
+            displayDescriptionOnStart &= consoleOutputMode != ConsoleOutputMode.Disable;
+
+            // Describe the trainer configuration
+            List<string> description = DescribeFit();
+            WriteLineIfLogging();
+            foreach (string line in description)
+            {
+                WriteLineIfLogging(line);
+            }
+            WriteLineIfLogging();
+
+            void WriteLineIfLogging(string message = "")
+            {
+                if (displayDescriptionOnStart)
+                    WriteLine(message);
+                logger?.LogInformation(message);
+            }
 
 #if DEBUG
         string environment = "Debug";
 #else
-        string environment = "Release";
+            string environment = "Release";
 #endif
-        logger?.LogInformation("Environment: {environment}.", environment);
-        //logger?.LogInformation("Operation backend: {operationBackend}", OperationBackend.CurrentType);
+            logger?.LogInformation("Environment: {environment}.", environment);
+            //logger?.LogInformation("Operation backend: {operationBackend}", OperationBackend.CurrentType);
 
-        (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
-        int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
-        long allStepsInTraining = allSteps * epochs;
+            (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
+            int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
+            long allStepsInTraining = allSteps * epochs;
 
-        for (int epoch = 1; epoch <= epochs; epoch++)
-        {
-            bool lastEpoch = epoch == epochs;
-            bool evaluationEpoch = epoch % evalEveryEpochs == 0 || lastEpoch;
-            bool logEpoch = epoch % logEveryEpochs == 0 || lastEpoch;
-
-            if (logEpoch)
-                logger?.LogInformation("Epoch {epoch}/{epochs} started.", epoch, epochs);
-
-            bool eval = xTest is not null && yTest is not null && evaluationEpoch;
-
-            if ((logEpoch && consoleOutputMode == ConsoleOutputMode.OnlyOnEval) || consoleOutputMode == ConsoleOutputMode.Always)
-                WriteLine($"\nEpoch {epoch}/{epochs}...");
-
-            // Epoch should be later than 1 to save the first checkpoint.
-            //if (eval && epoch > 1)
-            //{
-            //    model.SaveCheckpoint();
-            //    logger?.LogInformation("Checkpoint saved.");
-            //}
-
-            PermuteData(xTrain, yTrain, random ?? new Random());
-            optimizer.UpdateLearningRate(epoch, epochs);
-
-            if (logEpoch)
-                WriteLine($"Current learning rate: {optimizer.LearningRate.GetLearningRate()}.");
-
-            float? trainLoss = null;
-            int step = 0;
-
-            float? stepsPerSecond = null;
-            TimeSpan eta;
-            long calculatedOn = -500;
-
-            Stopwatch stepWatch = Stopwatch.StartNew();
-            foreach ((TInputData xBatch, TPrediction yBatch) in GenerateBatches(xTrain, yTrain, batchSize))
+            for (int epoch = 1; epoch <= epochs; epoch++)
             {
-                step++;
-                if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
+                bool lastEpoch = epoch == epochs;
+                bool evaluationEpoch = epoch % evalEveryEpochs == 0 || lastEpoch;
+                bool logEpoch = epoch % logEveryEpochs == 0 || lastEpoch;
+
+                if (logEpoch)
+                    logger?.LogInformation("Epoch {epoch}/{epochs} started.", epoch, epochs);
+
+                bool eval = xTest is not null && yTest is not null && evaluationEpoch;
+
+                if ((logEpoch && consoleOutputMode == ConsoleOutputMode.OnlyOnEval) || consoleOutputMode == ConsoleOutputMode.Always)
+                    WriteLine($"\nEpoch {epoch}/{epochs}...");
+
+                // Epoch should be later than 1 to save the first checkpoint.
+                //if (eval && epoch > 1)
+                //{
+                //    model.SaveCheckpoint();
+                //    logger?.LogInformation("Checkpoint saved.");
+                //}
+
+                PermuteData(xTrain, yTrain, random ?? new Random());
+                optimizer.UpdateLearningRate(epoch, epochs);
+
+                if (logEpoch)
+                    WriteLine($"Current learning rate: {optimizer.LearningRate.GetLearningRate()}.");
+
+                float? trainLoss = null;
+                int step = 0;
+
+                float? stepsPerSecond = null;
+                TimeSpan eta;
+                long calculatedOn = -500;
+
+                Stopwatch stepWatch = Stopwatch.StartNew();
+                foreach ((TInputData xBatch, TPrediction yBatch) in GenerateBatches(xTrain, yTrain, batchSize))
                 {
-                    string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";
-                    string speedAndEtaInfo = string.Empty;
-
-                    if (stepsPerSecond is not null)
+                    step++;
+                    if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                     {
-                        long currentTimeInMlliseconds = trainWatch.ElapsedMilliseconds;
-                        
-                        // Update the speed and ETA every 500 milliseconds
-                        if (currentTimeInMlliseconds - calculatedOn >= 500)
+                        string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";
+                        string speedAndEtaInfo = string.Empty;
+
+                        if (stepsPerSecond is not null)
                         {
-                            long stepsDone = (epoch - 1) * allSteps + step;
-                            long remainingSteps = allStepsInTraining - stepsDone;
+                            long currentTimeInMlliseconds = trainWatch.ElapsedMilliseconds;
 
-                            long milisecondsPerStep = currentTimeInMlliseconds / stepsDone;
-                            long remainingMiliseconds = remainingSteps * milisecondsPerStep;
+                            // Update the speed and ETA every 500 milliseconds
+                            if (currentTimeInMlliseconds - calculatedOn >= 500)
+                            {
+                                long stepsDone = (epoch - 1) * allSteps + step;
+                                long remainingSteps = allStepsInTraining - stepsDone;
 
-                            eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
-                            calculatedOn = currentTimeInMlliseconds;
-                            // WriteLine("test");
-                            speedAndEtaInfo = $" {stepsPerSecond.Value:F2} steps/s - {eta.Hours}h {eta.Minutes}m {eta.Seconds}s left   ";
+                                long milisecondsPerStep = currentTimeInMlliseconds / stepsDone;
+                                long remainingMiliseconds = remainingSteps * milisecondsPerStep;
+
+                                eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
+                                calculatedOn = currentTimeInMlliseconds;
+                                speedAndEtaInfo = $" {stepsPerSecond.Value:F2} steps/s - {eta.Hours}h {eta.Minutes}m {eta.Seconds}s left   ";
+                            }
                         }
 
-                        //if (eta is not null)
-                        //    stepInfo += $" {stepsPerSecond.Value:F2} steps/s - {eta.Value.Hours}h {eta.Value.Minutes}m {eta.Value.Seconds}s left   ";
-
+                        Write(stepInfo + speedAndEtaInfo + "\r");
                     }
 
-                    Write(stepInfo + speedAndEtaInfo + "\r");
+                    trainLoss = (trainLoss ?? 0) + model.TrainBatch(xBatch, yBatch);
+                    model.UpdateParams(optimizer);
+
+                    long elapsedMsPerStep = stepWatch.ElapsedMilliseconds / step;
+                    stepsPerSecond = 1000.0f / elapsedMsPerStep;
+                }
+                stepWatch.Stop();
+
+                // Write a line with 80 spaces to clean the line with the step info.
+                if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
+                    Write(new string(' ', 80) + "\r");
+
+                if (trainLoss is not null && logEpoch)
+                {
+                    if (consoleOutputMode > ConsoleOutputMode.Disable)
+                        WriteLine($"Train loss (average): {trainLoss.Value / allSteps}");
+                    logger?.LogInformation("Train loss (average): {trainLoss} for epoch {epoch}.", trainLoss.Value / allSteps, epoch);
                 }
 
-                trainLoss = (trainLoss ?? 0) + model.TrainBatch(xBatch, yBatch);
-                model.UpdateParams(optimizer);
+                if (eval)
+                {
+                    TPrediction testPredictions = model.Forward(xTest!, true);
+                    float loss = model.LossFunction.Forward(testPredictions, yTest!);
 
-                long elapsedMsPerStep = stepWatch.ElapsedMilliseconds / step;
-                stepsPerSecond = 1000.0f / elapsedMsPerStep;
+                    if (consoleOutputMode > ConsoleOutputMode.Disable)
+                        WriteLine($"Test loss: {loss}");
+                    logger?.LogInformation("Test loss: {testLoss} for epoch {epoch}.", loss, epoch);
+
+                    if (evalFunction is not null)
+                    {
+                        float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
+
+                        if (consoleOutputMode > ConsoleOutputMode.Disable)
+                            WriteLine($"Eval: {evalValue:P2}");
+                        logger?.LogInformation("Eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
+                    }
+
+                    if (loss < _bestLoss)
+                    {
+                        _bestLoss = loss;
+                    }
+                    else if (earlyStop)
+                    {
+                        if (model.HasCheckpoint())
+                        {
+                            model.RestoreCheckpoint();
+                            logger?.LogInformation("Checkpoint restored.");
+                        }
+
+                        if (consoleOutputMode > ConsoleOutputMode.Disable)
+                            WriteLine($"Early stopping, loss {loss} is greater than {_bestLoss}");
+                        logger?.LogInformation("Early stopping. Loss {loss} is greater than {bestLoss}.", loss, _bestLoss);
+
+                        break;
+                    }
+
+                }
             }
-            stepWatch.Stop();
 
-            // Write a line with 80 spaces to clean the line with the step info.
-            if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
-                Write(new string(' ', 80) + "\r");
+            trainWatch.Stop();
 
-            if (trainLoss is not null && logEpoch)
+            double elapsedSeconds = trainWatch.Elapsed.TotalSeconds;
+            logger?.LogInformation("Fit finished in {elapsedSecond:F2} s.", elapsedSeconds);
+            int paramCount = model.GetParamCount();
+            logger?.LogInformation("{paramCount:n0} parameters trained.", paramCount);
+
+            if (consoleOutputMode > ConsoleOutputMode.Disable)
             {
-                if (consoleOutputMode > ConsoleOutputMode.Disable)
-                    WriteLine($"Train loss (average): {trainLoss.Value / allSteps}");
-                logger?.LogInformation("Train loss (average): {trainLoss} for epoch {epoch}.", trainLoss.Value / allSteps, epoch);
-            }
-
-            if (eval)
-            {
+                ForegroundColor = ConsoleColor.Cyan;
+                WriteLine($"\nFit finished in {elapsedSeconds:F2} s.");
+                WriteLine($"{paramCount:n0} parameters trained.");
+                ForegroundColor = ConsoleColor.Yellow;
                 TPrediction testPredictions = model.Forward(xTest!, true);
                 float loss = model.LossFunction.Forward(testPredictions, yTest!);
-
-                if (consoleOutputMode > ConsoleOutputMode.Disable)
-                    WriteLine($"Test loss: {loss}");
-                logger?.LogInformation("Test loss: {testLoss} for epoch {epoch}.", loss, epoch);
-
+                WriteLine($"\nLoss on test data: {loss:F5}");
                 if (evalFunction is not null)
                 {
                     float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
-
-                    if (consoleOutputMode > ConsoleOutputMode.Disable)
-                        WriteLine($"Eval: {evalValue:P2}");
-                    logger?.LogInformation("Eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
+                    WriteLine($"Eval on test data: {evalValue:P2}");
                 }
-
-                if (loss < _bestLoss)
-                {
-                    _bestLoss = loss;
-                }
-                else if (earlyStop)
-                {
-                    if (model.HasCheckpoint())
-                    {
-                        model.RestoreCheckpoint();
-                        logger?.LogInformation("Checkpoint restored.");
-                    }
-
-                    if (consoleOutputMode > ConsoleOutputMode.Disable)
-                        WriteLine($"Early stopping, loss {loss} is greater than {_bestLoss}");
-                    logger?.LogInformation("Early stopping. Loss {loss} is greater than {bestLoss}.", loss, _bestLoss);
-
-                    break;
-                }
-
+                ResetColor();
+                WriteLine();
             }
+
+            logger?.LogInformation("===== End Log =====");
+            logger?.LogInformation(string.Empty);
+
         }
-
-        trainWatch.Stop();
-
-        double elapsedSeconds = trainWatch.Elapsed.TotalSeconds;
-        logger?.LogInformation("Fit finished in {elapsedSecond:F2} s.", elapsedSeconds);
-        int paramCount = model.GetParamCount();
-        logger?.LogInformation("{paramCount:n0} parameters trained.", paramCount);
-
-        if (consoleOutputMode > ConsoleOutputMode.Disable)
+        catch (Exception ex)
         {
-            ForegroundColor = ConsoleColor.Cyan;
-            WriteLine($"\nFit finished in {elapsedSeconds:F2} s.");
-            WriteLine($"{paramCount:n0} parameters trained.");
-            ForegroundColor = ConsoleColor.Yellow;
-            TPrediction testPredictions = model.Forward(xTest!, true);
-            float loss = model.LossFunction.Forward(testPredictions, yTest!);
-            WriteLine($"\nLoss on test data: {loss:F5}");
-            if (evalFunction is not null)
-            {
-                float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
-                WriteLine($"Eval on test data: {evalValue:P2}");
-            }
-            ResetColor();
-            WriteLine();
+            logger?.LogError(ex, "An error occurred during training: {message}", ex.Message);
+            throw;
         }
-
-        logger?.LogInformation("===== End Log =====");
-        logger?.LogInformation(string.Empty);
 
         List<string> DescribeFit()
         {

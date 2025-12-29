@@ -16,7 +16,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Core.Operations.OperationsGpu">
-    <Position X="0.75" Y="9" Width="2.75" />
+    <Position X="0.75" Y="11.75" Width="2.75" />
     <Members>
       <Method Name="WeightMultiplyInputGradientKernel" Hidden="true" />
       <Method Name="WeightMultiplyOutputKernel" Hidden="true" />
@@ -26,7 +26,7 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AgAAAAAgACAAAAAAgEIAIAAAEAAAAQAAAAABAAAAIAA=</HashCode>
+      <HashCode>AgAAEAAwACAAAAAAgEIAIAAAMAIAAYACEoAFAAAAIgA=</HashCode>
       <FileName>Core\Operations\OperationsGpu.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -34,12 +34,19 @@
   <Class Name="NeuralNetworks.Core.Operations.OperationBackend">
     <Position X="4.25" Y="0.75" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAgAABAAAACAACBIAgAcAAEAAgAAiQAEAAAAgA=</HashCode>
+      <HashCode>AAAAAAAgAABAAAACAACBIAgAcAAEAAgAAiQAEAAAQgA=</HashCode>
       <FileName>Core\Operations\OperationBackend.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="Current" />
     </ShowAsAssociation>
+  </Class>
+  <Class Name="NeuralNetworks.Core.Operations.OperationsSpanParallel">
+    <Position X="0.75" Y="9.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Core\Operations\OperationsSpanParallel.cs</FileName>
+    </TypeIdentifier>
   </Class>
   <Interface Name="NeuralNetworks.Core.Operations.IOperations" Collapsed="true">
     <Position X="7.5" Y="0.75" Width="1.5" />
@@ -51,7 +58,7 @@
   <Enum Name="NeuralNetworks.Core.Operations.OperationBackendType">
     <Position X="7.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAEIAAA=</HashCode>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAgAAAAAAAAAAEIAAA=</HashCode>
       <FileName>Core\Operations\OperationBackendType.cs</FileName>
     </TypeIdentifier>
   </Enum>
