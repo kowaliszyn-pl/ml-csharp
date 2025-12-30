@@ -73,12 +73,12 @@ public readonly struct Convolve2DOutputMeta
 
 internal class OperationsGpu : OperationsSpanParallel, IDisposable
 {
-
-
     private readonly Context _context;
     private readonly Accelerator _accelerator;
     private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
     private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyCalcOutputKernel;
+    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyInputGradientKernel;
+    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> _weightMultiplyParamGradientKernel;
     private bool _disposedValue;
 
     public OperationsGpu()
@@ -89,6 +89,10 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         _convolve2DOutputKernel = _accelerator.LoadAutoGroupedStreamKernel<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta>(Convolve2DOutputKernel);
         _weightMultiplyCalcOutputKernel =
            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyCalcOutputKernel);
+        _weightMultiplyInputGradientKernel =
+            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyInputGradientKernel);
+        _weightMultiplyParamGradientKernel =
+            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView>(WeightMultiplyParamGradientKernel);
     }
 
     public override OperationBackendType BackendType => OperationBackendType.Gpu;
@@ -156,10 +160,10 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         outputGradientDev.View.CopyFromCPU(outputGradient);
         weightsDev.View.CopyFromCPU(weights);
 
-        Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> kernel =
-            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyInputGradientKernel);
+        //Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> kernel =
+        //    _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyInputGradientKernel);
 
-        kernel(new Index2D(batchSize, inputFeatures), outputGradientDev.View, weightsDev.View, inputGradientDev.View, outputFeatures);
+        _weightMultiplyInputGradientKernel(new Index2D(batchSize, inputFeatures), outputGradientDev.View, weightsDev.View, inputGradientDev.View, outputFeatures);
         _accelerator.Synchronize();
 
         inputGradientDev.View.CopyToCPU(inputGradient);
@@ -203,10 +207,10 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         inputDev.View.CopyFromCPU(input);
         outputGradientDev.View.CopyFromCPU(outputGradient);
 
-        Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> kernel =
-            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView>(WeightMultiplyParamGradientKernel);
+        //Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> kernel =
+         //   _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView>(WeightMultiplyParamGradientKernel);
 
-        kernel(new Index2D(inputFeatures, outputFeatures), inputDev.View, outputGradientDev.View, paramGradientDev.View);
+        _weightMultiplyParamGradientKernel(new Index2D(inputFeatures, outputFeatures), inputDev.View, outputGradientDev.View, paramGradientDev.View);
         _accelerator.Synchronize();
 
         paramGradientDev.View.CopyToCPU(paramGradient);
