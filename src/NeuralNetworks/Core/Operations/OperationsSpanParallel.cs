@@ -37,11 +37,6 @@ internal class OperationsSpanParallel: OperationsSpan
 
         float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
 
-        //ref float inputRef = ref input[0, 0, 0, 0];
-        //ref float weightsRef = ref weights[0, 0, 0, 0];
-        //ref float outputRef = ref output[0, 0, 0, 0];
-
-        
         // pre-compute sizes for offsets
         int outputBSize = outputChannels * outputHeight * outputWidth;
         int outputCSize = outputHeight * outputWidth;

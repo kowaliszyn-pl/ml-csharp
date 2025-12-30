@@ -211,16 +211,8 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         using MemoryBuffer1D<float, Stride1D.Dense> outputDev =
             s_accelerator.Allocate1D<float>(new Index1D(batchSize * outputChannels * outputHeight * outputWidth));
 
-        //ref float inputRef = ref input[0, 0, 0, 0];
-        //ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
         inputDev.View.CopyFromCPU(ref input[0, 0, 0, 0], input.Length);
         weightsDev.View.CopyFromCPU(ref weights[0, 0, 0, 0], weights.Length);
-
-
-        //inputDev.View.CopyFromCPU(ref inputRef, input.Length);
-
-        //CopyInput4DTo3D(input, inputDev.View);
-        //CopyWeights4DTo3D(weights, weightsDev.View);
 
         Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, int, int, int, int, int, int, int, int, int> kernel =
             s_accelerator.LoadAutoGroupedStreamKernel<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, int, int, int, int, int, int, int, int, int>(Convolve2DOutputKernel);
@@ -230,7 +222,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         s_accelerator.Synchronize();
 
         outputDev.View.CopyToCPU(ref output[0, 0, 0, 0], output.Length);
-        //CopyOutput3DTo4D(outputDev.View, output);
         return output;
     }
 
@@ -244,7 +235,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         int oh = index.Y;
         int ow = index.Z;
 
-        // int outputHeight = (int)output.Extent.Y;
         int outputWidth = (int)(output.Length / (batchSize * outputChannels * outputHeight));
 
         if (oh >= outputHeight || ow >= outputWidth)
@@ -284,9 +274,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         {
             int inputCIndex = ic * inputCSize;
             int weightsInputCIndex = ic * weightsCSize;
-            //int bc = (b * inputChannels) + ic;
-            //int ioc = (ic * outputChannels) + oc;
-
             for (int kh = 0; kh < kernelHeight; kh++)
             {
                 int ih = kh + ohMinusPad;
