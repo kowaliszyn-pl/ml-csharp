@@ -2,10 +2,8 @@
 // File name: OperationsGpu.cs
 // www.kowaliszyn.pl, 2025
 
-using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 using ILGPU;
 using ILGPU.Runtime;
@@ -16,19 +14,81 @@ namespace NeuralNetworks.Core.Operations;
 
 using FloatDense1DView = ArrayView1D<float, Stride1D.Dense>;
 using FloatDense2DView = ArrayView2D<float, Stride2D.DenseX>;
-using FloatDense3DView = ArrayView3D<float, Stride3D.DenseXY>;
+
+public readonly struct Convolve2DOutputMeta
+{
+    public Convolve2DOutputMeta(
+        int pad,
+        int inputChannels,
+        int inputHeight,
+        int inputWidth,
+        int kernelHeight,
+        int kernelWidth,
+        int outputChannels,
+        int batchSize,
+        int outputHeight,
+        int outputWidth,
+        int inputBatchSize,
+        int inputChannelSize,
+        int weightsChannelSize,
+        int weightsOutputChannelSize,
+        int outputBatchSize,
+        int outputChannelSize)
+    {
+        Pad = pad;
+        InputChannels = inputChannels;
+        InputHeight = inputHeight;
+        InputWidth = inputWidth;
+        KernelHeight = kernelHeight;
+        KernelWidth = kernelWidth;
+        OutputChannels = outputChannels;
+        BatchSize = batchSize;
+        OutputHeight = outputHeight;
+        OutputWidth = outputWidth;
+        InputBatchSize = inputBatchSize;
+        InputChannelSize = inputChannelSize;
+        WeightsChannelSize = weightsChannelSize;
+        WeightsOutputChannelSize = weightsOutputChannelSize;
+        OutputBatchSize = outputBatchSize;
+        OutputChannelSize = outputChannelSize;
+    }
+
+    public int Pad { get; }
+    public int InputChannels { get; }
+    public int InputHeight { get; }
+    public int InputWidth { get; }
+    public int KernelHeight { get; }
+    public int KernelWidth { get; }
+    public int OutputChannels { get; }
+    public int BatchSize { get; }
+    public int OutputHeight { get; }
+    public int OutputWidth { get; }
+    public int InputBatchSize { get; }
+    public int InputChannelSize { get; }
+    public int WeightsChannelSize { get; }
+    public int WeightsOutputChannelSize { get; }
+    public int OutputBatchSize { get; }
+    public int OutputChannelSize { get; }
+}
 
 internal class OperationsGpu : OperationsSpanParallel, IDisposable
 {
-    private readonly Context s_context;
-    private readonly Accelerator s_accelerator;
+
+
+    private readonly Context _context;
+    private readonly Accelerator _accelerator;
+    private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
+    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyCalcOutputKernel;
     private bool _disposedValue;
 
     public OperationsGpu()
     {
         // Initialize ILGPU context and accelerator
-        s_context = Context.Create(builder => builder.Cuda().CPU());
-        s_accelerator = s_context.GetPreferredDevice(preferCPU: false).CreateAccelerator(s_context);
+        _context = Context.Create(builder => builder.Cuda().CPU());
+        _accelerator = _context.GetPreferredDevice(preferCPU: false).CreateAccelerator(_context);
+        _convolve2DOutputKernel = _accelerator.LoadAutoGroupedStreamKernel<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta>(Convolve2DOutputKernel);
+        _weightMultiplyCalcOutputKernel =
+           _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyCalcOutputKernel);
     }
 
     public override OperationBackendType BackendType => OperationBackendType.Gpu;
@@ -45,24 +105,21 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         float[,] output = new float[batchSize, outputFeatures];
 
-        using MemoryBuffer2D<float, Stride2D.DenseX> inputDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, inputFeatures));
-        using MemoryBuffer2D<float, Stride2D.DenseX> weightsDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(inputFeatures, outputFeatures));
-        using MemoryBuffer2D<float, Stride2D.DenseX> outputDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, outputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> inputDev = _accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, inputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> weightsDev = _accelerator.Allocate2DDenseX<float>(new Index2D(inputFeatures, outputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> outputDev = _accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, outputFeatures));
 
         inputDev.View.CopyFromCPU(input);
         weightsDev.View.CopyFromCPU(weights);
 
-        Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> kernel =
-            s_accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyOutputKernel);
-
-        kernel(new Index2D(batchSize, outputFeatures), inputDev.View, weightsDev.View, outputDev.View, inputFeatures);
-        s_accelerator.Synchronize();
+        _weightMultiplyCalcOutputKernel(new Index2D(batchSize, outputFeatures), inputDev.View, weightsDev.View, outputDev.View, inputFeatures);
+        _accelerator.Synchronize();
 
         outputDev.View.CopyToCPU(output);
         return output;
     }
 
-    private static void WeightMultiplyOutputKernel(Index2D index, FloatDense2DView input, FloatDense2DView weights, FloatDense2DView output, int kDim)
+    private static void WeightMultiplyCalcOutputKernel(Index2D index, FloatDense2DView input, FloatDense2DView weights, FloatDense2DView output, int kDim)
     {
         int row = index.X;
         int col = index.Y;
@@ -92,24 +149,24 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         float[,] inputGradient = new float[batchSize, inputFeatures];
 
-        using MemoryBuffer2D<float, Stride2D.DenseX> outputGradientDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, outputFeatures));
-        using MemoryBuffer2D<float, Stride2D.DenseX> weightsDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(inputFeatures, outputFeatures));
-        using MemoryBuffer2D<float, Stride2D.DenseX> inputGradientDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, inputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> outputGradientDev = _accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, outputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> weightsDev = _accelerator.Allocate2DDenseX<float>(new Index2D(inputFeatures, outputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> inputGradientDev = _accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, inputFeatures));
 
         outputGradientDev.View.CopyFromCPU(outputGradient);
         weightsDev.View.CopyFromCPU(weights);
 
-        Action<Index2D, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>, int> kernel =
-            s_accelerator.LoadAutoGroupedStreamKernel<Index2D, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>, int>(WeightMultiplyInputGradientKernel);
+        Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> kernel =
+            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyInputGradientKernel);
 
         kernel(new Index2D(batchSize, inputFeatures), outputGradientDev.View, weightsDev.View, inputGradientDev.View, outputFeatures);
-        s_accelerator.Synchronize();
+        _accelerator.Synchronize();
 
         inputGradientDev.View.CopyToCPU(inputGradient);
         return inputGradient;
     }
 
-    private static void WeightMultiplyInputGradientKernel(Index2D index, ArrayView2D<float, Stride2D.DenseX> outputGradient, ArrayView2D<float, Stride2D.DenseX> weights, ArrayView2D<float, Stride2D.DenseX> inputGradient, int kDim)
+    private static void WeightMultiplyInputGradientKernel(Index2D index, FloatDense2DView outputGradient, FloatDense2DView weights, FloatDense2DView inputGradient, int kDim)
     {
         int row = index.X;
         int col = index.Y;
@@ -139,24 +196,24 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         float[,] paramGradient = new float[inputFeatures, outputFeatures];
 
-        using MemoryBuffer2D<float, Stride2D.DenseX> inputDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, inputFeatures));
-        using MemoryBuffer2D<float, Stride2D.DenseX> outputGradientDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, outputFeatures));
-        using MemoryBuffer2D<float, Stride2D.DenseX> paramGradientDev = s_accelerator.Allocate2DDenseX<float>(new Index2D(inputFeatures, outputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> inputDev = _accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, inputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> outputGradientDev = _accelerator.Allocate2DDenseX<float>(new Index2D(batchSize, outputFeatures));
+        using MemoryBuffer2D<float, Stride2D.DenseX> paramGradientDev = _accelerator.Allocate2DDenseX<float>(new Index2D(inputFeatures, outputFeatures));
 
         inputDev.View.CopyFromCPU(input);
         outputGradientDev.View.CopyFromCPU(outputGradient);
 
-        Action<Index2D, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>> kernel =
-            s_accelerator.LoadAutoGroupedStreamKernel<Index2D, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>, ArrayView2D<float, Stride2D.DenseX>>(WeightMultiplyParamGradientKernel);
+        Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> kernel =
+            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView>(WeightMultiplyParamGradientKernel);
 
         kernel(new Index2D(inputFeatures, outputFeatures), inputDev.View, outputGradientDev.View, paramGradientDev.View);
-        s_accelerator.Synchronize();
+        _accelerator.Synchronize();
 
         paramGradientDev.View.CopyToCPU(paramGradient);
         return paramGradient;
     }
 
-    private static void WeightMultiplyParamGradientKernel(Index2D index, ArrayView2D<float, Stride2D.DenseX> input, ArrayView2D<float, Stride2D.DenseX> outputGradient, ArrayView2D<float, Stride2D.DenseX> paramGradient)
+    private static void WeightMultiplyParamGradientKernel(Index2D index, FloatDense2DView input, FloatDense2DView outputGradient, FloatDense2DView paramGradient)
     {
         int row = index.X;
         int col = index.Y;
@@ -180,7 +237,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     public override float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null)
     {
         int batchSize = input.GetLength(0);
-
         int inputChannels = input.GetLength(1);
         int inputHeight = input.GetLength(2);
         int inputWidth = input.GetLength(3);
@@ -200,27 +256,52 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
 
-        // Layout:
-        // inputDev[batchSize * inputChannels * inputHeight * inputWidth]
-        // weightsDev[inputChannels * outputChannels * kernelHeight * kernelWidth]
-        // outputDev[batchSize * outputChannels * outputHeight * outputWidth]
+        int inputChannelSize = inputHeight * inputWidth;
+        int inputBatchSize = inputChannels * inputChannelSize;
+        int weightsOutputChannelSize = kernelHeight * kernelWidth;
+        int weightsChannelSize = outputChannels * weightsOutputChannelSize;
+        int outputChannelSize = outputHeight * outputWidth;
+        int outputBatchSize = outputChannels * outputChannelSize;
+
         using MemoryBuffer1D<float, Stride1D.Dense> inputDev =
-            s_accelerator.Allocate1D<float>(new Index1D(batchSize * inputChannels * inputHeight * inputWidth));
+            _accelerator.Allocate1D<float>(new Index1D(batchSize * inputBatchSize));
         using MemoryBuffer1D<float, Stride1D.Dense> weightsDev =
-            s_accelerator.Allocate1D<float>(new Index1D(inputChannels * outputChannels * kernelHeight * kernelWidth));
+            _accelerator.Allocate1D<float>(new Index1D(weightChannels * weightsChannelSize));
         using MemoryBuffer1D<float, Stride1D.Dense> outputDev =
-            s_accelerator.Allocate1D<float>(new Index1D(batchSize * outputChannels * outputHeight * outputWidth));
+            _accelerator.Allocate1D<float>(new Index1D(batchSize * outputBatchSize));
 
         inputDev.View.CopyFromCPU(ref input[0, 0, 0, 0], input.Length);
         weightsDev.View.CopyFromCPU(ref weights[0, 0, 0, 0], weights.Length);
 
-        Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, int, int, int, int, int, int, int, int, int> kernel =
-            s_accelerator.LoadAutoGroupedStreamKernel<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, int, int, int, int, int, int, int, int, int>(Convolve2DOutputKernel);
+        Convolve2DOutputMeta meta = new(
+            pad,
+            inputChannels,
+            inputHeight,
+            inputWidth,
+            kernelHeight,
+            kernelWidth,
+            outputChannels,
+            batchSize,
+            outputHeight,
+            outputWidth,
+            inputBatchSize,
+            inputChannelSize,
+            weightsChannelSize,
+            weightsOutputChannelSize,
+            outputBatchSize,
+            outputChannelSize);
 
-        // We encode: X = batch * outputChannels + outputChannel, Y = outputHeight, Z = outputWidth
-        kernel(new Index3D(batchSize * outputChannels, outputHeight, outputWidth), inputDev.View, weightsDev.View, outputDev.View, pad, inputChannels, inputHeight, inputWidth, kernelHeight, kernelWidth, outputChannels, batchSize, outputHeight);
-        s_accelerator.Synchronize();
+        // Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel =
+        _accelerator.LoadAutoGroupedStreamKernel<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta>(Convolve2DOutputKernel);
 
+        _convolve2DOutputKernel(
+                new Index3D(batchSize * outputChannels, outputHeight, outputWidth),
+                inputDev.View,
+                weightsDev.View,
+                outputDev.View,
+                meta);
+
+        _accelerator.Synchronize();
         outputDev.View.CopyToCPU(ref output[0, 0, 0, 0], output.Length);
         return output;
     }
@@ -229,13 +310,22 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     // Encoded as: batchOutputChannelIndex = index.X = b * outputChannels + oc
     // oc = batchOutputChannelIndex % outputChannels; b = batchOutputChannelIndex / outputChannels
     // oh = index.Y; ow = index.Z
-    private static void Convolve2DOutputKernel(Index3D index, FloatDense1DView input, FloatDense1DView weights, FloatDense1DView output, int pad, int inputChannels, int inputHeight, int inputWidth, int kernelHeight, int kernelWidth, int outputChannels, int batchSize, int outputHeight)
+    private static void Convolve2DOutputKernel(Index3D index, FloatDense1DView input, FloatDense1DView weights, FloatDense1DView output, Convolve2DOutputMeta meta)
     {
+        int pad = meta.Pad;
+        int inputChannels = meta.InputChannels;
+        int inputHeight = meta.InputHeight;
+        int inputWidth = meta.InputWidth;
+        int kernelHeight = meta.KernelHeight;
+        int kernelWidth = meta.KernelWidth;
+        int outputChannels = meta.OutputChannels;
+        int batchSize = meta.BatchSize;
+        int outputHeight = meta.OutputHeight;
+        int outputWidth = meta.OutputWidth;
+
         int batchOutputChannelIndex = index.X;
         int oh = index.Y;
         int ow = index.Z;
-
-        int outputWidth = (int)(output.Length / (batchSize * outputChannels * outputHeight));
 
         if (oh >= outputHeight || ow >= outputWidth)
         {
@@ -243,7 +333,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         }
 
         int b = batchOutputChannelIndex / outputChannels;
-
         if (b >= batchSize)
         {
             return;
@@ -251,29 +340,21 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         int oc = batchOutputChannelIndex - (b * outputChannels);
 
-        int outputBSize = outputChannels * outputHeight * outputWidth;
-        int outputCSize = outputHeight * outputWidth;
-        int outputBIndex = b * outputBSize;
-        int outputCIndex = oc * outputCSize;
+        int outputBIndex = b * meta.OutputBatchSize;
+        int outputCIndex = oc * meta.OutputChannelSize;
         int outputHIndex = oh * outputWidth;
 
-        int inputBSize = inputChannels * inputHeight * inputWidth;
-        int inputCSize = inputHeight * inputWidth;
-        int weightsCSize = outputChannels * kernelHeight * kernelWidth;
-        int weightsOutputCSize = kernelHeight * kernelWidth;
-        int weightsOutputCIndex = oc * weightsOutputCSize;
-
-        int inputBIndex = b * inputBSize;
+        int inputBIndex = b * meta.InputBatchSize;
+        int weightsOutputCIndex = oc * meta.WeightsOutputChannelSize;
 
         int ohMinusPad = oh - pad;
         int owMinusPad = ow - pad;
-
         float sum = 0f;
 
         for (int ic = 0; ic < inputChannels; ic++)
         {
-            int inputCIndex = ic * inputCSize;
-            int weightsInputCIndex = ic * weightsCSize;
+            int inputCIndex = ic * meta.InputChannelSize;
+            int weightsInputCIndex = ic * meta.WeightsChannelSize;
             for (int kh = 0; kh < kernelHeight; kh++)
             {
                 int ih = kh + ohMinusPad;
@@ -281,6 +362,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
                 {
                     continue;
                 }
+
                 int weightsKernelHIndex = kh * kernelWidth;
                 int inputHIndex = ih * inputWidth;
                 for (int kw = 0; kw < kernelWidth; kw++)
@@ -291,7 +373,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
                         continue;
                     }
 
-                    // sum += input[b, ic, ih, iw] * weights[ic, oc, kh, kw];
                     float inputVal = input[inputBIndex + inputCIndex + inputHIndex + iw];
                     float weightVal = weights[weightsInputCIndex + weightsOutputCIndex + weightsKernelHIndex + kw];
                     sum += inputVal * weightVal;
@@ -299,7 +380,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
             }
         }
 
-        // output[b, oc, oh, ow] = sum;
         output[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
     }
 
@@ -329,11 +409,11 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         float[,,,] inputGradient = new float[batchSize, inputChannels, inputHeight, inputWidth];
 
         using MemoryBuffer3D<float, Stride3D.DenseXY> weightsDev =
-            s_accelerator.Allocate3DDenseXY<float>(new Index3D(inputChannels * outputGradientChannels, kernelHeight, kernelWidth));
+            _accelerator.Allocate3DDenseXY<float>(new Index3D(inputChannels * outputGradientChannels, kernelHeight, kernelWidth));
         using MemoryBuffer3D<float, Stride3D.DenseXY> outputGradientDev =
-            s_accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * outputGradientChannels, outputGradientHeight, outputGradientWidth));
+            _accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * outputGradientChannels, outputGradientHeight, outputGradientWidth));
         using MemoryBuffer3D<float, Stride3D.DenseXY> inputGradientDev =
-            s_accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * inputChannels, inputHeight, inputWidth));
+            _accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * inputChannels, inputHeight, inputWidth));
 
         CopyWeights4DTo3D(weights, weightsDev.View);
         CopyOutputGrad4DTo3D(outputGradient, outputGradientDev.View);
@@ -351,7 +431,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
             int,
             int,
             int> bwdInputKernel =
-            s_accelerator.LoadAutoGroupedStreamKernel<
+            _accelerator.LoadAutoGroupedStreamKernel<
                 Index3D,
                 ArrayView3D<float, Stride3D.DenseXY>,
                 ArrayView3D<float, Stride3D.DenseXY>,
@@ -379,7 +459,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
             kernelWidth,
             outputGradientChannels,
             batchSize);
-        s_accelerator.Synchronize();
+        _accelerator.Synchronize();
 
         CopyInputGrad3DTo4D(inputGradientDev.View, inputGradient);
         return inputGradient;
@@ -404,11 +484,11 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         float[,,,] paramGradient = new float[inputChannels, outputGradientChannels, kernelHeight, kernelWidth];
 
         using MemoryBuffer3D<float, Stride3D.DenseXY> inputDev =
-            s_accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * inputChannels, inputHeight, inputWidth));
+            _accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * inputChannels, inputHeight, inputWidth));
         using MemoryBuffer3D<float, Stride3D.DenseXY> outputGradientDev =
-            s_accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * outputGradientChannels, outputGradientHeight, outputGradientWidth));
+            _accelerator.Allocate3DDenseXY<float>(new Index3D(batchSize * outputGradientChannels, outputGradientHeight, outputGradientWidth));
         using MemoryBuffer3D<float, Stride3D.DenseXY> paramGradientDev =
-            s_accelerator.Allocate3DDenseXY<float>(new Index3D(inputChannels * outputGradientChannels, kernelHeight, kernelWidth));
+            _accelerator.Allocate3DDenseXY<float>(new Index3D(inputChannels * outputGradientChannels, kernelHeight, kernelWidth));
 
         CopyInput4DTo3D(input, inputDev.View);
         CopyOutputGrad4DTo3D(outputGradient, outputGradientDev.View);
@@ -427,7 +507,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
             int,
             int,
             int> bwdWeightsKernel =
-            s_accelerator.LoadAutoGroupedStreamKernel<
+            _accelerator.LoadAutoGroupedStreamKernel<
                 Index3D,
                 ArrayView3D<float, Stride3D.DenseXY>,
                 ArrayView3D<float, Stride3D.DenseXY>,
@@ -456,7 +536,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
             kernelWidth,
             outputGradientChannels,
             batchSize);
-        s_accelerator.Synchronize();
+        _accelerator.Synchronize();
 
         CopyWeights3DTo4D(paramGradientDev.View, paramGradient);
         return paramGradient;
@@ -770,8 +850,8 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
             }
 
             // Free unmanaged resources (unmanaged objects) and override finalizer
-            s_accelerator.Dispose();
-            s_context.Dispose();
+            _accelerator.Dispose();
+            _context.Dispose();
             // TODO: set large fields to null
             _disposedValue = true;
         }
