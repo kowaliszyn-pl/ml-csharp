@@ -236,7 +236,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         paramGradient[row, col] = sum;
     }
-
+    /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null)
     {
@@ -309,7 +309,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         outputDev.View.CopyToCPU(ref output[0, 0, 0, 0], output.Length);
         return output;
     }
-
+    */
     // Forward: each thread computes one output element [batchSize * outputChannels * outputHeight * outputWidth]
     // Encoded as: batchOutputChannelIndex = index.X = b * outputChannels + oc
     // oc = batchOutputChannelIndex % outputChannels; b = batchOutputChannelIndex / outputChannels
