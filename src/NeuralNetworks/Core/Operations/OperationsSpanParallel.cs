@@ -81,16 +81,16 @@ internal class OperationsSpanParallel : OperationsSpan
 
         Parallel.For(0, batchSize, b =>
         {
-            
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
+                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
 
             int outputGradientBIndex = b * outputFeatures;
             int inputGradientBIndex = b * inputFeatures;
-            Parallel.For(0, inputFeatures, inputFeature =>
-            // for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
+            //Parallel.For(0, inputFeatures, inputFeature =>
+            for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
             {
-                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
-                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+                
                 float sum = 0f;
                 for (int outputFeature = 0; outputFeature < outputFeatures; outputFeature++)
                 {
@@ -99,7 +99,7 @@ internal class OperationsSpanParallel : OperationsSpan
                 }
                 // inputGradient[b, inputFeature] = sum;
                 inputGradientSpan[inputGradientBIndex + inputFeature] = sum;
-            });
+            };
         });
 
         return inputGradient;
@@ -127,14 +127,14 @@ internal class OperationsSpanParallel : OperationsSpan
 
         Parallel.For(0, inputFeatures, ifeature =>
         {
-            
-            int paramGradientInputFeatureIndex = ifeature * outputFeatures;
-            Parallel.For(0, outputFeatures, ofeature =>
-            //for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
-            {
-                ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
                 ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
                 Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0], paramGradient.Length);
+            int paramGradientInputFeatureIndex = ifeature * outputFeatures;
+            //Parallel.For(0, outputFeatures, ofeature =>
+            for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            {
+                
 
                 float sum = 0f;
                 for (int b = 0; b < batchSize; b++)
@@ -144,7 +144,7 @@ internal class OperationsSpanParallel : OperationsSpan
                 }
                 // paramGradient[inputFeature, outputFeature] = sum;
                 paramGradientSpan[paramGradientInputFeatureIndex + ofeature] = sum;
-            });
+            };
         });
         return paramGradient;
     }
@@ -208,11 +208,14 @@ internal class OperationsSpanParallel : OperationsSpan
         {
             int inputBIndex = b * inputBSize;
             int outputBIndex = b * outputBSize;
-            Parallel.For(0, outputChannels, oc =>
-            {
-                ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+
+ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
                 ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
                 Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+            //Parallel.For(0, outputChannels, oc =>
+            for (int oc = 0; oc < outputChannels; oc++)
+            {
+                
 
                 int weightsOutputCIndex = oc * weightsOutputCSize;
                 int outputCIndex = oc * outputCSize;
@@ -252,7 +255,7 @@ internal class OperationsSpanParallel : OperationsSpan
                         outputSpan[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
                     }
                 }
-            });
+            };
         });
 
         return output;

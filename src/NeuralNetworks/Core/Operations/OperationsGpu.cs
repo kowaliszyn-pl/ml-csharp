@@ -75,10 +75,12 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 {
     private readonly Context _context;
     private readonly Accelerator _accelerator;
+
     private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
     private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyCalcOutputKernel;
     private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyInputGradientKernel;
     private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> _weightMultiplyParamGradientKernel;
+
     private bool _disposedValue;
 
     public OperationsGpu()
@@ -86,6 +88,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         // Initialize ILGPU context and accelerator
         _context = Context.Create(builder => builder.Cuda().CPU());
         _accelerator = _context.GetPreferredDevice(preferCPU: false).CreateAccelerator(_context);
+
         _convolve2DOutputKernel = _accelerator.LoadAutoGroupedStreamKernel<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta>(Convolve2DOutputKernel);
         _weightMultiplyCalcOutputKernel =
            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyCalcOutputKernel);
