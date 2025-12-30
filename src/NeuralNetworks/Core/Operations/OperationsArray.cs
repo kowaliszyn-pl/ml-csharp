@@ -45,7 +45,7 @@ internal class OperationsArray : IOperations
         => input.Transpose().MultiplyDot(outputGradient);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? paddingArg = null)
+    public virtual float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? paddingArg = null)
     {
         int batchSize = input.GetLength(0);
         int inputChannels = input.GetLength(1);

@@ -49,7 +49,7 @@ public static class OperationBackend
     }
 
     internal static float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
-        => Current.Convolve2DForward(input, weights, padding);
+        => Current.Convolve2DCalcOutput(input, weights, padding);
 
     internal static float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
         => Current.Convolve2DBackwardInput(input, weights, outputGradient, padding);

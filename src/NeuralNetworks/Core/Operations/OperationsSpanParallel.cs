@@ -14,7 +14,7 @@ internal class OperationsSpanParallel: OperationsSpan
     public override OperationBackendType BackendType => OperationBackendType.Cpu_Spans_Parallel;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
+    public override float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null)
     {
         int batchSize = input.GetLength(0);
 

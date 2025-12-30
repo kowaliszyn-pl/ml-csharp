@@ -29,7 +29,7 @@ public class Tanh4D : ActivationFunction4D
     /// dL/dy => outputGradient
     /// </item>
     /// <item>
-    /// dl/dx => inputGradient
+    /// dL/dx => inputGradient
     /// </item>
     /// </list>
     /// </remarks>

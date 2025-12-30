@@ -21,7 +21,7 @@ internal class OperationsSpan : OperationsArray
     /// </summary>
     /// <returns>Output</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
+    public override float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null)
     {
         int batchSize = input.GetLength(0);
 
@@ -44,13 +44,13 @@ internal class OperationsSpan : OperationsArray
 
         float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
 
-        ref float inputRef = ref input[0, 0, 0, 0];
-        ref float weightsRef = ref weights[0, 0, 0, 0];
-        ref float outputRef = ref output[0, 0, 0, 0];
+        //ref float inputRef = ref input[0, 0, 0, 0];
+        //ref float weightsRef = ref weights[0, 0, 0, 0];
+        //ref float outputRef = ref output[0, 0, 0, 0];
 
-        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
-        ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
-        Span<float> outputSpan = MemoryMarshal.CreateSpan(ref outputRef, output.Length);
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+        ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
+        Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
 
         // pre-compute sizes for offsets
         int outputBSize = outputChannels * outputHeight * outputWidth;
@@ -598,11 +598,11 @@ internal class OperationsSpan : OperationsArray
 
         float[,,,] res = new float[dim1, dim2, dim3, dim4];
 
-        ref float sourceRef = ref source[0, 0, 0, 0];
-        ref float resRef = ref res[0, 0, 0, 0];
+        //ref float sourceRef = ref source[0, 0, 0, 0];
+        //ref float resRef = ref res[0, 0, 0, 0];
 
-        ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref sourceRef, source.Length);
-        Span<float> resSpan = MemoryMarshal.CreateSpan(ref resRef, res.Length);
+        ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref source[0, 0, 0, 0], source.Length);
+        Span<float> resSpan = MemoryMarshal.CreateSpan(ref res[0, 0, 0, 0], res.Length);
 
         for (int i = 0; i < resSpan.Length; i++)
         {

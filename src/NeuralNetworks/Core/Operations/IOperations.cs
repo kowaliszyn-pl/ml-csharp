@@ -6,7 +6,7 @@ namespace NeuralNetworks.Core.Operations;
 
 public interface IOperations
 {
-    public float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null);
+    public float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null);
     public float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null);
     public float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null);
     public float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f);
