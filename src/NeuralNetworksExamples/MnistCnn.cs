@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 using NeuralNetworks.Core.Operations;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;

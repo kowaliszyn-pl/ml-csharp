@@ -2,7 +2,7 @@
 // File name: BiasAdd.cs
 // www.kowaliszyn.pl, 2025
 
-using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 

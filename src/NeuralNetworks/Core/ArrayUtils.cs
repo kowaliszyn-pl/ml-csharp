@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+using NeuralNetworks.Core.Extensions;
+
 namespace NeuralNetworks.Core;
 
 public class ArrayUtils

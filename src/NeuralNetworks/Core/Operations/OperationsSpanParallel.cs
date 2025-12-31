@@ -13,7 +13,7 @@ internal class OperationsSpanParallel : OperationsSpan
     public override OperationBackendType BackendType => OperationBackendType.Cpu_Spans_Parallel;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {
         int batchSize = input.GetLength(0);
         int inputFeatures = input.GetLength(1);
@@ -53,13 +53,13 @@ internal class OperationsSpanParallel : OperationsSpan
             }
         });
 
-        Debug.Assert(output.Length == batchSize * outputFeatures, "Output shape is incorrect.");
+        // Debug.Assert(output.Length == batchSize * outputFeatures, "Output shape is incorrect.");
 
         return output;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    public override float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
     {
         // outputGradient.MultiplyDot(weights.Transpose());
 
@@ -81,32 +81,33 @@ internal class OperationsSpanParallel : OperationsSpan
 
         Parallel.For(0, batchSize, b =>
         {
-            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
-                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+            
 
             int outputGradientBIndex = b * outputFeatures;
             int inputGradientBIndex = b * inputFeatures;
-            //Parallel.For(0, inputFeatures, inputFeature =>
-            for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
+            Parallel.For(0, inputFeatures, inputFeature =>
+            //for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
             {
-                
+ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
+                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+                int inputFeatureIndex = inputFeature * outputFeatures;
                 float sum = 0f;
                 for (int outputFeature = 0; outputFeature < outputFeatures; outputFeature++)
                 {
                     // sum += outputGradient[b, outputFeature] * weights[inputFeature, outputFeature];
-                    sum += outputGradientSpan[outputGradientBIndex + outputFeature] * weightsSpan[inputFeature * outputFeatures + outputFeature];
+                    sum += outputGradientSpan[outputGradientBIndex + outputFeature] * weightsSpan[inputFeatureIndex + outputFeature];
                 }
                 // inputGradient[b, inputFeature] = sum;
                 inputGradientSpan[inputGradientBIndex + inputFeature] = sum;
-            };
+            });
         });
 
         return inputGradient;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    public override float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
     {
         // input.Transpose().MultiplyDot(outputGradient);
 
@@ -127,15 +128,15 @@ internal class OperationsSpanParallel : OperationsSpan
 
         Parallel.For(0, inputFeatures, ifeature =>
         {
-            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
-                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-                Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0], paramGradient.Length);
+            
             int paramGradientInputFeatureIndex = ifeature * outputFeatures;
-            //Parallel.For(0, outputFeatures, ofeature =>
-            for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            Parallel.For(0, outputFeatures, ofeature =>
+            //for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
             {
                 
-
+ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+                Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0], paramGradient.Length);
                 float sum = 0f;
                 for (int b = 0; b < batchSize; b++)
                 {
@@ -144,7 +145,7 @@ internal class OperationsSpanParallel : OperationsSpan
                 }
                 // paramGradient[inputFeature, outputFeature] = sum;
                 paramGradientSpan[paramGradientInputFeatureIndex + ofeature] = sum;
-            };
+            });
         });
         return paramGradient;
     }
@@ -173,7 +174,7 @@ internal class OperationsSpanParallel : OperationsSpan
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null)
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
     {
         int batchSize = input.GetLength(0);
 
@@ -262,7 +263,7 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -358,7 +359,7 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
     /// </summary>
     /// <returns>ParamGradient</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
+    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 

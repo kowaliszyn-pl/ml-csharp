@@ -100,8 +100,12 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
     public override OperationBackendType BackendType => OperationBackendType.Gpu;
 
+    MemoryBuffer2D<float, Stride2D.DenseX> inputDev;
+    MemoryBuffer2D<float, Stride2D.DenseX> weightsDev;
+    MemoryBuffer2D<float, Stride2D.DenseX> outputDev;
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {
         int batchSize = input.GetLength(0);
 
@@ -146,7 +150,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    public override float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
     {
         int batchSize = outputGradient.GetLength(0);
         int outputFeatures = outputGradient.GetLength(1);
@@ -193,7 +197,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    public override float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
     {
         int batchSize = input.GetLength(0);
         int inputFeatures = input.GetLength(1);
@@ -241,7 +245,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     }
     /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null)
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
     {
         int batchSize = input.GetLength(0);
         int inputChannels = input.GetLength(1);
@@ -392,7 +396,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
     /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -473,7 +477,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
+    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 

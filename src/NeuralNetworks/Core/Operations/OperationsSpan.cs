@@ -21,7 +21,7 @@ internal class OperationsSpan : OperationsArray
     /// </summary>
     /// <returns>Output</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? padding = null)
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
     {
         int batchSize = input.GetLength(0);
 
@@ -118,7 +118,7 @@ internal class OperationsSpan : OperationsArray
     /// </summary>
     /// <returns>InputGradient</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -213,7 +213,7 @@ internal class OperationsSpan : OperationsArray
     /// </summary>
     /// <returns>ParamGradient</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
+    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -375,7 +375,7 @@ internal class OperationsSpan : OperationsArray
     /// <param name="output"></param>
     /// <returns>InputGradient</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] MultiplyByTanhDerivative(float[,,,] outputGradient, float[,,,] output)
+    public override float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
     {
         // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
         // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
@@ -414,7 +414,7 @@ internal class OperationsSpan : OperationsArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {
         int batchSize = input.GetLength(0);
         int inputFeatures = input.GetLength(1);
@@ -455,7 +455,7 @@ internal class OperationsSpan : OperationsArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    public override float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
     {
         // outputGradient.MultiplyDot(weights.Transpose());
 
@@ -496,7 +496,7 @@ internal class OperationsSpan : OperationsArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    public override float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
     {
         // input.Transpose().MultiplyDot(outputGradient);
 

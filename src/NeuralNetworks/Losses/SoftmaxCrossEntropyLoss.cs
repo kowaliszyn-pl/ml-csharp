@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 
 using static NeuralNetworks.Core.Operations.OperationBackend;
 

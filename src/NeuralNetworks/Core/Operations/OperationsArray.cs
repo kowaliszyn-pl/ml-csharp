@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 
 using ILGPU.Runtime.Cuda;
 
+using NeuralNetworks.Core.Extensions;
+
 namespace NeuralNetworks.Core.Operations;
 
 internal class OperationsArray : IOperations
@@ -33,19 +35,19 @@ internal class OperationsArray : IOperations
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    public virtual float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
         => input.MultiplyDot(weights);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    public virtual float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
         => outputGradient.MultiplyDot(weights.Transpose());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    public virtual float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
         => input.Transpose().MultiplyDot(outputGradient);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] Convolve2DCalcOutput(float[,,,] input, float[,,,] weights, int? paddingArg = null)
+    public virtual float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? paddingArg = null)
     {
         int batchSize = input.GetLength(0);
         int inputChannels = input.GetLength(1);
@@ -100,7 +102,7 @@ internal class OperationsArray : IOperations
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? paddingArg = null)
+    public virtual float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? paddingArg = null)
     {
         int batchSize = outputGradient.GetLength(0);
         int inputChannels = input.GetLength(1);
@@ -154,7 +156,7 @@ internal class OperationsArray : IOperations
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? paddingArg = null)
+    public virtual float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? paddingArg = null)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -231,7 +233,7 @@ internal class OperationsArray : IOperations
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] MultiplyByTanhDerivative(float[,,,] outputGradient, float[,,,] output)
+    public virtual float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
     {
         // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
         // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).

@@ -5,6 +5,7 @@
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;

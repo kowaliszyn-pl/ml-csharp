@@ -8,6 +8,8 @@ using BenchmarkDotNet.Attributes;
 
 using Microsoft.VSDiagnostics;
 
+using NeuralNetworks.Core.Extensions;
+
 namespace SpanBenchmark;
 // For more information on the VS BenchmarkDotNet Diagnosers see https://learn.microsoft.com/visualstudio/profiling/profiling-with-benchmark-dotnet
 [CPUUsageDiagnoser]
@@ -26,13 +28,13 @@ public class SpanBenchmarks
     [Benchmark]
     public void MultiplyByTanhDerivativeSpan()
     {
-        //new NeuralNetworks.Core.Span.OperationOps.MultiplyByTanhDerivative(array1, array2);
+        //new NeuralNetworks.Core.Span.OperationOps.TanhInputGradient(array1, array2);
     }
 
     [Benchmark]
     public void MultiplyByTanhDerivative()
     {
-        NeuralNetworks.Core.ArrayExtensions.MultiplyByTanhDerivative(array1, array2);
+        ArrayExtensions.MultiplyByTanhDerivative(array1, array2);
     }
 
     [Benchmark]

@@ -5,6 +5,7 @@
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Operations;
 

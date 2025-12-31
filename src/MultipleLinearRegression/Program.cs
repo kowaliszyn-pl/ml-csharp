@@ -4,7 +4,7 @@
 
 // Set the hyperparameters for the model
 
-using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 
 const float LearningRate = 0.0005f;
 const int Iterations = 35_000;

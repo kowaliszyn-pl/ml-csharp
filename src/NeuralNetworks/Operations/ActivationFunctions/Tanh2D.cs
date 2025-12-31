@@ -2,7 +2,7 @@
 // File name: Tanh2D.cs
 // www.kowaliszyn.pl, 2025
 
-using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 

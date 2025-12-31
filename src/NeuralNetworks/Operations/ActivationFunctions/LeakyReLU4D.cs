@@ -12,7 +12,7 @@ public class LeakyReLU4D(float alfa = 0.01f, float beta = 1f) : ActivationFuncti
         => LeakyReLU(Input, alfa, beta);
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
-        => LeakyReLUCalcInputGradient(outputGradient, Input, alfa, beta);
+        => LeakyReLUInputGradient(outputGradient, Input, alfa, beta);
 
     public override string ToString() 
         => $"LeakyReLU4D (alfa={alfa}, beta={beta})";

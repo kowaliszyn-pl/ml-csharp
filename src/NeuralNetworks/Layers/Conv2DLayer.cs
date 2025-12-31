@@ -12,7 +12,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworks.Layers;
 
 /*
- * TIn and TOut are 4D arrays (tensors) with the following dimensions: [batch, channels, height, width]
+ * TIn and TOut are 4D arrays with the following dimensions: [batch, channels, height, width]
  * TODO: strides, padding, dilation
  */
 public class Conv2DLayer : Layer<float[,,,], float[,,,]>

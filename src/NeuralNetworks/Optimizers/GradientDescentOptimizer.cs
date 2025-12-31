@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-using NeuralNetworks.Core;
+using NeuralNetworks.Core.Extensions;
 using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;
 
