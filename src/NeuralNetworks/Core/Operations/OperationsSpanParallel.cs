@@ -3,178 +3,164 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core.Operations;
 
 internal class OperationsSpanParallel : OperationsSpan
 {
+    #region Backend Management
+
     public override OperationBackendType BackendType => OperationBackendType.Cpu_Spans_Parallel;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
+    #endregion
+
+    #region Loss Functions
+
+    public override float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
     {
-        int batchSize = input.GetLength(0);
-        int inputFeatures = input.GetLength(1);
-        int outputFeatures = weights.GetLength(1);
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        Debug.Assert(weights.GetLength(0) == inputFeatures, "Input features must match weight input dimension.");
+        float loss = 0f;
+        int batchSize = predicted.GetLength(0);
+        int numClasses = predicted.GetLength(1);
 
-        float[,] output = new float[batchSize, outputFeatures];
-
-        //ref float inputRef = ref input[0, 0];
-        //ref float weightsRef = ref weights[0, 0];
-        //ref float outputRef = ref output[0, 0];
-
-        //ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
-        //ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
-        //Span<float> outputSpan = MemoryMarshal.CreateSpan(ref outputRef, output.Length);
-
-
-        Parallel.For(0, batchSize, b =>
+        Parallel.For(0, target.Length, i =>
         {
-            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
-            ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
-            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
 
-            int inputBIndex = b * inputFeatures;
-            int outputBIndex = b * outputFeatures;
-            for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
-            {
-                float sum = 0f;
-                for (int ifeature = 0; ifeature < inputFeatures; ifeature++)
-                {
-                    // sum += input[b, inputFeature] * weights[inputFeature, outputFeature];
-                    sum += inputSpan[inputBIndex + ifeature] * weightsSpan[ifeature * outputFeatures + ofeature];
-                }
-                // output[b, outputFeature] = sum;
-                outputSpan[outputBIndex + ofeature] = sum;
-            }
+            ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0], predicted.Length);
+            ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
+
+            float p = Math.Clamp(predictedSpan[i], eps, 1 - eps);
+            loss += targetSpan[i] * MathF.Log(p);
         });
 
-        // Debug.Assert(output.Length == batchSize * outputFeatures, "Output shape is incorrect.");
+        return -loss / (batchSize * numClasses);
+    }
+
+    public override float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
+    {
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = predicted.GetLength(0);
+        int numClasses = predicted.GetLength(1);
+        float[,] gradient = new float[batchSize, numClasses];
+
+        Parallel.For(0, gradient.Length, i =>
+        {
+            ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0], predicted.Length);
+            ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
+            Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0], gradient.Length);
+
+            gradientSpan[i] = (predictedSpan[i] - targetSpan[i]) / batchSize;
+        });
+
+        return gradient;
+    }
+
+    #endregion
+
+    #region Activations Functions
+
+    public override float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01f, float beta = 1f)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
+
+        float[,,,] output = new float[dim1, dim2, dim3, dim4];
+
+        Parallel.For(0, input.Length, i =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+
+            float value = inputSpan[i];
+            outputSpan[i] = value >= 0 ? value * beta : value * alpha;
+        });
 
         return output;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
+    public override float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
     {
-        // outputGradient.MultiplyDot(weights.Transpose());
+        int dim1 = outputGradient.GetLength(0);
+        int dim2 = outputGradient.GetLength(1);
+        int dim3 = outputGradient.GetLength(2);
+        int dim4 = outputGradient.GetLength(3);
 
-        int batchSize = outputGradient.GetLength(0); // 100
-        int inputFeatures = weights.GetLength(0); // 46
-        int outputFeatures = weights.GetLength(1); // 10
-        int outputGradientFeatures = outputGradient.GetLength(1); // 10
+        Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
+        Debug.Assert(input.GetLength(0) == dim1 && input.GetLength(1) == dim2 && input.GetLength(2) == dim3 && input.GetLength(3) == dim4, "Shapes of outputGradient and input must match for elementwise operations.");
 
-        Debug.Assert(outputGradientFeatures == outputFeatures, "Output features of output gradient must match weight output dimension.");
+        float[,,,] inputGradient = new float[dim1, dim2, dim3, dim4];
 
-        float[,] inputGradient = new float[batchSize, inputFeatures];
-        //ref float outputGradientRef = ref outputGradient[0, 0];
-        //ref float weightsRef = ref weights[0, 0];
-        //ref float inputGradientRef = ref inputGradient[0, 0];
-
-        //ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradientRef, outputGradient.Length);
-        //ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weightsRef, weights.Length);
-        //Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradientRef, inputGradient.Length);
-
-        Parallel.For(0, batchSize, b =>
+        Parallel.For(0, input.Length, i =>
         {
-            
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
 
-            int outputGradientBIndex = b * outputFeatures;
-            int inputGradientBIndex = b * inputFeatures;
-            Parallel.For(0, inputFeatures, inputFeature =>
-            //for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
-            {
-ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
-                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
-                int inputFeatureIndex = inputFeature * outputFeatures;
-                float sum = 0f;
-                for (int outputFeature = 0; outputFeature < outputFeatures; outputFeature++)
-                {
-                    // sum += outputGradient[b, outputFeature] * weights[inputFeature, outputFeature];
-                    sum += outputGradientSpan[outputGradientBIndex + outputFeature] * weightsSpan[inputFeatureIndex + outputFeature];
-                }
-                // inputGradient[b, inputFeature] = sum;
-                inputGradientSpan[inputGradientBIndex + inputFeature] = sum;
-            });
+            inputGradientSpan[i] = inputSpan[i] > 0 ? outputGradientSpan[i] * beta : outputGradientSpan[i] * alfa;
         });
 
         return inputGradient;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
+    public override float[,,,] Tanh(float[,,,] input)
     {
-        // input.Transpose().MultiplyDot(outputGradient);
-
-        int batchSize = input.GetLength(0);
-        int inputFeatures = input.GetLength(1);
-        int outputFeatures = outputGradient.GetLength(1);
-
-        Debug.Assert(outputGradient.GetLength(0) == batchSize, "Batch size of output gradient must match batch size of input.");
-
-        float[,] paramGradient = new float[inputFeatures, outputFeatures];
-        //ref float inputRef = ref input[0, 0];
-        //ref float outputGradientRef = ref outputGradient[0, 0];
-        //ref float paramGradientRef = ref paramGradient[0, 0];
-
-        //ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref inputRef, input.Length);
-        //ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradientRef, outputGradient.Length);
-        //Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradientRef, paramGradient.Length);
-
-        Parallel.For(0, inputFeatures, ifeature =>
-        {
-            
-            int paramGradientInputFeatureIndex = ifeature * outputFeatures;
-            Parallel.For(0, outputFeatures, ofeature =>
-            //for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
-            {
-                
-ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
-                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-                Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0], paramGradient.Length);
-                float sum = 0f;
-                for (int b = 0; b < batchSize; b++)
-                {
-                    // sum += input[b, inputFeature] * outputGradient[b, outputFeature];
-                    sum += inputSpan[b * inputFeatures + ifeature] * outputGradientSpan[b * outputFeatures + ofeature];
-                }
-                // paramGradient[inputFeature, outputFeature] = sum;
-                paramGradientSpan[paramGradientInputFeatureIndex + ofeature] = sum;
-            });
-        });
-        return paramGradient;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,] Flatten(float[,,,] source)
-    {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
 
         Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
 
-        float[,] res = new float[dim1, dim2 * dim3 * dim4];
+        float[,,,] output = new float[dim1, dim2, dim3, dim4];
 
-        ref float sourceRef = ref source[0, 0, 0, 0];
-        ref float resRef = ref res[0, 0];
+        Parallel.For(0, output.Length, i =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
 
-        ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref sourceRef, source.Length);
-        Span<float> resSpan = MemoryMarshal.CreateSpan(ref resRef, res.Length);
+            outputSpan[i] = MathF.Tanh(inputSpan[i]);
+        });
 
-        sourceSpan.CopyTo(resSpan);
-
-        return res;
+        return output;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
+    public override float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
+    {
+        int dim0 = outputGradient.GetLength(0);
+        int dim1 = outputGradient.GetLength(1);
+        int dim2 = outputGradient.GetLength(2);
+        int dim3 = outputGradient.GetLength(3);
+
+        Debug.Assert(dim0 > 0 && dim1 > 0 && dim2 > 0 && dim3 > 0, "All dimensions must be greater than zero.");
+        Debug.Assert(output.GetLength(0) == dim0 && output.GetLength(1) == dim1 && output.GetLength(2) == dim2 && output.GetLength(3) == dim3, "Shapes of outputGradient and output must match for elementwise operations.");
+
+        float[,,,] inputGradient = new float[dim0, dim1, dim2, dim3];
+
+        Parallel.For(0, inputGradient.Length, i =>
+        {
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+            ReadOnlySpan<float> outputSpan = MemoryMarshal.CreateReadOnlySpan(ref output[0, 0, 0, 0], output.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
+
+            float y = outputSpan[i];
+            inputGradientSpan[i] = outputGradientSpan[i] * (1f - (y * y));
+        });
+
+        return inputGradient;
+    }
+
+    #endregion
+
+    #region Parametric Operations
+
+    // Convolution Operations
+
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
     {
         int batchSize = input.GetLength(0);
 
@@ -190,7 +176,7 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0]
         Debug.Assert(weightChannels == inputChannels);
         Debug.Assert(kernelHeight == kernelWidth);
 
-        int pad = padding ?? (kernelHeight / 2);
+        int pad = kernelHeight / 2;
 
         int outputHeight = inputHeight - kernelHeight + 1 + 2 * pad;
         int outputWidth = inputWidth - kernelWidth + 1 + 2 * pad;
@@ -198,26 +184,25 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0]
         float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
 
         // pre-compute sizes for offsets
-        int outputBSize = outputChannels * outputHeight * outputWidth;
         int outputCSize = outputHeight * outputWidth;
-        int inputBSize = inputChannels * inputHeight * inputWidth;
+        int outputBSize = outputChannels * outputCSize;
         int inputCSize = inputHeight * inputWidth;
-        int weightsCSize = outputChannels * kernelHeight * kernelWidth;
+        int inputBSize = inputChannels * inputCSize;
         int weightsOutputCSize = kernelHeight * kernelWidth;
+        int weightsCSize = outputChannels * weightsOutputCSize;
 
         Parallel.For(0, batchSize, b =>
         {
             int inputBIndex = b * inputBSize;
             int outputBIndex = b * outputBSize;
 
-ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
-                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
-                Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+
             //Parallel.For(0, outputChannels, oc =>
             for (int oc = 0; oc < outputChannels; oc++)
             {
-                
-
                 int weightsOutputCIndex = oc * weightsOutputCSize;
                 int outputCIndex = oc * outputCSize;
                 for (int oh = 0; oh < outputHeight; oh++) // ~28
@@ -256,14 +241,13 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
                         outputSpan[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
                     }
                 }
-            };
+            }
         });
 
         return output;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -282,32 +266,29 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
         Debug.Assert(weights.GetLength(1) == outputGradientChannels);
         Debug.Assert(kernelHeight == kernelWidth);
 
-        int pad = padding ?? (kernelHeight / 2);
+        int pad = kernelHeight / 2;
 
         float[,,,] inputGradient = new float[batchSize, inputChannels, inputHeight, inputWidth];
 
-        //ref float weightsRef = ref weights[0, 0, 0, 0];
-        //ref float outputGradientRef = ref outputGradient[0, 0, 0, 0];
-        //ref float inputGradientRef = ref inputGradient[0, 0, 0, 0];
-
-
-
         // pre-compute sizes for offsets
-        int outputGradientBSize = outputGradientChannels * outputGradientHeight * outputGradientWidth;
         int outputGradientCSize = outputGradientHeight * outputGradientWidth;
-        int weightsInputCSize = outputGradientChannels * kernelHeight * kernelWidth;
+        int outputGradientBSize = outputGradientChannels * outputGradientCSize;
         int weightsOutputCSize = kernelHeight * kernelWidth;
-        int inputGradientBSize = inputChannels * inputHeight * inputWidth;
+        int weightsInputCSize = outputGradientChannels * weightsOutputCSize;
         int inputGradientCSize = inputHeight * inputWidth;
+        int inputGradientBSize = inputChannels * inputGradientCSize;
 
         Parallel.For(0, batchSize, b =>
         {
             int outputGradientBIndex = b * outputGradientBSize;
+            int inputGradientBIndex = b * inputGradientBSize;
+
             Parallel.For(0, inputChannels, ic =>
             {
                 ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
                 ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
                 Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
+
                 int weightsInputCIndex = ic * weightsInputCSize;
                 int inputGradientCIndex = ic * inputGradientCSize;
                 for (int ih = 0; ih < inputHeight; ih++)
@@ -317,7 +298,7 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
                     for (int iw = 0; iw < inputWidth; iw++)
                     {
                         float sum = 0f;
-                        int inputGradientBIndex = b * inputGradientBSize;
+
                         int iwPlusPad = iw + pad;
                         for (int oc = 0; oc < outputGradientChannels; oc++)
                         {
@@ -353,13 +334,7 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
         return inputGradient;
     }
 
-    /// <summary>
-    /// Backward pass w.r.t. weights (parameters) for 2D convolution.
-    /// Returns gradient with shape [inChannels, outChannels, kernelHeight, kernelWidth].
-    /// </summary>
-    /// <returns>ParamGradient</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
+    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -372,32 +347,29 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
         int outputGradientWidth = outputGradient.GetLength(3);
 
         Debug.Assert(kernelHeight == kernelWidth);
-        int pad = padding ?? (kernelHeight / 2);
+        int pad = kernelHeight / 2;
 
         float[,,,] paramGradient = new float[inputChannels, outputGradientChannels, kernelHeight, kernelWidth];
 
-        //ref float inputRef = ref input[0, 0, 0, 0];
-        //ref float outputGradientRef = ref outputGradient[0, 0, 0, 0];
-
-
-
         // pre-compute sizes for offsets
-        int outputGradientBSize = outputGradientChannels * outputGradientHeight * outputGradientWidth;
         int outputGradientOutputCSize = outputGradientHeight * outputGradientWidth;
-        int inputBSize = inputChannels * inputHeight * inputWidth;
+        int outputGradientBSize = outputGradientChannels * outputGradientOutputCSize;
         int inputCSize = inputHeight * inputWidth;
-        int paramGradientInputCSize = outputGradientChannels * kernelHeight * kernelWidth;
+        int inputBSize = inputChannels * inputCSize;
         int paramGradientOutputCSize = kernelHeight * kernelWidth;
+        int paramGradientInputCSize = outputGradientChannels * paramGradientOutputCSize;
 
         Parallel.For(0, batchSize, b =>
         {
             int outputGradientBIndex = b * outputGradientBSize;
             int inputBIndex = b * inputBSize;
+
             Parallel.For(0, inputChannels, ic =>
             {
                 ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
                 ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
                 Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0, 0, 0], paramGradient.Length);
+
                 int inputCIndex = ic * inputCSize;
                 int paramGradientInputCIndex = ic * paramGradientInputCSize;
 
@@ -443,5 +415,112 @@ ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0,
         return paramGradient;
     }
 
-}
+    // Weight Multiplication Operations
 
+    public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
+    {
+        int batchSize = input.GetLength(0);
+        int inputFeatures = input.GetLength(1);
+        int outputFeatures = weights.GetLength(1);
+
+        Debug.Assert(weights.GetLength(0) == inputFeatures, "Input features must match weight input dimension.");
+
+        float[,] output = new float[batchSize, outputFeatures];
+
+        Parallel.For(0, batchSize, b =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
+
+            int inputBIndex = b * inputFeatures;
+            int outputBIndex = b * outputFeatures;
+            for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            {
+                float sum = 0f;
+                for (int ifeature = 0; ifeature < inputFeatures; ifeature++)
+                {
+                    // sum += input[b, inputFeature] * weights[inputFeature, outputFeature];
+                    sum += inputSpan[inputBIndex + ifeature] * weightsSpan[ifeature * outputFeatures + ofeature];
+                }
+                // output[b, outputFeature] = sum;
+                outputSpan[outputBIndex + ofeature] = sum;
+            }
+        });
+
+        return output;
+    }
+
+    public override float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
+    {
+        int batchSize = outputGradient.GetLength(0); // 100
+        int inputFeatures = weights.GetLength(0); // 46
+        int outputFeatures = weights.GetLength(1); // 10
+        int outputGradientFeatures = outputGradient.GetLength(1); // 10
+
+        Debug.Assert(outputGradientFeatures == outputFeatures, "Output features of output gradient must match weight output dimension.");
+
+        float[,] inputGradient = new float[batchSize, inputFeatures];
+
+        Parallel.For(0, batchSize, b =>
+        {
+            int outputGradientBIndex = b * outputFeatures;
+            int inputGradientBIndex = b * inputFeatures;
+
+            Parallel.For(0, inputFeatures, inputFeature =>
+            //for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
+            {
+                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
+                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+                int inputFeatureIndex = inputFeature * outputFeatures;
+                float sum = 0f;
+                for (int outputFeature = 0; outputFeature < outputFeatures; outputFeature++)
+                {
+                    // sum += outputGradient[b, outputFeature] * weights[inputFeature, outputFeature];
+                    sum += outputGradientSpan[outputGradientBIndex + outputFeature] * weightsSpan[inputFeatureIndex + outputFeature];
+                }
+                // inputGradient[b, inputFeature] = sum;
+                inputGradientSpan[inputGradientBIndex + inputFeature] = sum;
+            });
+        });
+
+        return inputGradient;
+    }
+
+    public override float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
+    {
+        int batchSize = input.GetLength(0);
+        int inputFeatures = input.GetLength(1);
+        int outputFeatures = outputGradient.GetLength(1);
+
+        Debug.Assert(outputGradient.GetLength(0) == batchSize, "Batch size of output gradient must match batch size of input.");
+
+        float[,] paramGradient = new float[inputFeatures, outputFeatures];
+
+        Parallel.For(0, inputFeatures, ifeature =>
+        {
+            int paramGradientInputFeatureIndex = ifeature * outputFeatures;
+
+            Parallel.For(0, outputFeatures, ofeature =>
+            //for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            {
+                ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+                Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0], paramGradient.Length);
+
+                float sum = 0f;
+                for (int b = 0; b < batchSize; b++)
+                {
+                    // sum += input[b, inputFeature] * outputGradient[b, outputFeature];
+                    sum += inputSpan[b * inputFeatures + ifeature] * outputGradientSpan[b * outputFeatures + ofeature];
+                }
+                // paramGradient[inputFeature, outputFeature] = sum;
+                paramGradientSpan[paramGradientInputFeatureIndex + ofeature] = sum;
+            });
+        });
+        return paramGradient;
+    }
+
+    #endregion
+}

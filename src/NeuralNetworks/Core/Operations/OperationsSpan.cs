@@ -3,7 +3,6 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core.Operations;
@@ -69,18 +68,18 @@ internal class OperationsSpan : OperationsArray
         int dim3 = input.GetLength(2);
         int dim4 = input.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] output = new float[dim1, dim2, dim3, dim4];
 
-        ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
-        Span<float> resSpan = MemoryMarshal.CreateSpan(ref res[0, 0, 0, 0], res.Length);
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+        Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
 
-        for (int i = 0; i < sourceSpan.Length; i++)
+        for (int i = 0; i < inputSpan.Length; i++)
         {
-            float value = sourceSpan[i];
-            resSpan[i] = value >= 0 ? value * beta : value * alpha;
+            float value = inputSpan[i];
+            outputSpan[i] = value >= 0 ? value * beta : value * alpha;
         }
 
-        return res;
+        return output;
     }
 
     public override float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
@@ -282,6 +281,7 @@ internal class OperationsSpan : OperationsArray
         for (int b = 0; b < batchSize; b++)
         {
             int outputGradientBIndex = b * outputGradientBSize;
+            int inputGradientBIndex = b * inputGradientBSize;
             for (int ic = 0; ic < inputChannels; ic++)
             {
                 int weightsInputCIndex = ic * weightsInputCSize;
@@ -293,7 +293,6 @@ internal class OperationsSpan : OperationsArray
                     for (int iw = 0; iw < inputWidth; iw++)
                     {
                         float sum = 0f;
-                        int inputGradientBIndex = b * inputGradientBSize;
                         int iwPlusPad = iw + padding;
                         for (int oc = 0; oc < outputGradientChannels; oc++)
                         {
@@ -444,11 +443,8 @@ internal class OperationsSpan : OperationsArray
         return output;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
     {
-        // outputGradient.MultiplyDot(weights.Transpose());
-
         int batchSize = outputGradient.GetLength(0); // 100
         int inputFeatures = weights.GetLength(0); // 46
         int outputFeatures = weights.GetLength(1); // 10
