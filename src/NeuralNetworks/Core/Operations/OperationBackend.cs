@@ -120,17 +120,34 @@ public static class OperationBackend
 
     // Convolution Operations
 
+    /// <summary>
+    /// Computes the 2D convolution of the input array with the specified weights.
+    /// </summary>
+    /// <remarks>
+    /// Padding is symmetric and computed as kernelSize / 2. Strides and dilation are not supported yet.
+    /// </remarks>
+    /// <param name="input">The input array of shape [batchSize, inputChannels, inputHeight, inputWidth]</param> 
+    /// <param name="weights">The weights array (of the convolution filters) of shape [inputChannels, outputChannels, kernelHeight, kernelWidth]</param>
+    /// <returns>The output array of shape [batchSize, outputChannels, outputHeight, outputWidth]</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
-        => Current.Convolve2DOutput(input, weights, padding);
+    internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
+        => Current.Convolve2DOutput(input, weights);
+
+    /// <summary>
+    /// Computes the gradient of the input array for a 2D convolution operation during backpropagation.
+    /// </summary>
+    /// <param name="input">The input array to the convolution layer, represented as a four-dimensional array with shape [batchSize, inputChannels, inputHeight, inputWidth].</param>
+    /// <param name="weights">The weights of the convolution filters, represented as a four-dimensional array with shape [inputChannels, outputChannels, kernelHeight, kernelWidth].</param>
+    /// <param name="outputGradient">The gradient of the loss with respect to the output of the convolution layer, represented as a four-dimensional array with shape [batchSize, outputChannels, outputHeight, outputWidth].</param>
+    /// <returns>The input gradient array of shape [batchSize, inputChannels, inputHeight, inputWidth].
+    /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
+        => Current.Convolve2DInputGradient(input, weights, outputGradient);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
-        => Current.Convolve2DInputGradient(input, weights, outputGradient, padding);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
-        => Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth, padding);
+    internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth)
+        => Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth);
 
     // Weight Multiplication Operations
 

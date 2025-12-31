@@ -58,9 +58,9 @@ public interface IOperations
 
     // Convolution Operations
 
-    public float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null);
-    public float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null);
-    public float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null);
+    public float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights);
+    public float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient);
+    public float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth);
 
     // Weight Multiplication Operations
 

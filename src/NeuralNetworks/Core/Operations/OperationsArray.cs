@@ -132,7 +132,7 @@ internal class OperationsArray : IOperations
 
     // Convolution Operations
 
-    public virtual float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? paddingArg = null)
+    public virtual float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
     {
         int batchSize = input.GetLength(0);
         int inputChannels = input.GetLength(1);
@@ -145,7 +145,7 @@ internal class OperationsArray : IOperations
         Debug.Assert(weights.GetLength(0) == inputChannels);
         Debug.Assert(kernelSize == weights.GetLength(3));
 
-        int padding = paddingArg ?? kernelSize / 2;
+        int padding = kernelSize / 2;
 
         int outputHeight = inputHeight - kernelSize + 1 + 2 * padding;
         int outputWidth = inputWidth - kernelSize + 1 + 2 * padding;
@@ -186,7 +186,7 @@ internal class OperationsArray : IOperations
 
     }
 
-    public virtual float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? paddingArg = null)
+    public virtual float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
     {
         int batchSize = outputGradient.GetLength(0);
         int inputChannels = input.GetLength(1);
@@ -201,7 +201,7 @@ internal class OperationsArray : IOperations
         Debug.Assert(weights.GetLength(0) == inputChannels);
         Debug.Assert(kernelSize == weights.GetLength(3));
 
-        int padding = paddingArg ?? kernelSize / 2;
+        int padding = kernelSize / 2;
 
         float[,,,] inputGradient = new float[batchSize, inputChannels, inputHeight, inputWidth];
 
@@ -239,7 +239,7 @@ internal class OperationsArray : IOperations
 
     }
 
-    public virtual float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? paddingArg = null)
+    public virtual float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -253,7 +253,7 @@ internal class OperationsArray : IOperations
 
         Debug.Assert(kernelHeight == kernelWidth);
 
-        int padding = paddingArg ?? kernelHeight / 2;
+        int padding = kernelHeight / 2;
 
         float[,,,] paramGradient = new float[inputChannels, outputChannels, kernelHeight, kernelWidth];
 
