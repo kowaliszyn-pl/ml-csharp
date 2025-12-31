@@ -31,7 +31,8 @@ public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : Bas
         return outputGradient.MultiplyElementwise(Mask);
     }
 
-    public override string ToString() => $"Dropout2D (keepProb={keepProb}, seed={random?.Seed})";
+    public override string ToString() 
+        => $"Dropout2D (keepProb={keepProb}, seed={random?.Seed})";
 
 
 

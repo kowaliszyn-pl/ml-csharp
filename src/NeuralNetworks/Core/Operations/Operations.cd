@@ -16,7 +16,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Core.Operations.OperationsGpu">
-    <Position X="0.75" Y="13.75" Width="2.75" />
+    <Position X="0.75" Y="14.75" Width="2.75" />
     <Members>
       <Method Name="WeightMultiplyInputGradientKernel" Hidden="true" />
       <Method Name="WeightMultiplyParamGradientKernel" Hidden="true" />
@@ -25,7 +25,7 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>BAAAEAAQACAABBAAhBIAAAIQAEIAAAADEIAFAAFEoAA=</HashCode>
+      <HashCode>BAAAEAAAACAABBAAhAIAAAIQAAAAAAABAAABAAFEIAA=</HashCode>
       <FileName>Core\Operations\OperationsGpu.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -43,7 +43,7 @@
   <Class Name="NeuralNetworks.Core.Operations.OperationsSpanParallel">
     <Position X="0.75" Y="10.25" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>BAAAAAAAAEAIAAAAAAAAAAIAQAAAIAABAAAAAABAAAA=</HashCode>
+      <HashCode>BAAAAAAIAEAIAAACAAABAAIAAAAAIgABACQAAABAAAA=</HashCode>
       <FileName>Core\Operations\OperationsSpanParallel.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -57,7 +57,7 @@
   <Enum Name="NeuralNetworks.Core.Operations.OperationBackendType">
     <Position X="7.5" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAgAAAAAAAAAAEIAAA=</HashCode>
+      <HashCode>AAAAQAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAEIABA=</HashCode>
       <FileName>Core\Operations\OperationBackendType.cs</FileName>
     </TypeIdentifier>
   </Enum>
