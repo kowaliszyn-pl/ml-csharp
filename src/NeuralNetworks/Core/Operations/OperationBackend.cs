@@ -31,9 +31,9 @@ public static class OperationBackend
 
         Current = backendType switch
         {
-            OperationBackendType.Cpu_Arrays => new OperationsArray(),
-            OperationBackendType.Cpu_Spans => new OperationsSpan(),
-            OperationBackendType.Cpu_Spans_Parallel => new OperationsSpanParallel(),
+            OperationBackendType.CpuArrays => new OperationsArray(),
+            OperationBackendType.CpuSpans => new OperationsSpan(),
+            OperationBackendType.CpuSpansParallel => new OperationsSpanParallel(),
             OperationBackendType.Gpu => new OperationsGpu(),
             _ => throw new NotSupportedException($"The specified backend type '{backendType}' is not supported."),
         };

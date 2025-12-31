@@ -11,7 +11,7 @@ internal class OperationsSpan : OperationsArray
 {
     #region Backend Management
 
-    public override OperationBackendType BackendType => OperationBackendType.Cpu_Spans;
+    public override OperationBackendType BackendType => OperationBackendType.CpuSpans;
 
     #endregion
 

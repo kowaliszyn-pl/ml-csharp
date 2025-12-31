@@ -101,15 +101,15 @@ internal static class Program
         switch (backendChoice)
         {
             case "1":
-                OperationBackend.Use(OperationBackendType.Cpu_Arrays);
+                OperationBackend.Use(OperationBackendType.CpuArrays);
                 Console.WriteLine("Using CPU - Arrays backend.");
                 break;
             case "2":
-                OperationBackend.Use(OperationBackendType.Cpu_Spans);
+                OperationBackend.Use(OperationBackendType.CpuSpans);
                 Console.WriteLine("Using CPU - Spans backend.");
                 break;
             case "3":
-                OperationBackend.Use(OperationBackendType.Cpu_Spans_Parallel);
+                OperationBackend.Use(OperationBackendType.CpuSpansParallel);
                 Console.WriteLine("Using CPU - Spans Parallel backend.");
                 break;
             case "4":

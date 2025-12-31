@@ -11,7 +11,7 @@ internal class OperationsSpanParallel : OperationsSpan
 {
     #region Backend Management
 
-    public override OperationBackendType BackendType => OperationBackendType.Cpu_Spans_Parallel;
+    public override OperationBackendType BackendType => OperationBackendType.CpuSpansParallel;
 
     #endregion
 

@@ -21,7 +21,7 @@ internal class OperationsArray : IOperations
 {
     #region Backend Management
 
-    public virtual OperationBackendType BackendType => OperationBackendType.Cpu_Arrays;
+    public virtual OperationBackendType BackendType => OperationBackendType.CpuArrays;
 
     #endregion
 
