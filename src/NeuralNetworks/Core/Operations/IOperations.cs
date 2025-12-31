@@ -24,6 +24,32 @@ public interface IOperations
     public float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01f, float beta = 1f);
     public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
     public float[,,,] Tanh(float[,,,] source);
+
+    /// <summary>
+    /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
+    /// </summary>
+    /// <remarks>
+    /// Given the output gradient (dL/dy), the function calculates the source gradient (dL/dx). 
+    /// <para/>
+    /// The derivative of the Tanh function <c>tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))</c> is <c>1 - tanh(x)^2</c>.
+    /// Therefore, the source gradient is computed as: <c>dL/dx = dL/dy * (1 - tanh(x)^2) = dL/dy * (1 - output^2)</c>.
+    /// <list type="bullet">
+    /// <item>
+    /// tanh(x) => output
+    /// </item>
+    /// <item>
+    /// dL/dy => outputGradient
+    /// </item>
+    /// <item>
+    /// dL/dx => inputGradient
+    /// </item>
+    /// </list>
+    /// </remarks>
+    /// <param name="output">The output of the Tanh function (<c>tanh(x)</c>).</param>
+    /// <param name="outputGradient">The gradient of the loss with respect to the output of the Tanh function (dL/dy).</param>
+    /// <returns>
+    /// The gradient of the loss with respect to the input of the Tanh function (dL/dx), having the same shape as <paramref name="outputGradient"/>.
+    /// </returns>
     public float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output);
 
     #endregion

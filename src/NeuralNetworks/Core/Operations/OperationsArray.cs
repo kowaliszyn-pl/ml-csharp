@@ -3,19 +3,20 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Core.Operations;
 
 /// <summary>
-/// Provides array-based, naive implementation of <see cref="IOperations"/> for easy debugging (CPU execution).
+/// Provides the baseline array-based CPU implementation of <see cref="IOperations"/> for deterministic reference execution.
 /// </summary>
-/// <remarks>This class implements the <see cref="IOperations"/> interface using standard multidimensional arrays and CPU-based
-/// algorithms. It is intended for use in environments where GPU acceleration is not available or not required.
-/// OperationsArray is typically used as a backend for neural network computations during development, testing, or in
-/// production scenarios where CPU performance is sufficient.</remarks>
+/// <remarks>
+/// All kernels are written against standard multidimensional arrays and straightforward loops so the behavior mirrors
+/// higher-performance backends while remaining easy to debug, test, and teach. Use this backend when GPU acceleration
+/// is unavailable, when numerical traceability matters more than throughput, or as a correctness oracle for other
+/// implementations.
+/// </remarks>
 internal class OperationsArray : IOperations
 {
     #region Backend Management
@@ -26,7 +27,6 @@ internal class OperationsArray : IOperations
 
     #region Loss Functions
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
@@ -36,7 +36,6 @@ internal class OperationsArray : IOperations
         return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
@@ -47,19 +46,92 @@ internal class OperationsArray : IOperations
 
     #endregion
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
-        => input.MultiplyDot(weights);
+    #region Activations Functions
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
-        => outputGradient.MultiplyDot(weights.Transpose());
+    public virtual float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01F, float beta = 1)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
+        float[,,,] output = new float[dim1, dim2, dim3, dim4];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        output[i, j, k, l] = input[i, j, k, l] > 0 ? input[i, j, k, l] * beta : input[i, j, k, l] * alpha;
+                    }
+                }
+            }
+        }
+        return output;
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
-        => input.Transpose().MultiplyDot(outputGradient);
+    public virtual float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
+        float[,,,] inputGradient = new float[dim1, dim2, dim3, dim4];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        inputGradient[i, j, k, l] = input[i, j, k, l] > 0 ? outputGradient[i, j, k, l] * beta : outputGradient[i, j, k, l] * alfa;
+                    }
+                }
+            }
+        }
+        return inputGradient;
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public virtual float[,,,] Tanh(float[,,,] input)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
+
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        res[i, j, k, l] = MathF.Tanh(input[i, j, k, l]);
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    public virtual float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
+    {
+        float[,,,] tanhBackward = output.AsOnes().Subtract(output.MultiplyElementwise(output));
+        return outputGradient.MultiplyElementwise(tanhBackward);
+    }
+
+    #endregion
+
+    #region Parametric Operations
+
+    // Convolution Operations
+
     public virtual float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? paddingArg = null)
     {
         int batchSize = input.GetLength(0);
@@ -114,7 +186,6 @@ internal class OperationsArray : IOperations
 
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? paddingArg = null)
     {
         int batchSize = outputGradient.GetLength(0);
@@ -168,7 +239,6 @@ internal class OperationsArray : IOperations
 
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? paddingArg = null)
     {
         int batchSize = outputGradient.GetLength(0);
@@ -218,59 +288,33 @@ internal class OperationsArray : IOperations
         }
 
         return paramGradient;
-
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
-    {
-        int dim1 = input.GetLength(0);
-        int dim2 = input.GetLength(1);
-        int dim3 = input.GetLength(2);
-        int dim4 = input.GetLength(3);
-        float[,,,] inputGradient = new float[dim1, dim2, dim3, dim4];
-        for (int i = 0; i < dim1; i++)
-        {
-            for (int j = 0; j < dim2; j++)
-            {
-                for (int k = 0; k < dim3; k++)
-                {
-                    for (int l = 0; l < dim4; l++)
-                    {
-                        inputGradient[i, j, k, l] = input[i, j, k, l] > 0 ? outputGradient[i, j, k, l] * beta : outputGradient[i, j, k, l] * alfa;
-                    }
-                }
-            }
-        }
-        return inputGradient;
-    }
+    // Weight Multiplication Operations
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
-    {
-        // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
-        // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
-        // The derivative of the Tanh function tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x)) is 1 - tanh(x)^2.
-        // Therefore, the input gradient is computed as: dL/dx = dL/dy * (1 - tanh(x)^2).
-        // The elementwise multiplication of the output gradient and the derivative of the Tanh function is returned as the input gradient.
-        // tanh(x) => Output
-        // dL/dy => outputGradient
-        // dl/dx => inputGradient
-        float[,,,] tanhBackward = output.AsOnes().Subtract(output.MultiplyElementwise(output));
-        return outputGradient.MultiplyElementwise(tanhBackward);
-    }
+    public virtual float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
+    => input.MultiplyDot(weights);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public virtual float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
+        => outputGradient.MultiplyDot(weights.Transpose());
+
+    public virtual float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
+        => input.Transpose().MultiplyDot(outputGradient);
+
+    #endregion
+
+    #region Transformations
+
     public virtual float[,] Flatten(float[,,,] source)
     {
-        // Flattent the input for each batch
+        // Flattent the source for each batch
 
         int batchSize = source.GetLength(0);
         int channels = source.GetLength(1);
         int height = source.GetLength(2);
         int width = source.GetLength(3);
 
-        float[,] output = new float[batchSize, channels * height * width];
+        float[,] res = new float[batchSize, channels * height * width];
 
         for (int b = 0; b < batchSize; b++)
         {
@@ -281,36 +325,34 @@ internal class OperationsArray : IOperations
                     for (int w = 0; w < width; w++)
                     {
                         int index = c * height * width + h * width + w;
-                        output[b, index] = source[b, c, h, w];
+                        res[b, index] = source[b, c, h, w];
                     }
                 }
             }
         }
 
-        return output;
+        return res;
     }
     
-    public virtual float[,,,] LeakyReLU(float[,,,] source, float alpha = 0.01F, float beta = 1) => throw new NotImplementedException();
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] Tanh(float[,,,] source)
+    public virtual float[,,,] Unflatten(float[,] source, float[,,,] targetSize)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int batchSize = targetSize.GetLength(0);
+        int channels = targetSize.GetLength(1);
+        int height = targetSize.GetLength(2);
+        int width = targetSize.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[batchSize, channels, height, width];
 
-        for (int i = 0; i < dim1; i++)
+        for (int b = 0; b < batchSize; b++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int c = 0; c < channels; c++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int h = 0; h < height; h++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int w = 0; w < width; w++)
                     {
-                        res[i, j, k, l] = MathF.Tanh(source[i, j, k, l]);
+                        int index = c * height * width + h * width + w;
+                        res[b, c, h, w] = source[b, index];
                     }
                 }
             }
@@ -319,31 +361,5 @@ internal class OperationsArray : IOperations
         return res;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] Unflatten(float[,] source, float[,,,] targetSize)
-    {
-        int batchSize = targetSize.GetLength(0);
-        int channels = targetSize.GetLength(1);
-        int height = targetSize.GetLength(2);
-        int width = targetSize.GetLength(3);
-
-        float[,,,] inputGrad = new float[batchSize, channels, height, width];
-
-        for (int b = 0; b < batchSize; b++)
-        {
-            for (int c = 0; c < channels; c++)
-            {
-                for (int h = 0; h < height; h++)
-                {
-                    for (int w = 0; w < width; w++)
-                    {
-                        int index = c * height * width + h * width + w;
-                        inputGrad[b, c, h, w] = source[b, index];
-                    }
-                }
-            }
-        }
-
-        return inputGrad;
-    }
+    #endregion
 }

@@ -89,15 +89,13 @@ public static class OperationBackend
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
     /// </summary>
     /// <remarks>
-    /// This method is used during backpropagation in neural network training to propagate
-    /// gradients through a Tanh activation layer. The returned array has the same shape as <paramref
-    /// name="outputGradient"/>.
-    /// <para>
-    /// This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx). The derivative of the Tanh function is <c>1 - tanh(x)^2</c>. Therefore, the input gradient is computed as: <c>dL/dx = dL/dy * (1 - tanh(x)^2)</c>. The elementwise multiplication of the output gradient and the derivative of the Tanh function is returned as the input gradient.
-    /// </para>
+    /// Given the output gradient (dL/dy), the function calculates the source gradient (dL/dx). 
+    /// <para/>
+    /// The derivative of the Tanh function <c>tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))</c> is <c>1 - tanh(x)^2</c>.
+    /// Therefore, the source gradient is computed as: <c>dL/dx = dL/dy * (1 - tanh(x)^2) = dL/dy * (1 - output^2)</c>.
     /// <list type="bullet">
     /// <item>
-    /// tanh(x) => Output
+    /// tanh(x) => output
     /// </item>
     /// <item>
     /// dL/dy => outputGradient
@@ -107,10 +105,10 @@ public static class OperationBackend
     /// </item>
     /// </list>
     /// </remarks>
-    /// <param name="outputGradient">A four-dimensional array representing the gradient of the loss with respect to the output of the Tanh function. The shape must match the output tensor of the layer.</param>
-    /// <returns>A four-dimensional array containing the gradient of the loss with respect to the input of the Tanh function.
-    /// Each element is computed by multiplying the corresponding element in <paramref name="outputGradient"/> by the
-    /// derivative of the Tanh function at that position.
+    /// <param name="output">The output of the Tanh function (<c>tanh(x)</c>).</param>
+    /// <param name="outputGradient">The gradient of the loss with respect to the output of the Tanh function (dL/dy).</param>
+    /// <returns>
+    /// The gradient of the loss with respect to the input of the Tanh function (dL/dx), having the same shape as <paramref name="outputGradient"/>.
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
