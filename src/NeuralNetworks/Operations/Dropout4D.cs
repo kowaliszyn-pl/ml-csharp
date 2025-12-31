@@ -6,11 +6,10 @@ using System.Diagnostics;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Core.Extensions;
-using NeuralNetworks.Operations.Interfaces;
 
 namespace NeuralNetworks.Operations;
 
-public class Dropout4D(float keepProb = 0.8f, SeededRandom? random = null) : Operation4D, IParameterCountProvider
+public class Dropout4D(float keepProb = 0.8f, SeededRandom? random = null) : Operation4D
 {
     private float[,,,]? _mask;
 
@@ -30,11 +29,10 @@ public class Dropout4D(float keepProb = 0.8f, SeededRandom? random = null) : Ope
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
     {
         Debug.Assert(_mask != null, "Mask must not be null here.");
+
         return outputGradient.MultiplyElementwise(_mask);
     }
 
-    public override string ToString() => $"Dropout4D (keepProb={keepProb}, seed={random?.Seed})";
-
-    public int GetParamCount()
-        => _mask?.Length ?? 0;
+    public override string ToString() 
+        => $"Dropout4D (keepProb={keepProb}, seed={random?.Seed})";
 }
