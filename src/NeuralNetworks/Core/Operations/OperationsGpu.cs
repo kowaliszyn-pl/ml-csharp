@@ -3,7 +3,6 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 using ILGPU;
 using ILGPU.Runtime;
@@ -15,73 +14,15 @@ namespace NeuralNetworks.Core.Operations;
 using FloatDense1DView = ArrayView1D<float, Stride1D.Dense>;
 using FloatDense2DView = ArrayView2D<float, Stride2D.DenseX>;
 
-public readonly struct Convolve2DOutputMeta
-{
-    public Convolve2DOutputMeta(
-        int pad,
-        int inputChannels,
-        int inputHeight,
-        int inputWidth,
-        int kernelHeight,
-        int kernelWidth,
-        int outputChannels,
-        int batchSize,
-        int outputHeight,
-        int outputWidth,
-        int inputBatchSize,
-        int inputChannelSize,
-        int weightsChannelSize,
-        int weightsOutputChannelSize,
-        int outputBatchSize,
-        int outputChannelSize)
-    {
-        Pad = pad;
-        InputChannels = inputChannels;
-        InputHeight = inputHeight;
-        InputWidth = inputWidth;
-        KernelHeight = kernelHeight;
-        KernelWidth = kernelWidth;
-        OutputChannels = outputChannels;
-        BatchSize = batchSize;
-        OutputHeight = outputHeight;
-        OutputWidth = outputWidth;
-        InputBatchSize = inputBatchSize;
-        InputChannelSize = inputChannelSize;
-        WeightsChannelSize = weightsChannelSize;
-        WeightsOutputChannelSize = weightsOutputChannelSize;
-        OutputBatchSize = outputBatchSize;
-        OutputChannelSize = outputChannelSize;
-    }
-
-    public int Pad { get; }
-    public int InputChannels { get; }
-    public int InputHeight { get; }
-    public int InputWidth { get; }
-    public int KernelHeight { get; }
-    public int KernelWidth { get; }
-    public int OutputChannels { get; }
-    public int BatchSize { get; }
-    public int OutputHeight { get; }
-    public int OutputWidth { get; }
-    public int InputBatchSize { get; }
-    public int InputChannelSize { get; }
-    public int WeightsChannelSize { get; }
-    public int WeightsOutputChannelSize { get; }
-    public int OutputBatchSize { get; }
-    public int OutputChannelSize { get; }
-}
-
 internal class OperationsGpu : OperationsSpanParallel, IDisposable
 {
+
+    #region Backend Management
+
+    public override OperationBackendType BackendType => OperationBackendType.Gpu;
+
     private readonly Context _context;
     private readonly Accelerator _accelerator;
-
-    private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
-    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyCalcOutputKernel;
-    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyInputGradientKernel;
-    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> _weightMultiplyParamGradientKernel;
-
-    private bool _disposedValue;
 
     public OperationsGpu()
     {
@@ -89,7 +30,10 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         _context = Context.Create(builder => builder.Cuda().CPU());
         _accelerator = _context.GetPreferredDevice(preferCPU: false).CreateAccelerator(_context);
 
+        // Convolution Operations
         _convolve2DOutputKernel = _accelerator.LoadAutoGroupedStreamKernel<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta>(Convolve2DOutputKernel);
+
+        // Weight Multiplication Operations
         _weightMultiplyCalcOutputKernel =
            _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyCalcOutputKernel);
         _weightMultiplyInputGradientKernel =
@@ -98,13 +42,121 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
             _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView>(WeightMultiplyParamGradientKernel);
     }
 
-    public override OperationBackendType BackendType => OperationBackendType.Gpu;
+    #region Dispose pattern
 
-    MemoryBuffer2D<float, Stride2D.DenseX> inputDev;
-    MemoryBuffer2D<float, Stride2D.DenseX> weightsDev;
-    MemoryBuffer2D<float, Stride2D.DenseX> outputDev;
+    private bool _disposedValue;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                // TODO: dispose managed state (managed objects)
+            }
+
+            // Free unmanaged resources (unmanaged objects) and override finalizer
+            _accelerator.Dispose();
+            _context.Dispose();
+            // TODO: set large fields to null
+            _disposedValue = true;
+        }
+    }
+
+    // Override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    ~OperationsGpu()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: false);
+    }
+
+    void IDisposable.Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    #endregion
+
+    #endregion
+
+    #region Loss Functions
+
+    #endregion
+
+    #region Activations Functions
+
+    #endregion
+
+    #region Parametric Operations
+
+    // Convolution Operations
+
+    public readonly struct Convolve2DOutputMeta
+    {
+        public Convolve2DOutputMeta(
+            int pad,
+            int inputChannels,
+            int inputHeight,
+            int inputWidth,
+            int kernelHeight,
+            int kernelWidth,
+            int outputChannels,
+            int batchSize,
+            int outputHeight,
+            int outputWidth,
+            int inputBatchSize,
+            int inputChannelSize,
+            int weightsChannelSize,
+            int weightsOutputChannelSize,
+            int outputBatchSize,
+            int outputChannelSize)
+        {
+            Pad = pad;
+            InputChannels = inputChannels;
+            InputHeight = inputHeight;
+            InputWidth = inputWidth;
+            KernelHeight = kernelHeight;
+            KernelWidth = kernelWidth;
+            OutputChannels = outputChannels;
+            BatchSize = batchSize;
+            OutputHeight = outputHeight;
+            OutputWidth = outputWidth;
+            InputBatchSize = inputBatchSize;
+            InputChannelSize = inputChannelSize;
+            WeightsChannelSize = weightsChannelSize;
+            WeightsOutputChannelSize = weightsOutputChannelSize;
+            OutputBatchSize = outputBatchSize;
+            OutputChannelSize = outputChannelSize;
+        }
+
+        public int Pad { get; }
+        public int InputChannels { get; }
+        public int InputHeight { get; }
+        public int InputWidth { get; }
+        public int KernelHeight { get; }
+        public int KernelWidth { get; }
+        public int OutputChannels { get; }
+        public int BatchSize { get; }
+        public int OutputHeight { get; }
+        public int OutputWidth { get; }
+        public int InputBatchSize { get; }
+        public int InputChannelSize { get; }
+        public int WeightsChannelSize { get; }
+        public int WeightsOutputChannelSize { get; }
+        public int OutputBatchSize { get; }
+        public int OutputChannelSize { get; }
+    }
+
+    private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
+
+    // Weight Multiplication Operations
+
+    // WeightMultiplyOutput
+
+    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyCalcOutputKernel;
+
     public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {
         int batchSize = input.GetLength(0);
@@ -130,7 +182,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         return output;
     }
 
-    private static void WeightMultiplyCalcOutputKernel(Index2D index, FloatDense2DView input, FloatDense2DView weights, FloatDense2DView output, int kDim)
+    private static void WeightMultiplyCalcOutputKernel(Index2D index, FloatDense2DView input, FloatDense2DView weights, FloatDense2DView output, int inputFeatures)
     {
         int row = index.X;
         int col = index.Y;
@@ -141,7 +193,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         }
 
         float sum = 0f;
-        for (int k = 0; k < kDim; k++)
+        for (int k = 0; k < inputFeatures; k++)
         {
             sum += input[row, k] * weights[k, col];
         }
@@ -149,7 +201,10 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         output[row, col] = sum;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // WeightMultiplyInputGradient
+
+    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> _weightMultiplyInputGradientKernel;
+
     public override float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
     {
         int batchSize = outputGradient.GetLength(0);
@@ -167,9 +222,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         outputGradientDev.View.CopyFromCPU(outputGradient);
         weightsDev.View.CopyFromCPU(weights);
 
-        //Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int> kernel =
-        //    _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView, int>(WeightMultiplyInputGradientKernel);
-
         _weightMultiplyInputGradientKernel(new Index2D(batchSize, inputFeatures), outputGradientDev.View, weightsDev.View, inputGradientDev.View, outputFeatures);
         _accelerator.Synchronize();
 
@@ -177,7 +229,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         return inputGradient;
     }
 
-    private static void WeightMultiplyInputGradientKernel(Index2D index, FloatDense2DView outputGradient, FloatDense2DView weights, FloatDense2DView inputGradient, int kDim)
+    private static void WeightMultiplyInputGradientKernel(Index2D index, FloatDense2DView outputGradient, FloatDense2DView weights, FloatDense2DView inputGradient, int outputFeatures)
     {
         int row = index.X;
         int col = index.Y;
@@ -188,7 +240,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         }
 
         float sum = 0f;
-        for (int k = 0; k < kDim; k++)
+        for (int k = 0; k < outputFeatures; k++)
         {
             sum += outputGradient[row, k] * weights[col, k];
         }
@@ -196,7 +248,10 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         inputGradient[row, col] = sum;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    // WeightMultiplyParamGradient
+
+    private readonly Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> _weightMultiplyParamGradientKernel;
+
     public override float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
     {
         int batchSize = input.GetLength(0);
@@ -213,9 +268,6 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         inputDev.View.CopyFromCPU(input);
         outputGradientDev.View.CopyFromCPU(outputGradient);
-
-        //Action<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView> kernel =
-         //   _accelerator.LoadAutoGroupedStreamKernel<Index2D, FloatDense2DView, FloatDense2DView, FloatDense2DView>(WeightMultiplyParamGradientKernel);
 
         _weightMultiplyParamGradientKernel(new Index2D(inputFeatures, outputFeatures), inputDev.View, outputGradientDev.View, paramGradientDev.View);
         _accelerator.Synchronize();
@@ -243,6 +295,9 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
         paramGradient[row, col] = sum;
     }
+
+    #endregion
+
     /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
@@ -708,38 +763,4 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     #endregion
     */
 
-    #region Dispose pattern
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                // TODO: dispose managed state (managed objects)
-            }
-
-            // Free unmanaged resources (unmanaged objects) and override finalizer
-            _accelerator.Dispose();
-            _context.Dispose();
-            // TODO: set large fields to null
-            _disposedValue = true;
-        }
-    }
-
-    // Override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-    ~OperationsGpu()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: false);
-    }
-
-    void IDisposable.Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    #endregion
 }
