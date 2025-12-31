@@ -9,9 +9,22 @@ using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Core.Operations;
 
+/// <summary>
+/// Provides array-based, naive implementation of <see cref="IOperations"/> for easy debugging (CPU execution).
+/// </summary>
+/// <remarks>This class implements the <see cref="IOperations"/> interface using standard multidimensional arrays and CPU-based
+/// algorithms. It is intended for use in environments where GPU acceleration is not available or not required.
+/// OperationsArray is typically used as a backend for neural network computations during development, testing, or in
+/// production scenarios where CPU performance is sufficient.</remarks>
 internal class OperationsArray : IOperations
 {
+    #region Backend Management
+
     public virtual OperationBackendType BackendType => OperationBackendType.Cpu_Arrays;
+
+    #endregion
+
+    #region Loss Functions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
@@ -31,6 +44,8 @@ internal class OperationsArray : IOperations
         int batchSize = predicted.GetLength(0);
         return predicted.Subtract(target).Divide(batchSize);
     }
+
+    #endregion
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public virtual float[,] WeightMultiplyOutput(float[,] input, float[,] weights)

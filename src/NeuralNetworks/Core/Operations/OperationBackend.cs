@@ -9,7 +9,7 @@ namespace NeuralNetworks.Core.Operations;
 public static class OperationBackend
 {
 
-    #region
+    #region Backend Management
 
     static OperationBackend()
     {
@@ -120,17 +120,7 @@ public static class OperationBackend
 
     #region Parametric Operations
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
-        => Current.WeightMultiplyOutput(input, weights);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
-        => Current.WeightMultiplyInputGradient(outputGradient, weights);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
-        => Current.WeightMultiplyParamGradient(input, outputGradient);
+    // Convolution Operations
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
@@ -143,6 +133,20 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
         => Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth, padding);
+
+    // Weight Multiplication Operations
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
+        => Current.WeightMultiplyOutput(input, weights);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
+        => Current.WeightMultiplyInputGradient(outputGradient, weights);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
+        => Current.WeightMultiplyParamGradient(input, outputGradient);
 
     #endregion
 
