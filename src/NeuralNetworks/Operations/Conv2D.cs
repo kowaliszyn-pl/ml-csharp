@@ -22,15 +22,15 @@ public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
 {
 
     protected override float[,,,] CalcOutput(bool inference) 
-        => Convolve2DForward(Input, Param);
+        => Convolve2DOutput(Input, Param);
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
-        => Convolve2DBackwardInput(Input, Param, outputGradient);
+        => Convolve2DInputGradient(Input, Param, outputGradient);
 
     protected override float[,,,] CalcParamGradient(float[,,,] outputGradient)
     {
         int kernelSize = Param.GetLength(2);
-        return Convolve2DBackwardWeights(Input, outputGradient, kernelSize, kernelSize);
+        return Convolve2DParamGradient(Input, outputGradient, kernelSize, kernelSize);
     }
 
     public override void UpdateParams(Layer? layer, Optimizer optimizer)

@@ -20,13 +20,13 @@ namespace NeuralNetworks.Operations;
 public class WeightMultiply(float[,] weights) : ParamOperation2D<float[,]>(weights)
 {
     protected override float[,] CalcOutput(bool inference)
-        => WeightMultiplyCalcOutput(Input, Param);
+        => WeightMultiplyOutput(Input, Param);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
-        => WeightMultiplyCalcInputGradient(outputGradient, Param);
+        => WeightMultiplyInputGradient(outputGradient, Param);
 
     protected override float[,] CalcParamGradient(float[,] outputGradient)
-        => WeightMultiplyCalcParamGradient(Input, outputGradient);
+        => WeightMultiplyParamGradient(Input, outputGradient);
 
     public override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);

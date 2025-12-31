@@ -345,7 +345,7 @@ internal class OperationsSpan : OperationsArray
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
+    public override float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
     {
         int dim0 = outputGradient.GetLength(0);
         int dim1 = outputGradient.GetLength(1);

@@ -13,7 +13,7 @@ public interface IOperations
     public float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target);
     public float[,] Flatten(float[,,,] source);
     public float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01f, float beta = 1f);
-    public float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
+    public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
     public float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output);
     public float[,,,] Tanh(float[,,,] source);
     public float[,,,] Unflatten(float[,] source, float[,,,] targetSize);

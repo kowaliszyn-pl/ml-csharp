@@ -5,8 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ILGPU.Runtime.Cuda;
-
 using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Core.Operations;
@@ -209,7 +207,7 @@ internal class OperationsArray : IOperations
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] LeakyReLUCalcInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
+    public virtual float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
     {
         int dim1 = input.GetLength(0);
         int dim2 = input.GetLength(1);

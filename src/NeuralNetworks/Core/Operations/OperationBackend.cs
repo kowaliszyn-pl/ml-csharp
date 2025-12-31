@@ -74,7 +74,7 @@ public static class OperationBackend
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
-        => Current.LeakyReLUCalcInputGradient(outputGradient, input, alfa, beta);
+        => Current.LeakyReLUInputGradient(outputGradient, input, alfa, beta);
 
     /// <summary>
     /// Applies the hyperbolic tangent function element-wise to the input.
@@ -121,27 +121,27 @@ public static class OperationBackend
     #region Parametric Operations
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] WeightMultiplyCalcOutput(float[,] input, float[,] weights)
+    internal static float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
         => Current.WeightMultiplyOutput(input, weights);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] WeightMultiplyCalcInputGradient(float[,] outputGradient, float[,] weights)
+    internal static float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
         => Current.WeightMultiplyInputGradient(outputGradient, weights);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] WeightMultiplyCalcParamGradient(float[,] input, float[,] outputGradient)
+    internal static float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
         => Current.WeightMultiplyParamGradient(input, outputGradient);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DForward(float[,,,] input, float[,,,] weights, int? padding = null)
+    internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
         => Current.Convolve2DOutput(input, weights, padding);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DBackwardInput(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
+    internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int? padding = null)
         => Current.Convolve2DInputGradient(input, weights, outputGradient, padding);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DBackwardWeights(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
+    internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int? padding = null)
         => Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth, padding);
 
     #endregion
