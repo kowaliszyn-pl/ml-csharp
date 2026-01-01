@@ -52,8 +52,8 @@ class MnistConvModel(SeededRandom? random)
 class MnistCnn
 {
     const int RandomSeed = 251225;
-    const int Epochs = 5;
-    const int BatchSize = 500;
+    const int Epochs = 2;
+    const int BatchSize = 400;
     const int EvalEveryEpochs = 2;
     const int LogEveryEpochs = 1;
 

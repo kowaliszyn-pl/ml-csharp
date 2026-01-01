@@ -97,6 +97,148 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
     private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
 
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
+    {
+        int batchSize = input.GetLength(0);
+        int inputChannels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int weightChannels = weights.GetLength(0);
+        int outputChannels = weights.GetLength(1);
+        int kernelHeight = weights.GetLength(2);
+        int kernelWidth = weights.GetLength(3);
+
+        Debug.Assert(weightChannels == inputChannels);
+        Debug.Assert(kernelHeight == kernelWidth);
+
+        int pad = kernelHeight / 2;
+
+        int outputHeight = inputHeight - kernelHeight + 1 + (2 * pad);
+        int outputWidth = inputWidth - kernelWidth + 1 + (2 * pad);
+
+        float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
+
+        int inputChannelSize = inputHeight * inputWidth;
+        int inputBatchSize = inputChannels * inputChannelSize;
+        int weightsOutputChannelSize = kernelHeight * kernelWidth;
+        int weightsChannelSize = outputChannels * weightsOutputChannelSize;
+        int outputChannelSize = outputHeight * outputWidth;
+        int outputBatchSize = outputChannels * outputChannelSize;
+
+        using MemoryBuffer1D<float, Stride1D.Dense> inputDev =
+            _accelerator.Allocate1D<float>(new Index1D(batchSize * inputBatchSize));
+        using MemoryBuffer1D<float, Stride1D.Dense> weightsDev =
+            _accelerator.Allocate1D<float>(new Index1D(weightChannels * weightsChannelSize));
+        using MemoryBuffer1D<float, Stride1D.Dense> outputDev =
+            _accelerator.Allocate1D<float>(new Index1D(batchSize * outputBatchSize));
+
+        inputDev.View.CopyFromCPU(ref input[0, 0, 0, 0], input.Length);
+        weightsDev.View.CopyFromCPU(ref weights[0, 0, 0, 0], weights.Length);
+
+        Convolve2DOutputMeta meta = new(
+            pad,
+            inputChannels,
+            inputHeight,
+            inputWidth,
+            kernelHeight,
+            kernelWidth,
+            outputChannels,
+            //batchSize,
+            //outputHeight,
+            outputWidth,
+            inputBatchSize,
+            inputChannelSize,
+            weightsChannelSize,
+            weightsOutputChannelSize,
+            outputBatchSize,
+            outputChannelSize);
+
+        _convolve2DOutputKernel(
+                new Index3D(batchSize * outputChannels, outputHeight, outputWidth),
+                inputDev.View,
+                weightsDev.View,
+                outputDev.View,
+                meta);
+
+        //_accelerator.Synchronize();
+        outputDev.View.CopyToCPU(ref output[0, 0, 0, 0], output.Length);
+        return output;
+    }
+
+    private static void Convolve2DOutputKernel(Index3D index, FloatDense1DView input, FloatDense1DView weights, FloatDense1DView output, Convolve2DOutputMeta meta)
+    {
+        int pad = meta.Pad;
+        int inputChannels = meta.InputChannels;
+        int inputHeight = meta.InputHeight;
+        int inputWidth = meta.InputWidth;
+        int kernelHeight = meta.KernelHeight;
+        int kernelWidth = meta.KernelWidth;
+        int outputChannels = meta.OutputChannels;
+        //int batchSize = meta.BatchSize;
+        //int outputHeight = meta.OutputHeight;
+        int outputWidth = meta.OutputWidth;
+
+        int batchOutputChannelIndex = index.X;
+        int oh = index.Y;
+        int ow = index.Z;
+
+        //if (oh >= outputHeight || ow >= outputWidth)
+        //{
+        //    return;
+        //}
+
+        int b = batchOutputChannelIndex / outputChannels;
+        //if (b >= batchSize)
+        //{
+        //    return;
+        //}
+
+        int oc = batchOutputChannelIndex - (b * outputChannels);
+
+        int outputBIndex = b * meta.OutputBatchSize;
+        int outputCIndex = oc * meta.OutputChannelSize;
+        int outputHIndex = oh * outputWidth;
+
+        int inputBIndex = b * meta.InputBatchSize;
+        int weightsOutputCIndex = oc * meta.WeightsOutputChannelSize;
+
+        int ohMinusPad = oh - pad;
+        int owMinusPad = ow - pad;
+        float sum = 0f;
+
+        for (int ic = 0; ic < inputChannels; ic++)
+        {
+            int inputCIndex = ic * meta.InputChannelSize;
+            int weightsInputCIndex = ic * meta.WeightsChannelSize;
+            for (int kh = 0; kh < kernelHeight; kh++)
+            {
+                int ih = kh + ohMinusPad;
+                if (ih < 0 || ih >= inputHeight)
+                {
+                    continue;
+                }
+
+                int weightsKernelHIndex = kh * kernelWidth;
+                int inputHIndex = ih * inputWidth;
+                for (int kw = 0; kw < kernelWidth; kw++)
+                {
+                    int iw = kw + owMinusPad;
+                    if (iw < 0 || iw >= inputWidth)
+                    {
+                        continue;
+                    }
+
+                    float inputVal = input[inputBIndex + inputCIndex + inputHIndex + iw];
+                    float weightVal = weights[weightsInputCIndex + weightsOutputCIndex + weightsKernelHIndex + kw];
+                    sum += inputVal * weightVal;
+                }
+            }
+        }
+
+        output[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
+    }
+
     // Weight Multiplication Operations
 
     // WeightMultiplyOutput
@@ -322,78 +464,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
     // Encoded as: batchOutputChannelIndex = index.X = b * outputChannels + oc
     // oc = batchOutputChannelIndex % outputChannels; b = batchOutputChannelIndex / outputChannels
     // oh = index.Y; ow = index.Z
-    private static void Convolve2DOutputKernel(Index3D index, FloatDense1DView input, FloatDense1DView weights, FloatDense1DView output, Convolve2DOutputMeta meta)
-    {
-        int pad = meta.Pad;
-        int inputChannels = meta.InputChannels;
-        int inputHeight = meta.InputHeight;
-        int inputWidth = meta.InputWidth;
-        int kernelHeight = meta.KernelHeight;
-        int kernelWidth = meta.KernelWidth;
-        int outputChannels = meta.OutputChannels;
-        int batchSize = meta.BatchSize;
-        int outputHeight = meta.OutputHeight;
-        int outputWidth = meta.OutputWidth;
-
-        int batchOutputChannelIndex = index.X;
-        int oh = index.Y;
-        int ow = index.Z;
-
-        if (oh >= outputHeight || ow >= outputWidth)
-        {
-            return;
-        }
-
-        int b = batchOutputChannelIndex / outputChannels;
-        if (b >= batchSize)
-        {
-            return;
-        }
-
-        int oc = batchOutputChannelIndex - (b * outputChannels);
-
-        int outputBIndex = b * meta.OutputBatchSize;
-        int outputCIndex = oc * meta.OutputChannelSize;
-        int outputHIndex = oh * outputWidth;
-
-        int inputBIndex = b * meta.InputBatchSize;
-        int weightsOutputCIndex = oc * meta.WeightsOutputChannelSize;
-
-        int ohMinusPad = oh - pad;
-        int owMinusPad = ow - pad;
-        float sum = 0f;
-
-        for (int ic = 0; ic < inputChannels; ic++)
-        {
-            int inputCIndex = ic * meta.InputChannelSize;
-            int weightsInputCIndex = ic * meta.WeightsChannelSize;
-            for (int kh = 0; kh < kernelHeight; kh++)
-            {
-                int ih = kh + ohMinusPad;
-                if (ih < 0 || ih >= inputHeight)
-                {
-                    continue;
-                }
-
-                int weightsKernelHIndex = kh * kernelWidth;
-                int inputHIndex = ih * inputWidth;
-                for (int kw = 0; kw < kernelWidth; kw++)
-                {
-                    int iw = kw + owMinusPad;
-                    if (iw < 0 || iw >= inputWidth)
-                    {
-                        continue;
-                    }
-
-                    float inputVal = input[inputBIndex + inputCIndex + inputHIndex + iw];
-                    float weightVal = weights[weightsInputCIndex + weightsOutputCIndex + weightsKernelHIndex + kw];
-                    sum += inputVal * weightVal;
-                }
-            }
-        }
-
-        output[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
-    }
+    
 
     /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

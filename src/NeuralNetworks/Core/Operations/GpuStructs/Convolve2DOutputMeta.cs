@@ -14,8 +14,8 @@ public readonly struct Convolve2DOutputMeta
         int kernelHeight,
         int kernelWidth,
         int outputChannels,
-        int batchSize,
-        int outputHeight,
+        //int batchSize,
+        //int outputHeight,
         int outputWidth,
         int inputBatchSize,
         int inputChannelSize,
@@ -31,8 +31,8 @@ public readonly struct Convolve2DOutputMeta
         KernelHeight = kernelHeight;
         KernelWidth = kernelWidth;
         OutputChannels = outputChannels;
-        BatchSize = batchSize;
-        OutputHeight = outputHeight;
+        //BatchSize = batchSize;
+        //OutputHeight = outputHeight;
         OutputWidth = outputWidth;
         InputBatchSize = inputBatchSize;
         InputChannelSize = inputChannelSize;
@@ -49,8 +49,8 @@ public readonly struct Convolve2DOutputMeta
     public int KernelHeight { get; }
     public int KernelWidth { get; }
     public int OutputChannels { get; }
-    public int BatchSize { get; }
-    public int OutputHeight { get; }
+    //public int BatchSize { get; }
+    //public int OutputHeight { get; }
     public int OutputWidth { get; }
     public int InputBatchSize { get; }
     public int InputChannelSize { get; }
