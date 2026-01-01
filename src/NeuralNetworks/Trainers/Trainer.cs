@@ -87,12 +87,12 @@ public abstract class Trainer<TInputData, TPrediction>(
 
             if (operationBackendTimingEnabled)
             {
-                OperationBackend.EnableTiming(true);
-                OperationBackend.ResetTiming();
+                OperationBackend.EnableStatistics(true);
+                OperationBackend.ResetStatistics();
             }
             else
             {
-                OperationBackend.EnableTiming(false);
+                OperationBackend.EnableStatistics(false);
             }
 
             // Describe the trainer configuration
@@ -276,7 +276,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             {
                 WriteLine();
                 
-                string timingReport = OperationBackend.GetTimingReport();
+                string timingReport = OperationBackend.GetStatistics();
                 logger?.LogInformation("Operation backend timing report:\n{timingReport}", timingReport);
                 if (consoleOutputMode > ConsoleOutputMode.Disable)
                 {
@@ -316,7 +316,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         res.Add($"{newIndent}Random: {random}");
         res.Add($"{newIndent}Optimizer: {optimizer}");
         res.Add($"{newIndent}Operation backend: {OperationBackend.CurrentType}");
-        res.Add($"{newIndent}Timing enabled: {OperationBackend.TimingEnabled}");
+        res.Add($"{newIndent}Timing enabled: {OperationBackend.StatisticsEnabled}");
         res.AddRange(model.Describe(indentation + Constants.Indentation));
         return res;
     }

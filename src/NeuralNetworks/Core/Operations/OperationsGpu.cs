@@ -122,7 +122,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         weightsDev.View.CopyFromCPU(weights);
 
         _weightMultiplyCalcOutputKernel(new Index2D(batchSize, outputFeatures), inputDev.View, weightsDev.View, outputDev.View, inputFeatures);
-        _accelerator.Synchronize();
+        // _accelerator.Synchronize();
 
         outputDev.View.CopyToCPU(output);
         return output;
@@ -130,13 +130,13 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
     private static void WeightMultiplyCalcOutputKernel(Index2D index, FloatDense2DView input, FloatDense2DView weights, FloatDense2DView output, int inputFeatures)
     {
-        int row = index.X;
-        int col = index.Y;
+        int row = index.X; // batchSize
+        int col = index.Y; // outputFeatures
 
-        if (row >= output.Extent.X || col >= output.Extent.Y)
-        {
-            return;
-        }
+        //if (row >= output.Extent.X || col >= output.Extent.Y)
+        //{
+        //    return;
+        //}
 
         float sum = 0f;
         for (int k = 0; k < inputFeatures; k++)
@@ -169,7 +169,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         weightsDev.View.CopyFromCPU(weights);
 
         _weightMultiplyInputGradientKernel(new Index2D(batchSize, inputFeatures), outputGradientDev.View, weightsDev.View, inputGradientDev.View, outputFeatures);
-        _accelerator.Synchronize();
+        //_accelerator.Synchronize();
 
         inputGradientDev.View.CopyToCPU(inputGradient);
         return inputGradient;
@@ -180,10 +180,10 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         int row = index.X;
         int col = index.Y;
 
-        if (row >= inputGradient.Extent.X || col >= inputGradient.Extent.Y)
-        {
-            return;
-        }
+        //if (row >= inputGradient.Extent.X || col >= inputGradient.Extent.Y)
+        //{
+        //    return;
+        //}
 
         float sum = 0f;
         for (int k = 0; k < outputFeatures; k++)
@@ -216,7 +216,7 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
         outputGradientDev.View.CopyFromCPU(outputGradient);
 
         _weightMultiplyParamGradientKernel(new Index2D(inputFeatures, outputFeatures), inputDev.View, outputGradientDev.View, paramGradientDev.View);
-        _accelerator.Synchronize();
+        //_accelerator.Synchronize();
 
         paramGradientDev.View.CopyToCPU(paramGradient);
         return paramGradient;
@@ -224,13 +224,13 @@ internal class OperationsGpu : OperationsSpanParallel, IDisposable
 
     private static void WeightMultiplyParamGradientKernel(Index2D index, FloatDense2DView input, FloatDense2DView outputGradient, FloatDense2DView paramGradient)
     {
-        int row = index.X;
-        int col = index.Y;
+        int row = index.X; // inputFeatures
+        int col = index.Y; // outputFeatures
 
-        if (row >= paramGradient.Extent.X || col >= paramGradient.Extent.Y)
-        {
-            return;
-        }
+        //if (row >= paramGradient.Extent.X || col >= paramGradient.Extent.Y)
+        //{
+        //    return;
+        //}
 
         long batch = input.Extent.X;
         float sum = 0f;

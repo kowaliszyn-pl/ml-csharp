@@ -12,25 +12,31 @@ public static class OperationBackend
 
     #region Backend Management
 
-    private static bool s_timingEnabled = false;
+    private static bool s_statisticsEnabled = false;
 
     private static long s_convolve2DOutputTicks;
     private static long s_convolve2DOutputCalls;
+    private static long s_convolve2DOutputInputMemory;
 
     private static long s_convolve2DInputGradientTicks;
     private static long s_convolve2DInputGradientCalls;
+    private static long s_convolve2DInputGradientInputMemory;
 
     private static long s_convolve2DParamGradientTicks;
     private static long s_convolve2DParamGradientCalls;
+    private static long s_convolve2DParamGradientInputMemory;
 
     private static long s_weightMultiplyOutputTicks;
     private static long s_weightMultiplyOutputCalls;
+    private static long s_weightMultiplyOutputInputMemory;
 
     private static long s_weightMultiplyInputGradientTicks;
     private static long s_weightMultiplyInputGradientCalls;
+    private static long s_weightMultiplyInputGradientInputMemory;
 
     private static long s_weightMultiplyParamGradientTicks;
     private static long s_weightMultiplyParamGradientCalls;
+    private static long s_weightMultiplyParamGradientInputMemory;
 
 
     static OperationBackend()
@@ -40,7 +46,7 @@ public static class OperationBackend
 
     public static OperationBackendType CurrentType => Current.BackendType;
 
-    public static bool TimingEnabled => s_timingEnabled;
+    public static bool StatisticsEnabled => s_statisticsEnabled;
 
 
     internal static IOperations Current
@@ -63,9 +69,9 @@ public static class OperationBackend
         };
     }
 
-    public static void EnableTiming(bool enable = true)
+    public static void EnableStatistics(bool enable = true)
     {
-        s_timingEnabled = enable;
+        s_statisticsEnabled = enable;
     }
 
     private static void DisposeCurrentOperationBackend()
@@ -81,49 +87,58 @@ public static class OperationBackend
         }
     }
 
-    internal static string GetTimingReport()
+    internal static string GetStatistics()
     {
-        if (!s_timingEnabled)
+        if (!s_statisticsEnabled)
         {
             return "Timing disabled.";
         }
 
         return string.Join(
             Environment.NewLine,
-            Format("Convolve2DOutput", s_convolve2DOutputTicks, s_convolve2DOutputCalls),
-            Format("Convolve2DInputGradient", s_convolve2DInputGradientTicks, s_convolve2DInputGradientCalls),
-            Format("Convolve2DParamGradient", s_convolve2DParamGradientTicks, s_convolve2DParamGradientCalls),
-            Format("WeightMultiplyOutput", s_weightMultiplyOutputTicks, s_weightMultiplyOutputCalls),
-            Format("WeightMultiplyInputGradient", s_weightMultiplyInputGradientTicks, s_weightMultiplyInputGradientCalls),
-            Format("WeightMultiplyParamGradient", s_weightMultiplyParamGradientTicks, s_weightMultiplyParamGradientCalls));
+            Format("Convolve2DOutput", s_convolve2DOutputTicks, s_convolve2DOutputCalls, s_convolve2DOutputInputMemory),
+            Format("Convolve2DInputGradient", s_convolve2DInputGradientTicks, s_convolve2DInputGradientCalls, s_convolve2DInputGradientInputMemory),
+            Format("Convolve2DParamGradient", s_convolve2DParamGradientTicks, s_convolve2DParamGradientCalls, s_convolve2DParamGradientInputMemory),
+            Format("WeightMultiplyOutput", s_weightMultiplyOutputTicks, s_weightMultiplyOutputCalls, s_weightMultiplyOutputInputMemory),
+            Format("WeightMultiplyInputGradient", s_weightMultiplyInputGradientTicks, s_weightMultiplyInputGradientCalls, s_weightMultiplyInputGradientInputMemory),
+            Format("WeightMultiplyParamGradient", s_weightMultiplyParamGradientTicks, s_weightMultiplyParamGradientCalls, s_weightMultiplyParamGradientInputMemory)
+        );
     }
 
-    internal static void ResetTiming()
+    internal static void ResetStatistics()
     {
         s_convolve2DOutputTicks = 0;
         s_convolve2DOutputCalls = 0;
+        s_convolve2DOutputInputMemory = 0;
 
         s_convolve2DInputGradientTicks = 0;
         s_convolve2DInputGradientCalls = 0;
+        s_convolve2DInputGradientInputMemory = 0;
 
         s_convolve2DParamGradientTicks = 0;
         s_convolve2DParamGradientCalls = 0;
+        s_convolve2DParamGradientInputMemory = 0;
 
         s_weightMultiplyOutputTicks = 0;
         s_weightMultiplyOutputCalls = 0;
+        s_weightMultiplyOutputInputMemory = 0;
 
         s_weightMultiplyInputGradientTicks = 0;
         s_weightMultiplyInputGradientCalls = 0;
+        s_weightMultiplyInputGradientInputMemory = 0;
 
         s_weightMultiplyParamGradientTicks = 0;
         s_weightMultiplyParamGradientCalls = 0;
+        s_weightMultiplyParamGradientInputMemory = 0;
     }
 
-    private static string Format(string name, long ticks, long calls)
+    private static string Format(string name, long ticks, long calls, long memoryBytes)
     {
-        double totalMs = (ticks * 1000.0) / Stopwatch.Frequency;
-        double avgUs = calls > 0 ? (totalMs * 1000.0) / calls : 0.0;
-        return $"{name}: calls={calls}, totalMs={totalMs:F3}, avgUs={avgUs:F3}";
+        double totalSeconds = (double)ticks / Stopwatch.Frequency;
+        double averageMicroseconds = calls > 0 ? (totalSeconds * 1000.0) / calls : 0.0;
+        double memoryMB = (double)memoryBytes / (1024 * 1024);
+        double memoryMBPerCall = calls > 0 ? memoryMB / calls : 0.0;
+        return $"{name}: calls={calls}, totalSeconds={totalSeconds:F2}, averageMicroseconds={averageMicroseconds:F3}, inputMemoryMB={memoryMB:F2}, memoryMBPerCall={memoryMBPerCall:F4}";
     }
 
 
@@ -207,15 +222,16 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
     {
-        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
         
         float[,,,] result = Current.Convolve2DOutput(input, weights);
 
-        if (s_timingEnabled)
+        if (s_statisticsEnabled)
         {
             long elapsed = Stopwatch.GetTimestamp() - start;
             Interlocked.Add(ref s_convolve2DOutputTicks, elapsed);
             Interlocked.Increment(ref s_convolve2DOutputCalls);
+            Interlocked.Add(ref s_convolve2DOutputInputMemory, (input.Length + weights.Length) * sizeof(float));
         }
         
         return result;
@@ -232,15 +248,16 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
     {
-        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
         
         float[,,,] result = Current.Convolve2DInputGradient(input, weights, outputGradient);
 
-        if (s_timingEnabled)
+        if (s_statisticsEnabled)
         {
             long elapsed = Stopwatch.GetTimestamp() - start;
             Interlocked.Add(ref s_convolve2DInputGradientTicks, elapsed);
             Interlocked.Increment(ref s_convolve2DInputGradientCalls);
+            Interlocked.Add(ref s_convolve2DInputGradientInputMemory, (input.Length + weights.Length + outputGradient.Length) * sizeof(float));
         }
 
         return result;
@@ -249,15 +266,16 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth)
     {
-        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
         float[,,,] result = Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth);
 
-        if (s_timingEnabled)
+        if (s_statisticsEnabled)
         {
             long elapsed = Stopwatch.GetTimestamp() - start;
             Interlocked.Add(ref s_convolve2DParamGradientTicks, elapsed);
             Interlocked.Increment(ref s_convolve2DParamGradientCalls);
+            Interlocked.Add(ref s_convolve2DParamGradientInputMemory, (input.Length + outputGradient.Length) * sizeof(float));
         }
 
         return result;
@@ -268,15 +286,16 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {
-        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
         float[,] result = Current.WeightMultiplyOutput(input, weights);
 
-        if (s_timingEnabled)
+        if (s_statisticsEnabled)
         {
             long elapsed = Stopwatch.GetTimestamp() - start;
             Interlocked.Add(ref s_weightMultiplyOutputTicks, elapsed);
             Interlocked.Increment(ref s_weightMultiplyOutputCalls);
+            Interlocked.Add(ref s_weightMultiplyOutputInputMemory, (input.Length + weights.Length) * sizeof(float));
         } 
         
         return result;
@@ -286,15 +305,16 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
     {
-        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
         float[,] result = Current.WeightMultiplyInputGradient(outputGradient, weights);
 
-        if (s_timingEnabled)
+        if (s_statisticsEnabled)
         {
             long elapsed = Stopwatch.GetTimestamp() - start;
             Interlocked.Add(ref s_weightMultiplyInputGradientTicks, elapsed);
             Interlocked.Increment(ref s_weightMultiplyInputGradientCalls);
+            Interlocked.Add(ref s_weightMultiplyInputGradientInputMemory, (outputGradient.Length + weights.Length) * sizeof(float));
         }
 
         return result;
@@ -303,15 +323,16 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
     {
-        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
         float[,] result = Current.WeightMultiplyParamGradient(input, outputGradient);
 
-        if (s_timingEnabled)
+        if (s_statisticsEnabled)
         {
             long elapsed = Stopwatch.GetTimestamp() - start;
             Interlocked.Add(ref s_weightMultiplyParamGradientTicks, elapsed);
             Interlocked.Increment(ref s_weightMultiplyParamGradientCalls);
+            Interlocked.Add(ref s_weightMultiplyParamGradientInputMemory, (input.Length + outputGradient.Length) * sizeof(float));
         }
 
         return result;
