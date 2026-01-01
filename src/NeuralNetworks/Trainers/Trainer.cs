@@ -26,7 +26,9 @@ public abstract class Trainer<TInputData, TPrediction>(
     Optimizer optimizer,
     ConsoleOutputMode consoleOutputMode = ConsoleOutputMode.OnlyOnEval,
     SeededRandom? random = null,
-    ILogger<Trainer<TInputData, TPrediction>>? logger = null)
+    ILogger<Trainer<TInputData, TPrediction>>? logger = null,
+    bool operationBackendTimingEnabled = false
+)
     where TInputData : notnull
     where TPrediction : notnull
 {
@@ -82,6 +84,16 @@ public abstract class Trainer<TInputData, TPrediction>(
             logger?.LogInformation("Fit started");
 
             displayDescriptionOnStart &= consoleOutputMode != ConsoleOutputMode.Disable;
+
+            if (operationBackendTimingEnabled)
+            {
+                OperationBackend.EnableTiming(true);
+                OperationBackend.ResetTiming();
+            }
+            else
+            {
+                OperationBackend.EnableTiming(false);
+            }
 
             // Describe the trainer configuration
             List<string> description = DescribeFit();
@@ -260,6 +272,21 @@ public abstract class Trainer<TInputData, TPrediction>(
                 WriteLine();
             }
 
+            if (operationBackendTimingEnabled)
+            {
+                WriteLine();
+                
+                string timingReport = OperationBackend.GetTimingReport();
+                logger?.LogInformation("Operation backend timing report:\n{timingReport}", timingReport);
+                if (consoleOutputMode > ConsoleOutputMode.Disable)
+                {
+                    ForegroundColor = ConsoleColor.Green;
+                    WriteLine("Operation backend timing report:");
+                    WriteLine(timingReport);
+                    ResetColor();
+                }
+            }
+
             logger?.LogInformation("===== End Log =====");
             logger?.LogInformation(string.Empty);
 
@@ -289,6 +316,7 @@ public abstract class Trainer<TInputData, TPrediction>(
         res.Add($"{newIndent}Random: {random}");
         res.Add($"{newIndent}Optimizer: {optimizer}");
         res.Add($"{newIndent}Operation backend: {OperationBackend.CurrentType}");
+        res.Add($"{newIndent}Timing enabled: {OperationBackend.TimingEnabled}");
         res.AddRange(model.Describe(indentation + Constants.Indentation));
         return res;
     }

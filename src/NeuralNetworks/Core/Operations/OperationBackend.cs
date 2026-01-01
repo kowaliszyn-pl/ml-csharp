@@ -2,6 +2,7 @@
 // File name: OperationBackend.cs
 // www.kowaliszyn.pl, 2025
 
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core.Operations;
@@ -11,12 +12,35 @@ public static class OperationBackend
 
     #region Backend Management
 
+    private static bool s_timingEnabled = false;
+
+    private static long s_convolve2DOutputTicks;
+    private static long s_convolve2DOutputCalls;
+
+    private static long s_convolve2DInputGradientTicks;
+    private static long s_convolve2DInputGradientCalls;
+
+    private static long s_convolve2DParamGradientTicks;
+    private static long s_convolve2DParamGradientCalls;
+
+    private static long s_weightMultiplyOutputTicks;
+    private static long s_weightMultiplyOutputCalls;
+
+    private static long s_weightMultiplyInputGradientTicks;
+    private static long s_weightMultiplyInputGradientCalls;
+
+    private static long s_weightMultiplyParamGradientTicks;
+    private static long s_weightMultiplyParamGradientCalls;
+
+
     static OperationBackend()
     {
         AppDomain.CurrentDomain.ProcessExit += (s, e) => DisposeCurrentOperationBackend();
     }
 
     public static OperationBackendType CurrentType => Current.BackendType;
+
+    public static bool TimingEnabled => s_timingEnabled;
 
 
     internal static IOperations Current
@@ -39,6 +63,11 @@ public static class OperationBackend
         };
     }
 
+    public static void EnableTiming(bool enable = true)
+    {
+        s_timingEnabled = enable;
+    }
+
     private static void DisposeCurrentOperationBackend()
     {
         if (Current != null)
@@ -51,6 +80,52 @@ public static class OperationBackend
             Current = null!;
         }
     }
+
+    internal static string GetTimingReport()
+    {
+        if (!s_timingEnabled)
+        {
+            return "Timing disabled.";
+        }
+
+        return string.Join(
+            Environment.NewLine,
+            Format("Convolve2DOutput", s_convolve2DOutputTicks, s_convolve2DOutputCalls),
+            Format("Convolve2DInputGradient", s_convolve2DInputGradientTicks, s_convolve2DInputGradientCalls),
+            Format("Convolve2DParamGradient", s_convolve2DParamGradientTicks, s_convolve2DParamGradientCalls),
+            Format("WeightMultiplyOutput", s_weightMultiplyOutputTicks, s_weightMultiplyOutputCalls),
+            Format("WeightMultiplyInputGradient", s_weightMultiplyInputGradientTicks, s_weightMultiplyInputGradientCalls),
+            Format("WeightMultiplyParamGradient", s_weightMultiplyParamGradientTicks, s_weightMultiplyParamGradientCalls));
+    }
+
+    internal static void ResetTiming()
+    {
+        s_convolve2DOutputTicks = 0;
+        s_convolve2DOutputCalls = 0;
+
+        s_convolve2DInputGradientTicks = 0;
+        s_convolve2DInputGradientCalls = 0;
+
+        s_convolve2DParamGradientTicks = 0;
+        s_convolve2DParamGradientCalls = 0;
+
+        s_weightMultiplyOutputTicks = 0;
+        s_weightMultiplyOutputCalls = 0;
+
+        s_weightMultiplyInputGradientTicks = 0;
+        s_weightMultiplyInputGradientCalls = 0;
+
+        s_weightMultiplyParamGradientTicks = 0;
+        s_weightMultiplyParamGradientCalls = 0;
+    }
+
+    private static string Format(string name, long ticks, long calls)
+    {
+        double totalMs = (ticks * 1000.0) / Stopwatch.Frequency;
+        double avgUs = calls > 0 ? (totalMs * 1000.0) / calls : 0.0;
+        return $"{name}: calls={calls}, totalMs={totalMs:F3}, avgUs={avgUs:F3}";
+    }
+
 
     #endregion
 
@@ -131,7 +206,20 @@ public static class OperationBackend
     /// <returns>The output array of shape [batchSize, outputChannels, outputHeight, outputWidth]</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
-        => Current.Convolve2DOutput(input, weights);
+    {
+        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        
+        float[,,,] result = Current.Convolve2DOutput(input, weights);
+
+        if (s_timingEnabled)
+        {
+            long elapsed = Stopwatch.GetTimestamp() - start;
+            Interlocked.Add(ref s_convolve2DOutputTicks, elapsed);
+            Interlocked.Increment(ref s_convolve2DOutputCalls);
+        }
+        
+        return result;
+    }
 
     /// <summary>
     /// Computes the gradient of the input array for a 2D convolution operation during backpropagation.
@@ -143,25 +231,91 @@ public static class OperationBackend
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
-        => Current.Convolve2DInputGradient(input, weights, outputGradient);
+    {
+        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+        
+        float[,,,] result = Current.Convolve2DInputGradient(input, weights, outputGradient);
+
+        if (s_timingEnabled)
+        {
+            long elapsed = Stopwatch.GetTimestamp() - start;
+            Interlocked.Add(ref s_convolve2DInputGradientTicks, elapsed);
+            Interlocked.Increment(ref s_convolve2DInputGradientCalls);
+        }
+
+        return result;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth)
-        => Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth);
+    {
+        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+
+        float[,,,] result = Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth);
+
+        if (s_timingEnabled)
+        {
+            long elapsed = Stopwatch.GetTimestamp() - start;
+            Interlocked.Add(ref s_convolve2DParamGradientTicks, elapsed);
+            Interlocked.Increment(ref s_convolve2DParamGradientCalls);
+        }
+
+        return result;
+    }
 
     // Weight Multiplication Operations
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
-        => Current.WeightMultiplyOutput(input, weights);
+    {
+        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+
+        float[,] result = Current.WeightMultiplyOutput(input, weights);
+
+        if (s_timingEnabled)
+        {
+            long elapsed = Stopwatch.GetTimestamp() - start;
+            Interlocked.Add(ref s_weightMultiplyOutputTicks, elapsed);
+            Interlocked.Increment(ref s_weightMultiplyOutputCalls);
+        } 
+        
+        return result;
+    }
+    
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
-        => Current.WeightMultiplyInputGradient(outputGradient, weights);
+    {
+        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+
+        float[,] result = Current.WeightMultiplyInputGradient(outputGradient, weights);
+
+        if (s_timingEnabled)
+        {
+            long elapsed = Stopwatch.GetTimestamp() - start;
+            Interlocked.Add(ref s_weightMultiplyInputGradientTicks, elapsed);
+            Interlocked.Increment(ref s_weightMultiplyInputGradientCalls);
+        }
+
+        return result;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
-        => Current.WeightMultiplyParamGradient(input, outputGradient);
+    {
+        long start = s_timingEnabled ? Stopwatch.GetTimestamp() : 0;
+
+        float[,] result = Current.WeightMultiplyParamGradient(input, outputGradient);
+
+        if (s_timingEnabled)
+        {
+            long elapsed = Stopwatch.GetTimestamp() - start;
+            Interlocked.Add(ref s_weightMultiplyParamGradientTicks, elapsed);
+            Interlocked.Increment(ref s_weightMultiplyParamGradientCalls);
+        }
+
+        return result;
+    }
 
     #endregion
 

@@ -106,7 +106,9 @@ internal class Mnist
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             new AdamOptimizer(learningRate, beta1: AdamBeta1, beta2: AdamBeta2),
             random: commonRandom,
-            logger: logger)
+            logger: logger,
+            operationBackendTimingEnabled: true
+            )
         {
             Memo = $"Calling class: {nameof(Mnist)}."
         };

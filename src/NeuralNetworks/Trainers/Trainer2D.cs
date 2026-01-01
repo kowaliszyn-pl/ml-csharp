@@ -15,7 +15,13 @@ namespace NeuralNetworks.Trainers;
 
 public class Trainer2D : Trainer<float[,], float[,]>
 {
-    public Trainer2D(Model<float[,], float[,]> model, Optimizer optimizer, SeededRandom? random, ILogger<Trainer2D>? logger = null) : base(model, optimizer, random: random, logger: logger)
+    public Trainer2D(
+        Model<float[,], float[,]> model, 
+        Optimizer optimizer, 
+        SeededRandom? random, 
+        ILogger<Trainer2D>? logger = null,
+        bool operationBackendTimingEnabled = false
+    ) : base(model, optimizer, random: random, logger: logger, operationBackendTimingEnabled: operationBackendTimingEnabled)
     {
     }
 
