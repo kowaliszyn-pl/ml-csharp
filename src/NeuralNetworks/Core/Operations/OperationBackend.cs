@@ -4,6 +4,9 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+
+using ILGPU.Runtime.Cuda;
 
 namespace NeuralNetworks.Core.Operations;
 
@@ -348,6 +351,13 @@ public static class OperationBackend
 
         return result;
     }
+
+    #endregion
+
+    #region Dropout
+
+    internal static float[,] DropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask)
+        => Current.DropoutOutput(input, inference, keepProb, random, out mask);
 
     #endregion
 

@@ -2,6 +2,8 @@
 // File name: IOperations.cs
 // www.kowaliszyn.pl, 2025
 
+using NeuralNetworks.Core.Extensions;
+
 namespace NeuralNetworks.Core.Operations;
 
 public interface IOperations
@@ -73,6 +75,12 @@ public interface IOperations
     public float[,] WeightMultiplyOutput(float[,] input, float[,] weights);
     public float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights);
     public float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient);
+
+    #endregion
+
+    #region Dropout
+
+    public float[,] DropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask);
 
     #endregion
 

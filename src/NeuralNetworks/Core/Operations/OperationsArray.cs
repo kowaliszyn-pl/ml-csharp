@@ -3,8 +3,10 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 using ILGPU.IR.Values;
+using ILGPU.Runtime.Cuda;
 
 using NeuralNetworks.Core.Extensions;
 
@@ -313,6 +315,24 @@ internal class OperationsArray : IOperations
 
     #endregion
 
+    #region Dropout
+
+    public virtual float[,] DropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask)
+    {
+        if (inference)
+        {
+            mask = null;
+            return input.Multiply(keepProb);
+        }
+        else
+        {
+            mask = input.AsZeroOnes(keepProb, random ?? new());
+            return input.MultiplyElementwise(mask);
+        }
+    }
+
+    #endregion
+
     #region Transformations
 
     public virtual float[,] Flatten(float[,,,] source)
@@ -372,4 +392,6 @@ internal class OperationsArray : IOperations
     }
 
     #endregion
+
+
 }

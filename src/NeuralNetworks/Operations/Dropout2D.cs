@@ -7,21 +7,17 @@ using System.Diagnostics;
 using NeuralNetworks.Core;
 using NeuralNetworks.Core.Extensions;
 
+using static NeuralNetworks.Core.Operations.OperationBackend;
+
 namespace NeuralNetworks.Operations;
 
 public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : BaseDropout2D
 {
     protected override float[,] CalcOutput(bool inference)
     {
-        if (inference)
-        {
-            return Input.Multiply(keepProb);
-        }
-        else
-        {
-            Mask = Input.AsZeroOnes(keepProb, random ?? new());
-            return Input.MultiplyElementwise(Mask);
-        }
+        float[,] result = DropoutOutput(Input, inference, keepProb, random, out float[,]? mask);
+        Mask = mask;
+        return result;
     }
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
