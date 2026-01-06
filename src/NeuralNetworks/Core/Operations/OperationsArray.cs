@@ -3,9 +3,6 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
-using System.Threading.Tasks;
-
-using ILGPU.Runtime.Cuda;
 
 using NeuralNetworks.Core.Extensions;
 
@@ -97,34 +94,19 @@ internal class OperationsArray : IOperations
         return inputGradient;
     }
 
-    public virtual float[,,,] Tanh(float[,,,] input)
-    {
-        int dim1 = input.GetLength(0);
-        int dim2 = input.GetLength(1);
-        int dim3 = input.GetLength(2);
-        int dim4 = input.GetLength(3);
-
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
-
-        for (int i = 0; i < dim1; i++)
-        {
-            for (int j = 0; j < dim2; j++)
-            {
-                for (int k = 0; k < dim3; k++)
-                {
-                    for (int l = 0; l < dim4; l++)
-                    {
-                        res[i, j, k, l] = MathF.Tanh(input[i, j, k, l]);
-                    }
-                }
-            }
-        }
-
-        return res;
-    }
+    public virtual float[,,,] Tanh(float[,,,] input) 
+        => input.Tanh();
 
     public virtual float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
     {
+        // The TanhInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
+        // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
+        // The derivative of the Tanh function tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x)) is 1 - tanh(x)^2.
+        // Therefore, the input gradient is computed as: dL/dx = dL/dy * (1 - tanh(x)^2).
+        // The elementwise multiplication of the output gradient and the derivative of the Tanh function is returned as the input gradient.
+        // tanh(x) => Output
+        // dL/dy => outputGradient
+        // dl/dx => inputGradient
         float[,,,] tanhBackward = output.AsOnes().Subtract(output.MultiplyElementwise(output));
         return outputGradient.MultiplyElementwise(tanhBackward);
     }
@@ -330,7 +312,7 @@ internal class OperationsArray : IOperations
         }
     }
 
-    public float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask) 
+    public float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask)
         => outputGradient.MultiplyElementwise(mask);
 
     public virtual float[,,,] DropoutOutput(float[,,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,,]? mask)

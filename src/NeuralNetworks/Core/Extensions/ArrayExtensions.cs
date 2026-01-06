@@ -2021,37 +2021,37 @@ public static class ArrayExtensions
         return res;
     }
 
-    ///// <summary>
-    ///// Applies the hyperbolic tangent function element-wise to the source.
-    ///// </summary>
-    ///// <returns>A new source with the hyperbolic tangent applied element-wise.</returns>
-    ///// <param name="source">The four-dimensional array to transform.</param>
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //public static float[,,,] Tanh(this float[,,,] source)
-    //{
-    //    int dim1 = source.GetLength(0);
-    //    int dim2 = source.GetLength(1);
-    //    int dim3 = source.GetLength(2);
-    //    int dim4 = source.GetLength(3);
+    /// <summary>
+    /// Applies the hyperbolic tangent function element-wise to the source.
+    /// </summary>
+    /// <returns>A new source with the hyperbolic tangent applied element-wise.</returns>
+    /// <param name="source">The four-dimensional array to transform.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] Tanh(this float[,,,] source)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
 
-    //    float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
 
-    //    for (int i = 0; i < dim1; i++)
-    //    {
-    //        for (int j = 0; j < dim2; j++)
-    //        {
-    //            for (int k = 0; k < dim3; k++)
-    //            {
-    //                for (int l = 0; l < dim4; l++)
-    //                {
-    //                    res[i, j, k, l] = MathF.Tanh(source[i, j, k, l]);
-    //                }
-    //            }
-    //        }
-    //    }
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        res[i, j, k, l] = MathF.Tanh(source[i, j, k, l]);
+                    }
+                }
+            }
+        }
 
-    //    return res;
-    //}
+        return res;
+    }
 
     /// <summary>
     /// Transposes the source by swapping its dim1 and dim2.
