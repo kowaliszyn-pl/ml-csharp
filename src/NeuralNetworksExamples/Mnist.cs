@@ -46,7 +46,7 @@ internal class Mnist
 {
     private const int RandomSeed = 44; // From Mickiewicz's poetry.
     private const int Epochs = 5;
-    private const int BatchSize = 2000;
+    private const int BatchSize = 400;
     private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
 

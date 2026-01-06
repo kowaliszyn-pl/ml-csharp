@@ -56,6 +56,12 @@ public interface IOperations
 
     #region Parametric Operations
 
+    // Bias Addition Operations
+
+    public float[,] BiasAddOutput(float[,] input, float[] bias);
+
+    public float[] BiasAddParamGradient(float[,] outputGradient);
+
     // Convolution Operations
 
     public float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights);
@@ -76,4 +82,5 @@ public interface IOperations
     public float[,,,] Unflatten(float[,] source, float[,,,] targetSize);
 
     #endregion
+
 }

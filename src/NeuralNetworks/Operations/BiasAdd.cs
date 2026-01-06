@@ -1,12 +1,12 @@
 ﻿// Neural Networks in C♯
 // File name: BiasAdd.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Core.Extensions;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
 using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations;
 
@@ -18,16 +18,15 @@ public class BiasAdd(float[] bias) : ParamOperation2D<float[]>(bias)
 {
 
     protected override float[,] CalcOutput(bool inference)
-        => Input.AddRow(Param);
+        => BiasAddOutput(Input, Param);
 
     protected override float[] CalcParamGradient(float[,] outputGradient)
-       // outputGradient is already averaged over the batch size in the loss function, so we just need to sum by columns
-       => outputGradient.SumByColumns();
+       => BiasAddParamGradient(outputGradient);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
-      => outputGradient; // => Input.AsOnes().MultiplyElementwise(outputGradient);
+      => outputGradient; // Input.AsOnes().MultiplyElementwise(outputGradient);
 
-    public override void UpdateParams(Layer? layer, Optimizer optimizer) 
+    public override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);
 
     protected override void EnsureSameShapeForParam(float[]? param, float[] paramGradient)

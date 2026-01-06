@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+using ILGPU.IR.Values;
+
 using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Core.Operations;
@@ -129,6 +131,14 @@ internal class OperationsArray : IOperations
     #endregion
 
     #region Parametric Operations
+
+    // Bias Addition Operations
+
+    public virtual float[,] BiasAddOutput(float[,] input, float[] bias)
+        => input.AddRow(bias);
+
+    public virtual float[] BiasAddParamGradient(float[,] outputGradient)
+        => outputGradient.SumByColumns();
 
     // Convolution Operations
 

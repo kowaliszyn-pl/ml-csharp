@@ -208,6 +208,17 @@ public static class OperationBackend
 
     #region Parametric Operations
 
+    // Bias Addition Operations
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] BiasAddOutput(float[,] input, float[] bias)
+        => Current.BiasAddOutput(input, bias);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[] BiasAddParamGradient(float[,] outputGradient)
+        // outputGradient is already averaged over the batch size in the loss function, so we just need to sum by columns
+        => Current.BiasAddParamGradient(outputGradient);
+
     // Convolution Operations
 
     /// <summary>
