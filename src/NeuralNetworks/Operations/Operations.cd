@@ -84,20 +84,18 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NeuralNetworks.Operations.Dropout2D" Collapsed="true">
-    <Position X="2.5" Y="5.25" Width="1.5" />
+    <Position X="4" Y="7" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAgAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Dropout2D.cs</FileName>
     </TypeIdentifier>
-    <Lollipop Position="0.2" />
   </Class>
   <Class Name="NeuralNetworks.Operations.Dropout4D" Collapsed="true">
     <Position X="8.5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAgAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAgAAAAAAAAAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Dropout4D.cs</FileName>
     </TypeIdentifier>
-    <Lollipop Position="0.2" />
   </Class>
   <Class Name="NeuralNetworks.Operations.Conv2D" Collapsed="true">
     <Position X="6.75" Y="7.75" Width="1.5" />
@@ -107,7 +105,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction2D" Collapsed="true">
-    <Position X="4.5" Y="5.25" Width="1.75" />
+    <Position X="2.25" Y="5.25" Width="1.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\ActivationFunction2D.cs</FileName>
@@ -118,6 +116,20 @@
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\ActivationFunction4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.BaseDropout2D" Collapsed="true">
+    <Position X="4.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
+      <FileName>Operations\BaseDropout2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.InvertedDropout2D" Collapsed="true">
+    <Position X="5" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\InvertedDropout2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

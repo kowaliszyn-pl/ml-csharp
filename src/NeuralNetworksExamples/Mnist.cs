@@ -8,15 +8,14 @@ using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Core.Extensions;
-using NeuralNetworks.Core.Operations;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
-using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.ActivationFunctions;
+using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;

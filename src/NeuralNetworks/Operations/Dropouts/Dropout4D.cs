@@ -8,7 +8,7 @@ using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.Dropouts;
 
 public class Dropout4D(float keepProb = 0.8f, SeededRandom? random = null) : Operation4D
 {

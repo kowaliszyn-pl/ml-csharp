@@ -8,7 +8,7 @@ using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.Dropouts;
 
 public class InvertedDropout2D(float keepProb = 0.8f, SeededRandom? random = null) : BaseDropout2D
 {
