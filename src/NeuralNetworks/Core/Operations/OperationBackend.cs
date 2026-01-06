@@ -368,6 +368,12 @@ public static class OperationBackend
     internal static float[,,,] DropoutInputGradient(float[,,,] outputGradient, float[,,,] mask)
         => Current.DropoutInputGradient(outputGradient, mask);
 
+    internal static float[,] InvertedDropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask)
+        => Current.InvertedDropoutOutput(input, inference, keepProb, random, out mask);
+
+    internal static float[,] InvertedDropoutInputGradient(float[,] outputGradient, float[,] mask, float keepProb)
+        => Current.InvertedDropoutInputGradient(outputGradient, mask, keepProb);
+
     #endregion
 
     #region Transformations

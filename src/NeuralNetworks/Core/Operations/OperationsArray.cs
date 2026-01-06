@@ -3,6 +3,9 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
+using System.Threading.Tasks;
+
+using ILGPU.Runtime.Cuda;
 
 using NeuralNetworks.Core.Extensions;
 
@@ -346,6 +349,27 @@ internal class OperationsArray : IOperations
 
     public float[,,,] DropoutInputGradient(float[,,,] outputGradient, float[,,,] mask)
         => outputGradient.MultiplyElementwise(mask);
+
+    public virtual float[,] InvertedDropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask)
+    {
+        if (inference)
+        {
+            mask = null;
+            return input;
+        }
+        else
+        {
+            float multiplier = 1f / keepProb;
+            mask = input.AsZeroOnes(keepProb, random ?? new());
+            return input.MultiplyElementwise(mask).Multiply(multiplier);
+        }
+    }
+
+    public float[,] InvertedDropoutInputGradient(float[,] outputGradient, float[,] mask, float keepProb)
+    {
+        float multiplier = 1f / keepProb;
+        return outputGradient.MultiplyElementwise(mask).Multiply(multiplier);
+    }
 
     #endregion
 
