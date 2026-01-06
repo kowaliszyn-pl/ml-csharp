@@ -1,22 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="NeuralNetworks.Core.Operations.OperationsArray">
+  <Class Name="NeuralNetworks.Core.Operations.OperationsArray" Collapsed="true">
     <Position X="0.75" Y="0.75" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>BAAAAAAIAEAIAAACAAABAAIAQAAAIggBACQAAABAAAA=</HashCode>
+      <HashCode>BAACAAAMAEAIAAACAAAFAAIAQAAAoggBACQAAQBAAIA=</HashCode>
       <FileName>Core\Operations\OperationsArray.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="NeuralNetworks.Core.Operations.OperationsSpan">
-    <Position X="0.75" Y="5.5" Width="2.75" />
+  <Class Name="NeuralNetworks.Core.Operations.OperationsSpan" Collapsed="true">
+    <Position X="0.75" Y="1.75" Width="2.75" />
     <TypeIdentifier>
       <HashCode>BAAAAAAIAEAIAAACAAABAAIAQAAAIggBACQAAABAAAA=</HashCode>
       <FileName>Core\Operations\OperationsSpan.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Core.Operations.OperationsGpu">
-    <Position X="0.75" Y="14.75" Width="2.75" />
+  <Class Name="NeuralNetworks.Core.Operations.OperationsGpu" Collapsed="true">
+    <Position X="0.75" Y="4.5" Width="2.75" />
     <Members>
       <Method Name="WeightMultiplyInputGradientKernel" Hidden="true" />
       <Method Name="WeightMultiplyParamGradientKernel" Hidden="true" />
@@ -25,23 +25,28 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>BAAAEAAAACAABBAAhAIAAAIQAAAAAAABAAABAAFEIAA=</HashCode>
+      <HashCode>BAAAEAAAACAIBBAAhAIAAAIQAAAAAAABAAABAAFEIAA=</HashCode>
       <FileName>Core\Operations\OperationsGpu.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NeuralNetworks.Core.Operations.OperationBackend">
     <Position X="4.25" Y="0.75" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
     <TypeIdentifier>
-      <HashCode>BAAAAAAIAEAIAAACAACBAAIAQAAEIggAACQAEABAQAA=</HashCode>
+      <HashCode>BiAGAAAsAEQZAACCAACHCAYCUAoEogiACCQAHQBAQYg=</HashCode>
       <FileName>Core\Operations\OperationBackend.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="Current" />
     </ShowAsAssociation>
   </Class>
-  <Class Name="NeuralNetworks.Core.Operations.OperationsSpanParallel">
-    <Position X="0.75" Y="10.25" Width="2.75" />
+  <Class Name="NeuralNetworks.Core.Operations.OperationsSpanParallel" Collapsed="true">
+    <Position X="0.75" Y="3" Width="2.75" />
     <TypeIdentifier>
       <HashCode>BAAAAAAIAEAIAAACAAABAAIAAAAAIgABACQAAABAAAA=</HashCode>
       <FileName>Core\Operations\OperationsSpanParallel.cs</FileName>
@@ -50,7 +55,7 @@
   <Interface Name="NeuralNetworks.Core.Operations.IOperations" Collapsed="true">
     <Position X="7.5" Y="0.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>BAAAAAAIAEAIAAACAAABAAIAQAAAIggBACQAAABAAAA=</HashCode>
+      <HashCode>BAACAAAMAEAIAAACAAAFAAIAQAAAoggBACQAAQBAAIA=</HashCode>
       <FileName>Core\Operations\IOperations.cs</FileName>
     </TypeIdentifier>
   </Interface>

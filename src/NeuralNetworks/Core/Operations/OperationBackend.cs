@@ -169,6 +169,14 @@ public static class OperationBackend
     internal static float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
         => Current.LeakyReLUInputGradient(outputGradient, input, alfa, beta);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] Tanh(float[,] input)
+        => Current.Tanh(input);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] TanhInputGradient(float[,] outputGradient, float[,] output)
+      => Current.TanhInputGradient(outputGradient, output);
+
     /// <summary>
     /// Applies the hyperbolic tangent function element-wise to the input.
     /// </summary>

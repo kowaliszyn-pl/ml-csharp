@@ -94,6 +94,23 @@ internal class OperationsArray : IOperations
         return inputGradient;
     }
 
+    public virtual float[,] Tanh(float[,] input) 
+        => input.Tanh();
+
+    public virtual float[,] TanhInputGradient(float[,] outputGradient, float[,] output)
+    {
+        // The TanhInputGradient function computes the gradient of the loss with respect to the input of the Tanh function.
+        // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
+        // The derivative of the Tanh function tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x)) is 1 - tanh(x)^2.
+        // Therefore, the input gradient is computed as: dL/dx = dL/dy * (1 - tanh(x)^2).
+        // The elementwise multiplication of the output gradient and the derivative of the Tanh function is returned as the input gradient.
+        // tanh(x) => Output
+        // dL/dy => outputGradient
+        // dl/dx => inputGradient
+        float[,] tanhBackward = output.AsOnes().Subtract(output.MultiplyElementwise(output));
+        return outputGradient.MultiplyElementwise(tanhBackward);
+    }
+
     public virtual float[,,,] Tanh(float[,,,] input) 
         => input.Tanh();
 
