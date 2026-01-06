@@ -1,12 +1,8 @@
 ﻿// Neural Networks in C♯
 // File name: OperationsArray.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
-using System.Threading.Tasks;
-
-using ILGPU.IR.Values;
-using ILGPU.Runtime.Cuda;
 
 using NeuralNetworks.Core.Extensions;
 
@@ -331,6 +327,26 @@ internal class OperationsArray : IOperations
         }
     }
 
+    public float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask) 
+        => outputGradient.MultiplyElementwise(mask);
+
+    public virtual float[,,,] DropoutOutput(float[,,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,,]? mask)
+    {
+        if (inference)
+        {
+            mask = null;
+            return input.Multiply(keepProb);
+        }
+        else
+        {
+            mask = input.AsZeroOnes(keepProb, random ?? new());
+            return input.MultiplyElementwise(mask);
+        }
+    }
+
+    public float[,,,] DropoutInputGradient(float[,,,] outputGradient, float[,,,] mask)
+        => outputGradient.MultiplyElementwise(mask);
+
     #endregion
 
     #region Transformations
@@ -363,7 +379,7 @@ internal class OperationsArray : IOperations
 
         return res;
     }
-    
+
     public virtual float[,,,] Unflatten(float[,] source, float[,,,] targetSize)
     {
         int batchSize = targetSize.GetLength(0);
@@ -392,6 +408,5 @@ internal class OperationsArray : IOperations
     }
 
     #endregion
-
 
 }

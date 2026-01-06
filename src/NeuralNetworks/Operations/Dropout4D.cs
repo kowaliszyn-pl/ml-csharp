@@ -1,11 +1,12 @@
 ﻿// Neural Networks in C♯
 // File name: Dropout4D.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Extensions;
+
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations;
 
@@ -14,25 +15,14 @@ public class Dropout4D(float keepProb = 0.8f, SeededRandom? random = null) : Ope
     private float[,,,]? _mask;
 
     protected override float[,,,] CalcOutput(bool inference)
-    {
-        if (inference)
-        {
-            return Input.Multiply(keepProb);
-        }
-        else
-        {
-            _mask = Input.AsZeroOnes(keepProb, random ?? new());
-            return Input.MultiplyElementwise(_mask);
-        }
-    }
+        => DropoutOutput(Input, inference, keepProb, random, out _mask);
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
     {
         Debug.Assert(_mask != null, "Mask must not be null here.");
-
-        return outputGradient.MultiplyElementwise(_mask);
+        return DropoutInputGradient(outputGradient, _mask);
     }
 
-    public override string ToString() 
+    public override string ToString()
         => $"Dropout4D (keepProb={keepProb}, seed={random?.Seed})";
 }

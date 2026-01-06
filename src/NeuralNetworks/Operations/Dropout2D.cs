@@ -1,11 +1,10 @@
 ﻿// Neural Networks in C♯
 // File name: Dropout2D.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Extensions;
 
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
@@ -23,13 +22,10 @@ public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : Bas
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {
         Debug.Assert(Mask != null, "Mask must not be null here.");
-
-        return outputGradient.MultiplyElementwise(Mask);
+        return DropoutInputGradient(outputGradient, Mask);
     }
 
-    public override string ToString() 
+    public override string ToString()
         => $"Dropout2D (keepProb={keepProb}, seed={random?.Seed})";
-
-
 
 }

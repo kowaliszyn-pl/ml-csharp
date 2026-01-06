@@ -81,6 +81,9 @@ public interface IOperations
     #region Dropout
 
     public float[,] DropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask);
+    public float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask);
+    public float[,,,] DropoutOutput(float[,,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,,]? mask);
+    public float[,,,] DropoutInputGradient(float[,,,] outputGradient, float[,,,] mask);
 
     #endregion
 
