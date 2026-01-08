@@ -673,26 +673,6 @@ public static class ArrayExtensions
             && source.GetLength(2) == matrix.GetLength(2)
             && source.GetLength(3) == matrix.GetLength(3);
 
-    /*
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] LeakyReLU(this float[,] source, float alpha = 0.01f, float beta = 1f)
-    {
-        int rows = source.GetLength(0);
-        int columns = source.GetLength(1);
-        float[,] res = new float[rows, columns];
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                float value = source[i, j];
-                res[i, j] = value >= 0 ? value * beta : value * alpha;
-            }
-        }
-        return res;
-    }
-    */
-    
-
     /// <summary>
     /// Computes the natural logarithm elementwise and returns a new array.
     /// </summary>
@@ -1179,6 +1159,7 @@ public static class ArrayExtensions
     /// </summary>
     /// <param name="source">The two-dimensional array whose dim1 will be permuted.</param>
     /// <param name="random">The random number generator. If null, a new instance is created.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlace(this float[,] source, Random? random)
     {
         random ??= new();
@@ -1214,6 +1195,7 @@ public static class ArrayExtensions
     /// number of dim1 as <paramref name="source"/>.</param>
     /// <param name="random">The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
     /// will be created.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this float[,] source, float[,] secondMatrix, Random? random)
     {
         random ??= new();
@@ -1256,6 +1238,7 @@ public static class ArrayExtensions
     /// name="source"/>. Must have the same number of dim1 as <paramref name="source"/>.</param>
     /// <param name="random">The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
     /// of <see cref="Random"/> will be created.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this float[,,,] source, float[,] secondMatrix, Random? random)
     {
         random ??= new();
@@ -1304,6 +1287,7 @@ public static class ArrayExtensions
     /// same number of dim1 as <paramref name="source"/>.</param>
     /// <param name="random">The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
     /// will be created.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWithSetRow(this float[,] source, float[,] secondMatrix, Random? random)
     {
         random ??= new();
@@ -1327,6 +1311,7 @@ public static class ArrayExtensions
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWithSetRow(this float[,,,] source, float[,] secondMatrix, Random? random)
     {
         random ??= new();
@@ -1393,33 +1378,6 @@ public static class ArrayExtensions
             }
         }
     }
-
-    /*
-    /// <summary>
-    /// Applies the rectified linear unit (ReLU) activation function to each element of the specified 2D array.
-    /// </summary>
-    /// <remarks>The ReLU function sets all negative values to zero and multiplies non-negative values by the
-    /// specified beta. The original array is not modified.</remarks>
-    /// <param name="source">The two-dimensional array of single-precision floating-point values to which the ReLU function is applied.</param>
-    /// <param name="beta">An optional scaling factor applied to non-negative values. The default is 1.0.</param>
-    /// <returns>A new two-dimensional array where each element is the result of applying the ReLU function to the corresponding
-    /// element in the source array.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] ReLU(this float[,] source, float beta = 1f)
-    {
-        int rows = source.GetLength(0);
-        int columns = source.GetLength(1);
-        float[,] res = new float[rows, columns];
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                float value = source[i, j];
-                res[i, j] = value >= 0 ? value * beta : 0;
-            }
-        }
-        return res;
-    }*/
 
     /// <summary>
     /// Sets the values of a specific row in the source.
@@ -1631,6 +1589,7 @@ public static class ArrayExtensions
     /// <param name="source">The two-dimensional array to split.</param>
     /// <param name="ratio">The ratio for splitting the dim1.</param>
     /// <returns>A tuple containing the two sets of dim1.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (float[,] Set1, float[,] Set2) SplitRowsByRatio(this float[,] source, float ratio)
     {
         Debug.Assert(ratio > 0 && ratio < 1, "Ratio must be between 0 and 1.");
@@ -2079,27 +2038,4 @@ public static class ArrayExtensions
         return array;
     }
 
-    ///// <summary>
-    ///// Gets a row from the source.
-    ///// </summary>
-    ///// <param name="row">The index of the row to retrieve.</param>
-    ///// <returns>A new <see cref="Matrix"/> object representing the specified row.</returns>
-    ///// <remarks>
-    ///// The returned row is a new instance of the <see cref="Matrix"/> class and has the same number of dim2 as the original source.
-    ///// </remarks>
-    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //public static float[] GetRow(this float[,] source, int row)
-    //{
-    //    int dim2 = source.GetLength(1);
-
-    //    // Create an array to store the row.
-    //    float[] res = new float[dim2];
-    //    for (int i = 0; i < dim2; i++)
-    //    {
-    //        // Access each element in the specified row.
-    //        res[i] = source[row, i];
-    //    }
-
-    //    return res;
-    //}
 }
