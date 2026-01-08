@@ -26,6 +26,18 @@ public interface IOperations
     public float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01f, float beta = 1f);
     public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
 
+    /// <summary>
+    /// Applies the rectified linear unit (ReLU) activation function to each element of the specified 2D array.
+    /// </summary>
+    /// <remarks>The ReLU function sets all negative values to zero and multiplies non-negative values by the
+    /// specified beta. The original array is not modified.</remarks>
+    /// <param name="input">The two-dimensional array of single-precision floating-point values to which the ReLU function is applied.</param>
+    /// <param name="beta">An optional scaling factor applied to non-negative values. The default is 1.0.</param>
+    /// <returns>A new two-dimensional array where each element is the result of applying the ReLU function to the corresponding
+    /// element in the source array.</returns>
+    public float[,] ReLUOutput(float[,] input, float beta = 1f);
+    public float[,] ReLUInputGradient(float[,] outputGradient, float[,] input, float beta);
+
     public float[,] SigmoidOutput(float[,] input);
     public float[,] SigmoidInputGradient(float[,] outputGradient, float[,] output);
 

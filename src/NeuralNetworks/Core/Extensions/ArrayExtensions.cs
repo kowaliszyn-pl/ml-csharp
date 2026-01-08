@@ -1393,6 +1393,7 @@ public static class ArrayExtensions
         }
     }
 
+    /*
     /// <summary>
     /// Applies the rectified linear unit (ReLU) activation function to each element of the specified 2D array.
     /// </summary>
@@ -1417,7 +1418,7 @@ public static class ArrayExtensions
             }
         }
         return res;
-    }
+    }*/
 
     /// <summary>
     /// Sets the values of a specific row in the source.

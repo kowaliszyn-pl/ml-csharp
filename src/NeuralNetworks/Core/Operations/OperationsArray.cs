@@ -96,6 +96,37 @@ internal class OperationsArray : IOperations
         return inputGradient;
     }
 
+    public virtual float[,] ReLUOutput(float[,] input, float beta = 1f)
+    {
+        int rows = input.GetLength(0);
+        int columns = input.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                float value = input[i, j];
+                res[i, j] = value >= 0 ? value * beta : 0;
+            }
+        }
+        return res;
+    }
+
+    public virtual float[,] ReLUInputGradient(float[,] outputGradient, float[,] input, float beta)
+    {
+        int rows = input.GetLength(0);
+        int cols = input.GetLength(1);
+        float[,] inputGradient = new float[rows, cols];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                inputGradient[i, j] = input[i, j] > 0 ? outputGradient[i, j] * beta : 0f;
+            }
+        }
+        return inputGradient;
+    }
+
     public virtual float[,] SigmoidOutput(float[,] input)
         => input.Sigmoid();
 
