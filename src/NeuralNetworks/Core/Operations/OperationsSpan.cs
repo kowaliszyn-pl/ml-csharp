@@ -61,7 +61,7 @@ internal class OperationsSpan : OperationsArray
 
     #region Activations Functions
 
-    public override float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01f, float beta = 1f)
+    public override float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01f, float beta = 1f)
     {
         int dim1 = input.GetLength(0);
         int dim2 = input.GetLength(1);

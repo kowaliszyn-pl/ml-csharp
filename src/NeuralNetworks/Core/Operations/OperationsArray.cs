@@ -50,7 +50,7 @@ internal class OperationsArray : IOperations
 
     #region Activations Functions
 
-    public virtual float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01F, float beta = 1)
+    public virtual float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01F, float beta = 1)
     {
         int dim1 = input.GetLength(0);
         int dim2 = input.GetLength(1);

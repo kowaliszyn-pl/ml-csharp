@@ -23,7 +23,7 @@ public interface IOperations
 
     #region Activations Functions
 
-    public float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01f, float beta = 1f);
+    public float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01f, float beta = 1f);
     public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
 
     public float[,] SoftplusOutput(float[,] input);
