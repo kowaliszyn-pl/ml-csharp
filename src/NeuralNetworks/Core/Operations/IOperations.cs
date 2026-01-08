@@ -26,7 +26,10 @@ public interface IOperations
     public float[,,,] LeakyReLU(float[,,,] input, float alpha = 0.01f, float beta = 1f);
     public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
 
-    public float[,] Tanh(float[,] source);
+    public float[,] SoftplusOutput(float[,] input);
+    public float[,] SoftplusInputGradient(float[,] outputGradient, float[,] output);
+
+    public float[,] TanhOutput(float[,] source);
 
     /// <summary>
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
@@ -55,7 +58,7 @@ public interface IOperations
     /// </returns>
     public float[,] TanhInputGradient(float[,] outputGradient, float[,] output);
 
-    public float[,,,] Tanh(float[,,,] source);
+    public float[,,,] TanhOutput(float[,,,] source);
 
     /// <summary>
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.

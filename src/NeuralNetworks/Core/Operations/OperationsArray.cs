@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+using ILGPU.Runtime.Cuda;
+
 using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Core.Operations;
@@ -94,7 +96,24 @@ internal class OperationsArray : IOperations
         return inputGradient;
     }
 
-    public virtual float[,] Tanh(float[,] input) 
+    public virtual float[,] SoftplusOutput(float[,] input) 
+        => input.Softplus();
+
+    public virtual float[,] SoftplusInputGradient(float[,] outputGradient, float[,] output)
+    {
+        // The CalcInputGradient function computes the gradient of the loss with respect to the input of the Softplus function.
+        // This is done using the chain rule of calculus. Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
+        // The derivative of the Softplus function softplus(x) = ln(1 + exp(x)) is σ(x) = 1 / (1 + exp(-x)), which is the Sigmoid function.
+        // Therefore, the input gradient is computed as: dL/dx = dL/dy * σ(x).
+        // The elementwise multiplication of the output gradient and the derivative of the Softplus function is returned as the input gradient.
+        // σ(x) => Output
+        // dL/dy => outputGradient
+        // dl/dx => inputGradient
+        float[,] sigmoidBackward = output.Sigmoid();
+        return outputGradient.MultiplyElementwise(sigmoidBackward);
+    }
+
+    public virtual float[,] TanhOutput(float[,] input)
         => input.Tanh();
 
     public virtual float[,] TanhInputGradient(float[,] outputGradient, float[,] output)
@@ -111,7 +130,7 @@ internal class OperationsArray : IOperations
         return outputGradient.MultiplyElementwise(tanhBackward);
     }
 
-    public virtual float[,,,] Tanh(float[,,,] input) 
+    public virtual float[,,,] TanhOutput(float[,,,] input)
         => input.Tanh();
 
     public virtual float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)

@@ -170,12 +170,16 @@ public static class OperationBackend
         => Current.LeakyReLUInputGradient(outputGradient, input, alfa, beta);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] Tanh(float[,] input)
-        => Current.Tanh(input);
+    internal static float[,] SoftplusOutput(float[,] input)
+        => Current.SoftplusOutput(input);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] TanhInputGradient(float[,] outputGradient, float[,] output)
-      => Current.TanhInputGradient(outputGradient, output);
+    internal static float[,] SoftplusInputGradient(float[,] outputGradient, float[,] output)
+        => Current.SoftplusInputGradient(outputGradient, output);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] TanhOutput(float[,] input)
+        => Current.TanhOutput(input);
 
     /// <summary>
     /// Applies the hyperbolic tangent function element-wise to the input.
@@ -183,8 +187,37 @@ public static class OperationBackend
     /// <returns>A new input with the hyperbolic tangent applied element-wise.</returns>
     /// <param name="input">The four-dimensional array to transform.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Tanh(float[,,,] input)
-        => Current.Tanh(input);
+    internal static float[,,,] TanhOutput(float[,,,] input)
+        => Current.TanhOutput(input);
+
+    /// <summary>
+    /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
+    /// </summary>
+    /// <remarks>
+    /// Given the output gradient (dL/dy), the function calculates the source gradient (dL/dx). 
+    /// <para/>
+    /// The derivative of the Tanh function <c>tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))</c> is <c>1 - tanh(x)^2</c>.
+    /// Therefore, the source gradient is computed as: <c>dL/dx = dL/dy * (1 - tanh(x)^2) = dL/dy * (1 - output^2)</c>.
+    /// <list type="bullet">
+    /// <item>
+    /// tanh(x) => output
+    /// </item>
+    /// <item>
+    /// dL/dy => outputGradient
+    /// </item>
+    /// <item>
+    /// dL/dx => inputGradient
+    /// </item>
+    /// </list>
+    /// </remarks>
+    /// <param name="output">The output of the Tanh function (<c>tanh(x)</c>).</param>
+    /// <param name="outputGradient">The gradient of the loss with respect to the output of the Tanh function (dL/dy).</param>
+    /// <returns>
+    /// The gradient of the loss with respect to the input of the Tanh function (dL/dx), having the same shape as <paramref name="outputGradient"/>.
+    /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] TanhInputGradient(float[,] outputGradient, float[,] output)
+      => Current.TanhInputGradient(outputGradient, output);
 
     /// <summary>
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.

@@ -83,20 +83,6 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="NeuralNetworks.Operations.Dropout2D" Collapsed="true">
-    <Position X="4" Y="7" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\Dropout2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.Dropout4D" Collapsed="true">
-    <Position X="8.5" Y="5.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAgAAAAAAAAAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\Dropout4D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="NeuralNetworks.Operations.Conv2D" Collapsed="true">
     <Position X="6.75" Y="7.75" Width="1.5" />
     <TypeIdentifier>
@@ -118,18 +104,32 @@
       <FileName>Operations\ActivationFunctions\ActivationFunction4D.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.BaseDropout2D" Collapsed="true">
+  <Class Name="NeuralNetworks.Operations.Dropouts.BaseDropout2D" Collapsed="true">
     <Position X="4.5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
-      <FileName>Operations\BaseDropout2D.cs</FileName>
+      <FileName>Operations\Dropouts\BaseDropout2D.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.InvertedDropout2D" Collapsed="true">
-    <Position X="5" Y="8.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Dropouts.Dropout2D" Collapsed="true">
+    <Position X="3.75" Y="6.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\InvertedDropout2D.cs</FileName>
+      <FileName>Operations\Dropouts\Dropout2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Dropouts.InvertedDropout2D" Collapsed="true">
+    <Position X="5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Dropouts\InvertedDropout2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Dropouts.Dropout4D" Collapsed="true">
+    <Position X="8.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Dropouts\Dropout4D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

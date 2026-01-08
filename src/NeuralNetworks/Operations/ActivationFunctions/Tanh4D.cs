@@ -9,7 +9,7 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 public class Tanh4D : ActivationFunction4D
 {
     protected override float[,,,] CalcOutput(bool inference)
-        => Tanh(Input);
+        => TanhOutput(Input);
     
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
         => TanhInputGradient(outputGradient, Output);

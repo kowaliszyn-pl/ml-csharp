@@ -105,7 +105,7 @@ internal class OperationsSpan : OperationsArray
         return inputGradient;
     }
 
-    public override float[,,,] Tanh(float[,,,] source)
+    public override float[,,,] TanhOutput(float[,,,] source)
     {
         int dim1 = source.GetLength(0);
         int dim2 = source.GetLength(1);
