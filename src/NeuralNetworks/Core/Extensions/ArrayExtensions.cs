@@ -673,6 +673,7 @@ public static class ArrayExtensions
             && source.GetLength(2) == matrix.GetLength(2)
             && source.GetLength(3) == matrix.GetLength(3);
 
+    /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] LeakyReLU(this float[,] source, float alpha = 0.01f, float beta = 1f)
     {
@@ -689,7 +690,7 @@ public static class ArrayExtensions
         }
         return res;
     }
-
+    */
     
 
     /// <summary>

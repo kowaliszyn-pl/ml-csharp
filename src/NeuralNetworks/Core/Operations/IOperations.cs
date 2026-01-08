@@ -26,6 +26,9 @@ public interface IOperations
     public float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01f, float beta = 1f);
     public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
 
+    public float[,] LeakyReLUOutput(float[,] input, float alpha = 0.01f, float beta = 1f);
+    public float[,] LeakyReLUInputGradient(float[,] outputGradient, float[,] input, float alfa, float beta);
+
     /// <summary>
     /// Applies the rectified linear unit (ReLU) activation function to each element of the specified 2D array.
     /// </summary>

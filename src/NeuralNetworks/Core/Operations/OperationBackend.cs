@@ -169,6 +169,15 @@ public static class OperationBackend
     internal static float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta)
         => Current.LeakyReLUInputGradient(outputGradient, input, alfa, beta);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] LeakyReLUOutput(float[,] input, float alpha = 0.01f, float beta = 1f)
+       => Current.LeakyReLUOutput(input, alpha, beta);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] LeakyReLUInputGradient(float[,] outputGradient, float[,] input, float alfa, float beta)
+        => Current.LeakyReLUInputGradient(outputGradient, input, alfa, beta);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] ReLUOutput(float[,] input, float beta = 1f)
         => Current.ReLUOutput(input, beta);
 

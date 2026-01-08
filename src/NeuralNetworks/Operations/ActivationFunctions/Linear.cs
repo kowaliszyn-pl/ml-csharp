@@ -15,5 +15,6 @@ public class Linear : ActivationFunction2D
     protected override float[,] CalcInputGradient(float[,] outputGradient) 
         => outputGradient;
 
-    public override string ToString() => "Linear";
+    public override string ToString() 
+        => "Linear";
 }
