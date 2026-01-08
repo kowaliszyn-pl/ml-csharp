@@ -26,6 +26,9 @@ public interface IOperations
     public float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01f, float beta = 1f);
     public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);
 
+    public float[,] SigmoidOutput(float[,] input);
+    public float[,] SigmoidInputGradient(float[,] outputGradient, float[,] output);
+
     public float[,] SoftplusOutput(float[,] input);
     public float[,] SoftplusInputGradient(float[,] outputGradient, float[,] output);
 

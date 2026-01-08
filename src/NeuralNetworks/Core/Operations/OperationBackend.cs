@@ -170,6 +170,14 @@ public static class OperationBackend
         => Current.LeakyReLUInputGradient(outputGradient, input, alfa, beta);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] SigmoidOutput(float[,] input)
+        => Current.SigmoidOutput(input);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] SigmoidInputGradient(float[,] outputGradient, float[,] output)
+        => Current.SigmoidInputGradient(outputGradient, output);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] SoftplusOutput(float[,] input)
         => Current.SoftplusOutput(input);
 
