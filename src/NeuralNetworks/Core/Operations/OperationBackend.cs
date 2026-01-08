@@ -162,6 +162,14 @@ public static class OperationBackend
     #region Activation Functions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] BipolarSigmoidOutput(float[,] input, float scale)
+        => Current.BipolarSigmoidOutput(input, scale);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] BipolarSigmoidInputGradient(float[,] outputGradient, float[,] output, float scale)
+        => Current.BipolarSigmoidInputGradient(outputGradient, output, scale);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01f, float beta = 1f)
         => Current.LeakyReLUOutput(input, alpha, beta);
 

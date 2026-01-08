@@ -4,8 +4,6 @@
 
 using System.Diagnostics;
 
-using ILGPU.Runtime.Cuda;
-
 using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.Core.Operations;
@@ -49,6 +47,22 @@ internal class OperationsArray : IOperations
     #endregion
 
     #region Activations Functions
+
+    public virtual float[,] BipolarSigmoidOutput(float[,] input, float scale)
+        => input.Sigmoid().Add(-0.5f).Multiply(scale);
+
+    public virtual float[,] BipolarSigmoidInputGradient(float[,] outputGradient, float[,] output, float scale)
+    {
+        Debug.Assert(scale != 0f, "Scale must be non-zero.");
+
+        // Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
+        // Output = scale * (σ(x) - 0.5)  =>  σ(x) = (Output/scale) + 0.5
+        // d/dx[scale * (σ(x) - 0.5)] = scale * σ(x) * (1 - σ(x))
+        // Therefore, the input gradient is computed as: dL/dx = dL/dy * scale * σ(x) * (1 - σ(x)).
+        float[,] sigma = output.Divide(scale).Add(0.5f);
+        float[,] sigmoidBackward = sigma.MultiplyElementwise(sigma.AsOnes().Subtract(sigma)).Multiply(scale);
+        return outputGradient.MultiplyElementwise(sigmoidBackward);
+    }
 
     public virtual float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01F, float beta = 1)
     {

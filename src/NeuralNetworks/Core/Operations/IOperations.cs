@@ -1,8 +1,6 @@
 ﻿// Neural Networks in C♯
 // File name: IOperations.cs
-// www.kowaliszyn.pl, 2025
-
-using NeuralNetworks.Core.Extensions;
+// www.kowaliszyn.pl, 2025 - 2026
 
 namespace NeuralNetworks.Core.Operations;
 
@@ -10,7 +8,7 @@ public interface IOperations
 {
     #region Backend Management
 
-    OperationBackendType BackendType { get; }
+    public OperationBackendType BackendType { get; }
 
     #endregion
 
@@ -22,6 +20,9 @@ public interface IOperations
     #endregion
 
     #region Activations Functions
+
+    public float[,] BipolarSigmoidOutput(float[,] input, float scale);
+    public float[,] BipolarSigmoidInputGradient(float[,] outputGradient, float[,] output, float scale);
 
     public float[,,,] LeakyReLUOutput(float[,,,] input, float alpha = 0.01f, float beta = 1f);
     public float[,,,] LeakyReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float alfa, float beta);

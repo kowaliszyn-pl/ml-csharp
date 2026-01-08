@@ -1,10 +1,8 @@
 ﻿// Neural Networks in C♯
 // File name: BipolarSigmoid.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
-using System.Diagnostics;
-
-using NeuralNetworks.Core.Extensions;
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
@@ -23,20 +21,11 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 public class BipolarSigmoid(float scale) : ActivationFunction2D
 {
     protected override float[,] CalcOutput(bool inference)
-        => Input.Sigmoid().Add(-0.5f).Multiply(scale);
+        => BipolarSigmoidOutput(Input, scale);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
-    {
-        Debug.Assert(scale != 0f, "Scale must be non-zero.");
+        => BipolarSigmoidInputGradient(outputGradient, Output, scale);
 
-        // Given the output gradient (dL/dy), the function calculates the input gradient (dL/dx).
-        // Output = scale * (σ(x) - 0.5)  =>  σ(x) = (Output/scale) + 0.5
-        // d/dx[scale * (σ(x) - 0.5)] = scale * σ(x) * (1 - σ(x))
-        // Therefore, the input gradient is computed as: dL/dx = dL/dy * scale * σ(x) * (1 - σ(x)).
-        float[,] sigma = Output.Divide(scale).Add(0.5f);
-        float[,] sigmoidBackward = sigma.MultiplyElementwise(sigma.AsOnes().Subtract(sigma)).Multiply(scale);
-        return outputGradient.MultiplyElementwise(sigmoidBackward);
-    }
-
-    public override string ToString() => $"BipolarSigmoid (scale={scale})";
+    public override string ToString()
+        => $"BipolarSigmoid (scale={scale})";
 }
