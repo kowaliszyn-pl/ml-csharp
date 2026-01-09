@@ -26,9 +26,9 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
-//  97,27% - CpuSpansParallel
-//  - Gpu
-//  - CpuSpans, CpuArrays
+// 97,30% - CpuSpansParallel
+// 97,30% - Gpu
+// 97,31% - CpuSpans, CpuArrays
 
 internal class MnistConvModel(SeededRandom? random)
     : BaseModel<float[,,,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
@@ -42,7 +42,7 @@ internal class MnistConvModel(SeededRandom? random)
             AddLayer(new Conv2DLayer(
                 filters: 32, // 16,
                 kernelSize: 3,
-                activationFunction: new ReLU4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer,
                 dropout: dropout
             ))

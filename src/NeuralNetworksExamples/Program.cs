@@ -89,10 +89,10 @@ internal static class Program
     private static void SelectOperationBackend()
     {
         Console.WriteLine("Select operation backend:");
-        Console.WriteLine("1. CPU - Arrays");
-        Console.WriteLine("2. CPU - Spans");
+        Console.WriteLine("A. CPU - Arrays");
+        Console.WriteLine("S. CPU - Spans");
         Console.WriteLine("P. CPU - Spans Parallel");
-        Console.WriteLine("4. GPU");
+        Console.WriteLine("G. GPU");
         Console.WriteLine("Other: Exit");
         Console.WriteLine();
         Console.Write("Enter your choice: ");
@@ -100,11 +100,11 @@ internal static class Program
         Console.WriteLine();
         switch (backendChoice?.ToUpper())
         {
-            case "1":
+            case "A":
                 OperationBackend.Use(OperationBackendType.CpuArrays);
                 Console.WriteLine("Using CPU - Arrays backend.");
                 break;
-            case "2":
+            case "S":
                 OperationBackend.Use(OperationBackendType.CpuSpans);
                 Console.WriteLine("Using CPU - Spans backend.");
                 break;
@@ -112,7 +112,7 @@ internal static class Program
                 OperationBackend.Use(OperationBackendType.CpuSpansParallel);
                 Console.WriteLine("Using CPU - Spans Parallel backend.");
                 break;
-            case "4":
+            case "G":
                 OperationBackend.Use(OperationBackendType.Gpu);
                 Console.WriteLine("Using GPU backend.");
                 break;

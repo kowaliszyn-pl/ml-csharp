@@ -26,9 +26,9 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
-// 97.30% - CpuSpansParallel
-// 97.18% - Gpu
-// 97.07% - CpuSpans, CpuArrays
+// 97,07% - CpuSpansParallel
+// 97,05% - Gpu
+// 97,07% - CpuSpans, CpuArrays
 
 internal class MnistDenseModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
