@@ -172,6 +172,55 @@ internal class OperationsArray : IOperations
         return inputGradient;
     }
 
+    public virtual float[,,,] ReLUOutput(float[,,,] input, float beta = 1f)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
+
+        float[,,,] output = new float[dim1, dim2, dim3, dim4];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        float value = input[i, j, k, l];
+                        output[i, j, k, l] = value >= 0 ? value * beta : 0;
+                    }
+                }
+            }
+        }
+        return output;
+    }
+
+    public virtual float[,,,] ReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float beta)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
+
+        float[,,,] inputGradient = new float[dim1, dim2, dim3, dim4];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        inputGradient[i, j, k, l] = input[i, j, k, l] > 0 ? outputGradient[i, j, k, l] * beta : 0f;
+                    }
+                }
+            }
+        }
+        return inputGradient;
+    }
+
     public virtual float[,] SigmoidOutput(float[,] input)
         => input.Sigmoid();
 

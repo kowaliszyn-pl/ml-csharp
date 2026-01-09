@@ -28,11 +28,11 @@ file class FunctionModel(SeededRandom? random)
     {
         GlorotInitializer initializer = new(Random);
 
-        return AddLayer(new DenseLayer(4, new ReLU(), initializer))
+        return AddLayer(new DenseLayer(4, new ReLU2D(), initializer))
             //.AddLayer(new DenseLayer(4, new ReLU(), initializer))
             //.AddLayer(new DenseLayer(4, new Sigmoid(), initializer))
-            .AddLayer(new DenseLayer(4, new ReLU(), initializer))
-            .AddLayer(new DenseLayer(4, new ReLU(), initializer))
+            .AddLayer(new DenseLayer(4, new ReLU2D(), initializer))
+            .AddLayer(new DenseLayer(4, new ReLU2D(), initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
 

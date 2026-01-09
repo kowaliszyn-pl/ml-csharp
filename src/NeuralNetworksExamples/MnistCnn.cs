@@ -1,6 +1,6 @@
 ﻿// Neural Networks in C♯
 // File name: MnistCnn.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
@@ -27,18 +27,19 @@ namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves  97,61% accuracy (changed after changing the implementation of Glorot initializer).
 
-class MnistConvModel(SeededRandom? random)
+internal class MnistConvModel(SeededRandom? random)
     : BaseModel<float[,,,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,,,], float[,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
-        Dropout4D? dropout = new(0.82f, Random);
+        Dropout4D? dropout = new(0.80f, Random);
 
-        return AddLayer(new Conv2DLayer(
+        return 
+            AddLayer(new Conv2DLayer(
                 filters: 32, // 16,
                 kernelSize: 3,
-                activationFunction: new LeakyReLU4D(),
+                activationFunction: new ReLU4D(),
                 paramInitializer: initializer,
                 dropout: dropout
             ))
@@ -48,13 +49,18 @@ class MnistConvModel(SeededRandom? random)
 
 }
 
-class MnistCnn
+internal class MnistCnn
 {
-    const int RandomSeed = 251225;
-    const int Epochs = 2;
-    const int BatchSize = 400;
-    const int EvalEveryEpochs = 2;
-    const int LogEveryEpochs = 1;
+    private const int RandomSeed = 44; // From Mickiewicz's poetry.
+    private const int Epochs = 15;
+    private const int BatchSize = 400;
+    private const int EvalEveryEpochs = 2;
+    private const int LogEveryEpochs = 1;
+
+    private const float InitialLearningRate = 0.002f;
+    private const float FinalLearningRate = 0.0005f;
+    private const float AdamBeta1 = 0.89f;
+    private const float AdamBeta2 = 0.99f;
 
     public static void Run()
     {
@@ -101,17 +107,17 @@ class MnistCnn
 
         WriteLine("\nStart training...");
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(0.003f, 0.0004f);
+        LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate);
         Trainer4D trainer = new(
             model,
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
-            new AdamOptimizer(learningRate, 0.89f, 0.99f),
+            new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
             random: commonRandom,
             logger: logger,
             operationBackendTimingEnabled: true
         )
         {
-            Memo = $"Class: {nameof(MnistCnn)}."
+            Memo = $"Calling class: {nameof(MnistCnn)}."
         };
 
         trainer.Fit(

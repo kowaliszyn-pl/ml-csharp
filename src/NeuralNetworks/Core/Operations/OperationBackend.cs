@@ -194,6 +194,14 @@ public static class OperationBackend
         => Current.ReLUInputGradient(outputGradient, input, beta);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,,,] ReLUOutput(float[,,,] input, float beta = 1f)
+        => Current.ReLUOutput(input, beta);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,,,] ReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float beta)
+        => Current.ReLUInputGradient(outputGradient, input, beta);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] SigmoidOutput(float[,] input)
         => Current.SigmoidOutput(input);
 

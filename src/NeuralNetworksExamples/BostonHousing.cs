@@ -139,7 +139,7 @@ internal class BostonHousing
 
         // Show predictions for the test set
 
-        int[] showTestSamples = { 0, 1, 2, nTest - 3, nTest - 2, nTest - 1 };
+        int[] showTestSamples = [0, 1, 2, nTest - 3, nTest - 2, nTest - 1];
 
         // Do a forward pass for all test samples at once
 

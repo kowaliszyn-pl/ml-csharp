@@ -26,9 +26,9 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves accuracy:
-// 97,00% - CpuSpansParallel
-// 97.04% - Gpu
-// 97.00% - CpuSpans, CpuArrays
+// 97.07% - CpuSpansParallel
+// 97.05% - Gpu
+// 97.07% - CpuSpans, CpuArrays
 
 internal class MnistDenseModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
@@ -38,8 +38,8 @@ internal class MnistDenseModel(SeededRandom? random)
         GlorotInitializer initializer = new(Random);
 
         return
-             AddLayer(new DenseLayer(178, new ReLU(), initializer, new Dropout2D(0.8f, Random)))
-            .AddLayer(new DenseLayer(46, new ReLU(), initializer, new Dropout2D(0.8f, Random)))
+             AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
+            .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
 }
