@@ -65,7 +65,7 @@ internal static class Program
                     BostonHousing.Run(false);
                     break;
                 case "4":
-                    Mnist.Run();
+                    MnistDense.Run();
                     break;
                 case "5":
                     MnistCnn.Run();

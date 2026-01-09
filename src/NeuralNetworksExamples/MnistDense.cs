@@ -25,9 +25,12 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-// For the current configuration and hyperparameters, the model achieves  97,54% accuracy (changed after changing the implementation of Glorot initializer).
+// For the current configuration and hyperparameters, the model achieves accuracy:
+// 97,00% - CpuSpansParallel
+// 97.04% - Gpu
+// 97.00% - CpuSpans, CpuArrays
 
-internal class MnistModel(SeededRandom? random)
+internal class MnistDenseModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
@@ -35,21 +38,21 @@ internal class MnistModel(SeededRandom? random)
         GlorotInitializer initializer = new(Random);
 
         return
-             AddLayer(new DenseLayer(178, new LeakyReLU2D(0.005f), initializer, new InvertedDropout2D(0.82f, Random)))
-            .AddLayer(new DenseLayer(46, new BipolarSigmoid(1.5f), initializer, new InvertedDropout2D(0.82f, Random)))
+             AddLayer(new DenseLayer(178, new ReLU(), initializer, new Dropout2D(0.8f, Random)))
+            .AddLayer(new DenseLayer(46, new ReLU(), initializer, new Dropout2D(0.8f, Random)))
             .AddLayer(new DenseLayer(10, new Linear(), initializer));
     }
 }
 
-internal class Mnist
+internal class MnistDense
 {
     private const int RandomSeed = 44; // From Mickiewicz's poetry.
-    private const int Epochs = 5;
+    private const int Epochs = 15;
     private const int BatchSize = 400;
     private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
 
-    private const float InitialLearningRate = 0.0025f;
+    private const float InitialLearningRate = 0.002f;
     private const float FinalLearningRate = 0.0005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
@@ -95,7 +98,7 @@ internal class Mnist
 
         // Create a model
 
-        MnistModel model = new(commonRandom);
+        MnistDenseModel model = new(commonRandom);
 
         WriteLine("\nStart training...");
 
@@ -109,7 +112,7 @@ internal class Mnist
             operationBackendTimingEnabled: true
         )
         {
-            Memo = $"Calling class: {nameof(Mnist)}."
+            Memo = $"Calling class: {nameof(MnistDense)}."
         };
 
         trainer.Fit(
