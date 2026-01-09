@@ -2,6 +2,7 @@
 // File name: ArrayUtils.cs
 // www.kowaliszyn.pl, 2025
 
+using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -93,20 +94,20 @@ public class ArrayUtils
         float[] res = new float[columns];
         for (int col = 0; col < columns; col++)
         {
-            res[col] = BoxMuller() * stdDev + mean;
+            res[col] = BoxMuller(random) * stdDev + mean;
         }
         return res;
 
-        float BoxMuller() // TODO: Move to RandomUtils
-        {
-            // uniform(0,1] random doubles
-            double u1 = 1 - random.NextDouble();
-            double u2 = 1 - random.NextDouble();
+        //float BoxMuller() // TODO: Move to RandomUtils
+        //{
+        //    // uniform(0,1] random doubles
+        //    double u1 = 1 - random.NextDouble();
+        //    double u2 = 1 - random.NextDouble();
 
-            //random normal(0,1)
-            float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
-            return randStdNormal;
-        }
+        //    //random normal(0,1)
+        //    float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
+        //    return randStdNormal;
+        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -121,22 +122,39 @@ public class ArrayUtils
                 {
                     for (int l = 0; l < dim4; l++)
                     {
-                        res[i, j, k, l] = BoxMuller() * stdDev + mean;
+                        res[i, j, k, l] = BoxMuller(random) * stdDev + mean;
                     }
                 }
             }
         }
         return res;
 
-        float BoxMuller() // TODO: Move to RandomUtils
-        {
-            // uniform(0,1] random doubles
-            double u1 = 1 - random.NextDouble();
-            double u2 = 1 - random.NextDouble();
-            //random normal(0,1)
-            float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
-            return randStdNormal;
-        }
+        //float BoxMuller() // TODO: Move to RandomUtils
+        //{
+        //    // uniform(0,1] random doubles
+        //    double u1 = 1 - random.NextDouble();
+        //    double u2 = 1 - random.NextDouble();
+        //    //random normal(0,1)
+        //    float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
+        //    return randStdNormal;
+        //}
+    }
+
+    /// <summary>
+    /// Generates a random number following a standard normal distribution (mean = 0, stdDev = 1) using the Box-Muller transform.
+    /// </summary>
+    /// <param name="random"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float BoxMuller(Random random)
+    {
+        // uniform(0,1] random doubles
+        double u1 = 1 - random.NextDouble();
+        double u2 = 1 - random.NextDouble();
+
+        //random normal(0,1)
+        float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
+        return randStdNormal;
     }
 
     /// <summary>

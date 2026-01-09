@@ -19,8 +19,4 @@
 		</AssemblyAttribute>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Core\IO\" />
-	</ItemGroup>
-
 </Project>
