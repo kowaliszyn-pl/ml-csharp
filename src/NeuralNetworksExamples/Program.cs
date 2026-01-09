@@ -39,7 +39,7 @@ internal static class Program
             Console.WriteLine("1. Function data set");
             Console.WriteLine("2. Boston Housing data set (custom model)");
             Console.WriteLine("3. Boston Housing data set (generic model)");
-            Console.WriteLine("4. MNIST data set (dense layers)");
+            Console.WriteLine("D. MNIST data set (dense layers)");
             Console.WriteLine("C. MNIST data set (CNN)");
             Console.WriteLine("Other: Exit");
             Console.WriteLine();
@@ -64,7 +64,7 @@ internal static class Program
                 case "3":
                     BostonHousing.Run(false);
                     break;
-                case "4":
+                case "D":
                     MnistDense.Run();
                     break;
                 case "C":
