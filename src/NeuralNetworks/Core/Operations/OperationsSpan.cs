@@ -105,6 +105,42 @@ internal class OperationsSpan : OperationsArray
         return inputGradient;
     }
 
+    public override float[,,,] ReLUOutput(float[,,,] input, float beta = 1)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        int dim4 = input.GetLength(3);
+        float[,,,] output = new float[dim1, dim2, dim3, dim4];
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+        Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+        for (int i = 0; i < inputSpan.Length; i++)
+        {
+            float value = inputSpan[i];
+            outputSpan[i] = value >= 0 ? value * beta : 0f;
+        }
+        return output;
+    }
+
+    public override float[,,,] ReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float beta)
+    {
+        int dim1 = outputGradient.GetLength(0);
+        int dim2 = outputGradient.GetLength(1);
+        int dim3 = outputGradient.GetLength(2);
+        int dim4 = outputGradient.GetLength(3);
+        Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
+        Debug.Assert(input.GetLength(0) == dim1 && input.GetLength(1) == dim2 && input.GetLength(2) == dim3 && input.GetLength(3) == dim4, "Shapes of outputGradient and input must match for elementwise operations.");
+        float[,,,] inputGradient = new float[dim1, dim2, dim3, dim4];
+        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+        Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
+        for (int i = 0; i < inputGradientSpan.Length; i++)
+        {
+            inputGradientSpan[i] = inputSpan[i] > 0 ? outputGradientSpan[i] * beta : 0f;
+        }
+        return inputGradient;
+    }
+
     public override float[,,,] TanhOutput(float[,,,] source)
     {
         int dim1 = source.GetLength(0);

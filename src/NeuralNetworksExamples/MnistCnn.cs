@@ -25,7 +25,10 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
-// For the current configuration and hyperparameters, the model achieves  97,61% accuracy (changed after changing the implementation of Glorot initializer).
+// For the current configuration and hyperparameters, the model achieves the accuracy:
+//  97,27% - CpuSpansParallel
+//  - Gpu
+//  - CpuSpans, CpuArrays
 
 internal class MnistConvModel(SeededRandom? random)
     : BaseModel<float[,,,], float[,]>(new SoftmaxCrossEntropyLoss(), random)

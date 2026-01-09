@@ -35,12 +35,12 @@ internal static class Program
         {
             bool fromSubmenu = false;
             Console.WriteLine("Select a routine to run (Neural Networks Examples):");
-            Console.WriteLine("0. Select operation backend");
+            Console.WriteLine("B. Select operation backend");
             Console.WriteLine("1. Function data set");
             Console.WriteLine("2. Boston Housing data set (custom model)");
             Console.WriteLine("3. Boston Housing data set (generic model)");
             Console.WriteLine("4. MNIST data set (dense layers)");
-            Console.WriteLine("5. MNIST data set (CNN)");
+            Console.WriteLine("C. MNIST data set (CNN)");
             Console.WriteLine("Other: Exit");
             Console.WriteLine();
             Console.Write("Enter your choice: ");
@@ -48,9 +48,9 @@ internal static class Program
             string? choice = Console.ReadLine();
             Console.WriteLine();
 
-            switch (choice)
+            switch (choice?.ToUpper())
             {
-                case "0":
+                case "B":
                     SelectOperationBackend();
                     Console.WriteLine();
                     fromSubmenu = true;
@@ -67,7 +67,7 @@ internal static class Program
                 case "4":
                     MnistDense.Run();
                     break;
-                case "5":
+                case "C":
                     MnistCnn.Run();
                     break;
 
@@ -91,14 +91,14 @@ internal static class Program
         Console.WriteLine("Select operation backend:");
         Console.WriteLine("1. CPU - Arrays");
         Console.WriteLine("2. CPU - Spans");
-        Console.WriteLine("3. CPU - Spans Parallel");
+        Console.WriteLine("P. CPU - Spans Parallel");
         Console.WriteLine("4. GPU");
         Console.WriteLine("Other: Exit");
         Console.WriteLine();
         Console.Write("Enter your choice: ");
         string? backendChoice = Console.ReadLine();
         Console.WriteLine();
-        switch (backendChoice)
+        switch (backendChoice?.ToUpper())
         {
             case "1":
                 OperationBackend.Use(OperationBackendType.CpuArrays);
@@ -108,7 +108,7 @@ internal static class Program
                 OperationBackend.Use(OperationBackendType.CpuSpans);
                 Console.WriteLine("Using CPU - Spans backend.");
                 break;
-            case "3":
+            case "P":
                 OperationBackend.Use(OperationBackendType.CpuSpansParallel);
                 Console.WriteLine("Using CPU - Spans Parallel backend.");
                 break;
