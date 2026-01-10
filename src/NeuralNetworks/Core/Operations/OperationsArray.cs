@@ -15,7 +15,7 @@ namespace NeuralNetworks.Core.Operations;
 /// is unavailable, when numerical traceability matters more than throughput, or as a correctness oracle for other
 /// implementations.
 /// </remarks>
-internal class OperationsArray : IOperations
+public class OperationsArray : IOperations
 {
     #region Backend Management
 

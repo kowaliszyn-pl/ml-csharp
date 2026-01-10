@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core.Operations;
 
-internal class OperationsSpan : OperationsArray
+public class OperationsSpan : OperationsArray
 {
     #region Backend Management
 

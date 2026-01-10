@@ -508,7 +508,7 @@ public static class ArrayExtensions
     /// </summary>
     /// <param name="source">The two-dimensional array to slice.</param>
     /// <param name="row">The index of the row to retrieve.</param>
-    /// <returns>A new <see cref="float[]"/> representing the specified row.</returns>
+    /// <returns>A new array representing the specified row.</returns>
     /// <remarks>
     /// The returned row is a new instance and has the same number of dim2 as the original source.
     /// </remarks>
@@ -584,9 +584,9 @@ public static class ArrayExtensions
     /// </summary>
     /// <param name="source">The array to slice.</param>
     /// <param name="range">The range of dim1 to retrieve.</param>
-    /// <returns>A new <see cref="float[,]"/> object representing the submatrix.</returns>
+    /// <returns>A new array representing the submatrix.</returns>
     /// <remarks>
-    /// The returned dim1 are a new instance of the <see cref="float[,]"/> class and have the same number of dim2 as the original source.
+    /// The returned columns are the same as in the original source.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetRows(this float[,] source, Range range)

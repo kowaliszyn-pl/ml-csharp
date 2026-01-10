@@ -16,7 +16,7 @@ namespace NeuralNetworks.Core.Operations;
 using FloatDense1DView = ArrayView1D<float, Stride1D.Dense>;
 using FloatDense2DView = ArrayView2D<float, Stride2D.DenseX>;
 
-internal class OperationsGpu : OperationsSpanParallel, IDisposable
+public class OperationsGpu : OperationsSpanParallel, IDisposable
 {
 
     #region Backend Management

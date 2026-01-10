@@ -1,12 +1,9 @@
 ﻿// Neural Networks in C♯
 // File name: OperationBackend.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-
-using ILGPU.Runtime.Cuda;
 
 namespace NeuralNetworks.Core.Operations;
 
@@ -41,7 +38,6 @@ public static class OperationBackend
     private static long s_weightMultiplyParamGradientCalls;
     private static long s_weightMultiplyParamGradientInputMemory;
 
-
     static OperationBackend()
     {
         AppDomain.CurrentDomain.ProcessExit += (s, e) => DisposeCurrentOperationBackend();
@@ -50,7 +46,6 @@ public static class OperationBackend
     public static OperationBackendType CurrentType => Current.BackendType;
 
     public static bool StatisticsEnabled => s_statisticsEnabled;
-
 
     internal static IOperations Current
     {
@@ -72,10 +67,7 @@ public static class OperationBackend
         };
     }
 
-    public static void EnableStatistics(bool enable = true)
-    {
-        s_statisticsEnabled = enable;
-    }
+    public static void EnableStatistics(bool enable = true) => s_statisticsEnabled = enable;
 
     private static void DisposeCurrentOperationBackend()
     {
@@ -143,7 +135,6 @@ public static class OperationBackend
         double memoryMBPerCall = calls > 0 ? memoryMB / calls : 0.0;
         return $"{name}: calls={calls}, totalSeconds={totalSeconds:F2}, averageMicroseconds={averageMicroseconds:F3}, inputMemoryMB={memoryMB:F2}, memoryMBPerCall={memoryMBPerCall:F4}";
     }
-
 
     #endregion
 
@@ -318,7 +309,7 @@ public static class OperationBackend
     internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
     {
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
-        
+
         float[,,,] result = Current.Convolve2DOutput(input, weights);
 
         if (s_statisticsEnabled)
@@ -328,7 +319,7 @@ public static class OperationBackend
             Interlocked.Increment(ref s_convolve2DOutputCalls);
             Interlocked.Add(ref s_convolve2DOutputInputMemory, (input.Length + weights.Length) * sizeof(float));
         }
-        
+
         return result;
     }
 
@@ -344,7 +335,7 @@ public static class OperationBackend
     internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
     {
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
-        
+
         float[,,,] result = Current.Convolve2DInputGradient(input, weights, outputGradient);
 
         if (s_statisticsEnabled)
@@ -391,11 +382,11 @@ public static class OperationBackend
             Interlocked.Add(ref s_weightMultiplyOutputTicks, elapsed);
             Interlocked.Increment(ref s_weightMultiplyOutputCalls);
             Interlocked.Add(ref s_weightMultiplyOutputInputMemory, (input.Length + weights.Length) * sizeof(float));
-        } 
-        
+        }
+
         return result;
     }
-    
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyInputGradient(float[,] outputGradient, float[,] weights)
@@ -464,7 +455,7 @@ public static class OperationBackend
         => Current.Flatten(source);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Unflatten(float[,] source, float[,,,] targetSize) 
+    internal static float[,,,] Unflatten(float[,] source, float[,,,] targetSize)
         => Current.Unflatten(source, targetSize);
 
     #endregion
