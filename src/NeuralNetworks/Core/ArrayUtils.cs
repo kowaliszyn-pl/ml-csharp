@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using NeuralNetworks.Core.Extensions;
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Core;
 

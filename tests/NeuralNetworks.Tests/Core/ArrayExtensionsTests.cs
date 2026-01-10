@@ -2,8 +2,6 @@
 // File name: ArrayTests.cs
 // Code It Yourself with .NET, 2024
 
-using NeuralNetworks.Core.Extensions;
-
 namespace NeuralNetworks.Core.Tests;
 
 [TestClass]

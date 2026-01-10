@@ -2,7 +2,7 @@
 // File name: SoftmaxCrossEntropyLoss.cs
 // www.kowaliszyn.pl, 2025
 
-using NeuralNetworks.Core.Extensions;
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Losses;
 

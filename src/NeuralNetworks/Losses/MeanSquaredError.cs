@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-using NeuralNetworks.Core.Extensions;
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Losses;
 

@@ -5,7 +5,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core.Extensions;
+namespace NeuralNetworks.Core;
 
 /// <summary>
 /// Provides extension methods for performing mathematical and utility operations on multidimensional arrays of type

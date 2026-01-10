@@ -3,7 +3,6 @@
 // www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Extensions;
 
 namespace NeuralNetworks.DataSources;
 

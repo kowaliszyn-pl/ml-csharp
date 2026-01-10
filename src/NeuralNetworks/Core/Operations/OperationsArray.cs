@@ -4,8 +4,6 @@
 
 using System.Diagnostics;
 
-using NeuralNetworks.Core.Extensions;
-
 namespace NeuralNetworks.Core.Operations;
 
 /// <summary>
