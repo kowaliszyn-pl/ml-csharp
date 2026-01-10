@@ -4,7 +4,7 @@
 
 using NeuralNetworks.Core;
 
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.RandomUtils;
 
 namespace NeuralNetworks.ParamInitializers;
 

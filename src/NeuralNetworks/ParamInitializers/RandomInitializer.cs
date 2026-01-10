@@ -1,10 +1,10 @@
-﻿// Machine Learning Utils
+﻿// Neural Networks in C♯
 // File name: RandomInitializer.cs
-// Code It Yourself with .NET, 2024
+// www.kowaliszyn.pl, 2025 - 2026
 
 using NeuralNetworks.Core;
 
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.RandomUtils;
 
 namespace NeuralNetworks.ParamInitializers;
 
@@ -15,7 +15,7 @@ public class RandomInitializer : ParamInitializer
 
     public RandomInitializer(SeededRandom? random = null)
     {
-        if(random != null)
+        if (random != null)
         {
             _random = random;
             _seed = random.Seed;
@@ -31,15 +31,15 @@ public class RandomInitializer : ParamInitializer
 
     protected int? Seed => _seed;
 
-    internal override float[] InitBiases(int neurons) 
+    internal override float[] InitBiases(int neurons)
         => CreateRandom(neurons, _random);
 
-    internal override float[,] InitWeights(int inputColumns, int neurons) 
+    internal override float[,] InitWeights(int inputColumns, int neurons)
         => CreateRandom(inputColumns, neurons, _random);
 
     internal override float[,,,] InitWeights(int inputChannels, int outputChannels, int kernelSize)
         => CreateRandom(inputChannels, outputChannels, kernelSize, kernelSize, _random);
 
     public override string ToString() => $"RandomInitializer (seed={_seed})";
-    
+
 }
