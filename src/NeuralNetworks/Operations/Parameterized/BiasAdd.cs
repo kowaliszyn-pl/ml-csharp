@@ -8,7 +8,7 @@ using NeuralNetworks.Optimizers;
 using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.Parameterized;
 
 /// <summary>
 /// Computes bias addition.

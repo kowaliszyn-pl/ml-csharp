@@ -8,6 +8,7 @@ using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Operations.Dropouts;
+using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.ParamInitializers;
 
 using static NeuralNetworks.Core.ArrayUtils;

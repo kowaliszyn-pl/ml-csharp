@@ -2,6 +2,8 @@
 // File name: Conv2DOperationTests.cs
 // Code It Yourself with .NET, 2024
 
+using NeuralNetworks.Operations.Parameterized;
+
 namespace NeuralNetworks.Operations.Tests;
 
 // TODO: compare the test results with

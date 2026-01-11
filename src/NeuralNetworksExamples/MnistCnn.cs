@@ -40,7 +40,7 @@ internal class MnistConvModel(SeededRandom? random)
         return 
             AddLayer(new Conv2DLayer(
                 filters: 32, // 16,
-                kernelSize: 3,
+                kernelSize: 5,
                 activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer,
                 dropout: dropout

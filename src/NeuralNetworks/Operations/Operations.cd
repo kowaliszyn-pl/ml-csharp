@@ -7,38 +7,6 @@
       <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.ParamOperation2D&lt;TParam&gt;">
-    <Position X="1.25" Y="7" Width="2.25" />
-    <Members>
-      <Field Name="_paramGradient" Hidden="true" />
-      <Method Name="CloneBase" Hidden="true" />
-      <Method Name="EnsureSameShapeForParam" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
-      <FileName>Operations\ParamOperation2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.WeightMultiply">
-    <Position X="0.5" Y="10.25" Width="1.75" />
-    <Members>
-      <Method Name="EnsureSameShapeForParam" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\WeightMultiply.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.BiasAdd">
-    <Position X="2.75" Y="10.25" Width="2" />
-    <Members>
-      <Method Name="EnsureSameShapeForParam" Hidden="true" />
-    </Members>
-    <TypeIdentifier>
-      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\BiasAdd.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="NeuralNetworks.Operations.Operation2D" Collapsed="true">
     <Position X="3.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
@@ -60,36 +28,6 @@
       <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.ParamOperation4D" Collapsed="true">
-    <Position X="6.75" Y="5.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\ParamOperation4D.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="NeuralNetworks.Operations.ParamOperation4D&lt;TParam&gt;" Collapsed="true">
-    <Position X="6.75" Y="6.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
-      <FileName>Operations\ParamOperation4D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.ParamOperation2D" Collapsed="true">
-    <Position X="0.5" Y="5.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\ParamOperation2D.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="NeuralNetworks.Operations.Conv2D" Collapsed="true">
-    <Position X="6.75" Y="7.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\Conv2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction2D" Collapsed="true">
     <Position X="2.25" Y="5.25" Width="1.75" />
     <TypeIdentifier>
@@ -105,7 +43,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Dropouts.BaseDropout2D" Collapsed="true">
-    <Position X="4.5" Y="5.25" Width="1.5" />
+    <Position X="5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
       <FileName>Operations\Dropouts\BaseDropout2D.cs</FileName>
@@ -130,6 +68,57 @@
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Dropouts\Dropout4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation2D" Collapsed="true">
+    <Position X="0.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\Parameterized\ParamOperation2D.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation2D&lt;TParam&gt;" Collapsed="true">
+    <Position X="0.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\ParamOperation2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.WeightMultiply" Collapsed="true">
+    <Position X="0.5" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\WeightMultiply.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.BiasAdd" Collapsed="true">
+    <Position X="2.25" Y="7.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\BiasAdd.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation4D" Collapsed="true">
+    <Position X="6.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\Parameterized\ParamOperation4D.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation4D&lt;TParam&gt;" Collapsed="true">
+    <Position X="6.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\ParamOperation4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.Conv2D" Collapsed="true">
+    <Position X="6.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\Conv2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

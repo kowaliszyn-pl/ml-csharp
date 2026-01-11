@@ -1,5 +1,7 @@
 
 
+using NeuralNetworks.Operations.Reshaping;
+
 namespace NeuralNetworks.Operations.Tests;
 
 [TestClass]

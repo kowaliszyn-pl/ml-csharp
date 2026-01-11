@@ -5,7 +5,7 @@
 using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.Reshaping;
 
 public class Flatten : Operation<float[,,,], float[,]>
 {

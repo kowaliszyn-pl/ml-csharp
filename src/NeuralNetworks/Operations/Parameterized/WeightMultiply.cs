@@ -2,16 +2,13 @@
 // File name: WeightMultiply.cs
 // www.kowaliszyn.pl, 2025
 
-// This class is derived from the content originally published in the book Deep Learning from Scratch: Building with
-// Python from First Principles by Seth Weidman. Some comments here are copied/modified from the original text.
-
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
 using static NeuralNetworks.Core.Operations.OperationBackend;
 using static NeuralNetworks.Core.ArrayUtils;
 
-namespace NeuralNetworks.Operations;
+namespace NeuralNetworks.Operations.Parameterized;
 
 /// <summary>
 /// Weight multiplication operation for a neural network.
