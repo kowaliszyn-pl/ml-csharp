@@ -210,11 +210,11 @@ public abstract class Trainer<TInputData, TPrediction>(
                 if (eval)
                 {
                     TPrediction testPredictions = model.Forward(xTest!, true);
-                    float loss = model.LossFunction.Forward(testPredictions, yTest!);
+                    float testLoss = model.LossFunction.Forward(testPredictions, yTest!);
 
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
-                        WriteLine($"Test loss: {loss}");
-                    logger?.LogInformation("Test loss: {testLoss} for epoch {epoch}.", loss, epoch);
+                        WriteLine($"Test loss: {testLoss}");
+                    logger?.LogInformation("Test loss: {testLoss} for epoch {epoch}.", testLoss, epoch);
 
                     if (evalFunction is not null)
                     {
@@ -225,9 +225,9 @@ public abstract class Trainer<TInputData, TPrediction>(
                         logger?.LogInformation("Eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
                     }
 
-                    if (loss < _bestLoss)
+                    if (testLoss < _bestLoss)
                     {
-                        _bestLoss = loss;
+                        _bestLoss = testLoss;
                     }
                     else if (earlyStop)
                     {
@@ -238,8 +238,8 @@ public abstract class Trainer<TInputData, TPrediction>(
                         }
 
                         if (consoleOutputMode > ConsoleOutputMode.Disable)
-                            WriteLine($"Early stopping, loss {loss} is greater than {_bestLoss}");
-                        logger?.LogInformation("Early stopping. Loss {loss} is greater than {bestLoss}.", loss, _bestLoss);
+                            WriteLine($"Early stopping, loss {testLoss} is greater than {_bestLoss}");
+                        logger?.LogInformation("Early stopping. Loss {loss} is greater than {bestLoss}.", testLoss, _bestLoss);
 
                         break;
                     }
@@ -261,8 +261,8 @@ public abstract class Trainer<TInputData, TPrediction>(
                 WriteLine($"{paramCount:n0} parameters trained.");
                 ForegroundColor = ConsoleColor.Yellow;
                 TPrediction testPredictions = model.Forward(xTest!, true);
-                float loss = model.LossFunction.Forward(testPredictions, yTest!);
-                WriteLine($"\nLoss on test data: {loss:F5}");
+                float testLoss = model.LossFunction.Forward(testPredictions, yTest!);
+                WriteLine($"\nLoss on test data: {testLoss:F5}");
                 if (evalFunction is not null)
                 {
                     float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);

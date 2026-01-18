@@ -61,12 +61,12 @@ public class RandomUtils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float NextBoxMuller(Random random)
     {
-        // uniform(0,1] random doubles
-        double u1 = 1 - random.NextDouble();
-        double u2 = 1 - random.NextDouble();
+        // uniform(0,1] random floats
+        float u1 = 1 - random.NextSingle();
+        float u2 = 1 - random.NextSingle();
 
         //random normal(0,1)
-        float randStdNormal = Convert.ToSingle(Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2));
+        float randStdNormal = MathF.Sqrt(-2.0f * MathF.Log(u1)) * MathF.Sin(2.0f * MathF.PI * u2);
         return randStdNormal;
     }
 
