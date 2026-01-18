@@ -1,6 +1,6 @@
 ﻿// Neural Networks in C♯
-// File name: Mnist.cs
-// www.kowaliszyn.pl, 2025
+// File name: MnistDense.cs
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 

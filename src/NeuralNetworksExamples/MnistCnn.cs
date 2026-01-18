@@ -37,7 +37,7 @@ internal class MnistConvModel(SeededRandom? random)
         ParamInitializer initializer = new GlorotInitializer(Random);
         Dropout4D? dropout = new(0.80f, Random);
 
-        return 
+        return
             AddLayer(new Conv2DLayer(
                 filters: 32, // 16,
                 kernelSize: 5,
