@@ -18,9 +18,8 @@ public class Trainer2D : Trainer<float[,], float[,]>
         Model<float[,], float[,]> model, 
         Optimizer optimizer, 
         SeededRandom? random, 
-        ILogger<Trainer2D>? logger = null,
-        bool operationBackendTimingEnabled = false
-    ) : base(model, optimizer, random: random, logger: logger, operationBackendTimingEnabled: operationBackendTimingEnabled)
+        ILogger<Trainer2D>? logger = null
+    ) : base(model, optimizer, random: random, logger: logger)
     {
     }
 

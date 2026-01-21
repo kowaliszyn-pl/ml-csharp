@@ -45,7 +45,24 @@ public static class OperationBackend
 
     public static OperationBackendType CurrentType => Current.BackendType;
 
-    public static bool StatisticsEnabled => s_statisticsEnabled;
+    public static bool StatisticsEnabled
+    {
+        get
+        {
+            return s_statisticsEnabled;
+        }
+        set
+        {
+            if (s_statisticsEnabled != value)
+            {
+                s_statisticsEnabled = value;
+                if (s_statisticsEnabled)
+                {
+                    ResetStatistics();
+                }
+            }
+        }
+    }
 
     internal static IOperations Current
     {
@@ -66,8 +83,6 @@ public static class OperationBackend
             _ => throw new NotSupportedException($"The specified backend type '{backendType}' is not supported."),
         };
     }
-
-    public static void EnableStatistics(bool enable = true) => s_statisticsEnabled = enable;
 
     private static void DisposeCurrentOperationBackend()
     {

@@ -72,12 +72,12 @@ public abstract class Model<TInputData, TPrediction>
     public void UpdateParams(Optimizer optimizer) 
         => _layers.UpdateParams(optimizer);
 
-    public void SaveWeights(string filePath)
+    public void SaveWeights(string filePath, string? comment = null)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("File path must not be empty.", nameof(filePath));
 
-        ModelWeightsDto dto = BuildWeightsDto();
+        ModelWeightsDto dto = BuildWeightsDto(comment);
 
         string? directory = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(directory))
@@ -142,7 +142,7 @@ public abstract class Model<TInputData, TPrediction>
 
     #endregion Checkpoint
 
-    private ModelWeightsDto BuildWeightsDto()
+    private ModelWeightsDto BuildWeightsDto(string? comment)
     {
         List<LayerWeightsDto> layers = new List<LayerWeightsDto>(_layers.Count);
         foreach (Layer layer in _layers)
@@ -150,7 +150,7 @@ public abstract class Model<TInputData, TPrediction>
             layers.Add(SerializeLayer(layer));
         }
 
-        return new ModelWeightsDto(CurrentWeightsFormatVersion, layers);
+        return new ModelWeightsDto(CurrentWeightsFormatVersion, Describe(), comment, layers);
     }
 
     private LayerWeightsDto SerializeLayer(Layer layer)
@@ -221,7 +221,7 @@ public abstract class Model<TInputData, TPrediction>
     private static string GetTypeIdentifier(Type type)
         => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
 
-    public List<string> Describe(int indentation)
+    public List<string> Describe(int indentation = 0)
     {
         string indent = new(' ', indentation);
         string newIndent = new(' ', indentation + Constants.Indentation);
@@ -239,7 +239,9 @@ public abstract class Model<TInputData, TPrediction>
         return res;
     }
 
-    private sealed record ModelWeightsDto(int Version, List<LayerWeightsDto> Layers);
+    #region Serialization DTOs
+
+    private sealed record ModelWeightsDto(int Version, List<string> Architecture, string? Comment, List<LayerWeightsDto> Layers);
 
     private sealed record LayerWeightsDto(string LayerType, List<OperationWeightsDto> Operations);
 
@@ -265,4 +267,6 @@ public abstract class Model<TInputData, TPrediction>
             return new ParameterDataDto(shapeCopy, valueCopy);
         }
     }
+
+    #endregion Serialization DTOs
 }

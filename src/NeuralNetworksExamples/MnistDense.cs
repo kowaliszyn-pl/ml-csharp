@@ -107,8 +107,7 @@ internal class MnistDense
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             new AdamOptimizer(learningRate, beta1: AdamBeta1, beta2: AdamBeta2),
             random: commonRandom,
-            logger: logger,
-            operationBackendTimingEnabled: true
+            logger: logger
         )
         {
             Memo = $"Calling class: {nameof(MnistDense)}."

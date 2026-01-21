@@ -20,7 +20,7 @@ public class Trainer4D : Trainer<float[,,,], float[,]>
         SeededRandom random, 
         ILogger<Trainer4D> logger,
         bool operationBackendTimingEnabled = false
-    ) : base(model, optimizer, random: random, logger: logger, operationBackendTimingEnabled: operationBackendTimingEnabled)
+    ) : base(model, optimizer, random: random, logger: logger)
     {
     }
 

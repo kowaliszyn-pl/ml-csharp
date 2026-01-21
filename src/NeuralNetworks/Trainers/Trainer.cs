@@ -26,8 +26,7 @@ public abstract class Trainer<TInputData, TPrediction>(
     Optimizer optimizer,
     ConsoleOutputMode consoleOutputMode = ConsoleOutputMode.OnlyOnEval,
     SeededRandom? random = null,
-    ILogger<Trainer<TInputData, TPrediction>>? logger = null,
-    bool operationBackendTimingEnabled = false
+    ILogger<Trainer<TInputData, TPrediction>>? logger = null
 )
     where TInputData : notnull
     where TPrediction : notnull
@@ -59,8 +58,12 @@ public abstract class Trainer<TInputData, TPrediction>(
     /// <param name="evalFunction">The evaluation function.</param>
     /// <param name="epochs">The number of epochs.</param>
     /// <param name="evalEveryEpochs">The number of epochs between evaluations.</param>
+    /// <param name="logEveryEpochs">The number of epochs between logging.</param>
     /// <param name="batchSize">The batch size.</param>
-    /// <param name="restart">A flag indicating whether to restart the training.</param>
+    /// <param name="earlyStop">A flag indicating whether to enable early stopping.</param>
+    /// <param name="restart">A flag indicating whether to restart the training or continue from the last state.</param>
+    /// <param name="displayDescriptionOnStart">A flag indicating whether to display the fit+model description on start.</param>
+    /// <param name="operationBackendTimingEnabled">A flag indicating whether to enable operation backend timing. If true, the backend operations timing report will be displayed after training.</param>
     [SuppressMessage("Usage", "CA2254:Template should be a static expression", Justification = "<Pending>")]
     [SuppressMessage("Performance", "CA1873:Avoid potentially expensive logging", Justification = "<Pending>")]
     public void Fit(
@@ -72,7 +75,8 @@ public abstract class Trainer<TInputData, TPrediction>(
         int batchSize = 32,
         bool earlyStop = false,
         bool restart = true,
-        bool displayDescriptionOnStart = true
+        bool displayDescriptionOnStart = true,
+        bool operationBackendTimingEnabled = false
     )
     {
         try
@@ -85,15 +89,7 @@ public abstract class Trainer<TInputData, TPrediction>(
 
             displayDescriptionOnStart &= consoleOutputMode != ConsoleOutputMode.Disable;
 
-            if (operationBackendTimingEnabled)
-            {
-                OperationBackend.EnableStatistics(true);
-                OperationBackend.ResetStatistics();
-            }
-            else
-            {
-                OperationBackend.EnableStatistics(false);
-            }
+            OperationBackend.StatisticsEnabled = operationBackendTimingEnabled;
 
             // Describe the trainer configuration
             List<string> description = DescribeFit();
@@ -228,6 +224,7 @@ public abstract class Trainer<TInputData, TPrediction>(
                     if (testLoss < _bestLoss)
                     {
                         _bestLoss = testLoss;
+                        model.SaveWeights($"best_weights_{epoch}.json", $"Best weights at epoch {epoch} with loss {testLoss:F5}");
                     }
                     else if (earlyStop)
                     {
