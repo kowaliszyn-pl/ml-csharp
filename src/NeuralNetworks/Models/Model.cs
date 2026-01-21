@@ -33,6 +33,7 @@ public abstract class Model<TInputData, TPrediction>
 {
     private LayerList<TInputData, TPrediction> _layers;
     private float _lastLoss;
+    private readonly string? _modelFilePath;
     private ModelInputShapeDto? _inputShape;
 
     private const int CurrentModelFormatVersion = 1;
@@ -42,11 +43,17 @@ public abstract class Model<TInputData, TPrediction>
         WriteIndented = true
     };
 
-    protected Model(LayerListBuilder<TInputData, TPrediction>? layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random)
+    protected Model(LayerListBuilder<TInputData, TPrediction>? layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random = null, string? modelFilePath = null)
     {
         LossFunction = lossFunction;
         Random = random;
+        _modelFilePath = modelFilePath;
         _layers = (layerListBuilder ?? CreateLayerListBuilderInternal()).Build();
+      
+        if (modelFilePath is not null)
+        {
+            LoadParams(modelFilePath);
+        }
     }
 
     public IReadOnlyList<Layer> Layers => _layers;
@@ -90,6 +97,8 @@ public abstract class Model<TInputData, TPrediction>
         res.Add($"{newIndent}Type: {this}");
         res.Add($"{newIndent}Random: {Random}");
         res.Add($"{newIndent}LossFunction: {LossFunction}");
+        if(_modelFilePath != null)
+            res.Add($"{newIndent}ModelFilePath: {_modelFilePath}");
         res.Add($"{newIndent}Layers");
         foreach (Layer layer in _layers)
         {

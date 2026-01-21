@@ -30,9 +30,16 @@ namespace NeuralNetworksExamples;
 // 97,05% - Gpu
 // 97,07% - CpuSpans, CpuArrays
 
-internal class MnistDenseModel(SeededRandom? random)
-    : BaseModel<float[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
+internal class MnistDenseModel: BaseModel<float[,], float[,]>
 {
+    public MnistDenseModel(SeededRandom? random) : base(new SoftmaxCrossEntropyLoss(), random)
+    {
+    }
+
+    public MnistDenseModel(string? modelFilePath) : base(new SoftmaxCrossEntropyLoss(), null, modelFilePath)
+    {
+    }
+
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
@@ -194,8 +201,8 @@ internal class MnistDense
 
         // Load the model
         string modelPath = "MnistDenseModel.json";
-        MnistDenseModel model = new(null);
-        model.LoadParams(modelPath);
+        MnistDenseModel model = new(modelPath);
+        //model.LoadParams(modelPath);
 
         // Evaluate
         float[,] prediction = model.Forward(xTest, true);

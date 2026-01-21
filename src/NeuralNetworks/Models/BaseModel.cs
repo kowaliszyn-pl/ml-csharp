@@ -13,8 +13,8 @@ public abstract class BaseModel<TInputData, TPrediction> : Model<TInputData, TPr
     where TInputData : notnull
     where TPrediction : notnull
 {
-    public BaseModel(Loss<TPrediction> lossFunction, SeededRandom? random)
-        : base(null, lossFunction, random)
+    public BaseModel(Loss<TPrediction> lossFunction, SeededRandom? random, string? modelFilePath = null)
+        : base(null, lossFunction, random, modelFilePath)
     {
     }
 
