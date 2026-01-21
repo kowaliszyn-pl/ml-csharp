@@ -70,40 +70,6 @@ public abstract class Model<TInputData, TPrediction>
     public void UpdateParams(Optimizer optimizer)
         => _layers.UpdateParams(optimizer);
 
-    #region Checkpoint
-
-    private Model<TInputData, TPrediction>? _checkpoint;
-
-    public void SaveCheckpoint() => _checkpoint = Clone();
-
-    public bool HasCheckpoint() => _checkpoint is not null;
-
-    public void RestoreCheckpoint()
-    {
-        if (_checkpoint is null)
-        {
-            throw new Exception("No checkpoint to restore.");
-        }
-        // _checkpoint is already a deep copy so we can just copy its fields.
-        _layers = _checkpoint._layers;
-        LossFunction = _checkpoint.LossFunction;
-        _lastLoss = _checkpoint._lastLoss;
-    }
-
-    /// <summary>
-    /// Makes a deep copy of this neural network.
-    /// </summary>
-    /// <returns></returns>
-    public Model<TInputData, TPrediction> Clone()
-    {
-        Model<TInputData, TPrediction> clone = (Model<TInputData, TPrediction>)MemberwiseClone();
-        clone._layers = _layers.Clone();
-        clone.LossFunction = LossFunction.Clone();
-        return clone;
-    }
-
-    #endregion Checkpoint
-
     public int GetParamCount()
         => _layers.Sum(l => (int?)l.GetParamCount()) ?? 0;
 
@@ -178,7 +144,7 @@ public abstract class Model<TInputData, TPrediction>
         List<LayerWeightsDto> layers = new(_layers.Count);
         foreach (Layer layer in _layers)
         {
-            layers.Add(Model<TInputData, TPrediction>.SerializeLayer(layer));
+            layers.Add(SerializeLayer(layer));
         }
 
         return new ModelWeightsDto(CurrentWeightsFormatVersion, Describe(), comment, layers);
@@ -284,4 +250,38 @@ public abstract class Model<TInputData, TPrediction>
     }
 
     #endregion Serialization DTOs
+
+    #region Checkpoint
+
+    private Model<TInputData, TPrediction>? _checkpoint;
+
+    public void SaveCheckpoint() => _checkpoint = Clone();
+
+    public bool HasCheckpoint() => _checkpoint is not null;
+
+    public void RestoreCheckpoint()
+    {
+        if (_checkpoint is null)
+        {
+            throw new Exception("No checkpoint to restore.");
+        }
+        // _checkpoint is already a deep copy so we can just copy its fields.
+        _layers = _checkpoint._layers;
+        LossFunction = _checkpoint.LossFunction;
+        _lastLoss = _checkpoint._lastLoss;
+    }
+
+    /// <summary>
+    /// Makes a deep copy of this neural network.
+    /// </summary>
+    /// <returns></returns>
+    public Model<TInputData, TPrediction> Clone()
+    {
+        Model<TInputData, TPrediction> clone = (Model<TInputData, TPrediction>)MemberwiseClone();
+        clone._layers = _layers.Clone();
+        clone.LossFunction = LossFunction.Clone();
+        return clone;
+    }
+
+    #endregion Checkpoint
 }
