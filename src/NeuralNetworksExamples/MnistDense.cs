@@ -195,8 +195,7 @@ internal class MnistDense
         // Load the model
         string modelPath = "MnistDenseModel.json";
         MnistDenseModel model = new(null);
-        float[,] initializationSample = xTest.GetRowAs2D(0);
-        model.LoadParams(modelPath, initializationSample); // TODO: add model path to constructor
+        model.LoadParams(modelPath);
 
         // Evaluate
         float[,] prediction = model.Forward(xTest, true);

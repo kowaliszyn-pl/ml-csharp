@@ -33,10 +33,11 @@ public abstract class Model<TInputData, TPrediction>
 {
     private LayerList<TInputData, TPrediction> _layers;
     private float _lastLoss;
+    private ModelInputShapeDto? _inputShape;
 
-    private const int CurrentWeightsFormatVersion = 1;
+    private const int CurrentModelFormatVersion = 1;
 
-    private static readonly JsonSerializerOptions s_weightSerializerOptions = new()
+    private static readonly JsonSerializerOptions s_paramsSerializerOptions = new()
     {
         WriteIndented = true
     };
@@ -57,7 +58,10 @@ public abstract class Model<TInputData, TPrediction>
     protected internal abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal();
 
     public TPrediction Forward(TInputData input, bool inference)
-        => _layers.Forward(input, inference);
+    {
+        RememberInputShape(input);
+        return _layers.Forward(input, inference);
+    }
 
     public void Backward(TPrediction lossGrad)
         => _layers.Backward(lossGrad);
@@ -101,7 +105,7 @@ public abstract class Model<TInputData, TPrediction>
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("File path must not be empty.", nameof(filePath));
 
-        ModelWeightsDto dto = BuildWeightsDto(comment);
+        ModelParams modelParams = GetModelParams(comment);
 
         string? directory = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(directory))
@@ -109,7 +113,7 @@ public abstract class Model<TInputData, TPrediction>
             Directory.CreateDirectory(directory);
         }
 
-        string json = JsonSerializer.Serialize(dto, s_weightSerializerOptions);
+        string json = JsonSerializer.Serialize(modelParams, s_paramsSerializerOptions);
         File.WriteAllText(filePath, json);
     }
 
@@ -122,45 +126,56 @@ public abstract class Model<TInputData, TPrediction>
             throw new FileNotFoundException("Params file was not found.", filePath);
 
         string json = File.ReadAllText(filePath);
-        ModelWeightsDto? dto = JsonSerializer.Deserialize<ModelWeightsDto>(json, s_weightSerializerOptions) 
+        ModelParams? dto = JsonSerializer.Deserialize<ModelParams>(json, s_paramsSerializerOptions) 
             ?? throw new InvalidOperationException("Unable to deserialize params file.");
 
-        EnsureLayersInitialized(initializationSample);
+        EnsureLayersInitialized(initializationSample, dto.InputShape);
+
+        if (_inputShape is null && dto.InputShape is not null)
+        {
+            _inputShape = dto.InputShape;
+        }
+
         ApplyWeights(dto);
     }
 
-    private void EnsureLayersInitialized(TInputData? initializationSample)
+    private void EnsureLayersInitialized(TInputData? initializationSample, ModelInputShapeDto? persistedInputShape)
     {
         if (_layers.All(layer => layer.IsInitialized))
             return;
 
-        if (initializationSample is null)
+        if (initializationSample is not null)
         {
-            throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or run Forward once before loading params.");
+            Forward(initializationSample, inference: true);
+            return;
         }
 
-        Forward(initializationSample, inference: true);
+        if (persistedInputShape is not null)
+        {
+            TInputData syntheticSample = CreateInputFromShape(persistedInputShape);
+            Forward(syntheticSample, inference: true);
+            return;
+        }
+
+        throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or ensure the weights file contains input shape metadata.");
     }
 
-    private ModelWeightsDto BuildWeightsDto(string? comment)
+    private ModelParams GetModelParams(string? comment)
     {
-        //List<LayerWeightsDto> layers = new(_layers.Count);
-        //foreach (Layer layer in _layers)
-        //{
-        //    layers.Add(layer.SerializeLayer());
-        //}
-
-        List<LayerWeightsDto> layers = _layers
-            .Select(layer => layer.SerializeLayer())
+        List<LayerSerializationDto> serializedLayers = _layers
+            .Select(layer => layer.Serialize())
             .ToList();
 
-        return new ModelWeightsDto(CurrentWeightsFormatVersion, Describe(), comment, layers);
+        ModelInputShapeDto inputShape = _inputShape
+            ?? throw new InvalidOperationException("Unable to determine model input shape. Run a forward pass before saving parameters.");
+
+        return new ModelParams(CurrentModelFormatVersion, Describe(), comment, serializedLayers, inputShape);
     }
 
-    private void ApplyWeights(ModelWeightsDto dto)
+    private void ApplyWeights(ModelParams dto)
     {
-        if (dto.Version != CurrentWeightsFormatVersion)
-            throw new InvalidOperationException($"Unsupported weights file version '{dto.Version}'. Expected '{CurrentWeightsFormatVersion}'.");
+        if (dto.Version != CurrentModelFormatVersion)
+            throw new InvalidOperationException($"Unsupported weights file version '{dto.Version}'. Expected '{CurrentModelFormatVersion}'.");
 
         if (dto.Layers.Count != _layers.Count)
             throw new InvalidOperationException($"Layer count mismatch. Model has {_layers.Count} layers but weights file has {dto.Layers.Count}.");
@@ -168,7 +183,7 @@ public abstract class Model<TInputData, TPrediction>
         for (int layerIndex = 0; layerIndex < _layers.Count; layerIndex++)
         {
             Layer layer = _layers[layerIndex];
-            LayerWeightsDto layerDto = dto.Layers[layerIndex];
+            LayerSerializationDto layerDto = dto.Layers[layerIndex];
 
             EnsureTypeMatch(layerDto.LayerType, layer.GetType(), layerIndex, operationIndex: null);
 
@@ -183,7 +198,7 @@ public abstract class Model<TInputData, TPrediction>
             for (int opIndex = 0; opIndex < parameterizedOperations.Count; opIndex++)
             {
                 Operation operation = parameterizedOperations[opIndex];
-                OperationWeightsDto operationDto = layerDto.Operations[opIndex];
+                OperationSerializationDto operationDto = layerDto.Operations[opIndex];
 
                 EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, opIndex);
 
@@ -205,15 +220,61 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    
+    private void RememberInputShape(TInputData input)
+    {
+        ModelInputShapeDto? capturedShape = TryCaptureInputShape(input);
+        if (capturedShape is not null)
+        {
+            _inputShape = capturedShape;
+        }
+    }
+
+    private static ModelInputShapeDto? TryCaptureInputShape(TInputData input)
+    {
+        if (input is not Array array)
+            return null;
+
+        int[] dimensions = new int[array.Rank];
+        for (int dimension = 0; dimension < array.Rank; dimension++)
+        {
+            dimensions[dimension] = array.GetLength(dimension);
+        }
+
+        return new ModelInputShapeDto(GetTypeIdentifier(typeof(TInputData)), dimensions);
+    }
+
+    private static TInputData CreateInputFromShape(ModelInputShapeDto inputShape)
+    {
+        if (inputShape is null)
+            throw new ArgumentNullException(nameof(inputShape));
+
+        string expectedType = GetTypeIdentifier(typeof(TInputData));
+        if (!string.Equals(inputShape.InputType, expectedType, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException($"Input type mismatch. Model expects '{expectedType}' but file contains '{inputShape.InputType ?? "<unknown>"}'.");
+        }
+
+        if (!typeof(TInputData).IsArray)
+        {
+            throw new NotSupportedException($"Input type '{typeof(TInputData)}' is not supported for shape-based initialization. Provide an initialization sample explicitly.");
+        }
+
+        Type? elementType = typeof(TInputData).GetElementType();
+        if (elementType is null)
+            throw new InvalidOperationException($"Unable to determine element type for '{typeof(TInputData)}'.");
+
+        if (inputShape.Dimensions is null || inputShape.Dimensions.Length == 0)
+            throw new InvalidOperationException("Persisted input shape is empty.");
+
+        Array sample = Array.CreateInstance(elementType, inputShape.Dimensions);
+        return (TInputData)(object)sample;
+    }
+
+    private sealed record ModelParams(int Version, List<string> Architecture, string? Comment, List<LayerSerializationDto> Layers, ModelInputShapeDto? InputShape);
+
+    private sealed record ModelInputShapeDto(string InputType, int[] Dimensions);
 
     #endregion Serialization
-
-    #region Serialization DTOs
-
-    private sealed record ModelWeightsDto(int Version, List<string> Architecture, string? Comment, List<LayerWeightsDto> Layers);
-
-    #endregion Serialization DTOs
 
     #region Checkpoint
 

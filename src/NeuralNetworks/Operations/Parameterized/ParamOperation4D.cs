@@ -14,7 +14,7 @@ public abstract class ParamOperation4D : Operation4D, IParamOperation
 {
     public abstract int GetParamCount();
     public abstract void UpdateParams(Layer? layer, Optimizer optimizer);
-    public abstract ParameterSnapshot Capture();
+    public abstract ParameterSnapshot GetSnapshot();
     public abstract void Restore(ParameterSnapshot snapshot);
 }
 
@@ -59,7 +59,7 @@ public abstract class ParamOperation4D<TParam>(TParam param) : ParamOperation4D
         return clone;
     }
 
-    public override ParameterSnapshot Capture()
+    public override ParameterSnapshot GetSnapshot()
     {
         if (param is not Array array)
             throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");

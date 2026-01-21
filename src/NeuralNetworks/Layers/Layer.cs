@@ -31,7 +31,7 @@ public abstract class Layer
     public abstract object Backward(object outputGradient);
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract int GetParamCount();
-    internal abstract LayerWeightsDto SerializeLayer();
+    internal abstract LayerSerializationDto Serialize();
 
     internal virtual IReadOnlyList<Operation> GetOperations()
         => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
@@ -148,21 +148,26 @@ public abstract class Layer<TIn, TOut> : Layer
 
     internal override bool IsInitialized => _operations is not null;
 
-    internal override LayerWeightsDto SerializeLayer()
+    internal override LayerSerializationDto Serialize()
     {
-        IReadOnlyList<Operation> operations = GetOperations();
-        List<OperationWeightsDto> serializedOperations = [];
+        Debug.Assert(_operations != null, "Operations were not set up.");
 
-        foreach (Operation operation in operations)
+        List<OperationSerializationDto> serializedOperations = [];
+
+        foreach (Operation operation in _operations)
         {
-            if (operation is not IParamOperation provider)
+            if (operation is not IParamOperation paramOperation)
                 continue;
 
-            ParameterSnapshot snapshot = provider.Capture();
-            serializedOperations.Add(new OperationWeightsDto(GetTypeIdentifier(operation.GetType()), ParameterDataDto.FromSnapshot(snapshot)));
+            ParameterSnapshot snapshot = paramOperation.GetSnapshot();
+
+            string operationType = GetTypeIdentifier(operation.GetType());
+            OperationSerializationDto serializedOperation = new(operationType, ParameterDataDto.FromSnapshot(snapshot));
+            serializedOperations.Add(serializedOperation);
         }
 
-        return new LayerWeightsDto(GetTypeIdentifier(GetType()), serializedOperations);
+        string layerType = GetTypeIdentifier(GetType());
+        return new LayerSerializationDto(layerType, serializedOperations);
     }
 
 }
