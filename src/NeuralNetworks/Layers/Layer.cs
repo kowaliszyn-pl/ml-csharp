@@ -2,6 +2,7 @@
 // File name: Layer.cs
 // www.kowaliszyn.pl, 2025
 
+using System.Collections.Generic;
 using System.Diagnostics;
 
 using NeuralNetworks.Layers.OperationList;
@@ -27,6 +28,9 @@ public abstract class Layer
     public abstract object Backward(object outputGradient);
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract int GetParamCount();
+
+    internal virtual IReadOnlyList<Operation> GetOperations()
+        => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
 }
 
 public abstract class Layer<TIn, TOut> : Layer
@@ -125,6 +129,14 @@ public abstract class Layer<TIn, TOut> : Layer
         Debug.Assert(_operations != null, "Operations were not set up.");
 
         return _operations.GetParamCount();
+    }
+
+    internal override IReadOnlyList<Operation> GetOperations()
+    {
+        if (_operations is null)
+            throw new InvalidOperationException($"Layer '{GetType().Name}' is not initialized. Run a forward pass before accessing operations.");
+
+        return _operations;
     }
 
 }

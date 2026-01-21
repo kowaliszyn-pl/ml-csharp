@@ -2,9 +2,11 @@
 // File name: ParamOperation2D.cs
 // www.kowaliszyn.pl, 2025
 
+using System;
 using System.Diagnostics;
 
 using NeuralNetworks.Layers;
+using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
 
@@ -20,7 +22,8 @@ public abstract class ParamOperation2D : Operation2D, IParameterCountProvider, I
 /// An Operation with parameters of type TParam.
 /// </summary>
 /// <param name="param">Parameter matrix.</param>
-public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D
+public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D, IParameterStateProvider
+    where TParam : class
 {
     private TParam? _paramGradient;
 
@@ -56,4 +59,19 @@ public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D
         return clone;
     }
 
+    ParameterSnapshot IParameterStateProvider.Capture()
+    {
+        if (param is not Array array)
+            throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
+
+        return ParameterSnapshot.FromArray(array);
+    }
+
+    void IParameterStateProvider.Restore(ParameterSnapshot snapshot)
+    {
+        if (param is not Array array)
+            throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
+
+        snapshot.CopyTo(array);
+    }
 }
