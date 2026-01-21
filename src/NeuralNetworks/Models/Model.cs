@@ -1,11 +1,7 @@
 ﻿// Neural Networks in C♯
 // File name: Model.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 
 using NeuralNetworks.Core;
@@ -55,10 +51,10 @@ public abstract class Model<TInputData, TPrediction>
 
     protected internal abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal();
 
-    public TPrediction Forward(TInputData input, bool inference) 
+    public TPrediction Forward(TInputData input, bool inference)
         => _layers.Forward(input, inference);
 
-    public void Backward(TPrediction lossGrad) 
+    public void Backward(TPrediction lossGrad)
         => _layers.Backward(lossGrad);
 
     public float TrainBatch(TInputData xBatch, TPrediction yBatch)
@@ -69,7 +65,7 @@ public abstract class Model<TInputData, TPrediction>
         return _lastLoss;
     }
 
-    public void UpdateParams(Optimizer optimizer) 
+    public void UpdateParams(Optimizer optimizer)
         => _layers.UpdateParams(optimizer);
 
     public void SaveParams(string filePath, string? comment = null)
@@ -90,20 +86,10 @@ public abstract class Model<TInputData, TPrediction>
     }
 
     public void LoadParams(string filePath)
-    {
-        if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("File path must not be empty.", nameof(filePath));
+        => LoadParamsInternal(filePath, default!, hasInitializationSample: false);
 
-        if (!File.Exists(filePath))
-            throw new FileNotFoundException("Params file was not found.", filePath);
-
-        string json = File.ReadAllText(filePath);
-        ModelWeightsDto? dto = JsonSerializer.Deserialize<ModelWeightsDto>(json, WeightSerializerOptions);
-        if (dto is null)
-            throw new InvalidOperationException("Unable to deserialize params file.");
-
-        ApplyWeights(dto);
-    }
+    public void LoadParams(string filePath, TInputData initializationSample)
+        => LoadParamsInternal(filePath, initializationSample, hasInitializationSample: true);
 
     #region Checkpoint
 
@@ -142,9 +128,39 @@ public abstract class Model<TInputData, TPrediction>
 
     #endregion Checkpoint
 
+    private void LoadParamsInternal(string filePath, TInputData initializationSample, bool hasInitializationSample)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("File path must not be empty.", nameof(filePath));
+
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("Params file was not found.", filePath);
+
+        string json = File.ReadAllText(filePath);
+        ModelWeightsDto? dto = JsonSerializer.Deserialize<ModelWeightsDto>(json, WeightSerializerOptions);
+        if (dto is null)
+            throw new InvalidOperationException("Unable to deserialize params file.");
+
+        EnsureLayersInitialized(initializationSample, hasInitializationSample);
+        ApplyWeights(dto);
+    }
+
+    private void EnsureLayersInitialized(TInputData initializationSample, bool hasInitializationSample)
+    {
+        if (_layers.All(layer => layer.IsInitialized))
+            return;
+
+        if (!hasInitializationSample)
+        {
+            throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or run Forward once before loading params.");
+        }
+
+        Forward(initializationSample, inference: true);
+    }
+
     private ModelWeightsDto BuildWeightsDto(string? comment)
     {
-        List<LayerWeightsDto> layers = new List<LayerWeightsDto>(_layers.Count);
+        List<LayerWeightsDto> layers = new(_layers.Count);
         foreach (Layer layer in _layers)
         {
             layers.Add(SerializeLayer(layer));
@@ -156,7 +172,7 @@ public abstract class Model<TInputData, TPrediction>
     private LayerWeightsDto SerializeLayer(Layer layer)
     {
         IReadOnlyList<Operation> operations = layer.GetOperations();
-        List<OperationWeightsDto> serializedOperations = new();
+        List<OperationWeightsDto> serializedOperations = [];
 
         foreach (Operation operation in operations)
         {

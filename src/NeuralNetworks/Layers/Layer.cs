@@ -31,6 +31,8 @@ public abstract class Layer
 
     internal virtual IReadOnlyList<Operation> GetOperations()
         => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
+
+    internal virtual bool IsInitialized => true;
 }
 
 public abstract class Layer<TIn, TOut> : Layer
@@ -138,5 +140,7 @@ public abstract class Layer<TIn, TOut> : Layer
 
         return _operations;
     }
+
+    internal override bool IsInitialized => _operations is not null;
 
 }

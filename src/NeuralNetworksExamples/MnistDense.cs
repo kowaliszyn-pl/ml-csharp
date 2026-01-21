@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
+using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -181,12 +182,6 @@ internal class MnistDense
 
     internal static void LoadAndEvaluate()
     {
-        // Load the model
-        string modelPath = "MnistDenseModel.json";
-
-        MnistDenseModel model = new(null);
-        model.LoadParams(modelPath); // TODO: add model path to constructor
-
         // Load test data
         float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
         (float[,] xTest, float[,] yTest) = Split(test);
@@ -196,6 +191,12 @@ internal class MnistDense
         xTest.AddInPlace(-mean);
         float stdDev = xTest.StdDev();
         xTest.DivideInPlace(stdDev);
+
+        // Load the model
+        string modelPath = "MnistDenseModel.json";
+        MnistDenseModel model = new(null);
+        float[,] initializationSample = xTest.GetRowAs2D(0);
+        model.LoadParams(modelPath, initializationSample); // TODO: add model path to constructor
 
         // Evaluate
         float[,] prediction = model.Forward(xTest, true);
