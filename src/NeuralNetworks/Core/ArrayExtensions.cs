@@ -2015,10 +2015,10 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Transposes the source by swapping its dim1 and dim2.
+    /// Transposes the matrix by swapping its rows and columns.
     /// </summary>
     /// <param name="source">The two-dimensional array to transpose.</param>
-    /// <returns>A new array with shape [dim2, dim1].</returns>
+    /// <returns>A new array with shape [columns, rows].</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Transpose(this float[,] source)
     {
