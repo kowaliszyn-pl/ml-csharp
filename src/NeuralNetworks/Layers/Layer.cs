@@ -4,9 +4,13 @@
 
 using System.Diagnostics;
 
+using NeuralNetworks.Layers.Dtos;
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
+using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
+
+using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Layers;
 
@@ -27,6 +31,7 @@ public abstract class Layer
     public abstract object Backward(object outputGradient);
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract int GetParamCount();
+    internal abstract LayerWeightsDto SerializeLayer();
 
     internal virtual IReadOnlyList<Operation> GetOperations()
         => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
@@ -142,5 +147,22 @@ public abstract class Layer<TIn, TOut> : Layer
     }
 
     internal override bool IsInitialized => _operations is not null;
+
+    internal override LayerWeightsDto SerializeLayer()
+    {
+        IReadOnlyList<Operation> operations = GetOperations();
+        List<OperationWeightsDto> serializedOperations = [];
+
+        foreach (Operation operation in operations)
+        {
+            if (operation is not IParamOperation provider)
+                continue;
+
+            ParameterSnapshot snapshot = provider.Capture();
+            serializedOperations.Add(new OperationWeightsDto(GetTypeIdentifier(operation.GetType()), ParameterDataDto.FromSnapshot(snapshot)));
+        }
+
+        return new LayerWeightsDto(GetTypeIdentifier(GetType()), serializedOperations);
+    }
 
 }

@@ -6,11 +6,14 @@ using System.Text.Json;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
+using NeuralNetworks.Layers.Dtos;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
+
+using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Models;
 
@@ -141,30 +144,17 @@ public abstract class Model<TInputData, TPrediction>
 
     private ModelWeightsDto BuildWeightsDto(string? comment)
     {
-        List<LayerWeightsDto> layers = new(_layers.Count);
-        foreach (Layer layer in _layers)
-        {
-            layers.Add(SerializeLayer(layer));
-        }
+        //List<LayerWeightsDto> layers = new(_layers.Count);
+        //foreach (Layer layer in _layers)
+        //{
+        //    layers.Add(layer.SerializeLayer());
+        //}
+
+        List<LayerWeightsDto> layers = _layers
+            .Select(layer => layer.SerializeLayer())
+            .ToList();
 
         return new ModelWeightsDto(CurrentWeightsFormatVersion, Describe(), comment, layers);
-    }
-
-    private static LayerWeightsDto SerializeLayer(Layer layer)
-    {
-        IReadOnlyList<Operation> operations = layer.GetOperations();
-        List<OperationWeightsDto> serializedOperations = [];
-
-        foreach (Operation operation in operations)
-        {
-            if (operation is not IParamOperation provider)
-                continue;
-
-            ParameterSnapshot snapshot = provider.Capture();
-            serializedOperations.Add(new OperationWeightsDto(GetTypeIdentifier(operation.GetType()), ParameterDataDto.FromSnapshot(snapshot)));
-        }
-
-        return new LayerWeightsDto(GetTypeIdentifier(layer.GetType()), serializedOperations);
     }
 
     private void ApplyWeights(ModelWeightsDto dto)
@@ -215,39 +205,13 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    private static string GetTypeIdentifier(Type type)
-        => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
+    
 
     #endregion Serialization
 
     #region Serialization DTOs
 
     private sealed record ModelWeightsDto(int Version, List<string> Architecture, string? Comment, List<LayerWeightsDto> Layers);
-
-    private sealed record LayerWeightsDto(string LayerType, List<OperationWeightsDto> Operations);
-
-    private sealed record OperationWeightsDto(string OperationType, ParameterDataDto Parameters);
-
-    private sealed record ParameterDataDto(int[] Shape, float[] Values)
-    {
-        public ParameterSnapshot ToSnapshot()
-        {
-            int[] shapeCopy = new int[Shape.Length];
-            Array.Copy(Shape, shapeCopy, Shape.Length);
-            float[] valueCopy = new float[Values.Length];
-            Array.Copy(Values, valueCopy, Values.Length);
-            return new ParameterSnapshot(shapeCopy, valueCopy);
-        }
-
-        public static ParameterDataDto FromSnapshot(ParameterSnapshot snapshot)
-        {
-            int[] shapeCopy = new int[snapshot.Shape.Length];
-            Array.Copy(snapshot.Shape, shapeCopy, shapeCopy.Length);
-            float[] valueCopy = new float[snapshot.Values.Length];
-            Array.Copy(snapshot.Values, valueCopy, valueCopy.Length);
-            return new ParameterDataDto(shapeCopy, valueCopy);
-        }
-    }
 
     #endregion Serialization DTOs
 
