@@ -2,7 +2,6 @@
 // File name: Layer.cs
 // www.kowaliszyn.pl, 2025
 
-using System.Collections.Generic;
 using System.Diagnostics;
 
 using NeuralNetworks.Layers.OperationList;
@@ -56,6 +55,7 @@ public abstract class Layer<TIn, TOut> : Layer
         bool firstPass = _input is null;
 
         // We store the pointer to the input array so we can check the shape of the input gradient in the backward pass.
+        // We also use this input (its dimensions) in the SetupLayer method.
         _input = input;
         if (firstPass)
         {

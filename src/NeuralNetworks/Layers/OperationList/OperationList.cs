@@ -32,7 +32,7 @@ public class OperationList<TIn, TOut> : List<Operation>
     /// <param name="layer">The layer this operation list belongs to.</param>
     public void UpdateParams(Layer layer, Optimizer optimizer)
     {
-        foreach (IParameterUpdater operation in this.OfType<IParameterUpdater>())
+        foreach (IParamOperation operation in this.OfType<IParamOperation>())
         {
             operation.UpdateParams(layer, optimizer);
         }
@@ -41,7 +41,7 @@ public class OperationList<TIn, TOut> : List<Operation>
     public int GetParamCount()
     {
         return this
-            .OfType<IParameterCountProvider>()
+            .OfType<IParamOperation>()
             .Sum(po => (int?)po.GetParamCount()) ?? 0;
     }
 }

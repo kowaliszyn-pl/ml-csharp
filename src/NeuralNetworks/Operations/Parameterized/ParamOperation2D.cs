@@ -1,28 +1,28 @@
 ﻿// Neural Networks in C♯
 // File name: ParamOperation2D.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
-using System;
 using System.Diagnostics;
 
 using NeuralNetworks.Layers;
-using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-public abstract class ParamOperation2D : Operation2D, IParameterCountProvider, IParameterUpdater
+public abstract class ParamOperation2D : Operation2D, IParamOperation
 {
     public abstract int GetParamCount();
     public abstract void UpdateParams(Layer? layer, Optimizer optimizer);
+    public abstract ParameterSnapshot Capture();
+    public abstract void Restore(ParameterSnapshot snapshot);
 }
 
 /// <summary>
 /// An Operation with parameters of type TParam.
 /// </summary>
 /// <param name="param">Parameter matrix.</param>
-public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D, IParameterStateProvider
+public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D
     where TParam : class
 {
     private TParam? _paramGradient;
@@ -59,7 +59,7 @@ public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D,
         return clone;
     }
 
-    ParameterSnapshot IParameterStateProvider.Capture()
+    public override ParameterSnapshot Capture()
     {
         if (param is not Array array)
             throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
@@ -67,7 +67,7 @@ public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D,
         return ParameterSnapshot.FromArray(array);
     }
 
-    void IParameterStateProvider.Restore(ParameterSnapshot snapshot)
+    public override void Restore(ParameterSnapshot snapshot)
     {
         if (param is not Array array)
             throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");

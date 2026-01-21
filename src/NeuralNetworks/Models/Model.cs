@@ -30,8 +30,10 @@ public abstract class Model<TInputData, TPrediction>
 {
     private LayerList<TInputData, TPrediction> _layers;
     private float _lastLoss;
+
     private const int CurrentWeightsFormatVersion = 1;
-    private static readonly JsonSerializerOptions WeightSerializerOptions = new()
+
+    private static readonly JsonSerializerOptions s_weightSerializerOptions = new()
     {
         WriteIndented = true
     };
@@ -68,29 +70,6 @@ public abstract class Model<TInputData, TPrediction>
     public void UpdateParams(Optimizer optimizer)
         => _layers.UpdateParams(optimizer);
 
-    public void SaveParams(string filePath, string? comment = null)
-    {
-        if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("File path must not be empty.", nameof(filePath));
-
-        ModelWeightsDto dto = BuildWeightsDto(comment);
-
-        string? directory = Path.GetDirectoryName(filePath);
-        if (!string.IsNullOrEmpty(directory))
-        {
-            Directory.CreateDirectory(directory);
-        }
-
-        string json = JsonSerializer.Serialize(dto, WeightSerializerOptions);
-        File.WriteAllText(filePath, json);
-    }
-
-    public void LoadParams(string filePath)
-        => LoadParamsInternal(filePath, default!, hasInitializationSample: false);
-
-    public void LoadParams(string filePath, TInputData initializationSample)
-        => LoadParamsInternal(filePath, initializationSample, hasInitializationSample: true);
-
     #region Checkpoint
 
     private Model<TInputData, TPrediction>? _checkpoint;
@@ -123,12 +102,49 @@ public abstract class Model<TInputData, TPrediction>
         return clone;
     }
 
+    #endregion Checkpoint
+
     public int GetParamCount()
         => _layers.Sum(l => (int?)l.GetParamCount()) ?? 0;
 
-    #endregion Checkpoint
+    public List<string> Describe(int indentation = 0)
+    {
+        string indent = new(' ', indentation);
+        string newIndent = new(' ', indentation + Constants.Indentation);
+        string layerIndent = new(' ', indentation + 2 * Constants.Indentation);
+        List<string> res = [];
+        res.Add($"{indent}Model");
+        res.Add($"{newIndent}Type: {this}");
+        res.Add($"{newIndent}Random: {Random}");
+        res.Add($"{newIndent}LossFunction: {LossFunction}");
+        res.Add($"{newIndent}Layers");
+        foreach (Layer layer in _layers)
+        {
+            res.Add($"{layerIndent}{layer}");
+        }
+        return res;
+    }
 
-    private void LoadParamsInternal(string filePath, TInputData initializationSample, bool hasInitializationSample)
+    #region Serialization
+
+    public void SaveParams(string filePath, string? comment = null)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+            throw new ArgumentException("File path must not be empty.", nameof(filePath));
+
+        ModelWeightsDto dto = BuildWeightsDto(comment);
+
+        string? directory = Path.GetDirectoryName(filePath);
+        if (!string.IsNullOrEmpty(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        string json = JsonSerializer.Serialize(dto, s_weightSerializerOptions);
+        File.WriteAllText(filePath, json);
+    }
+
+    public void LoadParams(string filePath, TInputData? initializationSample = default)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("File path must not be empty.", nameof(filePath));
@@ -137,20 +153,19 @@ public abstract class Model<TInputData, TPrediction>
             throw new FileNotFoundException("Params file was not found.", filePath);
 
         string json = File.ReadAllText(filePath);
-        ModelWeightsDto? dto = JsonSerializer.Deserialize<ModelWeightsDto>(json, WeightSerializerOptions);
-        if (dto is null)
-            throw new InvalidOperationException("Unable to deserialize params file.");
+        ModelWeightsDto? dto = JsonSerializer.Deserialize<ModelWeightsDto>(json, s_weightSerializerOptions) 
+            ?? throw new InvalidOperationException("Unable to deserialize params file.");
 
-        EnsureLayersInitialized(initializationSample, hasInitializationSample);
+        EnsureLayersInitialized(initializationSample);
         ApplyWeights(dto);
     }
 
-    private void EnsureLayersInitialized(TInputData initializationSample, bool hasInitializationSample)
+    private void EnsureLayersInitialized(TInputData? initializationSample)
     {
         if (_layers.All(layer => layer.IsInitialized))
             return;
 
-        if (!hasInitializationSample)
+        if (initializationSample is null)
         {
             throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or run Forward once before loading params.");
         }
@@ -163,20 +178,20 @@ public abstract class Model<TInputData, TPrediction>
         List<LayerWeightsDto> layers = new(_layers.Count);
         foreach (Layer layer in _layers)
         {
-            layers.Add(SerializeLayer(layer));
+            layers.Add(Model<TInputData, TPrediction>.SerializeLayer(layer));
         }
 
         return new ModelWeightsDto(CurrentWeightsFormatVersion, Describe(), comment, layers);
     }
 
-    private LayerWeightsDto SerializeLayer(Layer layer)
+    private static LayerWeightsDto SerializeLayer(Layer layer)
     {
         IReadOnlyList<Operation> operations = layer.GetOperations();
         List<OperationWeightsDto> serializedOperations = [];
 
         foreach (Operation operation in operations)
         {
-            if (operation is not IParameterStateProvider provider)
+            if (operation is not IParamOperation provider)
                 continue;
 
             ParameterSnapshot snapshot = provider.Capture();
@@ -202,7 +217,7 @@ public abstract class Model<TInputData, TPrediction>
             EnsureTypeMatch(layerDto.LayerType, layer.GetType(), layerIndex, operationIndex: null);
 
             IReadOnlyList<Operation> operations = layer.GetOperations();
-            List<Operation> parameterizedOperations = operations.Where(op => op is IParameterStateProvider).ToList();
+            List<Operation> parameterizedOperations = operations.Where(op => op is IParamOperation).ToList();
 
             if (parameterizedOperations.Count != layerDto.Operations.Count)
             {
@@ -216,7 +231,7 @@ public abstract class Model<TInputData, TPrediction>
 
                 EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, opIndex);
 
-                IParameterStateProvider provider = (IParameterStateProvider)operation;
+                IParamOperation provider = (IParamOperation)operation;
                 provider.Restore(operationDto.Parameters.ToSnapshot());
             }
         }
@@ -237,23 +252,7 @@ public abstract class Model<TInputData, TPrediction>
     private static string GetTypeIdentifier(Type type)
         => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
 
-    public List<string> Describe(int indentation = 0)
-    {
-        string indent = new(' ', indentation);
-        string newIndent = new(' ', indentation + Constants.Indentation);
-        string layerIndent = new(' ', indentation + 2 * Constants.Indentation);
-        List<string> res = [];
-        res.Add($"{indent}Model");
-        res.Add($"{newIndent}Type: {this}");
-        res.Add($"{newIndent}Random: {Random}");
-        res.Add($"{newIndent}LossFunction: {LossFunction}");
-        res.Add($"{newIndent}Layers");
-        foreach (Layer layer in _layers)
-        {
-            res.Add($"{layerIndent}{layer}");
-        }
-        return res;
-    }
+    #endregion Serialization
 
     #region Serialization DTOs
 

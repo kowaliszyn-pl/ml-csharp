@@ -1,12 +1,10 @@
 // Neural Networks in C♯
 // File name: ParameterSnapshot.cs
-// www.kowaliszyn.pl, 2026
-
-using System;
+// www.kowaliszyn.pl, 2025 - 2026
 
 namespace NeuralNetworks.Operations;
 
-internal readonly record struct ParameterSnapshot
+public readonly record struct ParameterSnapshot
 {
     public ParameterSnapshot(int[] shape, float[] values)
     {
