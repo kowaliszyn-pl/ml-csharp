@@ -72,7 +72,7 @@ public abstract class Model<TInputData, TPrediction>
     public void UpdateParams(Optimizer optimizer) 
         => _layers.UpdateParams(optimizer);
 
-    public void SaveWeights(string filePath, string? comment = null)
+    public void SaveParams(string filePath, string? comment = null)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("File path must not be empty.", nameof(filePath));
@@ -89,18 +89,18 @@ public abstract class Model<TInputData, TPrediction>
         File.WriteAllText(filePath, json);
     }
 
-    public void LoadWeights(string filePath)
+    public void LoadParams(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("File path must not be empty.", nameof(filePath));
 
         if (!File.Exists(filePath))
-            throw new FileNotFoundException("Weights file was not found.", filePath);
+            throw new FileNotFoundException("Params file was not found.", filePath);
 
         string json = File.ReadAllText(filePath);
         ModelWeightsDto? dto = JsonSerializer.Deserialize<ModelWeightsDto>(json, WeightSerializerOptions);
         if (dto is null)
-            throw new InvalidOperationException("Unable to deserialize weights file.");
+            throw new InvalidOperationException("Unable to deserialize params file.");
 
         ApplyWeights(dto);
     }
@@ -201,7 +201,7 @@ public abstract class Model<TInputData, TPrediction>
                 EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, opIndex);
 
                 IParameterStateProvider provider = (IParameterStateProvider)operation;
-                provider.Restore(operationDto.Parameter.ToSnapshot());
+                provider.Restore(operationDto.Parameters.ToSnapshot());
             }
         }
     }
@@ -245,7 +245,7 @@ public abstract class Model<TInputData, TPrediction>
 
     private sealed record LayerWeightsDto(string LayerType, List<OperationWeightsDto> Operations);
 
-    private sealed record OperationWeightsDto(string OperationType, ParameterDataDto Parameter);
+    private sealed record OperationWeightsDto(string OperationType, ParameterDataDto Parameters);
 
     private sealed record ParameterDataDto(int[] Shape, float[] Values)
     {

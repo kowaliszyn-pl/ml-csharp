@@ -113,7 +113,6 @@ public abstract class Trainer<TInputData, TPrediction>(
             string environment = "Release";
 #endif
             logger?.LogInformation("Environment: {environment}.", environment);
-            //logger?.LogInformation("Operation backend: {operationBackend}", OperationBackend.CurrentType);
 
             (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
             int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
@@ -224,7 +223,11 @@ public abstract class Trainer<TInputData, TPrediction>(
                     if (testLoss < _bestLoss)
                     {
                         _bestLoss = testLoss;
-                        model.SaveWeights($"best_weights_{epoch}.json", $"Best weights at epoch {epoch} with loss {testLoss:F5}");
+                        string fileName = $"best_model_{epoch}.json";
+                        model.SaveParams(fileName, $"Best model at epoch {epoch} with loss {testLoss:F5}");
+                        if(consoleOutputMode > ConsoleOutputMode.Disable)
+                            WriteLine($"New best loss: {_bestLoss:F5}. Params saved at {fileName}.");
+                        logger?.LogInformation("New best loss: {bestLoss} at epoch {epoch}. Params saved at {fileName}.", _bestLoss, epoch, fileName);
                     }
                     else if (earlyStop)
                     {
