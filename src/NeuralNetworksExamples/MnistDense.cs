@@ -122,6 +122,10 @@ internal class MnistDense
             batchSize: BatchSize,
             displayDescriptionOnStart: true
         );
+
+        // Save the model
+        string modelPath = "MnistDenseModel.json";
+        model.SaveParams(modelPath, "Final trained model.");
     }
 
     private static readonly EvalFunction<float[,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
@@ -173,5 +177,43 @@ internal class MnistDense
         }
 
         return (xTest, oneHot);
+    }
+
+    internal static void LoadAndEvaluate()
+    {
+        // Load the model
+        string modelPath = "MnistDenseModel.json";
+
+        MnistDenseModel model = new(null);
+        model.LoadParams(modelPath); // TODO: add model path to constructor
+
+        // Load test data
+        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
+        (float[,] xTest, float[,] yTest) = Split(test);
+
+        // Standardize data
+        float mean = xTest.Mean();
+        xTest.AddInPlace(-mean);
+        float stdDev = xTest.StdDev();
+        xTest.DivideInPlace(stdDev);
+
+        // Evaluate
+        float[,] prediction = model.Forward(xTest, true);
+
+        // predictionArgmax is an array of predicted digits for each sample.
+        int[] predictionArgmax = prediction.Argmax();
+        int rows = predictionArgmax.GetLength(0);
+
+        Debug.Assert(rows == yTest.GetLength(0), "Number of samples in prediction and yEvalTest do not match.");
+
+        int hits = 0;
+        for (int row = 0; row < rows; row++)
+        {
+            int predictedDigit = predictionArgmax[row];
+            if (yTest[row, predictedDigit] == 1f)
+                hits++;
+        }
+        float accuracy = (float)hits / rows;
+        WriteLine($"Model accuracy on test set: {accuracy:P2}");
     }
 }
