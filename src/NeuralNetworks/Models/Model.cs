@@ -6,11 +6,8 @@ using System.Text.Json;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
-using NeuralNetworks.Layers.Dtos;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models.LayerList;
-using NeuralNetworks.Operations;
-using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
 
 using static NeuralNetworks.Utils.ModelUtils;
@@ -197,28 +194,7 @@ public abstract class Model<TInputData, TPrediction>
             Layer layer = _layers[layerIndex];
             LayerParams layerParams = modelParams.Layers[layerIndex];
 
-            //EnsureTypeMatch(layerParams.LayerType, layer.GetType(), layerIndex);
-
             layer.ApplyParams(layerParams, layerIndex);
-
-            //IReadOnlyList<Operation> operations = layer.GetOperations();
-            //List<Operation> parameterizedOperations = operations.Where(op => op is IParamOperation).ToList();
-
-            //if (parameterizedOperations.Count != layerParams.Operations.Count)
-            //{
-            //    throw new InvalidOperationException($"Operation count mismatch for layer '{layer.GetType().Name}' at index {layerIndex}. Expected {parameterizedOperations.Count} operations with parameters but file has {layerParams.Operations.Count}.");
-            //}
-
-            //for (int opIndex = 0; opIndex < parameterizedOperations.Count; opIndex++)
-            //{
-            //    Operation operation = parameterizedOperations[opIndex];
-            //    OperationSerializationDto operationDto = layerParams.Operations[opIndex];
-
-            //    EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, opIndex);
-
-            //    IParamOperation provider = (IParamOperation)operation;
-            //    provider.Restore(operationDto.Parameters.ToSnapshot());
-            //}
         }
     }
 

@@ -1,11 +1,9 @@
 ﻿// Neural Networks in C♯
 // File name: Layer.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
-using System.Reflection.Emit;
 
-using NeuralNetworks.Core.Operations;
 using NeuralNetworks.Layers.Dtos;
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
@@ -18,7 +16,7 @@ namespace NeuralNetworks.Layers;
 
 public abstract class Layer
 {
-    bool _registered = false;
+    private bool _registered = false;
 
     public void SetRegistered()
     {
@@ -34,12 +32,7 @@ public abstract class Layer
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract int GetParamCount();
     internal abstract LayerParams GetParams();
-
-    //internal virtual IReadOnlyList<Operation> GetOperations()
-    //    => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
-
     internal abstract void ApplyParams(LayerParams layerParams, int layerIndex);
-
     internal virtual bool IsInitialized => true;
 }
 
@@ -142,14 +135,6 @@ public abstract class Layer<TIn, TOut> : Layer
         return _operations.GetParamCount();
     }
 
-    //internal override IReadOnlyList<Operation> GetOperations()
-    //{
-    //    if (_operations is null)
-    //        throw new InvalidOperationException($"Layer '{GetType().Name}' is not initialized. Run a forward pass before accessing operations.");
-
-    //    return _operations;
-    //}
-
     internal override bool IsInitialized => _operations is not null;
 
     internal override LayerParams GetParams()
@@ -174,7 +159,7 @@ public abstract class Layer<TIn, TOut> : Layer
         return new LayerParams(layerType, serializedOperations);
     }
 
-    override internal void ApplyParams(LayerParams layerParams, int layerIndex)
+    internal override void ApplyParams(LayerParams layerParams, int layerIndex)
     {
         Debug.Assert(_operations != null, "Operations were not set up.");
 
@@ -198,18 +183,6 @@ public abstract class Layer<TIn, TOut> : Layer
             IParamOperation provider = (IParamOperation)operation;
             provider.Restore(operationDto.Parameters.ToSnapshot());
         }
-
-        //for (int i = 0; i < operationCount; i++)
-        //{
-        //    Operation operation = _operations[i];
-        //    if (operation is not IParamOperation paramOperation)
-        //        continue;
-        //    OperationSerializationDto serializedOperation = layerParams.Operations[i];
-        //    EnsureTypeMatch(serializedOperation.OperationType, operation.GetType(), layerIndex: -1, operationIndex: i);
-        //    ParameterDataDto parameterDataDto = serializedOperation.ParameterData;
-        //    ParameterSnapshot snapshot = parameterDataDto.ToSnapshot();
-        //    paramOperation.ApplySnapshot(snapshot);
-        //}
     }
 
 }
