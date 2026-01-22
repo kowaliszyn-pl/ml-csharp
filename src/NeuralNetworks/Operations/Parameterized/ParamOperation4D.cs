@@ -7,14 +7,27 @@ using System.Diagnostics;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
+using static NeuralNetworks.Utils.ModelUtils;
+
 namespace NeuralNetworks.Operations.Parameterized;
 
 public abstract class ParamOperation4D : Operation4D, IParamOperation
 {
-    public abstract int GetParamCount();
-    public abstract void UpdateParams(Layer? layer, Optimizer optimizer);
-    public abstract ParameterSnapshot GetSnapshot();
-    public abstract void Restore(ParameterSnapshot snapshot);
+    internal abstract int GetParamCount();
+    internal abstract void UpdateParams(Layer? layer, Optimizer optimizer);
+    internal abstract ParameterSnapshot GetSnapshot();
+    internal abstract void Restore(ParameterSnapshot snapshot);
+    internal abstract ParamOperationData GetData();
+    internal abstract void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
+
+    void IParamOperation.ApplyData(ParamOperationData data, int layerIndex, int operationIndex)
+        => ApplyData(data, layerIndex, operationIndex);
+
+    ParamOperationData IParamOperation.GetData() => GetData();
+    int IParamOperation.GetParamCount() => GetParamCount();
+    ParameterSnapshot IParamOperation.GetSnapshot() => GetSnapshot();
+    void IParamOperation.Restore(ParameterSnapshot snapshot) => Restore(snapshot);
+    void IParamOperation.UpdateParams(Layer? layer, Optimizer optimizer) => UpdateParams(layer, optimizer);
 }
 
 /// <summary>
@@ -58,7 +71,7 @@ public abstract class ParamOperation4D<TParam>(TParam param) : ParamOperation4D
         return clone;
     }
 
-    public override ParameterSnapshot GetSnapshot()
+    internal override ParameterSnapshot GetSnapshot()
     {
         if (param is not Array array)
             throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
@@ -66,11 +79,34 @@ public abstract class ParamOperation4D<TParam>(TParam param) : ParamOperation4D
         return ParameterSnapshot.FromArray(array);
     }
 
-    public override void Restore(ParameterSnapshot snapshot)
+    internal override void Restore(ParameterSnapshot snapshot)
     {
         if (param is not Array array)
             throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
 
         snapshot.CopyTo(array);
+    }
+
+    internal override ParamOperationData GetData()
+    {
+        if (param is not Array array)
+            throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
+
+        string operationType = GetTypeIdentifier(GetType());
+
+        return new ParamOperationData(operationType, ParamOperationParams.FromArray(array));
+    }
+
+    internal override void ApplyData(ParamOperationData data, int layerIndex, int operationIndex)
+    {
+        if (param is not Array array)
+            throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
+
+        EnsureTypeMatch(data.OperationType, GetType(), layerIndex, operationIndex);
+
+        data.Parameters.CopyTo(array);
+
+        //data.Parameters.OperationType = GetType().Name;
+        //data.Parameters.Parameters = ParameterSnapshot.FromArray(array);
     }
 }

@@ -25,12 +25,12 @@ public class WeightMultiply(float[,] weights) : ParamOperation2D<float[,]>(weigh
     protected override float[,] CalcParamGradient(float[,] outputGradient)
         => WeightMultiplyParamGradient(Input, outputGradient);
 
-    public override void UpdateParams(Layer? layer, Optimizer optimizer)
+    internal override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);
 
     protected override void EnsureSameShapeForParam(float[,]? param, float[,] paramGradient)
         => EnsureSameShape(param, paramGradient);
 
-    public override int GetParamCount()
+    internal override int GetParamCount()
         => Param.Length;
 }

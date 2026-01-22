@@ -13,4 +13,6 @@ internal interface IParamOperation
     public void UpdateParams(Layer? layer, Optimizer optimizer);
     public ParameterSnapshot GetSnapshot();
     public void Restore(ParameterSnapshot snapshot);
+    public ParamOperationData GetData();
+    public void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
 }
