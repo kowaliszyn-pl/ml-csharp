@@ -196,6 +196,7 @@ internal class MnistDense
         (float[,] xTest, float[,] yTest) = Split(test);
 
         // Load standardization stats
+        // Note: We have to use the same mean and stdDev as used during training.
         var stats = File.ReadAllText($"{ModelName}.stats").Split(';');
         float mean = float.Parse(stats[0]);
         float stdDev = float.Parse(stats[1]);
