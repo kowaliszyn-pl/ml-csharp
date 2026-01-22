@@ -7,7 +7,7 @@ using System.Diagnostics;
 using NeuralNetworks.Layers.Dtos;
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
-using NeuralNetworks.Operations.Interfaces;
+using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.Optimizers;
 
 using static NeuralNetworks.Utils.ModelUtils;

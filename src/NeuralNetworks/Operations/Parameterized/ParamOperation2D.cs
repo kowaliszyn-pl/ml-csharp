@@ -5,7 +5,6 @@
 using System.Diagnostics;
 
 using NeuralNetworks.Layers;
-using NeuralNetworks.Operations.Interfaces;
 using NeuralNetworks.Optimizers;
 
 namespace NeuralNetworks.Operations.Parameterized;

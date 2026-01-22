@@ -5,7 +5,7 @@
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
-namespace NeuralNetworks.Operations.Interfaces;
+namespace NeuralNetworks.Operations.Parameterized;
 
 internal interface IParamOperation
 {

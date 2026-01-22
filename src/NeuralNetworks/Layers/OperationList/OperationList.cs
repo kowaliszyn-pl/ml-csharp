@@ -1,5 +1,5 @@
 ﻿using NeuralNetworks.Operations;
-using NeuralNetworks.Operations.Interfaces;
+using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.Optimizers;
 
 namespace NeuralNetworks.Layers.OperationList;
