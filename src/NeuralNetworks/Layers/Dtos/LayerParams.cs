@@ -8,4 +8,4 @@ using System.Text;
 
 namespace NeuralNetworks.Layers.Dtos;
 
-internal sealed record LayerSerializationDto(string LayerType, List<OperationSerializationDto> Operations);
+internal sealed record LayerParams(string LayerType, List<OperationSerializationDto> Operations);

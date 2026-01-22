@@ -194,15 +194,14 @@ internal class MnistDense
         (float[,] xTest, float[,] yTest) = Split(test);
 
         // Standardize data
+        // TODO: a model was trained based on standardized data of xTrain, but we do not have access to xTrain here. In a real-world scenario, we would save the mean and stdDev used during training and apply the same transformation here. The results can be different from those obtained during training evaluation.
         float mean = xTest.Mean();
         xTest.AddInPlace(-mean);
         float stdDev = xTest.StdDev();
         xTest.DivideInPlace(stdDev);
 
         // Load the model
-        string modelPath = "MnistDenseModel.json";
-        MnistDenseModel model = new(modelPath);
-        //model.LoadParams(modelPath);
+        MnistDenseModel model = new("MnistDenseModel.json");
 
         // Evaluate
         float[,] prediction = model.Forward(xTest, true);
@@ -221,6 +220,9 @@ internal class MnistDense
                 hits++;
         }
         float accuracy = (float)hits / rows;
+        float loss = model.LossFunction.Forward(prediction, yTest);
+
         WriteLine($"Model accuracy on test set: {accuracy:P2}");
+        WriteLine($"Model loss on test set: {loss:F4}");
     }
 }

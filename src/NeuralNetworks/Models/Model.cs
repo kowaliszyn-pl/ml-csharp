@@ -34,7 +34,7 @@ public abstract class Model<TInputData, TPrediction>
     private LayerList<TInputData, TPrediction> _layers;
     private float _lastLoss;
     private readonly string? _modelFilePath;
-    private ModelInputShapeDto? _inputShape;
+    private ModelInputShape? _inputShape;
 
     private const int CurrentModelFormatVersion = 1;
 
@@ -49,14 +49,12 @@ public abstract class Model<TInputData, TPrediction>
         Random = random;
         _modelFilePath = modelFilePath;
         _layers = (layerListBuilder ?? CreateLayerListBuilderInternal()).Build();
-      
+
         if (modelFilePath is not null)
         {
             LoadParams(modelFilePath);
         }
     }
-
-    public IReadOnlyList<Layer> Layers => _layers;
 
     public Loss<TPrediction> LossFunction { get; private set; }
 
@@ -97,7 +95,7 @@ public abstract class Model<TInputData, TPrediction>
         res.Add($"{newIndent}Type: {this}");
         res.Add($"{newIndent}Random: {Random}");
         res.Add($"{newIndent}LossFunction: {LossFunction}");
-        if(_modelFilePath != null)
+        if (_modelFilePath != null)
             res.Add($"{newIndent}ModelFilePath: {_modelFilePath}");
         res.Add($"{newIndent}Layers");
         foreach (Layer layer in _layers)
@@ -107,6 +105,21 @@ public abstract class Model<TInputData, TPrediction>
         return res;
     }
 
+    private void RememberInputShape(TInputData input)
+    {
+        // If input shape is already known, no need to capture it again.
+        if (_inputShape != null || input is not Array array)
+            return;
+
+        int[] dimensions = new int[array.Rank];
+        for (int dimension = 0; dimension < array.Rank; dimension++)
+        {
+            dimensions[dimension] = array.GetLength(dimension);
+        }
+
+        _inputShape = new ModelInputShape(GetTypeIdentifier(typeof(TInputData)), dimensions);
+    }
+
     #region Serialization
 
     public void SaveParams(string filePath, string? comment = null)
@@ -114,7 +127,18 @@ public abstract class Model<TInputData, TPrediction>
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("File path must not be empty.", nameof(filePath));
 
-        ModelParams modelParams = GetModelParams(comment);
+        // Get the model parameters to serialize
+
+        List<LayerParams> serializedLayers = _layers
+            .Select(layer => layer.Serialize())
+            .ToList();
+
+        ModelInputShape inputShape = _inputShape
+            ?? throw new InvalidOperationException("Unable to determine model input shape. Run a forward pass before saving parameters.");
+
+        ModelParams modelParams = new(CurrentModelFormatVersion, Describe(), comment, inputShape, serializedLayers);
+
+        // Save to file
 
         string? directory = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(directory))
@@ -135,64 +159,43 @@ public abstract class Model<TInputData, TPrediction>
             throw new FileNotFoundException("Params file was not found.", filePath);
 
         string json = File.ReadAllText(filePath);
-        ModelParams? dto = JsonSerializer.Deserialize<ModelParams>(json, s_paramsSerializerOptions) 
+        ModelParams dto = JsonSerializer.Deserialize<ModelParams>(json, s_paramsSerializerOptions)
             ?? throw new InvalidOperationException("Unable to deserialize params file.");
 
-        EnsureLayersInitialized(initializationSample, dto.InputShape);
-
-        if (_inputShape is null && dto.InputShape is not null)
-        {
-            _inputShape = dto.InputShape;
-        }
-
-        ApplyWeights(dto);
-    }
-
-    private void EnsureLayersInitialized(TInputData? initializationSample, ModelInputShapeDto? persistedInputShape)
-    {
-        if (_layers.All(layer => layer.IsInitialized))
-            return;
-
-        if (initializationSample is not null)
-        {
-            Forward(initializationSample, inference: true);
-            return;
-        }
-
-        if (persistedInputShape is not null)
-        {
-            TInputData syntheticSample = CreateInputFromShape(persistedInputShape);
-            Forward(syntheticSample, inference: true);
-            return;
-        }
-
-        throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or ensure the weights file contains input shape metadata.");
-    }
-
-    private ModelParams GetModelParams(string? comment)
-    {
-        List<LayerSerializationDto> serializedLayers = _layers
-            .Select(layer => layer.Serialize())
-            .ToList();
-
-        ModelInputShapeDto inputShape = _inputShape
-            ?? throw new InvalidOperationException("Unable to determine model input shape. Run a forward pass before saving parameters.");
-
-        return new ModelParams(CurrentModelFormatVersion, Describe(), comment, serializedLayers, inputShape);
-    }
-
-    private void ApplyWeights(ModelParams dto)
-    {
         if (dto.Version != CurrentModelFormatVersion)
             throw new InvalidOperationException($"Unsupported weights file version '{dto.Version}'. Expected '{CurrentModelFormatVersion}'.");
 
         if (dto.Layers.Count != _layers.Count)
             throw new InvalidOperationException($"Layer count mismatch. Model has {_layers.Count} layers but weights file has {dto.Layers.Count}.");
 
+        // Ensure all layers are initialized before applying weights
+
+        if (_layers.Any(layer => !layer.IsInitialized))
+        {
+            if (initializationSample is not null)
+            {
+                Forward(initializationSample, inference: true);
+            }
+            else if (dto.InputShape is not null)
+            {
+                TInputData syntheticSample = dto.InputShape.CreateSyntheticSample<TInputData>();
+                Forward(syntheticSample, inference: true);
+            }
+            else
+                throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or ensure the weights file contains input shape metadata.");
+        }
+
+        if (_inputShape is null && dto.InputShape is not null)
+        {
+            _inputShape = dto.InputShape;
+        }
+
+        // Apply parameters to each layer
+
         for (int layerIndex = 0; layerIndex < _layers.Count; layerIndex++)
         {
             Layer layer = _layers[layerIndex];
-            LayerSerializationDto layerDto = dto.Layers[layerIndex];
+            LayerParams layerDto = dto.Layers[layerIndex];
 
             EnsureTypeMatch(layerDto.LayerType, layer.GetType(), layerIndex, operationIndex: null);
 
@@ -217,71 +220,7 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    private static void EnsureTypeMatch(string? persistedType, Type runtimeType, int layerIndex, int? operationIndex)
-    {
-        string expectedType = GetTypeIdentifier(runtimeType);
-        if (!string.Equals(persistedType, expectedType, StringComparison.Ordinal))
-        {
-            string location = operationIndex is null
-                ? $"Layer {layerIndex}"
-                : $"Layer {layerIndex}, operation {operationIndex}";
-            throw new InvalidOperationException($"Type mismatch at {location}. Expected '{expectedType}' but found '{persistedType ?? "<unknown>"}'.");
-        }
-    }
-
-    private void RememberInputShape(TInputData input)
-    {
-        ModelInputShapeDto? capturedShape = TryCaptureInputShape(input);
-        if (capturedShape is not null)
-        {
-            _inputShape = capturedShape;
-        }
-    }
-
-    private static ModelInputShapeDto? TryCaptureInputShape(TInputData input)
-    {
-        if (input is not Array array)
-            return null;
-
-        int[] dimensions = new int[array.Rank];
-        for (int dimension = 0; dimension < array.Rank; dimension++)
-        {
-            dimensions[dimension] = array.GetLength(dimension);
-        }
-
-        return new ModelInputShapeDto(GetTypeIdentifier(typeof(TInputData)), dimensions);
-    }
-
-    private static TInputData CreateInputFromShape(ModelInputShapeDto inputShape)
-    {
-        if (inputShape is null)
-            throw new ArgumentNullException(nameof(inputShape));
-
-        string expectedType = GetTypeIdentifier(typeof(TInputData));
-        if (!string.Equals(inputShape.InputType, expectedType, StringComparison.Ordinal))
-        {
-            throw new InvalidOperationException($"Input type mismatch. Model expects '{expectedType}' but file contains '{inputShape.InputType ?? "<unknown>"}'.");
-        }
-
-        if (!typeof(TInputData).IsArray)
-        {
-            throw new NotSupportedException($"Input type '{typeof(TInputData)}' is not supported for shape-based initialization. Provide an initialization sample explicitly.");
-        }
-
-        Type? elementType = typeof(TInputData).GetElementType();
-        if (elementType is null)
-            throw new InvalidOperationException($"Unable to determine element type for '{typeof(TInputData)}'.");
-
-        if (inputShape.Dimensions is null || inputShape.Dimensions.Length == 0)
-            throw new InvalidOperationException("Persisted input shape is empty.");
-
-        Array sample = Array.CreateInstance(elementType, inputShape.Dimensions);
-        return (TInputData)(object)sample;
-    }
-
-    private sealed record ModelParams(int Version, List<string> Architecture, string? Comment, List<LayerSerializationDto> Layers, ModelInputShapeDto? InputShape);
-
-    private sealed record ModelInputShapeDto(string InputType, int[] Dimensions);
+    private sealed record ModelParams(int Version, List<string> Architecture, string? Comment, ModelInputShape InputShape, List<LayerParams> Layers);
 
     #endregion Serialization
 

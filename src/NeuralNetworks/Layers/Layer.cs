@@ -31,7 +31,7 @@ public abstract class Layer
     public abstract object Backward(object outputGradient);
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract int GetParamCount();
-    internal abstract LayerSerializationDto Serialize();
+    internal abstract LayerParams Serialize();
 
     internal virtual IReadOnlyList<Operation> GetOperations()
         => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
@@ -148,7 +148,7 @@ public abstract class Layer<TIn, TOut> : Layer
 
     internal override bool IsInitialized => _operations is not null;
 
-    internal override LayerSerializationDto Serialize()
+    internal override LayerParams Serialize()
     {
         Debug.Assert(_operations != null, "Operations were not set up.");
 
@@ -167,7 +167,7 @@ public abstract class Layer<TIn, TOut> : Layer
         }
 
         string layerType = GetTypeIdentifier(GetType());
-        return new LayerSerializationDto(layerType, serializedOperations);
+        return new LayerParams(layerType, serializedOperations);
     }
 
 }
