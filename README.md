@@ -1,19 +1,5 @@
 # Neural networks in C#
 
-This repository contains source code for implementing neural networks in C#. It includes various examples and implementations of neural network architectures, training algorithms, and utilities for working with machine learning tasks.
+This project provides a C# library for implementing neural networks, including a variety of architectures, training algorithms, and utilities for machine learning tasks. It features modular components for building custom models, as well as example projects such as MNIST digit classification. The codebase is designed for learning, experimentation, and practical applications in C# environments. 
 
-See https://www.kowaliszyn.pl/ for more information (in Polish).
-
-# Projects
-
-## Aps
-
-### Simple linear regression
-
-### Multiple linear regression with matrix operations
-
-### First neural network - BostonHousingML
-
-## Libs
-
-### NeuralNetworks
+For more details, description and tutorials, visit kowaliszyn.pl (in Polish).
