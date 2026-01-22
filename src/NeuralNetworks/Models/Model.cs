@@ -130,7 +130,7 @@ public abstract class Model<TInputData, TPrediction>
         // Get the model parameters to serialize
 
         List<LayerParams> serializedLayers = _layers
-            .Select(layer => layer.Serialize())
+            .Select(layer => layer.GetParams())
             .ToList();
 
         ModelInputShape inputShape = _inputShape
@@ -159,14 +159,14 @@ public abstract class Model<TInputData, TPrediction>
             throw new FileNotFoundException("Params file was not found.", filePath);
 
         string json = File.ReadAllText(filePath);
-        ModelParams dto = JsonSerializer.Deserialize<ModelParams>(json, s_paramsSerializerOptions)
+        ModelParams modelParams = JsonSerializer.Deserialize<ModelParams>(json, s_paramsSerializerOptions)
             ?? throw new InvalidOperationException("Unable to deserialize params file.");
 
-        if (dto.Version != CurrentModelFormatVersion)
-            throw new InvalidOperationException($"Unsupported weights file version '{dto.Version}'. Expected '{CurrentModelFormatVersion}'.");
+        if (modelParams.Version != CurrentModelFormatVersion)
+            throw new InvalidOperationException($"Unsupported weights file version '{modelParams.Version}'. Expected '{CurrentModelFormatVersion}'.");
 
-        if (dto.Layers.Count != _layers.Count)
-            throw new InvalidOperationException($"Layer count mismatch. Model has {_layers.Count} layers but weights file has {dto.Layers.Count}.");
+        if (modelParams.Layers.Count != _layers.Count)
+            throw new InvalidOperationException($"Layer count mismatch. Model has {_layers.Count} layers but weights file has {modelParams.Layers.Count}.");
 
         // Ensure all layers are initialized before applying weights
 
@@ -176,18 +176,18 @@ public abstract class Model<TInputData, TPrediction>
             {
                 Forward(initializationSample, inference: true);
             }
-            else if (dto.InputShape is not null)
+            else if (modelParams.InputShape is not null)
             {
-                TInputData syntheticSample = dto.InputShape.CreateSyntheticSample<TInputData>();
+                TInputData syntheticSample = modelParams.InputShape.CreateSyntheticSample<TInputData>();
                 Forward(syntheticSample, inference: true);
             }
             else
                 throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or ensure the weights file contains input shape metadata.");
         }
 
-        if (_inputShape is null && dto.InputShape is not null)
+        if (_inputShape is null && modelParams.InputShape is not null)
         {
-            _inputShape = dto.InputShape;
+            _inputShape = modelParams.InputShape;
         }
 
         // Apply parameters to each layer
@@ -195,28 +195,30 @@ public abstract class Model<TInputData, TPrediction>
         for (int layerIndex = 0; layerIndex < _layers.Count; layerIndex++)
         {
             Layer layer = _layers[layerIndex];
-            LayerParams layerDto = dto.Layers[layerIndex];
+            LayerParams layerParams = modelParams.Layers[layerIndex];
 
-            EnsureTypeMatch(layerDto.LayerType, layer.GetType(), layerIndex, operationIndex: null);
+            //EnsureTypeMatch(layerParams.LayerType, layer.GetType(), layerIndex);
 
-            IReadOnlyList<Operation> operations = layer.GetOperations();
-            List<Operation> parameterizedOperations = operations.Where(op => op is IParamOperation).ToList();
+            layer.ApplyParams(layerParams, layerIndex);
 
-            if (parameterizedOperations.Count != layerDto.Operations.Count)
-            {
-                throw new InvalidOperationException($"Operation count mismatch for layer '{layer.GetType().Name}' at index {layerIndex}. Expected {parameterizedOperations.Count} operations with parameters but file has {layerDto.Operations.Count}.");
-            }
+            //IReadOnlyList<Operation> operations = layer.GetOperations();
+            //List<Operation> parameterizedOperations = operations.Where(op => op is IParamOperation).ToList();
 
-            for (int opIndex = 0; opIndex < parameterizedOperations.Count; opIndex++)
-            {
-                Operation operation = parameterizedOperations[opIndex];
-                OperationSerializationDto operationDto = layerDto.Operations[opIndex];
+            //if (parameterizedOperations.Count != layerParams.Operations.Count)
+            //{
+            //    throw new InvalidOperationException($"Operation count mismatch for layer '{layer.GetType().Name}' at index {layerIndex}. Expected {parameterizedOperations.Count} operations with parameters but file has {layerParams.Operations.Count}.");
+            //}
 
-                EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, opIndex);
+            //for (int opIndex = 0; opIndex < parameterizedOperations.Count; opIndex++)
+            //{
+            //    Operation operation = parameterizedOperations[opIndex];
+            //    OperationSerializationDto operationDto = layerParams.Operations[opIndex];
 
-                IParamOperation provider = (IParamOperation)operation;
-                provider.Restore(operationDto.Parameters.ToSnapshot());
-            }
+            //    EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, opIndex);
+
+            //    IParamOperation provider = (IParamOperation)operation;
+            //    provider.Restore(operationDto.Parameters.ToSnapshot());
+            //}
         }
     }
 

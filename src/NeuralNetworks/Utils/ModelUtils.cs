@@ -2,10 +2,6 @@
 // File name: ModelUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace NeuralNetworks.Utils;
 
 public static class ModelUtils
@@ -13,7 +9,7 @@ public static class ModelUtils
     public static string GetTypeIdentifier(Type type)
         => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
 
-    public static void EnsureTypeMatch(string? persistedType, Type runtimeType, int layerIndex, int? operationIndex)
+    public static void EnsureTypeMatch(string? persistedType, Type runtimeType, int layerIndex, int? operationIndex = null)
     {
         string expectedType = GetTypeIdentifier(runtimeType);
         if (!string.Equals(persistedType, expectedType, StringComparison.Ordinal))

@@ -3,7 +3,9 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
+using System.Reflection.Emit;
 
+using NeuralNetworks.Core.Operations;
 using NeuralNetworks.Layers.Dtos;
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
@@ -31,10 +33,12 @@ public abstract class Layer
     public abstract object Backward(object outputGradient);
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract int GetParamCount();
-    internal abstract LayerParams Serialize();
+    internal abstract LayerParams GetParams();
 
-    internal virtual IReadOnlyList<Operation> GetOperations()
-        => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
+    //internal virtual IReadOnlyList<Operation> GetOperations()
+    //    => throw new InvalidOperationException($"Layer '{GetType().Name}' does not expose its operations.");
+
+    internal abstract void ApplyParams(LayerParams layerParams, int layerIndex);
 
     internal virtual bool IsInitialized => true;
 }
@@ -138,17 +142,17 @@ public abstract class Layer<TIn, TOut> : Layer
         return _operations.GetParamCount();
     }
 
-    internal override IReadOnlyList<Operation> GetOperations()
-    {
-        if (_operations is null)
-            throw new InvalidOperationException($"Layer '{GetType().Name}' is not initialized. Run a forward pass before accessing operations.");
+    //internal override IReadOnlyList<Operation> GetOperations()
+    //{
+    //    if (_operations is null)
+    //        throw new InvalidOperationException($"Layer '{GetType().Name}' is not initialized. Run a forward pass before accessing operations.");
 
-        return _operations;
-    }
+    //    return _operations;
+    //}
 
     internal override bool IsInitialized => _operations is not null;
 
-    internal override LayerParams Serialize()
+    internal override LayerParams GetParams()
     {
         Debug.Assert(_operations != null, "Operations were not set up.");
 
@@ -168,6 +172,44 @@ public abstract class Layer<TIn, TOut> : Layer
 
         string layerType = GetTypeIdentifier(GetType());
         return new LayerParams(layerType, serializedOperations);
+    }
+
+    override internal void ApplyParams(LayerParams layerParams, int layerIndex)
+    {
+        Debug.Assert(_operations != null, "Operations were not set up.");
+
+        EnsureTypeMatch(layerParams.LayerType, GetType(), layerIndex);
+
+        List<Operation> parameterizedOperations = _operations.Where(op => op is IParamOperation).ToList();
+
+        int operationCount = parameterizedOperations.Count;
+        int serializedOperationCount = layerParams.Operations.Count;
+
+        if (operationCount != serializedOperationCount)
+            throw new InvalidOperationException($"Operation count mismatch. Layer '{GetType().Name}' at index {layerIndex} has {operationCount} operations but {serializedOperationCount} were found in the serialized data.");
+
+        for (int operationIndex = 0; operationIndex < parameterizedOperations.Count; operationIndex++)
+        {
+            Operation operation = parameterizedOperations[operationIndex];
+            OperationSerializationDto operationDto = layerParams.Operations[operationIndex];
+
+            EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, operationIndex);
+
+            IParamOperation provider = (IParamOperation)operation;
+            provider.Restore(operationDto.Parameters.ToSnapshot());
+        }
+
+        //for (int i = 0; i < operationCount; i++)
+        //{
+        //    Operation operation = _operations[i];
+        //    if (operation is not IParamOperation paramOperation)
+        //        continue;
+        //    OperationSerializationDto serializedOperation = layerParams.Operations[i];
+        //    EnsureTypeMatch(serializedOperation.OperationType, operation.GetType(), layerIndex: -1, operationIndex: i);
+        //    ParameterDataDto parameterDataDto = serializedOperation.ParameterData;
+        //    ParameterSnapshot snapshot = parameterDataDto.ToSnapshot();
+        //    paramOperation.ApplySnapshot(snapshot);
+        //}
     }
 
 }
