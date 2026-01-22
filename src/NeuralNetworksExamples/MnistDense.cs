@@ -3,7 +3,6 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
-using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -63,6 +62,8 @@ internal class MnistDense
     private const float FinalLearningRate = 0.0005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
+
+    private const string ModelName = "MnistDenseModel";
 
     public static void Run()
     {
@@ -132,8 +133,9 @@ internal class MnistDense
         );
 
         // Save the model
-        string modelPath = "MnistDenseModel.json";
+        string modelPath = $"{ModelName}.json";
         model.SaveParams(modelPath, "Final trained model.");
+        File.WriteAllText($"{ModelName}.stats", $"{mean};{stdDev}");
     }
 
     private static readonly EvalFunction<float[,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
@@ -193,15 +195,15 @@ internal class MnistDense
         float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
         (float[,] xTest, float[,] yTest) = Split(test);
 
-        // Standardize data
-        // TODO: a model was trained based on standardized data of xTrain, but we do not have access to xTrain here. In a real-world scenario, we would save the mean and stdDev used during training and apply the same transformation here. The results can be different from those obtained during training evaluation.
-        float mean = xTest.Mean();
+        // Load standardization stats
+        var stats = File.ReadAllText($"{ModelName}.stats").Split(';');
+        float mean = float.Parse(stats[0]);
+        float stdDev = float.Parse(stats[1]);
         xTest.AddInPlace(-mean);
-        float stdDev = xTest.StdDev();
         xTest.DivideInPlace(stdDev);
 
         // Load the model
-        MnistDenseModel model = new("MnistDenseModel.json");
+        MnistDenseModel model = new($"{ModelName}.json");
 
         // Evaluate
         float[,] prediction = model.Forward(xTest, true);
