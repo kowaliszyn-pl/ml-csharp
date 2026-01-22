@@ -2,8 +2,8 @@
 // File name: LayerParams.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Layers.Dtos;
+using NeuralNetworks.Operations.Parameterized;
 
 namespace NeuralNetworks.Layers;
 
-internal sealed record LayerParams(string LayerType, List<OperationSerializationDto> Operations);
+internal sealed record LayerParams(string LayerType, List<ParamOperationData> Operations);

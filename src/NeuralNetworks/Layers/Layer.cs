@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 
-using NeuralNetworks.Layers.Dtos;
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Parameterized;
@@ -141,22 +140,13 @@ public abstract class Layer<TIn, TOut> : Layer
     {
         Debug.Assert(_operations != null, "Operations were not set up.");
 
-        List<OperationSerializationDto> serializedOperations = [];
-
-        foreach (Operation operation in _operations)
-        {
-            if (operation is not IParamOperation paramOperation)
-                continue;
-
-            ParameterSnapshot snapshot = paramOperation.GetSnapshot();
-
-            string operationType = GetTypeIdentifier(operation.GetType());
-            OperationSerializationDto serializedOperation = new(operationType, ParameterDataDto.FromSnapshot(snapshot));
-            serializedOperations.Add(serializedOperation);
-        }
+        List<ParamOperationData> paramOperationDatas = _operations
+            .OfType<IParamOperation>()
+            .Select(paramOperation => paramOperation.GetData())
+            .ToList();
 
         string layerType = GetTypeIdentifier(GetType());
-        return new LayerParams(layerType, serializedOperations);
+        return new LayerParams(layerType, paramOperationDatas);
     }
 
     internal override void ApplyParams(LayerParams layerParams, int layerIndex)
@@ -165,23 +155,21 @@ public abstract class Layer<TIn, TOut> : Layer
 
         EnsureTypeMatch(layerParams.LayerType, GetType(), layerIndex);
 
-        List<Operation> parameterizedOperations = _operations.Where(op => op is IParamOperation).ToList();
+        List<IParamOperation> paramOperations = _operations
+            .OfType<IParamOperation>()
+            .ToList();
 
-        int operationCount = parameterizedOperations.Count;
+        int operationCount = paramOperations.Count;
         int serializedOperationCount = layerParams.Operations.Count;
 
         if (operationCount != serializedOperationCount)
             throw new InvalidOperationException($"Operation count mismatch. Layer '{GetType().Name}' at index {layerIndex} has {operationCount} operations but {serializedOperationCount} were found in the serialized data.");
 
-        for (int operationIndex = 0; operationIndex < parameterizedOperations.Count; operationIndex++)
+        for (int operationIndex = 0; operationIndex < paramOperations.Count; operationIndex++)
         {
-            Operation operation = parameterizedOperations[operationIndex];
-            OperationSerializationDto operationDto = layerParams.Operations[operationIndex];
-
-            EnsureTypeMatch(operationDto.OperationType, operation.GetType(), layerIndex, operationIndex);
-
-            IParamOperation provider = (IParamOperation)operation;
-            provider.Restore(operationDto.Parameters.ToSnapshot());
+            IParamOperation operation = paramOperations[operationIndex];
+            ParamOperationData operationDto = layerParams.Operations[operationIndex];
+            operation.ApplyData(operationDto, layerIndex, operationIndex);
         }
     }
 

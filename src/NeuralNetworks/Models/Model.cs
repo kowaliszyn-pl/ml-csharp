@@ -193,7 +193,6 @@ public abstract class Model<TInputData, TPrediction>
         {
             Layer layer = _layers[layerIndex];
             LayerParams layerParams = modelParams.Layers[layerIndex];
-
             layer.ApplyParams(layerParams, layerIndex);
         }
     }

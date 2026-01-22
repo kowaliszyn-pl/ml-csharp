@@ -15,8 +15,6 @@ public abstract class ParamOperation4D : Operation4D, IParamOperation
 {
     internal abstract int GetParamCount();
     internal abstract void UpdateParams(Layer? layer, Optimizer optimizer);
-    internal abstract ParameterSnapshot GetSnapshot();
-    internal abstract void Restore(ParameterSnapshot snapshot);
     internal abstract ParamOperationData GetData();
     internal abstract void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
 
@@ -25,8 +23,6 @@ public abstract class ParamOperation4D : Operation4D, IParamOperation
 
     ParamOperationData IParamOperation.GetData() => GetData();
     int IParamOperation.GetParamCount() => GetParamCount();
-    ParameterSnapshot IParamOperation.GetSnapshot() => GetSnapshot();
-    void IParamOperation.Restore(ParameterSnapshot snapshot) => Restore(snapshot);
     void IParamOperation.UpdateParams(Layer? layer, Optimizer optimizer) => UpdateParams(layer, optimizer);
 }
 
@@ -71,22 +67,6 @@ public abstract class ParamOperation4D<TParam>(TParam param) : ParamOperation4D
         return clone;
     }
 
-    internal override ParameterSnapshot GetSnapshot()
-    {
-        if (param is not Array array)
-            throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
-
-        return ParameterSnapshot.FromArray(array);
-    }
-
-    internal override void Restore(ParameterSnapshot snapshot)
-    {
-        if (param is not Array array)
-            throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
-
-        snapshot.CopyTo(array);
-    }
-
     internal override ParamOperationData GetData()
     {
         if (param is not Array array)
@@ -105,8 +85,5 @@ public abstract class ParamOperation4D<TParam>(TParam param) : ParamOperation4D
         EnsureTypeMatch(data.OperationType, GetType(), layerIndex, operationIndex);
 
         data.Parameters.CopyTo(array);
-
-        //data.Parameters.OperationType = GetType().Name;
-        //data.Parameters.Parameters = ParameterSnapshot.FromArray(array);
     }
 }
