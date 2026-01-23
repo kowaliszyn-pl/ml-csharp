@@ -60,5 +60,6 @@ public class GenericModel<TInputData, TPrediction> : Model<TInputData, TPredicti
     {
     }
 
-    internal protected override LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal() => throw new InvalidOperationException();
+    protected override LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder() 
+        => throw new InvalidOperationException();
 }

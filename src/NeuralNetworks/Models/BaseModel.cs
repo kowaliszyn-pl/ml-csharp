@@ -21,9 +21,4 @@ public abstract class BaseModel<TInputData, TPrediction> : Model<TInputData, TPr
     protected static LayerListBuilder<TInputData, TLayerOut> AddLayer<TLayerOut>(Layer<TInputData, TLayerOut> layer)
         where TLayerOut : notnull
         => new(layer);
-
-    protected internal override LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal() 
-        => CreateLayerListBuilder();
-
-    protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder();
 }

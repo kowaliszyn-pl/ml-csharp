@@ -45,7 +45,7 @@ public abstract class Model<TInputData, TPrediction>
         LossFunction = lossFunction;
         Random = random;
         _modelFilePath = modelFilePath;
-        _layers = (layerListBuilder ?? CreateLayerListBuilderInternal()).Build();
+        _layers = (layerListBuilder ?? CreateLayerListBuilder()).Build();
 
         if (modelFilePath is not null)
         {
@@ -57,7 +57,7 @@ public abstract class Model<TInputData, TPrediction>
 
     protected SeededRandom? Random { get; }
 
-    protected internal abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderInternal();
+    protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder();
 
     public TPrediction Forward(TInputData input, bool inference)
     {
@@ -175,7 +175,7 @@ public abstract class Model<TInputData, TPrediction>
             }
             else if (modelParams.InputShape is not null)
             {
-                TInputData syntheticSample = modelParams.InputShape.CreateSyntheticSample<TInputData>();
+                TInputData syntheticSample = modelParams.InputShape.CreateSyntheticSample<TInputData>(true);
                 Forward(syntheticSample, inference: true);
             }
             else

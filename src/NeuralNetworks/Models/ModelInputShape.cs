@@ -6,7 +6,7 @@ namespace NeuralNetworks.Models;
 
 internal sealed record ModelInputShape(string InputType, int[] Dimensions)
 {
-    internal T CreateSyntheticSample<T>() where T : notnull
+    internal T CreateSyntheticSample<T>(bool firstRowOnly) where T : notnull
     {
         if (!typeof(T).IsArray)
         {
@@ -18,6 +18,9 @@ internal sealed record ModelInputShape(string InputType, int[] Dimensions)
 
         if (Dimensions is null || Dimensions.Length == 0)
             throw new InvalidOperationException("Persisted input shape is empty.");
+
+        if (firstRowOnly)
+            Dimensions[0] = 1;
 
         Array sample = Array.CreateInstance(elementType, Dimensions);
         return (T)(object)sample;
