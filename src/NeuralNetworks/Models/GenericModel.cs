@@ -60,6 +60,6 @@ public class GenericModel<TInputData, TPrediction> : Model<TInputData, TPredicti
     {
     }
 
-    protected override LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder() 
-        => throw new InvalidOperationException();
+    private protected override LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderPrivate() 
+        => throw new InvalidOperationException("Provide layerListBuilder in the constructor.");
 }

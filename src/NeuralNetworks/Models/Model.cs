@@ -45,7 +45,7 @@ public abstract class Model<TInputData, TPrediction>
         LossFunction = lossFunction;
         Random = random;
         _modelFilePath = modelFilePath;
-        _layers = (layerListBuilder ?? CreateLayerListBuilder()).Build();
+        _layers = (layerListBuilder ?? CreateLayerListBuilderPrivate()).Build();
 
         if (modelFilePath is not null)
         {
@@ -57,7 +57,7 @@ public abstract class Model<TInputData, TPrediction>
 
     protected SeededRandom? Random { get; }
 
-    protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilder();
+    private protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderPrivate();
 
     public TPrediction Forward(TInputData input, bool inference)
     {
