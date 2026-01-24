@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using NeuralNetworks.Core;
@@ -24,14 +25,40 @@ internal static class Gpt2Basic
             headCount: 4,
             layerCount: 2);
 
-        SeededRandom random = new(42);
-        Gpt2Parameters parameters = RandomParameterFactory.Create(config, random);
+        Gpt2Parameters parameters = LoadParameters(config);
         Gpt2Model model = new(config);
 
         List<int> prompt = new() { 0, 4, 7, 2 };
         IReadOnlyList<int> generated = model.Generate(prompt, parameters, tokensToGenerate: 5);
 
         Console.WriteLine("GPT-2 toy run (ids only): " + string.Join(", ", generated));
+    }
+
+    internal static Gpt2Parameters LoadParameters(Gpt2Config config, string? weightFilePath = null)
+    {
+        if (!string.IsNullOrWhiteSpace(weightFilePath) && File.Exists(weightFilePath))
+        {
+            Console.WriteLine($"Loading GPT-2 weights from '{weightFilePath}'.");
+            return Gpt2ParameterLoader.LoadFromFile(weightFilePath, config);
+        }
+
+        string? envPath = Environment.GetEnvironmentVariable("GPT2_WEIGHTS_PATH");
+        if (!string.IsNullOrWhiteSpace(envPath) && File.Exists(envPath))
+        {
+            Console.WriteLine($"Loading GPT-2 weights from '{envPath}'.");
+            return Gpt2ParameterLoader.LoadFromFile(envPath, config);
+        }
+
+        string defaultPath = Path.Combine(AppContext.BaseDirectory, "Assets", "gpt2-weights.bin");
+        if (File.Exists(defaultPath))
+        {
+            Console.WriteLine($"Loading GPT-2 weights from '{defaultPath}'.");
+            return Gpt2ParameterLoader.LoadFromFile(defaultPath, config);
+        }
+
+        Console.WriteLine("GPT-2 weight file was not found. Using random initialization.");
+        SeededRandom random = new(42);
+        return RandomParameterFactory.Create(config, random);
     }
 
     private static class RandomParameterFactory
