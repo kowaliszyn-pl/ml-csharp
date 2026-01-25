@@ -6,6 +6,8 @@
 
 using System.Text;
 
+using static NeuralNetworks.Core.ArrayExtensions;
+
 internal class Program
 {
     /*
@@ -61,8 +63,6 @@ internal class Program
         Console.ReadLine();
     }
 
-    private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadEncoderHParamsAndParams(string modelSize, string modelsDir) => throw new NotImplementedException();
-
     /*
         def generate(inputs, params, n_head, n_tokens_to_generate):
             from tqdm import tqdm
@@ -75,7 +75,66 @@ internal class Program
             return inputs[len(inputs) - n_tokens_to_generate :]  # only return generated ids
      */
 
-    private static IEnumerable<int> Generate(int[] inputIds, Gpt2Params modelParams, int headCount, int nTokensToGenerate) => throw new NotImplementedException();
+    private static IEnumerable<int> Generate(int[] inputIds, Gpt2Params modelParams, int headCount, int nTokensToGenerate)
+    {
+        List<int> inputs = new List<int>(inputIds);
+        for (int i = 0; i < nTokensToGenerate; i++)
+        {
+            // logits = gpt2(inputs, **params, n_head=n_head)  # model forward pass
+            float[] logits = Forward(inputs.ToArray(), modelParams, headCount);
+            // next_id = np.argmax(logits[-1])  # greedy sampling
+            int nextId = logits.Argmax();
+            // inputs.append(int(next_id))  # append prediction to input
+            inputs.Add(nextId);
+            yield return nextId;
+        }
+    }
+
+    /*
+        def gpt2(inputs, wte, wpe, blocks, ln_f, n_head):  # [n_seq] -> [n_seq, n_vocab]
+            # token + positional embeddings
+            x = wte[inputs] + wpe[range(len(inputs))]  # [n_seq] -> [n_seq, n_embd]
+
+            # forward pass through n_layer transformer blocks
+            for block in blocks:
+                x = transformer_block(x, **block, n_head=n_head)  # [n_seq, n_embd] -> [n_seq, n_embd]
+
+            # projection to vocab
+            x = layer_norm(x, **ln_f)  # [n_seq, n_embd] -> [n_seq, n_embd]
+            return x @ wte.T  # [n_seq, n_embd] -> [n_seq, n_vocab]
+    */
+
+    private static float[,] EmbedTokens(int[] inputTokenIds, float[,] tokenEmbeddings, float[,] positionalEmbeddings)
+    {
+        int inputTokens = inputTokenIds.Length;
+        int embedDim = tokenEmbeddings.GetLength(1);
+        float[,] result = new float[inputTokens, embedDim];
+
+        for (int position = 0; position < inputTokens; position++)
+        {
+            int tokenId = inputTokenIds[position];
+            if (tokenId < 0 || tokenId >= tokenEmbeddings.GetLength(0))
+                throw new ArgumentOutOfRangeException(nameof(inputTokenIds), $"Token id {tokenId} is outside the vocabulary range.");
+
+            for (int dim = 0; dim < embedDim; dim++)
+            {
+                float value = tokenEmbeddings[tokenId, dim];
+                value += positionalEmbeddings[position, dim];
+                result[position, dim] = value;
+            }
+        }
+
+        return result;
+    }
+
+    private static float[] Forward(int[] inputIds, Gpt2Params modelParams, int headCount)
+    {
+        float[,] X = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
+
+        return null; // temp
+    }
+
+    private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadEncoderHParamsAndParams(string modelSize, string modelsDir) => throw new NotImplementedException();
 
     /*
         def gelu(x):

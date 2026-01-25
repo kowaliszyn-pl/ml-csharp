@@ -144,8 +144,33 @@ public static class ArrayExtensions
     /// <summary>
     /// Computes the index of the maximum value for each row.
     /// </summary>
+    /// <param name="source">The array to evaluate.</param>
+    /// <returns>The index of the maximum value in the array.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int Argmax(this float[] source)
+    {
+        int items = source.Length;
+
+        float max = float.MinValue;
+        int maxIndex = 0;
+        for (int i = 0; i < items; i++)
+        {
+            float value = source[i];
+            if (value > max)
+            {
+                max = value;
+                maxIndex = i;
+            }
+        }
+
+        return maxIndex;
+    }
+
+    /// <summary>
+    /// Computes the index of the maximum value for each row.
+    /// </summary>
     /// <param name="source">The two-dimensional array to evaluate.</param>
-    /// <returns>An array of length equal to the number of dim1, where each element is the column index of the maximum value in that row.</returns>
+    /// <returns>An array of length equal to the number of rows, where each element is the column index of the maximum value in that row.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int[] Argmax(this float[,] source)
     {
