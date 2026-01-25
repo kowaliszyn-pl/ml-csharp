@@ -1653,6 +1653,51 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Computes the numerically stable softmax of each row in a two-dimensional array of single-precision
+    /// floating-point values.
+    /// </summary>
+    /// <remarks>This method applies the softmax function to each row independently, using a numerically
+    /// stable algorithm to prevent overflow or underflow. The input array is not modified.</remarks>
+    /// <param name="source">A two-dimensional array of type <see cref="float"/> representing the input data. Each row is treated as a
+    /// separate vector for which the softmax will be computed.</param>
+    /// <returns>A two-dimensional array of type <see cref="float"/> containing the softmax probabilities for each row of the
+    /// input array. Each row sums to 1.0.</returns>
+    public static float[,] SoftmaxStable(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+
+        for (int i = 0; i < rows; i++)
+        {
+            // 1. Find the max for numerical stability
+            float max = source[i, 0];
+            for (int j = 1; j < columns; j++)
+            {
+                if (source[i, j] > max)
+                    max = source[i, j];
+            }
+
+            // 2. Exponentiate shifted values and compute sum
+            float sum = 0f;
+            for (int j = 0; j < columns; j++)
+            {
+                float exp = MathF.Exp(source[i, j] - max);
+                res[i, j] = exp;
+                sum += exp;
+            }
+
+            // 3. Normalize
+            for (int j = 0; j < columns; j++)
+            {
+                res[i, j] /= sum;
+            }
+        }
+
+        return res;
+    }
+
+    /// <summary>
     /// Applies the Softplus activation function to each element of the specified two-dimensional array.
     /// </summary>
     /// <remarks>The Softplus function is defined as <c>log(1 + exp(x))</c> and is commonly used as a smooth
@@ -1773,7 +1818,7 @@ public static class ArrayExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void StandardizeByRows(this float[,] source, Range? rowRange = null)
+    public static void StandardizeByRowsInPlace(this float[,] source, Range? rowRange = null)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
@@ -1820,6 +1865,59 @@ public static class ArrayExtensions
                 source[row, col] = (source[row, col] - mean) / stdDev;
             }
         }
+
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] StandardizeByRows(this float[,] source, Range? rowRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] result = new float[rows, columns];
+
+        int beginRow, endRow;
+        if (rowRange is not null)
+        {
+            (int offset, int length) = rowRange.Value.GetOffsetAndLength(rows);
+            beginRow = offset;
+            endRow = beginRow + length;
+        }
+        else
+        {
+            beginRow = 0;
+            endRow = rows;
+        }
+
+        for (int row = beginRow; row < endRow; row++)
+        {
+            // Calculate mean
+            float sum = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                sum += source[row, col];
+            }
+            float mean = sum / columns;
+
+            // Calculate standard deviation
+            float sumOfSquares = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                float value = source[row, col] - mean;
+                sumOfSquares += value * value;
+            }
+            float stdDev = MathF.Sqrt(sumOfSquares / columns);
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int col = 0; col < columns; col++)
+            {
+                result[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+        return result;
 
     }
 

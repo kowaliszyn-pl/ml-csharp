@@ -18,81 +18,51 @@ using static NeuralNetworks.Core.RandomUtils;
 internal class Program
 {
     private const float NegativeInfinity = -1e10f;
-
-    /*
-        def main(prompt: str, n_tokens_to_generate: int = 40, model_size: str = "124M", models_dir: str = "models"):
-            from utils import load_encoder_hparams_and_params
-
-            # load encoder, hparams, and params from the released open-ai gpt-2 files
-            encoder, hparams, params = load_encoder_hparams_and_params(model_size, models_dir)
-
-            # encode the input string using the BPE tokenizer
-            input_ids = encoder.encode(prompt)
-
-            # make sure we are not surpassing the max sequence length of our model
-            assert len(input_ids) + n_tokens_to_generate < hparams["n_ctx"]
-
-            # generate output ids
-            output_ids = generate(input_ids, params, hparams["n_head"], n_tokens_to_generate)
-
-            # decode the ids back into a string
-            output_text = encoder.decode(output_ids)
-
-            return output_text
-    */
+    private const string ModelSize = "124M";
+    private const string ModelsDir = "..\\..\\..\\..\\..\\data\\GPT-2\\";
+    private const int NumTokensToGenerate = 15;
 
     private static void Main(string[] args)
     {
-        // Interpret the args as prompt, n_tokens_to_generate, model_size, models_dir
-        string prompt = args.Length > 0 ? args[0] : "";
-        int nTokensToGenerate = args.Length > 1 && int.TryParse(args[1], out var n) ? n : 10;
-        string modelSize = args.Length > 2 ? args[2] : "124M";
-        string modelsDir = args.Length > 3 ? args[3] : "..\\..\\..\\..\\..\\data\\GPT-2\\";
-
-
-        Console.WriteLine($"Prompt: {prompt}");
-        Console.WriteLine($"n_tokens_to_generate: {nTokensToGenerate}");
-        Console.WriteLine($"model_size: {modelSize}");
-        Console.WriteLine($"models_dir: {modelsDir}");
+        Console.WriteLine($"NumTokensToGenerate: {NumTokensToGenerate}");
+        Console.WriteLine($"ModelSize: {ModelSize}");
+        Console.WriteLine($"ModelsDir: {ModelsDir}");
 
         // Prepare the model - load encoder, hparams, and params from the released open-ai gpt-2 files
-        (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) = LoadEncoderHParamsAndParams(modelSize, modelsDir);
-        int[] inputIds = encoder.Encode(prompt);
+        (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) = LoadEncoderHParamsAndParams(ModelSize, ModelsDir);
 
-        if (inputIds.Length + nTokensToGenerate >= hParams.ContextSize)
+        while (true)
         {
-            throw new ArgumentException("Input prompt is too long for the model's context size.");
+            Console.Write("Enter prompt: ");
+            string? prompt = Console.ReadLine();
+
+            if (string.IsNullOrEmpty(prompt))
+                break;
+
+            int[] inputIds = encoder.Encode(prompt);
+
+            if (inputIds.Length + NumTokensToGenerate >= hParams.ContextSize)
+            {
+                throw new ArgumentException("Input prompt is too long for the model's context size.");
+            }
+
+            // Console.WriteLine("Input token ids: " + string.Join(", ", inputIds));
+
+            foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate))
+            {
+                // Console.Write($" [{outputId}] ");
+                Console.Write(encoder.Decode([outputId]));
+            }
+            Console.WriteLine();
+            Console.WriteLine();
         }
-
-        // Print out the input token ids
-
-        Console.WriteLine("Input token ids: " + string.Join(", ", inputIds));
-
-        foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, nTokensToGenerate))
-        {
-            Console.Write($" [{outputId}] ");
-            Console.Write(encoder.Decode(new int[] { outputId }));
-        }
-
         Console.WriteLine("\nPress ENTER...");
         Console.ReadLine();
     }
 
-    /*
-        def generate(inputs, params, n_head, n_tokens_to_generate):
-            from tqdm import tqdm
-
-            for _ in tqdm(range(n_tokens_to_generate), "generating"):  # auto-regressive decode loop
-                logits = gpt2(inputs, **params, n_head=n_head)  # model forward pass
-                next_id = np.argmax(logits[-1])  # greedy sampling
-                inputs.append(int(next_id))  # append prediction to input
-
-            return inputs[len(inputs) - n_tokens_to_generate :]  # only return generated ids
-     */
-
     private static IEnumerable<int> Generate(int[] inputIds, Gpt2Params modelParams, int headCount, int nTokensToGenerate)
     {
-        List<int> inputs = new List<int>(inputIds);
+        List<int> inputs = [.. inputIds];
         for (int i = 0; i < nTokensToGenerate; i++)
         {
             float[,] logits = Forward(inputs.ToArray(), modelParams, headCount);
@@ -103,35 +73,21 @@ internal class Program
         }
     }
 
-    /*
-        def gpt2(inputs, wte, wpe, blocks, ln_f, n_head):  # [n_seq] -> [n_seq, n_vocab]
-            # token + positional embeddings
-            x = wte[inputs] + wpe[range(len(inputs))]  # [n_seq] -> [n_seq, n_embd]
-
-            # forward pass through n_layer transformer blocks
-            for block in blocks:
-                x = transformer_block(x, **block, n_head=n_head)  # [n_seq, n_embd] -> [n_seq, n_embd]
-
-            # projection to vocab
-            x = layer_norm(x, **ln_f)  # [n_seq, n_embd] -> [n_seq, n_embd]
-            return x @ wte.T  # [n_seq, n_embd] -> [n_seq, n_vocab]
-    */
-
     private static float[,] Forward(int[] inputIds, Gpt2Params modelParams, int headCount)
     {
         // X is [inputTokens, embeddingSize]
-        float[,] X = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
+        float[,] x = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
 
         for (int blockIndex = 0; blockIndex < modelParams.Blocks.Length; blockIndex++)
         {
             Gpt2Block block = modelParams.Blocks[blockIndex];
-            X = TransformerBlockForward(X, block, headCount);
+            x = TransformerBlockForward(x, block, headCount);
         }
 
-        X = LayerNormForward(X, modelParams.FinalLayerNorm);
+        x = LayerNormForward(x, modelParams.FinalLayerNorm);
 
         // Project to vocab: [n_seq, n_embd] -> [n_seq, n_vocab]
-        float[,] logitsMatrix = X.MultiplyDot(modelParams.TokenEmbeddings.Transpose());
+        float[,] logitsMatrix = x.MultiplyDot(modelParams.TokenEmbeddings.Transpose());
         return logitsMatrix;
     }
 
@@ -166,19 +122,8 @@ internal class Program
             }
         }
 
-        return result; // of size [inputTokens, embeddingSize]
+        return result;
     }
-
-    /*
-       def transformer_block(x, mlp, attn, ln_1, ln_2, n_head):  # [n_seq, n_embd] -> [n_seq, n_embd]
-           # multi-head causal self attention
-           x = x + mha(layer_norm(x, **ln_1), **attn, n_head=n_head)  # [n_seq, n_embd] -> [n_seq, n_embd]
-
-           # position-wise feed forward network
-           x = x + ffn(layer_norm(x, **ln_2), **mlp)  # [n_seq, n_embd] -> [n_seq, n_embd]
-
-           return x
-   */
 
     private static float[,] TransformerBlockForward(float[,] x, Gpt2Block block, int headCount)
     {
@@ -194,17 +139,6 @@ internal class Program
         return x;
     }
 
-    /*
-        def ffn(x, c_fc, c_proj):  # [n_seq, n_embd] -> [n_seq, n_embd]
-            # project up
-            a = gelu(linear(x, **c_fc))  # [n_seq, n_embd] -> [n_seq, 4*n_embd]
-
-            # project back down
-            x = linear(a, **c_proj)  # [n_seq, 4*n_embd] -> [n_seq, n_embd]
-
-            return x
-    */
-
     private static float[,] FeedForwardNetwork(float[,] x, Gpt2MultiLayerPerceptron mlp)
     {
         Gpt2LinearParams fullyConnected = mlp.FullyConnected;
@@ -212,23 +146,15 @@ internal class Program
 
         // Project up: [n_seq, n_embd] -> [n_seq, 4*n_embd]
         // The size is 4 times larger in the hidden layer, because it allows the model to learn more complex representations. The 4 number is a design choice made by the authors of the Transformer architecture, and it has been found to work well in practice.
-        float[,] a = LinearForward(x, fullyConnected);
+        float[,] hiddenLayer = LinearForward(x, fullyConnected);
 
         // Apply GELU activation
-        a = a.Gelu();
+        hiddenLayer = hiddenLayer.Gelu();
 
         // Project back down: [n_seq, 4*n_embd] -> [n_seq, n_embd]
-        float[,] output = LinearForward(a, outputProjection);
+        float[,] output = LinearForward(hiddenLayer, outputProjection);
         return output;
     }
-
-    /*
-        def layer_norm(x, g, b, eps: float = 1e-5):
-            mean = np.mean(x, axis=-1, keepdims=True)
-            variance = np.var(x, axis=-1, keepdims=True)
-            x = (x - mean) / np.sqrt(variance + eps)  # normalize x to have mean=0 and var=1 over last axis
-            return g * x + b  # scale and offset with gamma/beta params
-    */
 
     private static float[,] LayerNormForward(float[,] x, Gpt2LayerNormParams layerNorm)
     {
@@ -238,37 +164,11 @@ internal class Program
         if (gamma.Length != beta.Length)
             throw new ArgumentException("Gamma and beta must have the same length.");
 
-        x.StandardizeByRows(); // TODO: check if the standardization is done over the correct (last) axis. also our Standardize implementation is a little different (no epsilon)
+        float[,] normalized = x.StandardizeByRows(); // TODO: check if the standardization is done over the correct (last) axis. also our Standardize implementation is a little different (no epsilon)
 
-        float[,] res = x.MultiplyElementwise(gamma).AddRow(beta); // TODO: check if the broadcasting is done correctly; AddRow or AddColumn?
+        float[,] res = normalized.MultiplyElementwise(gamma).AddRow(beta); // TODO: check if the broadcasting is done correctly; AddRow or AddColumn?
         return res;
     }
-
-    /*
-        def mha(x, c_attn, c_proj, n_head):  # [n_seq, n_embd] -> [n_seq, n_embd]
-            # qkv projection
-            x = linear(x, **c_attn)  # [n_seq, n_embd] -> [n_seq, 3*n_embd]
-
-            # split into qkv
-            qkv = np.split(x, 3, axis=-1)  # [n_seq, 3*n_embd] -> [3, n_seq, n_embd]
-
-            # split into heads
-            qkv_heads = list(map(lambda x: np.split(x, n_head, axis=-1), qkv))  # [3, n_seq, n_embd] -> [3, n_head, n_seq, n_embd/n_head]
-
-            # causal mask to hide future inputs from being attended to
-            causal_mask = (1 - np.tri(x.shape[0], dtype=x.dtype)) * -1e10  # [n_seq, n_seq]
-
-            # perform attention over each head
-            out_heads = [attention(q, k, v, causal_mask) for q, k, v in zip(*qkv_heads)]  # [3, n_head, n_seq, n_embd/n_head] -> [n_head, n_seq, n_embd/n_head]
-
-            # merge heads
-            x = np.hstack(out_heads)  # [n_head, n_seq, n_embd/n_head] -> [n_seq, n_embd]
-
-            # out projection
-            x = linear(x, **c_proj)  # [n_seq, n_embd] -> [n_seq, n_embd]
-
-            return x
-    */
 
     private static float[,] MultiHeadAttention(float[,] x, Gpt2MultiHeadAttentionParams attention, int headCount)
     {
@@ -302,9 +202,7 @@ internal class Program
             float[,] kh = GetHead(kHeads, headIndex);
             float[,] vh = GetHead(vHeads, headIndex);
             float[,] attn = Attention(qh, kh, vh, causalMask); // [n_seq, headDim]
-            // MergeHead(outHeads, headIndex, attn);
 
-            //int nSeq = attn.GetLength(0);
             for (int i = 0; i < inputSequenceLength; i++)
                 for (int j = 0; j < headDim; j++)
                     outHeads[headIndex, i, j] = attn[i, j];
@@ -329,26 +227,32 @@ internal class Program
         return output;
     }
 
-    /*
-        def attention(q, k, v, mask):  # [n_q, d_k], [n_k, d_k], [n_k, d_v], [n_q, n_k] -> [n_q, d_v]
-            return softmax(q @ k.T / np.sqrt(q.shape[-1]) + mask) @ v
-    */
-
-    private static float[,] Attention(float[,] qh, float[,] kh, float[,] vh, float[,] causalMask)
+    private static float[,] Attention(float[,] queryHeadMatrix, float[,] keyHeadMatrix, float[,] valueHeadMatrix, float[,] causalMask)
     {
-        int dK = qh.GetLength(1); // dK is the dimension of the key vectors, for GPT-2 124M it is 64
-        float scale = 1f / (float)Math.Sqrt(dK);
-        // q @ k.T
-        float[,] qkT = qh.MultiplyDot(kh.Transpose());
-        // Scale
-        qkT = qkT.Multiply(scale);
-        // Add causal mask
-        qkT = qkT.Add(causalMask);
-        // Softmax
-        float[,] attnWeights = qkT.SoftmaxLogSumExp();
-        // attnWeights @ v
-        float[,] output = attnWeights.MultiplyDot(vh);
-        return output;
+        // Use the per-head channel count (dk) so that later scaling reflects how many features shape each query-key comparison.
+        int keyEmbeddingWidth = queryHeadMatrix.GetLength(1); 
+        
+        // Precompute the transformer scaling factor 1/sqrt(dk) to keep attention logits numerically well-behaved regardless of head width.
+        float inverseSqrtKeyDim = 1f / (float)Math.Sqrt(keyEmbeddingWidth); 
+
+        // Measure how strongly every query token relates to every key token via dot products between their head-specific embeddings.
+        float[,] rawAttentionScores = queryHeadMatrix.MultiplyDot(keyHeadMatrix.Transpose()); 
+
+        // Temper the magnitude of those dot products so softmax probabilities remain sharp but not saturated when dk grows.
+        rawAttentionScores = rawAttentionScores.Multiply(inverseSqrtKeyDim); 
+
+        // Inject -inf above the diagonal to forbid each position from peeking at future tokens while leaving allowed positions unchanged.
+        rawAttentionScores = rawAttentionScores.Add(causalMask); 
+
+        // Turn the masked logits into normalized weights per query row using the numerically stable softmax implementation.
+        float[,] attentionProbabilities = rawAttentionScores.SoftmaxStable();
+
+        // Combine value vectors using the attention weights so each query token receives a context-aware representation.
+        // Aggregate value vectors with the attention weights so each query token receives a context-aware representation.
+        float[,] contextualizedValues = attentionProbabilities.MultiplyDot(valueHeadMatrix); 
+
+        // Emit the attention head output that will later be concatenated with other heads and projected.
+        return contextualizedValues;
     }
 
     private static float[,] GetHead(float[,,] heads, int headIndex)
@@ -428,6 +332,15 @@ internal class Program
         return (q, k, v);
     }
 
+    /// <summary>
+    /// Applies a linear transformation to the input tensor using the specified weights and bias parameters.
+    /// </summary>
+    /// <param name="x">The input tensor to transform, represented as a two-dimensional array of shape [n_seq, n_embd]. Each row
+    /// corresponds to a sequence element, and each column to an embedding dimension.</param>
+    /// <param name="linearParams">The linear transformation parameters, including the weight matrix and bias vector to apply to the input tensor.</param>
+    /// <returns>A two-dimensional array containing the result of the linear transformation. The returned array has shape [n_seq,
+    /// output_size], where output_size is determined by the weights in the linear parameters.</returns>
+    /// <remarks>This function can be treated as a 1D convolution with kernel size 1. It performs a simple operation: result = x * W + b.</remarks>
     private static float[,] LinearForward(float[,] x, Gpt2LinearParams linearParams)
     {
         // x is [n_seq, n_embd]
@@ -445,7 +358,7 @@ internal class Program
 
         if (createDummy)
         {
-            Gpt2HParams hParams = new Gpt2HParams
+            Gpt2HParams hParams = new()
             {
                 ContextSize = 1024,
                 HeadCount = 12,
@@ -468,9 +381,9 @@ internal class Program
             //        Beta = new float[768]
             //    }
             //};
-            SeededRandom seededRandom = new SeededRandom(42);
+            SeededRandom seededRandom = new(42);
 
-            Gpt2Params modelParams = new Gpt2Params
+            Gpt2Params modelParams = new()
             {
                 TokenEmbeddings = CreateRandomNormal(50257, 768, seededRandom),
                 PositionalEmbeddings = CreateRandomNormal(1024, 768, seededRandom),
@@ -689,12 +602,5 @@ internal class Program
     }
 
     private static Gpt2Encoder CreateEncoder(string modelDirectory, Gpt2HParams hParams)
-    {
-        return BpeEncoder.FromDirectory(modelDirectory);
-
-
-        //string encoderJson = Path.Combine(modelDirectory, "encoder.json");
-        //string vocabBpe = Path.Combine(modelDirectory, "vocab.bpe");
-        //return new BpeGpt2Encoder(encoderJson, vocabBpe);
-    }
+        => BpeEncoder.FromDirectory(modelDirectory);
 }
