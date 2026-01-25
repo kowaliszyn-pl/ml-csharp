@@ -37,9 +37,10 @@ internal class Program
     {
         // Interpret the args as prompt, n_tokens_to_generate, model_size, models_dir
         string prompt = args.Length > 0 ? args[0] : "";
-        int nTokensToGenerate = args.Length > 1 && int.TryParse(args[1], out var n) ? n : 40;
+        int nTokensToGenerate = args.Length > 1 && int.TryParse(args[1], out var n) ? n : 10;
         string modelSize = args.Length > 2 ? args[2] : "124M";
         string modelsDir = args.Length > 3 ? args[3] : "models";
+        
 
         Console.WriteLine($"Prompt: {prompt}");
         Console.WriteLine($"n_tokens_to_generate: {nTokensToGenerate}");
@@ -420,10 +421,41 @@ internal class Program
         return result;
     }
 
-    private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadEncoderHParamsAndParams(string modelSize, string modelsDir) => throw new NotImplementedException();
+    private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadEncoderHParamsAndParams(string modelSize, string modelsDir)
+    {
+        bool createDummy = modelSize == "0";
 
-    /*
-        def gelu(x):
-            return 0.5 * x * (1 + np.tanh(np.sqrt(2 / np.pi) * (x + 0.044715 * x**3)))
-     */
+        if (createDummy)
+        {
+            Gpt2HParams hParams = new Gpt2HParams
+            {
+                ContextSize = 1024,
+                HeadCount = 12,
+                VocabularySize = 50257,
+                EmbeddingSize = 768,
+                LayerCount = 12,
+                //HeadSize = 64
+            };
+
+            Gpt2Encoder encoder = new DummyGpt2Encoder(hParams.VocabularySize);
+            
+            Gpt2Params modelParams = new Gpt2Params
+            {
+                TokenEmbeddings = new float[50257, 768],
+                PositionalEmbeddings = new float[1024, 768],
+                Blocks = new Gpt2Block[12],
+                FinalLayerNorm = new Gpt2LayerNormParams
+                {
+                    Gamma = new float[768],
+                    Beta = new float[768]
+                }
+            };
+            return (encoder, hParams, modelParams);
+        }
+        else
+        {
+            throw new NotImplementedException("Model loading not implemented.");
+            //return Gpt2ModelLoader.LoadModel(modelSize, modelsDir);
+        }
+    }
 }
