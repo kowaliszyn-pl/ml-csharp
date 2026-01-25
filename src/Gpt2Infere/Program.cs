@@ -20,7 +20,7 @@ internal class Program
     private const float NegativeInfinity = -1e10f;
     private const string ModelSize = "124M";
     private const string ModelsDir = "..\\..\\..\\..\\..\\data\\GPT-2\\";
-    private const int NumTokensToGenerate = 15;
+    private const int NumTokensToGenerate = 20;
 
     private static void Main(string[] args)
     {
