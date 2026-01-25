@@ -4,6 +4,6 @@
 
 public class Gpt2MultiHeadAttentionParams
 {
-    public Gpt2LinearParams Projection { get; }
-    public Gpt2LinearParams OutputProjection { get; }
+    public Gpt2LinearParams Projection { get; internal set; }
+    public Gpt2LinearParams OutputProjection { get; internal set; }
 }

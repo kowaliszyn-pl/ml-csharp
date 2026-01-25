@@ -4,6 +4,6 @@
 
 public class Gpt2LinearParams
 {
-    public float[,] Weights { get; }
-    public float[] Bias { get; }
+    public float[,] Weights { get; internal set; }
+    public float[] Bias { get; internal set; }
 }

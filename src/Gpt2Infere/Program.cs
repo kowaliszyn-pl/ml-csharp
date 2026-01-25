@@ -5,7 +5,10 @@
 // Translated for C# from the original Python code at https://github.com/kowaliszyn-pl/pico-gpt-2 (fork)
 // Also, part of the code also copied from https://github.com/kowaliszyn-pl/sharp-gpt-2 (fork)
 
+using NeuralNetworks.Core;
+
 using static NeuralNetworks.Core.ArrayExtensions;
+using static NeuralNetworks.Core.RandomUtils;
 
 internal class Program
 {
@@ -196,10 +199,14 @@ internal class Program
     {
         Gpt2LinearParams fullyConnected = mlp.FullyConnected;
         Gpt2LinearParams outputProjection = mlp.OutputProjection;
+
         // Project up: [n_seq, n_embd] -> [n_seq, 4*n_embd]
+        // The size is 4 times larger in the hidden layer, because it allows the model to learn more complex representations. The 4 number is a design choice made by the authors of the Transformer architecture, and it has been found to work well in practice.
         float[,] a = LinearForward(x, fullyConnected);
+
         // Apply GELU activation
         a = a.Gelu();
+
         // Project back down: [n_seq, 4*n_embd] -> [n_seq, n_embd]
         float[,] output = LinearForward(a, outputProjection);
         return output;
@@ -439,17 +446,71 @@ internal class Program
 
             Gpt2Encoder encoder = new DummyGpt2Encoder(hParams.VocabularySize);
             
+            //Gpt2Params modelParams = new Gpt2Params
+            //{
+            //    TokenEmbeddings = new float[50257, 768],
+            //    PositionalEmbeddings = new float[1024, 768],
+            //    Blocks = new Gpt2Block[12],
+            //    FinalLayerNorm = new Gpt2LayerNormParams
+            //    {
+            //        Gamma = new float[768],
+            //        Beta = new float[768]
+            //    }
+            //};
+            SeededRandom seededRandom = new SeededRandom(42);
+
             Gpt2Params modelParams = new Gpt2Params
             {
-                TokenEmbeddings = new float[50257, 768],
-                PositionalEmbeddings = new float[1024, 768],
+                TokenEmbeddings = CreateRandomNormal(50257, 768, seededRandom),
+                PositionalEmbeddings = CreateRandomNormal(1024, 768, seededRandom),
                 Blocks = new Gpt2Block[12],
                 FinalLayerNorm = new Gpt2LayerNormParams
                 {
-                    Gamma = new float[768],
-                    Beta = new float[768]
+                    Gamma = CreateRandomNormal(768, seededRandom),
+                    Beta = CreateRandomNormal(768, seededRandom)
                 }
             };
+
+            foreach(Gpt2Block block in modelParams.Blocks)
+            {
+                block.LayerNorm1 = new Gpt2LayerNormParams
+                {
+                    Gamma = CreateRandomNormal(768, seededRandom),
+                    Beta = CreateRandomNormal(768, seededRandom)
+                };
+                block.LayerNorm2 = new Gpt2LayerNormParams
+                {
+                    Gamma = CreateRandomNormal(768, seededRandom),
+                    Beta = CreateRandomNormal(768, seededRandom)
+                };
+                block.Attention = new Gpt2MultiHeadAttentionParams
+                {
+                    Projection = new Gpt2LinearParams
+                    {
+                        Weights = CreateRandomNormal(768, 3 * 768, seededRandom),
+                        Bias = CreateRandomNormal(3 * 768, seededRandom)
+                    },
+                    OutputProjection = new Gpt2LinearParams
+                    {
+                        Weights = CreateRandomNormal(768, 768, seededRandom),
+                        Bias = CreateRandomNormal(768, seededRandom)
+                    }
+                };
+                block.MultiLayerPerceptron = new Gpt2MultiLayerPerceptron
+                {
+                    FullyConnected = new Gpt2LinearParams
+                    {
+                        Weights = CreateRandomNormal(768, 4 * 768, seededRandom),
+                        Bias = CreateRandomNormal(4 * 768, seededRandom)
+                    },
+                    OutputProjection = new Gpt2LinearParams
+                    {
+                        Weights = CreateRandomNormal(4 * 768, 768, seededRandom),
+                        Bias = CreateRandomNormal(768, seededRandom)
+                    }
+                };
+            }
+
             return (encoder, hParams, modelParams);
         }
         else
