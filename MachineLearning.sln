@@ -32,6 +32,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PermuteBenchmark", "perform
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpanBenchmark", "performance\SpanBenchmark\SpanBenchmark.csproj", "{6881416D-627B-4E93-8976-936AE5F27D9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gpt2Infere", "src\Gpt2Infere\Gpt2Infere.csproj", "{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{6881416D-627B-4E93-8976-936AE5F27D9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6881416D-627B-4E93-8976-936AE5F27D9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6881416D-627B-4E93-8976-936AE5F27D9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -84,6 +90,7 @@ Global
 		{9A5B292E-83DD-4FF2-BF1D-261CF2EF493A} = {65654CF8-959C-45ED-967D-7006C766FA86}
 		{AE82D091-82AB-45CC-B9C4-142ED70CC6AA} = {7CDEF041-075B-465B-B3DF-67B8D41491E4}
 		{6881416D-627B-4E93-8976-936AE5F27D9F} = {7CDEF041-075B-465B-B3DF-67B8D41491E4}
+		{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E} = {E99F45B3-C5BB-45FC-9BC5-596751A765A7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1BDE2A5-2774-4AEF-A5CF-1D9513B84564}
