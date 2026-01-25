@@ -43,7 +43,7 @@ internal class Program
         int nTokensToGenerate = args.Length > 1 && int.TryParse(args[1], out var n) ? n : 10;
         string modelSize = args.Length > 2 ? args[2] : "124M";
         string modelsDir = args.Length > 3 ? args[3] : "models";
-        
+
 
         Console.WriteLine($"Prompt: {prompt}");
         Console.WriteLine($"n_tokens_to_generate: {nTokensToGenerate}");
@@ -59,7 +59,11 @@ internal class Program
             throw new ArgumentException("Input prompt is too long for the model's context size.");
         }
 
-        foreach(int outputId in Generate(inputIds, modelParams, hParams.HeadCount, nTokensToGenerate))
+        // Print out the input token ids
+
+        Console.WriteLine("Input token ids: " + string.Join(", ", inputIds));
+
+        foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, nTokensToGenerate))
         {
             Console.Write(encoder.Decode(new int[] { outputId }));
         }
@@ -334,7 +338,7 @@ internal class Program
         // Add causal mask
         qkT = qkT.Add(causalMask);
         // Softmax
-        float[,] attnWeights = qkT.Softmax();
+        float[,] attnWeights = qkT.SoftmaxLogSumExp();
         // attnWeights @ v
         float[,] output = attnWeights.MultiplyDot(vh);
         return output;
@@ -445,7 +449,7 @@ internal class Program
             };
 
             Gpt2Encoder encoder = new DummyGpt2Encoder(hParams.VocabularySize);
-            
+
             //Gpt2Params modelParams = new Gpt2Params
             //{
             //    TokenEmbeddings = new float[50257, 768],
@@ -463,53 +467,55 @@ internal class Program
             {
                 TokenEmbeddings = CreateRandomNormal(50257, 768, seededRandom),
                 PositionalEmbeddings = CreateRandomNormal(1024, 768, seededRandom),
-                Blocks = new Gpt2Block[12],
+                Blocks = Enumerable
+                    .Range(0, 12)
+                    .Select(_ => new Gpt2Block()
+                    {
+                        LayerNorm1 = new Gpt2LayerNormParams
+                        {
+                            Gamma = CreateRandomNormal(768, seededRandom),
+                            Beta = CreateRandomNormal(768, seededRandom)
+                        },
+                        LayerNorm2 = new Gpt2LayerNormParams
+                        {
+                            Gamma = CreateRandomNormal(768, seededRandom),
+                            Beta = CreateRandomNormal(768, seededRandom)
+                        },
+                        Attention = new Gpt2MultiHeadAttentionParams
+                        {
+                            Projection = new Gpt2LinearParams
+                            {
+                                Weights = CreateRandomNormal(768, 3 * 768, seededRandom),
+                                Bias = CreateRandomNormal(3 * 768, seededRandom)
+                            },
+                            OutputProjection = new Gpt2LinearParams
+                            {
+                                Weights = CreateRandomNormal(768, 768, seededRandom),
+                                Bias = CreateRandomNormal(768, seededRandom)
+                            }
+                        },
+                        MultiLayerPerceptron = new Gpt2MultiLayerPerceptron
+                        {
+                            FullyConnected = new Gpt2LinearParams
+                            {
+                                Weights = CreateRandomNormal(768, 4 * 768, seededRandom),
+                                Bias = CreateRandomNormal(4 * 768, seededRandom)
+                            },
+                            OutputProjection = new Gpt2LinearParams
+                            {
+                                Weights = CreateRandomNormal(4 * 768, 768, seededRandom),
+                                Bias = CreateRandomNormal(768, seededRandom)
+                            }
+                        }
+                    }
+                    )
+                    .ToArray(),
                 FinalLayerNorm = new Gpt2LayerNormParams
                 {
                     Gamma = CreateRandomNormal(768, seededRandom),
                     Beta = CreateRandomNormal(768, seededRandom)
                 }
             };
-
-            foreach(Gpt2Block block in modelParams.Blocks)
-            {
-                block.LayerNorm1 = new Gpt2LayerNormParams
-                {
-                    Gamma = CreateRandomNormal(768, seededRandom),
-                    Beta = CreateRandomNormal(768, seededRandom)
-                };
-                block.LayerNorm2 = new Gpt2LayerNormParams
-                {
-                    Gamma = CreateRandomNormal(768, seededRandom),
-                    Beta = CreateRandomNormal(768, seededRandom)
-                };
-                block.Attention = new Gpt2MultiHeadAttentionParams
-                {
-                    Projection = new Gpt2LinearParams
-                    {
-                        Weights = CreateRandomNormal(768, 3 * 768, seededRandom),
-                        Bias = CreateRandomNormal(3 * 768, seededRandom)
-                    },
-                    OutputProjection = new Gpt2LinearParams
-                    {
-                        Weights = CreateRandomNormal(768, 768, seededRandom),
-                        Bias = CreateRandomNormal(768, seededRandom)
-                    }
-                };
-                block.MultiLayerPerceptron = new Gpt2MultiLayerPerceptron
-                {
-                    FullyConnected = new Gpt2LinearParams
-                    {
-                        Weights = CreateRandomNormal(768, 4 * 768, seededRandom),
-                        Bias = CreateRandomNormal(4 * 768, seededRandom)
-                    },
-                    OutputProjection = new Gpt2LinearParams
-                    {
-                        Weights = CreateRandomNormal(4 * 768, 768, seededRandom),
-                        Bias = CreateRandomNormal(768, seededRandom)
-                    }
-                };
-            }
 
             return (encoder, hParams, modelParams);
         }
