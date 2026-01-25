@@ -9,4 +9,8 @@ internal class Gpt2HParams
 {
     public int ContextSize { get; internal set; }
     public int HeadCount { get; internal set; }
+    public int VocabularySize { get; }
+    public int EmbeddingSize { get; }
+    public int LayerCount { get; }
+    public int HeadSize => EmbeddingSize / HeadCount;
 }

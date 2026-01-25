@@ -48,6 +48,22 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Add(this float[,] source, float[,] matrix)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                res[row, col] = source[row, col] + matrix[row, col];
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Adds the specified scalar value to each element of the two-dimensional array in place.
     /// </summary>
@@ -477,7 +493,38 @@ public static class ArrayExtensions
                 }
             }
         }
+    }
 
+    /// <summary>
+    /// Applies the Gaussian Error Linear Unit (GELU) activation function to each element of the specified
+    /// two-dimensional array.
+    /// </summary>
+    /// <remarks>The GELU activation function is commonly used in neural networks and is defined as GELU(x) =
+    /// 0.5 * x * (1 + tanh(√(2/π) * (x + 0.044715 * x^3))). This method does not modify the input array; it returns a
+    /// new array containing the transformed values.</remarks>
+    /// <param name="source">A two-dimensional array of single-precision floating-point values to which the GELU function will be applied.</param>
+    /// <returns>A two-dimensional array of the same dimensions as the input, where each element is the result of applying the
+    /// GELU function to the corresponding element in the input array.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Gelu(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        const float sqrt2OverPi = 0.7978845608028654f; // sqrt(2 / pi)
+        const float coeff = 0.044715f;
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                float x = source[i, j];
+                float xCubed = x * x * x;
+                float tanhArg = sqrt2OverPi * (x + coeff * xCubed);
+                float tanhValue = MathF.Tanh(tanhArg);
+                res[i, j] = 0.5f * x * (1 + tanhValue);
+            }
+        }
+        return res;
     }
 
     /// <summary>
@@ -1148,6 +1195,29 @@ public static class ArrayExtensions
             }
         }
 
+        return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] MultiplyElementwise(this float[,] source, float[] matrix)
+    {
+        int thisRows = source.GetLength(0);
+        int thisColumns = source.GetLength(1);
+        int matrixLength = matrix.GetLength(0);
+        int maxColumns = Math.Max(thisColumns, matrixLength);
+
+        Debug.Assert(maxColumns % thisColumns == 0 && maxColumns % matrixLength == 0, "The number of dim2 of one matrix must be a multiple of the other matrix.");
+
+        float[,] res = new float[thisRows, maxColumns];
+        for (int row = 0; row < thisRows; row++)
+        {
+            for (int col = 0; col < maxColumns; col++)
+            {
+                float thisValue = source[row, col % thisColumns];
+                float matrixValue = matrix[col % matrixLength];
+                res[row, col] = thisValue * matrixValue;
+            }
+        }
         return res;
     }
 

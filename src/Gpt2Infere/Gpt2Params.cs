@@ -10,4 +10,5 @@ internal class Gpt2Params
     public float[,] TokenEmbeddings { get; internal set; }
     public float[,] PositionalEmbeddings { get; internal set; }
     public Gpt2Block[] Blocks { get; internal set; }
+    public Gpt2LayerNormParams FinalLayerNorm { get; internal set; }
 }
