@@ -161,7 +161,7 @@ internal class BostonHousing
 
         // Standardize each feature column (mean = 0, stddev = 1) except the target variable (last column)
         // Note: the upper bound in Range is exclusive, so we use inputFeatureCount to exclude the last column
-        bostonData.Standardize(0..inputFeatureCount);
+        bostonData.StandardizeByColumns(0..inputFeatureCount);
 
         // Permute the data randomly
         bostonData.PermuteInPlace(RandomSeed);

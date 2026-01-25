@@ -2,7 +2,7 @@
   "profiles": {
     "Gpt2Infere": {
       "commandName": "Project",
-      "commandLineArgs": "\"abc\" 10 0"
+      "commandLineArgs": "\"Poland is a\""
     }
   }
 }

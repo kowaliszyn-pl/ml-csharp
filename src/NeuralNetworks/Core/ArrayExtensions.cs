@@ -1721,7 +1721,7 @@ public static class ArrayExtensions
     /// Optional. The range of dim2 to standardize. If null, all dim2 are standardized.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Standardize(this float[,] source, Range? columnRange = null)
+    public static void StandardizeByColumns(this float[,] source, Range? columnRange = null)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
@@ -1770,6 +1770,57 @@ public static class ArrayExtensions
                 source[row, col] = (source[row, col] - mean) / stdDev;
             }
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void StandardizeByRows(this float[,] source, Range? rowRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        int beginRow, endRow;
+        if (rowRange is not null)
+        {
+            (int offset, int length) = rowRange.Value.GetOffsetAndLength(rows);
+            beginRow = offset;
+            endRow = beginRow + length;
+        }
+        else
+        {
+            beginRow = 0;
+            endRow = rows;
+        }
+
+        for (int row = beginRow; row < endRow; row++)
+        {
+            // Calculate mean
+            float sum = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                sum += source[row, col];
+            }
+            float mean = sum / columns;
+
+            // Calculate standard deviation
+            float sumOfSquares = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                float value = source[row, col] - mean;
+                sumOfSquares += value * value;
+            }
+            float stdDev = MathF.Sqrt(sumOfSquares / columns);
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int col = 0; col < columns; col++)
+            {
+                source[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+
     }
 
     /// <summary>

@@ -5,8 +5,6 @@
 // Translated for C# from the original Python code at https://github.com/kowaliszyn-pl/pico-gpt-2 (fork)
 // Also, part of the code also copied from https://github.com/kowaliszyn-pl/sharp-gpt-2 (fork)
 
-using System.IO;
-using System.Linq;
 using System.Text.Json;
 
 using Gpt2Infere;
@@ -49,7 +47,7 @@ internal class Program
         string prompt = args.Length > 0 ? args[0] : "";
         int nTokensToGenerate = args.Length > 1 && int.TryParse(args[1], out var n) ? n : 10;
         string modelSize = args.Length > 2 ? args[2] : "124M";
-        string modelsDir = args.Length > 3 ? args[3] : "models";
+        string modelsDir = args.Length > 3 ? args[3] : "..\\..\\..\\..\\..\\data\\GPT-2\\";
 
 
         Console.WriteLine($"Prompt: {prompt}");
@@ -72,6 +70,7 @@ internal class Program
 
         foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, nTokensToGenerate))
         {
+            Console.Write($" [{outputId}] ");
             Console.Write(encoder.Decode(new int[] { outputId }));
         }
 
@@ -239,9 +238,10 @@ internal class Program
         if (gamma.Length != beta.Length)
             throw new ArgumentException("Gamma and beta must have the same length.");
 
-        x.Standardize(); // TODO: check if the standardization is done over the correct (last) axis. also our Standardize implementation is a little different (no epsilon)
+        x.StandardizeByRows(); // TODO: check if the standardization is done over the correct (last) axis. also our Standardize implementation is a little different (no epsilon)
 
-        return x.MultiplyElementwise(gamma).AddRow(beta); // TODO: check if the broadcasting is done correctly; AddRow or AddColumn?
+        float[,] res = x.MultiplyElementwise(gamma).AddRow(beta); // TODO: check if the broadcasting is done correctly; AddRow or AddColumn?
+        return res;
     }
 
     /*

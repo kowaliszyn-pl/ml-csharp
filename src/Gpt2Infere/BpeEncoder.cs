@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -202,8 +202,8 @@ internal sealed class BpeEncoder: Gpt2Encoder
     {
         List<int> bs = new();
         bs.AddRange(Enumerable.Range('!', '~' - '!' + 1));
-        bs.AddRange(Enumerable.Range('?', '�' - '?' + 1));
-        bs.AddRange(Enumerable.Range('�', '?' - '�' + 1));
+        bs.AddRange(Enumerable.Range('¡', '¬' - '¡' + 1));
+        bs.AddRange(Enumerable.Range('®', 'ÿ' - '®' + 1));
 
         HashSet<int> existing = new(bs);
         List<int> cs = new(bs);
