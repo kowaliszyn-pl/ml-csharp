@@ -2,7 +2,8 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-// Translated for C# from the original Python code at https://github.com/kowaliszyn-pl/pico-gpt-2
+// Translated for C# from the original Python code at https://github.com/kowaliszyn-pl/pico-gpt-2 (fork)
+// Also, part of the code also copied from https://github.com/kowaliszyn-pl/sharp-gpt-2 (fork)
 
 using System.Text;
 
@@ -80,11 +81,8 @@ internal class Program
         List<int> inputs = new List<int>(inputIds);
         for (int i = 0; i < nTokensToGenerate; i++)
         {
-            // logits = gpt2(inputs, **params, n_head=n_head)  # model forward pass
             float[] logits = Forward(inputs.ToArray(), modelParams, headCount);
-            // next_id = np.argmax(logits[-1])  # greedy sampling
             int nextId = logits.Argmax();
-            // inputs.append(int(next_id))  # append prediction to input
             inputs.Add(nextId);
             yield return nextId;
         }
@@ -104,35 +102,67 @@ internal class Program
             return x @ wte.T  # [n_seq, n_embd] -> [n_seq, n_vocab]
     */
 
-    private static float[,] EmbedTokens(int[] inputTokenIds, float[,] tokenEmbeddings, float[,] positionalEmbeddings)
-    {
-        int inputTokens = inputTokenIds.Length;
-        int embedDim = tokenEmbeddings.GetLength(1);
-        float[,] result = new float[inputTokens, embedDim];
-
-        for (int position = 0; position < inputTokens; position++)
-        {
-            int tokenId = inputTokenIds[position];
-            if (tokenId < 0 || tokenId >= tokenEmbeddings.GetLength(0))
-                throw new ArgumentOutOfRangeException(nameof(inputTokenIds), $"Token id {tokenId} is outside the vocabulary range.");
-
-            for (int dim = 0; dim < embedDim; dim++)
-            {
-                float value = tokenEmbeddings[tokenId, dim];
-                value += positionalEmbeddings[position, dim];
-                result[position, dim] = value;
-            }
-        }
-
-        return result;
-    }
-
     private static float[] Forward(int[] inputIds, Gpt2Params modelParams, int headCount)
     {
+        // X is [inputTokens, embeddingSize]
         float[,] X = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
+
+        for (int blockIndex = 0; blockIndex < modelParams.Blocks.Length; blockIndex++)
+        {
+            Gpt2Block block = modelParams.Blocks[blockIndex];
+            X = TransformerBlockForward(X, block, headCount);
+        }
 
         return null; // temp
     }
+
+    /*
+        def transformer_block(x, mlp, attn, ln_1, ln_2, n_head):  # [n_seq, n_embd] -> [n_seq, n_embd]
+            # multi-head causal self attention
+            x = x + mha(layer_norm(x, **ln_1), **attn, n_head=n_head)  # [n_seq, n_embd] -> [n_seq, n_embd]
+
+            # position-wise feed forward network
+            x = x + ffn(layer_norm(x, **ln_2), **mlp)  # [n_seq, n_embd] -> [n_seq, n_embd]
+
+            return x
+    */
+
+    private static float[,] TransformerBlockForward(float[,] x, Gpt2Block block, int headCount) => throw new NotImplementedException();
+
+    private static float[,] EmbedTokens(int[] inputTokenIds, float[,] tokenEmbeddings, float[,] positionalEmbeddings)
+    {
+        // tokenEmbeddings are of size [vocab_size, embedding_size],
+        // where embedding_size is a size of the model embeddings (for GPT-2 124M it is 768)
+        // and vocab_size is the size of the vocabulary (for GPT-2 124M it is 50257)
+
+        // positionalEmbeddings are of size [context_size, embedding_size],
+        // where context_size is the maximum context size of the model (for GPT-2 124M it is 1024)
+        // where embedding_size is a size of the model embeddings (for GPT-2 124M it is 768)
+
+        int inputTokens = inputTokenIds.Length;
+        int embeddingSize = tokenEmbeddings.GetLength(1);
+        float[,] result = new float[inputTokens, embeddingSize];
+
+        for (int positionInInputSequence = 0; positionInInputSequence < inputTokens; positionInInputSequence++)
+        {
+            int tokenId = inputTokenIds[positionInInputSequence];
+            if (tokenId < 0 || tokenId >= tokenEmbeddings.GetLength(0))
+                throw new ArgumentOutOfRangeException(nameof(inputTokenIds), $"Token id {tokenId} is outside the vocabulary range.");
+
+            // The purpose of this loop is to add token embeddings (for e given token) and positional embeddings (for a given position in the input sequence)
+            for (int embeddingIndex = 0; embeddingIndex < embeddingSize; embeddingIndex++)
+            {
+                // For each position in the input sequence, we get the token embedding and add the positional embedding
+                // embeddingIndex goes from 0 to 767 (for GPT-2 124M)
+                float value = tokenEmbeddings[tokenId, embeddingIndex];
+                value += positionalEmbeddings[positionInInputSequence, embeddingIndex];
+                result[positionInInputSequence, embeddingIndex] = value;
+            }
+        }
+
+        return result; // of size [inputTokens, embeddingSize]
+    }
+
 
     private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadEncoderHParamsAndParams(string modelSize, string modelsDir) => throw new NotImplementedException();
 
