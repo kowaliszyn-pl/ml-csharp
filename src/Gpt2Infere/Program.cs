@@ -5,7 +5,14 @@
 // Translated for C# from the original Python code at https://github.com/kowaliszyn-pl/pico-gpt-2 (fork)
 // Also, part of the code also copied from https://github.com/kowaliszyn-pl/sharp-gpt-2 (fork)
 
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+
+using Gpt2Infere;
+
 using NeuralNetworks.Core;
+using NeuralNetworks.Transformers.Gpt2;
 
 using static NeuralNetworks.Core.ArrayExtensions;
 using static NeuralNetworks.Core.RandomUtils;
@@ -521,8 +528,173 @@ internal class Program
         }
         else
         {
-            throw new NotImplementedException("Model loading not implemented.");
-            //return Gpt2ModelLoader.LoadModel(modelSize, modelsDir);
+            return LoadModel(modelSize, modelsDir);
         }
+    }
+
+    private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadModel(string modelSize, string modelsDir)
+    {
+        if (string.IsNullOrWhiteSpace(modelSize))
+            throw new ArgumentException("Model size must be provided.", nameof(modelSize));
+
+        if (string.IsNullOrWhiteSpace(modelsDir))
+            throw new ArgumentException("Models directory must be provided.", nameof(modelsDir));
+
+        string modelDirectory = ResolveModelDirectory(modelSize, modelsDir);
+        string hparamsPath = Path.Combine(modelDirectory, "hparams.json");
+        if (!File.Exists(hparamsPath))
+            throw new FileNotFoundException($"Missing hparams.json for GPT-2 model '{modelSize}'.", hparamsPath);
+
+        Gpt2HParams hParams = LoadHParamsFromFile(hparamsPath);
+        string weightFilePath = ResolveWeightFile(modelDirectory);
+        Gpt2Params modelParams = LoadParameters(weightFilePath, hParams);
+        Gpt2Encoder encoder = CreateEncoder(modelDirectory, hParams);
+
+        return (encoder, hParams, modelParams);
+    }
+
+    private static string ResolveModelDirectory(string modelSize, string modelsDir)
+    {
+        string resolvedModelsDir = Path.GetFullPath(modelsDir);
+        if (!Directory.Exists(resolvedModelsDir))
+            throw new DirectoryNotFoundException($"Models directory '{resolvedModelsDir}' does not exist.");
+
+        string candidate = Path.Combine(resolvedModelsDir, modelSize);
+        if (Directory.Exists(candidate))
+            return candidate;
+
+        DirectoryInfo resolvedInfo = new(resolvedModelsDir);
+        if (string.Equals(resolvedInfo.Name, modelSize, StringComparison.OrdinalIgnoreCase))
+            return resolvedModelsDir;
+
+        throw new DirectoryNotFoundException($"Unable to locate GPT-2 files for '{modelSize}'. Expected to find them under '{candidate}'.");
+    }
+
+    private static Gpt2HParams LoadHParamsFromFile(string hparamsPath)
+    {
+        using FileStream stream = File.OpenRead(hparamsPath);
+        using JsonDocument document = JsonDocument.Parse(stream);
+        JsonElement root = document.RootElement;
+
+        return new Gpt2HParams
+        {
+            ContextSize = ReadRequiredInt(root, "n_ctx", "n_positions"),
+            HeadCount = ReadRequiredInt(root, "n_head"),
+            VocabularySize = ReadRequiredInt(root, "n_vocab"),
+            EmbeddingSize = ReadRequiredInt(root, "n_embd"),
+            LayerCount = ReadRequiredInt(root, "n_layer")
+        };
+    }
+
+    private static int ReadRequiredInt(JsonElement root, params string[] propertyNames)
+    {
+        foreach (string propertyName in propertyNames)
+        {
+            if (root.TryGetProperty(propertyName, out JsonElement element) && element.ValueKind == JsonValueKind.Number)
+                return element.GetInt32();
+        }
+
+        throw new InvalidDataException($"The hparams.json file is missing required entries ({string.Join(", ", propertyNames)}).");
+    }
+
+    private static string ResolveWeightFile(string modelDirectory)
+    {
+        string directoryName = new DirectoryInfo(modelDirectory).Name;
+        string[] preferredCandidates =
+        {
+            Path.Combine(modelDirectory, "gpt2-weights.bin"),
+            Path.Combine(modelDirectory, "weights.bin"),
+            Path.Combine(modelDirectory, $"{directoryName}.bin")
+        };
+
+        foreach (string candidate in preferredCandidates)
+        {
+            if (File.Exists(candidate))
+                return candidate;
+        }
+
+        string[] binFiles = Directory.GetFiles(modelDirectory, "*.bin", SearchOption.TopDirectoryOnly);
+        if (binFiles.Length == 1)
+            return binFiles[0];
+
+        if (binFiles.Length > 1)
+        {
+            string files = string.Join(", ", binFiles.Select(Path.GetFileName));
+            throw new InvalidOperationException($"Multiple GPT-2 weight files were found in '{modelDirectory}': {files}. Delete the extras or pass a directory containing a single export.");
+        }
+
+        throw new FileNotFoundException($"No GPT-2 weight file (.bin) was found in '{modelDirectory}'. Run tools\\gpt2_export.py to create one.");
+    }
+
+    private static Gpt2Params LoadParameters(string weightFilePath, Gpt2HParams hParams)
+    {
+        Gpt2Config config = new(
+            vocabularySize: hParams.VocabularySize,
+            contextSize: hParams.ContextSize,
+            embeddingSize: hParams.EmbeddingSize,
+            headCount: hParams.HeadCount,
+            layerCount: hParams.LayerCount);
+
+        Gpt2Parameters raw = Gpt2ParameterLoader.LoadFromFile(weightFilePath, config);
+        return ConvertParameters(raw);
+    }
+
+    private static Gpt2Params ConvertParameters(Gpt2Parameters parameters)
+    {
+        Gpt2Block[] blocks = parameters.Blocks.Select(ConvertBlock).ToArray();
+        return new Gpt2Params
+        {
+            TokenEmbeddings = parameters.TokenEmbeddings,
+            PositionalEmbeddings = parameters.PositionalEmbeddings,
+            Blocks = blocks,
+            FinalLayerNorm = ConvertLayerNorm(parameters.FinalLayerNorm)
+        };
+    }
+
+    private static Gpt2Block ConvertBlock(TransformerBlockParameters block)
+    {
+        return new Gpt2Block
+        {
+            LayerNorm1 = ConvertLayerNorm(block.LayerNorm1),
+            LayerNorm2 = ConvertLayerNorm(block.LayerNorm2),
+            Attention = new Gpt2MultiHeadAttentionParams
+            {
+                Projection = ConvertLinear(block.Attention.Projection),
+                OutputProjection = ConvertLinear(block.Attention.OutputProjection)
+            },
+            MultiLayerPerceptron = new Gpt2MultiLayerPerceptron
+            {
+                FullyConnected = ConvertLinear(block.FeedForward.UpProjection),
+                OutputProjection = ConvertLinear(block.FeedForward.DownProjection)
+            }
+        };
+    }
+
+    private static Gpt2LayerNormParams ConvertLayerNorm(LayerNormParameters layerNorm)
+    {
+        return new Gpt2LayerNormParams
+        {
+            Gamma = layerNorm.Gamma,
+            Beta = layerNorm.Beta
+        };
+    }
+
+    private static Gpt2LinearParams ConvertLinear(LinearWeights linear)
+    {
+        return new Gpt2LinearParams
+        {
+            Weights = linear.Weights,
+            Bias = linear.Bias
+        };
+    }
+
+    private static Gpt2Encoder CreateEncoder(string modelDirectory, Gpt2HParams hParams)
+    {
+        return BpeEncoder.FromDirectory(modelDirectory);
+
+
+        //string encoderJson = Path.Combine(modelDirectory, "encoder.json");
+        //string vocabBpe = Path.Combine(modelDirectory, "vocab.bpe");
+        //return new BpeGpt2Encoder(encoderJson, vocabBpe);
     }
 }
