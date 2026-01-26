@@ -7,6 +7,7 @@
 
 // Backwards: https://github.com/nietras/Llm.cs/blob/main/src/Llm/Llm.cs
 
+using System.Text;
 using System.Text.Json;
 
 using Gpt2Infere;
@@ -30,8 +31,28 @@ internal class Program
         Console.WriteLine($"ModelSize: {ModelSize}");
         Console.WriteLine($"ModelsDir: {ModelsDir}");
 
-        // Prepare the model - load encoder, hparams, and params from the released open-ai gpt-2 files
-        (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) = LoadEncoderHParamsAndParams(ModelSize, ModelsDir);
+        // Prepare the model - load encoder, hparams, and params from the released open-ai gpt-2 files or create dummy model
+        bool createDummy = ModelSize == "0";
+        Gpt2HParams hParams;
+        Gpt2Encoder encoder;
+        Gpt2Params modelParams;
+
+        if (createDummy)
+        {
+            SeededRandom seededRandom = new(42);
+
+            hParams = new();
+            encoder = Gpt2Encoder.CreateDummy(hParams);
+            modelParams = Gpt2Params.CreateNew(hParams, seededRandom);
+        }
+        else
+        {
+            string modelDirectory = Path.Combine(ModelsDir, ModelSize);
+
+            hParams = Gpt2HParams.FromDirectory(modelDirectory);
+            encoder = Gpt2Encoder.FromDirectory(modelDirectory);
+            modelParams = Gpt2Params.FromDirectory(modelDirectory, hParams);
+        }
 
         while (true)
         {
@@ -53,7 +74,7 @@ internal class Program
             foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate))
             {
                 // Console.Write($" [{outputId}] ");
-                Console.Write(encoder.Decode([outputId]));
+                Console.Write(encoder.Decode(outputId));
             }
             Console.WriteLine();
             Console.WriteLine();
@@ -357,116 +378,49 @@ internal class Program
     private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadEncoderHParamsAndParams(string modelSize, string modelsDir)
     {
         bool createDummy = modelSize == "0";
+        Gpt2HParams hParams;
+        Gpt2Encoder encoder;
+        Gpt2Params modelParams;
 
         if (createDummy)
         {
-            Gpt2HParams hParams = new()
-            {
-                ContextSize = 1024,
-                HeadCount = 12,
-                VocabularySize = 50257,
-                EmbeddingSize = 768,
-                LayerCount = 12,
-                //HeadSize = 64
-            };
-
-            Gpt2Encoder encoder = new DummyGpt2Encoder(hParams.VocabularySize);
-
-            //Gpt2Params modelParams = new Gpt2Params
-            //{
-            //    TokenEmbeddings = new float[50257, 768],
-            //    PositionalEmbeddings = new float[1024, 768],
-            //    Blocks = new Gpt2Block[12],
-            //    FinalLayerNorm = new Gpt2LayerNormParams
-            //    {
-            //        Gamma = new float[768],
-            //        Beta = new float[768]
-            //    }
-            //};
             SeededRandom seededRandom = new(42);
 
-            Gpt2Params modelParams = new()
-            {
-                TokenEmbeddings = CreateRandomNormal(50257, 768, seededRandom),
-                PositionalEmbeddings = CreateRandomNormal(1024, 768, seededRandom),
-                Blocks = Enumerable
-                    .Range(0, 12)
-                    .Select(_ => new Gpt2Block()
-                    {
-                        LayerNorm1 = new Gpt2LayerNormParams
-                        {
-                            Gamma = CreateRandomNormal(768, seededRandom),
-                            Beta = CreateRandomNormal(768, seededRandom)
-                        },
-                        LayerNorm2 = new Gpt2LayerNormParams
-                        {
-                            Gamma = CreateRandomNormal(768, seededRandom),
-                            Beta = CreateRandomNormal(768, seededRandom)
-                        },
-                        Attention = new Gpt2MultiHeadAttentionParams
-                        {
-                            Projection = new Gpt2LinearParams
-                            {
-                                Weights = CreateRandomNormal(768, 3 * 768, seededRandom),
-                                Bias = CreateRandomNormal(3 * 768, seededRandom)
-                            },
-                            OutputProjection = new Gpt2LinearParams
-                            {
-                                Weights = CreateRandomNormal(768, 768, seededRandom),
-                                Bias = CreateRandomNormal(768, seededRandom)
-                            }
-                        },
-                        MultiLayerPerceptron = new Gpt2MultiLayerPerceptron
-                        {
-                            FullyConnected = new Gpt2LinearParams
-                            {
-                                Weights = CreateRandomNormal(768, 4 * 768, seededRandom),
-                                Bias = CreateRandomNormal(4 * 768, seededRandom)
-                            },
-                            OutputProjection = new Gpt2LinearParams
-                            {
-                                Weights = CreateRandomNormal(4 * 768, 768, seededRandom),
-                                Bias = CreateRandomNormal(768, seededRandom)
-                            }
-                        }
-                    }
-                    )
-                    .ToArray(),
-                FinalLayerNorm = new Gpt2LayerNormParams
-                {
-                    Gamma = CreateRandomNormal(768, seededRandom),
-                    Beta = CreateRandomNormal(768, seededRandom)
-                }
-            };
-
-            return (encoder, hParams, modelParams);
+            hParams = new();
+            encoder = Gpt2Encoder.CreateDummy(hParams);
+            modelParams = Gpt2Params.CreateNew(hParams, seededRandom);
         }
         else
         {
-            return LoadModel(modelSize, modelsDir);
+            string modelDirectory = Path.Combine(modelsDir, modelSize);
+
+            hParams = Gpt2HParams.FromDirectory(modelDirectory);
+            encoder = Gpt2Encoder.FromDirectory(modelDirectory);
+            modelParams = Gpt2Params.FromDirectory(modelDirectory, hParams);
         }
-    }
-
-    private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadModel(string modelSize, string modelsDir)
-    {
-        if (string.IsNullOrWhiteSpace(modelSize))
-            throw new ArgumentException("Model size must be provided.", nameof(modelSize));
-
-        if (string.IsNullOrWhiteSpace(modelsDir))
-            throw new ArgumentException("Models directory must be provided.", nameof(modelsDir));
-
-        string modelDirectory = ResolveModelDirectory(modelSize, modelsDir);
-        string hparamsPath = Path.Combine(modelDirectory, "hparams.json");
-        if (!File.Exists(hparamsPath))
-            throw new FileNotFoundException($"Missing hparams.json for GPT-2 model '{modelSize}'.", hparamsPath);
-
-        Gpt2HParams hParams = LoadHParamsFromFile(hparamsPath);
-        string weightFilePath = ResolveWeightFile(modelDirectory);
-        Gpt2Params modelParams = LoadParameters(weightFilePath, hParams);
-        Gpt2Encoder encoder = CreateEncoder(modelDirectory, hParams);
-
         return (encoder, hParams, modelParams);
     }
+
+    //private static (Gpt2Encoder encoder, Gpt2HParams hParams, Gpt2Params modelParams) LoadModel(string modelSize, string modelsDir)
+    //{
+    //    if (string.IsNullOrWhiteSpace(modelSize))
+    //        throw new ArgumentException("Model size must be provided.", nameof(modelSize));
+
+    //    if (string.IsNullOrWhiteSpace(modelsDir))
+    //        throw new ArgumentException("Models directory must be provided.", nameof(modelsDir));
+
+    //    string modelDirectory = ResolveModelDirectory(modelSize, modelsDir);
+    //    string hparamsPath = Path.Combine(modelDirectory, "hparams.json");
+    //    if (!File.Exists(hparamsPath))
+    //        throw new FileNotFoundException($"Missing hparams.json for GPT-2 model '{modelSize}'.", hparamsPath);
+
+    //    Gpt2HParams hParams = LoadHParamsFromFile(hparamsPath);
+    //    string weightFilePath = ResolveWeightFile(modelDirectory);
+    //    Gpt2Params modelParams = LoadParameters(weightFilePath, hParams);
+    //    Gpt2Encoder encoder = CreateEncoder(modelDirectory, hParams);
+
+    //    return (encoder, hParams, modelParams);
+    //}
 
     private static string ResolveModelDirectory(string modelSize, string modelsDir)
     {
@@ -602,7 +556,4 @@ internal class Program
             Bias = linear.Bias
         };
     }
-
-    private static Gpt2Encoder CreateEncoder(string modelDirectory, Gpt2HParams hParams)
-        => BpeEncoder.FromDirectory(modelDirectory);
 }
