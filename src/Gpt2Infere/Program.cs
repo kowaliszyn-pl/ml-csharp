@@ -7,6 +7,8 @@
 
 // Backwards: https://github.com/nietras/Llm.cs/blob/main/src/Llm/Llm.cs
 
+using System.Diagnostics;
+
 using Gpt2Infere;
 
 using NeuralNetworks.Core;
@@ -157,6 +159,19 @@ internal class Program
         return x;
     }
 
+    private static float[,] LayerNormForward(float[,] x, Gpt2LayerNormParams layerNorm)
+    {
+        float[] gamma = layerNorm.Gamma;
+        float[] beta = layerNorm.Beta;
+
+        Debug.Assert(gamma.Length == beta.Length);
+
+        float[,] normalized = x.StandardizeByRows(); 
+
+        float[,] res = normalized.MultiplyElementwise(gamma).AddRow(beta);
+        return res;
+    }
+
     private static float[,] FeedForwardNetwork(float[,] x, Gpt2MultiLayerPerceptron mlp)
     {
         Gpt2LinearParams fullyConnected = mlp.FullyConnected;
@@ -172,20 +187,6 @@ internal class Program
         // Project back down: [n_seq, 4*n_embd] -> [n_seq, n_embd]
         float[,] output = LinearForward(hiddenLayer, outputProjection);
         return output;
-    }
-
-    private static float[,] LayerNormForward(float[,] x, Gpt2LayerNormParams layerNorm)
-    {
-        float[] gamma = layerNorm.Gamma;
-        float[] beta = layerNorm.Beta;
-
-        if (gamma.Length != beta.Length)
-            throw new ArgumentException("Gamma and beta must have the same length.");
-
-        float[,] normalized = x.StandardizeByRows(); // TODO: check if the standardization is done over the correct (last) axis. also our Standardize implementation is a little different (no epsilon)
-
-        float[,] res = normalized.MultiplyElementwise(gamma).AddRow(beta); // TODO: check if the broadcasting is done correctly; AddRow or AddColumn?
-        return res;
     }
 
     private static float[,] MultiHeadAttention(float[,] x, Gpt2MultiHeadAttentionParams attention, int headCount)

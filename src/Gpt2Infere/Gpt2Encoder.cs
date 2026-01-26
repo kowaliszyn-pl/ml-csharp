@@ -73,6 +73,142 @@ internal sealed class Gpt2Encoder
         return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes);
     }
 
+    public void SaveToDirectory(string modelDirectory)
+    {
+        string encoderPath = Path.Combine(modelDirectory, "encoder.json");
+        string mergesPath = Path.Combine(modelDirectory, "vocab.bpe");
+        string encoderJson = JsonSerializer.Serialize(_encoder, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(encoderPath, encoderJson);
+        List<string> mergeLines = ["#version: 0.2"];
+        foreach (var pair in _bpeRanks.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key))
+        {
+            mergeLines.Add($"{pair.First} {pair.Second}");
+        }
+        File.WriteAllLines(mergesPath, mergeLines);
+    }
+
+    public static Gpt2Encoder CreateCustom(
+        Dictionary<string, int> encoder,
+        IReadOnlyList<(string First, string Second)> merges,
+        bool throwOnInvalidBytes = false)
+    {
+        return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes);
+    }
+
+    public static Gpt2Encoder TrainFromText(
+        string text,
+        int vocabSize,
+        int numMerges,
+        bool throwOnInvalidBytes = false)
+    {
+        // Build base vocabulary from byte encoder (256 base tokens)
+        (Dictionary<byte, string> byteEncoder, _) = BuildByteUnicodeLookups();
+        Dictionary<string, int> encoder = [];
+        int tokenId = 0;
+        foreach (string byteToken in byteEncoder.Values)
+        {
+            encoder[byteToken] = tokenId++;
+        }
+
+        // Encode text as byte-level tokens
+        UTF8Encoding utf8 = new(false, throwOnInvalidBytes);
+        byte[] textBytes = utf8.GetBytes(text);
+        List<string> tokens = textBytes.Select(b => byteEncoder[b]).ToList();
+
+        // Split into words (sequences separated by whitespace-like boundaries)
+        List<List<string>> words = SplitIntoWords(tokens);
+
+        List<(string First, string Second)> merges = [];
+
+        for (int merge = 0; merge < numMerges && encoder.Count < vocabSize; merge++)
+        {
+            // Count all adjacent pairs across all words
+            Dictionary<(string, string), int> pairCounts = [];
+            foreach (List<string> word in words)
+            {
+                for (int i = 0; i < word.Count - 1; i++)
+                {
+                    var pair = (word[i], word[i + 1]);
+                    pairCounts[pair] = pairCounts.GetValueOrDefault(pair) + 1;
+                }
+            }
+
+            if (pairCounts.Count == 0)
+            {
+                break;
+            }
+
+            // Find most frequent pair
+            var bestPair = pairCounts.MaxBy(static kvp => kvp.Value).Key;
+
+            // Create new merged token
+            string newToken = bestPair.Item1 + bestPair.Item2;
+            if (!encoder.ContainsKey(newToken))
+            {
+                encoder[newToken] = tokenId++;
+            }
+
+            merges.Add((bestPair.Item1, bestPair.Item2));
+
+            // Apply merge to all words
+            for (int w = 0; w < words.Count; w++)
+            {
+                words[w] = ApplyMerge(words[w], bestPair.Item1, bestPair.Item2, newToken);
+            }
+        }
+
+        return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes);
+    }
+
+    private static List<List<string>> SplitIntoWords(List<string> tokens)
+    {
+        List<List<string>> words = [];
+        List<string> currentWord = [];
+
+        foreach (string token in tokens)
+        {
+            currentWord.Add(token);
+            // Simple word boundary: split on space-like characters
+            if (token.Length == 1 && char.IsWhiteSpace(token[0]))
+            {
+                if (currentWord.Count > 0)
+                {
+                    words.Add(currentWord);
+                    currentWord = [];
+                }
+            }
+        }
+
+        if (currentWord.Count > 0)
+        {
+            words.Add(currentWord);
+        }
+
+        return words;
+    }
+
+    private static List<string> ApplyMerge(List<string> word, string first, string second, string merged)
+    {
+        List<string> newWord = [];
+        int i = 0;
+
+        while (i < word.Count)
+        {
+            if (i < word.Count - 1 && word[i] == first && word[i + 1] == second)
+            {
+                newWord.Add(merged);
+                i += 2;
+            }
+            else
+            {
+                newWord.Add(word[i]);
+                i++;
+            }
+        }
+
+        return newWord;
+    }
+
     public int[] Encode(string text)
     {
         List<int> tokens = [];
@@ -222,8 +358,8 @@ internal sealed class Gpt2Encoder
             .. Enumerable.Range('®', 'ÿ' - '®' + 1),
         ];
 
-        HashSet<int> existing = new(bs);
-        List<int> cs = new(bs);
+        HashSet<int> existing = [.. bs];
+        List<int> cs = [.. bs];
         int n = 0;
 
         for (int b = 0; b < 256; b++)

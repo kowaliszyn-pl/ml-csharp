@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: 
+// File name: Gpt2Params.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 // Translated for C# from the original Python code at https://github.com/jaymody/picoGPT (fork https://github.com/kowaliszyn-pl/pico-gpt-2)
@@ -7,8 +7,6 @@
 
 using System.Numerics.Tensors;
 using System.Text;
-
-using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.RandomUtils;
 
@@ -197,10 +195,7 @@ internal sealed record Gpt2Params
             return matrix;
         }
 
-        static Tensor GetTensor(Dictionary<string, Tensor> tensors, string name)
-        {
-            return tensors[name];
-        }
+        static Tensor GetTensor(Dictionary<string, Tensor> tensors, string name) => tensors[name];
     }
 }
 
