@@ -4,19 +4,24 @@
 
 namespace NeuralNetworks.LearningRates;
 
-public class ExponentialDecayLearningRate(float initialLearningRate, float finalLearningRate) : DecayLearningRate(initialLearningRate)
+public class ExponentialDecayLearningRate(float initialLearningRate, float finalLearningRate, int warmupSteps = 0) : DecayLearningRate(initialLearningRate, warmupSteps)
 {
     private readonly float _initialLearningRate = initialLearningRate;
     private readonly float _finalLearningRate = finalLearningRate;
 
-    public override void Update(int epoch, int epochs)
+    public override void Update(int steps, int epoch, int epochs)
     {
+        if (WarmupSteps > 0 && steps < WarmupSteps && epoch == 1) // Only for the first epoch
+        {
+            CurrentLearningRate = _initialLearningRate * steps / WarmupSteps;
+            return;
+        }
+
         if (epochs == 1)
             CurrentLearningRate = _initialLearningRate;
         else
             CurrentLearningRate = _initialLearningRate * (float)Math.Pow(_finalLearningRate / _initialLearningRate, (float)(epoch - 1) / (epochs - 1));
-        // Console.WriteLine($"CurrentLearningRate: {CurrentLearningRate}, epoch: {epoch}, epochs: {epochs}");
     }
 
-    public override string ToString() => $"ExponentialDecayLearningRate (initialLearningRate={_initialLearningRate}, finalLearningRate={_finalLearningRate})";
+    public override string ToString() => $"ExponentialDecayLearningRate (initialLearningRate={_initialLearningRate}, finalLearningRate={_finalLearningRate}, warmupSteps={WarmupSteps})";
 }

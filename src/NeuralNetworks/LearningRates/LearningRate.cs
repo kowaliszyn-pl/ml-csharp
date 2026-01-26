@@ -8,5 +8,5 @@ public abstract class LearningRate
 {
     public abstract float GetLearningRate();
 
-    public virtual void Update(int epoch, int epochs) { }
+    public virtual void Update(int steps, int epoch, int epochs) { }
 }

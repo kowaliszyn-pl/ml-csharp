@@ -20,15 +20,17 @@ internal class Program
     private const float NegativeInfinity = -1e10f;
     private const string ModelSize = "124M";
     private const string ModelsDir = "..\\..\\..\\..\\..\\data\\GPT-2\\";
-    private const int NumTokensToGenerate = 50;
+    private const int NumTokensToGenerate = 100;
     private const int Seed = 42;
+    private const bool WithProbabilities = true;
 
     private sealed record GenerateOptions(float Temperature, int TopK, float TopP);
 
     private static readonly GenerateOptions Deterministic = new(1f, 1, 1f);
-    private static readonly GenerateOptions LittleFreedom = new(1f, 4, 1f);
-    private static readonly GenerateOptions Nondeterministic = new(1f, 40, 0.9f);
-    private static readonly GenerateOptions Creative = new(0.7f, 40, 0.9f);
+    private static readonly GenerateOptions LittleFreedom = new(1f, 5, 1f);
+    private static readonly GenerateOptions Nondeterministic = new(1f, 40, 1f);
+    private static readonly GenerateOptions Crazy = new(1.3f, 40, 0.9f);
+    private static readonly GenerateOptions Wise = new(0.6f, 30, 0.75f);
 
     private static void Main(string[] args)
     {
@@ -62,7 +64,9 @@ internal class Program
         while (true)
         {
             Console.Write("Enter prompt: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
             string? prompt = Console.ReadLine();
+            Console.ResetColor();
 
             if (string.IsNullOrEmpty(prompt))
                 break;
@@ -76,19 +80,31 @@ internal class Program
 
             // Console.WriteLine("Input token ids: " + string.Join(", ", inputIds));
 
-            foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, LittleFreedom, seededRandom))
+            foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, Wise, seededRandom))
             {
-                // Console.Write($" [{outputId}] ");
-                Console.Write(encoder.Decode(outputId));
+                string nextWord = encoder.Decode(outputId.TokenId);
+
+                if (WithProbabilities)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write($"{nextWord} ");
+                    Console.ResetColor();
+
+                    string candidatesStr = string.Join(", ", outputId.Candidates.Select(c => $"'{encoder.Decode(c.Item1)}' - {c.Item2:P2}"));
+                    Console.WriteLine($"[{candidatesStr}] ");
+                }
+                else
+                {
+                    Console.Write(nextWord);
+                }
             }
-            Console.WriteLine();
-            Console.WriteLine();
+            Console.WriteLine("\n");
         }
         Console.WriteLine("\nPress ENTER...");
         Console.ReadLine();
     }
 
-    private static IEnumerable<int> Generate(int[] inputIds, Gpt2Params modelParams, int headCount, int nTokensToGenerate, GenerateOptions options, Random random)
+    private static IEnumerable<(int, List<(int, float)>)> Generate(int[] inputIds, Gpt2Params modelParams, int headCount, int nTokensToGenerate, GenerateOptions options, Random random)
     {
         List<int> inputs = [.. inputIds];
         for (int i = 0; i < nTokensToGenerate; i++)
@@ -96,17 +112,22 @@ internal class Program
             float[,] logits = Forward([.. inputs], modelParams, headCount);
             float[] lastTokenLogits = logits.GetRow(logits.GetLength(0) - 1);
 
+            // Apply SoftMax to logits (cotrrected by temperature) to get probabilities
             float[] softmaxedLogits = lastTokenLogits.SoftmaxStableWithTemperature(options.Temperature);
 
+            // Create a list of (tokenId, probability) tuples, because indexes are no longer tokenIds after sorting and filtering
             List<(int TokenId, float Probability)> tokenList = softmaxedLogits
                 .Select((probability, tokenId) => (tokenId, probability))
                 .ToList();
 
-            tokenList.Sort((a, b) => b.Probability.CompareTo(a.Probability)); // Sort descending by probabilities
+            // Sort descending by probabilities
+            tokenList.Sort((a, b) => b.Probability.CompareTo(a.Probability));
 
+            // Select top K tokens
             if (options.TopK > 0)
                 tokenList = [.. tokenList.Take(options.TopK)];
 
+            // Apply nucleus (top-p) filtering
             if (options.TopP < 1f)
             {
                 float cumulativeProbability = 0f;
@@ -123,12 +144,13 @@ internal class Program
                 tokenList = [.. tokenList.Take(cutOffIndex)];
             }
 
+            // Sample from the resulting distribution
             float sumProbability = tokenList.Sum(t => t.Probability);
             float sample = random.NextSingle() * sumProbability;
 
             // Find the token corresponding to the sampled probability
             float cumulative = 0f;
-            int nextId = 0;
+            int nextId = tokenList[0].TokenId;  // Default to most likely
             for (int tokenIndex = 0; tokenIndex < tokenList.Count; tokenIndex++)
             {
                 cumulative += tokenList[tokenIndex].Probability;
@@ -139,8 +161,10 @@ internal class Program
                 }
             }
 
+            List<(int, float)> candidates = [.. tokenList.Take(5)];
+
             inputs.Add(nextId);
-            yield return nextId;
+            yield return (nextId, candidates);
         }
     }
 

@@ -25,8 +25,8 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
-// 97,30% - CpuSpansParallel
-// 97,30% - Gpu
+// 97,72% - CpuSpansParallel
+// 97,72% - Gpu
 // 97,31% - CpuSpans, CpuArrays
 
 internal class MnistConvModel(SeededRandom? random)
@@ -109,7 +109,7 @@ internal class MnistCnn
 
         WriteLine("\nStart training...");
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate);
+        LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
         Trainer4D trainer = new(
             model,
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 

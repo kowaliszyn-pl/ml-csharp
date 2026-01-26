@@ -140,7 +140,7 @@ public abstract class Trainer<TInputData, TPrediction>(
                 //}
 
                 PermuteData(xTrain, yTrain, random ?? new Random());
-                optimizer.UpdateLearningRate(epoch, epochs);
+                optimizer.UpdateLearningRate(1, epoch, epochs);
 
                 if (logEpoch)
                     WriteLine($"Current learning rate: {optimizer.LearningRate.GetLearningRate()}.");
@@ -156,6 +156,10 @@ public abstract class Trainer<TInputData, TPrediction>(
                 foreach ((TInputData xBatch, TPrediction yBatch) in GenerateBatches(xTrain, yTrain, batchSize))
                 {
                     step++;
+
+                    // Usually, learning rate is updated once per epoch, but some schedulers (like with non-zero WarmupSteps) may require per-step updates.
+                    optimizer.UpdateLearningRate(step, epoch, epochs);
+
                     if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                     {
                         string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";

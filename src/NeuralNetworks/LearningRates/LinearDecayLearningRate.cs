@@ -4,13 +4,19 @@
 
 namespace NeuralNetworks.LearningRates;
 
-public class LinearDecayLearningRate(float initialLearningRate, float finalLearningRate) : DecayLearningRate(initialLearningRate)
+public class LinearDecayLearningRate(float initialLearningRate, float finalLearningRate, int warmupSteps = 0) : DecayLearningRate(initialLearningRate, warmupSteps)
 {
     private readonly float _initialLearningRate = initialLearningRate;
     private readonly float _finalLearningRate = finalLearningRate;
 
-    public override void Update(int epoch, int epochs)
+    public override void Update(int steps, int epoch, int epochs)
     {
+        if(WarmupSteps > 0 && steps < WarmupSteps && epoch == 1) // Only for the first epoch
+        {
+            CurrentLearningRate = _initialLearningRate * steps  / WarmupSteps;
+            return;
+        }
+
         if (epochs == 1)
             CurrentLearningRate = _initialLearningRate;
         else
@@ -18,5 +24,5 @@ public class LinearDecayLearningRate(float initialLearningRate, float finalLearn
     }
 
     public override string ToString()
-        => $"LinearDecayLearningRate (initialLearningRate={_initialLearningRate}, finalLearningRate={_finalLearningRate})";
+        => $"LinearDecayLearningRate (initialLearningRate={_initialLearningRate}, finalLearningRate={_finalLearningRate}, warmupSteps={WarmupSteps})";
 }
