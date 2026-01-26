@@ -42,7 +42,6 @@ internal static class Program
             Console.WriteLine("D. MNIST data set (dense layers)");
             Console.WriteLine("C. MNIST data set (CNN)");
             Console.WriteLine("L. Load and evaluate MNIST data set (dense layers)");
-            Console.WriteLine("T. GPT-2 toy text generator");
             Console.WriteLine("Other: Exit");
             Console.WriteLine();
             Console.Write("Enter your choice: ");
@@ -74,9 +73,6 @@ internal static class Program
                     break;
                 case "L":
                     MnistDense.LoadAndEvaluate();
-                    break;
-                case "T":
-                    Gpt2Basic.Run();
                     break;
 
                 default:
