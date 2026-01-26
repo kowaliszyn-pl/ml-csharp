@@ -1697,6 +1697,39 @@ public static class ArrayExtensions
         return res;
     }
 
+    public static float[] SoftmaxStableWithTemperature(this float[] source, float temperature)
+    {
+        Debug.Assert(temperature > 0, "Temperature must be greater than 0.");
+
+        int length = source.GetLength(0);
+        float[] res = new float[length];
+
+        float max = float.NegativeInfinity;
+        for (int i = 0; i < length; i++)
+        {
+            // 1. Find the max for numerical stability
+            if (source[i] > max)
+                max = source[i];
+        }
+
+        // 2. Exponentiate shifted values and compute sum
+        float sum = 0f;
+        for (int i = 0; i < length; i++)
+        {
+            float exp = MathF.Exp((source[i] - max) / temperature);
+            res[i] = exp;
+            sum += exp;
+        }
+
+        // 3. Normalize
+        for (int i = 0; i < length; i++)
+        {
+            res[i] /= sum;
+        }
+
+        return res;
+    }
+
     /// <summary>
     /// Applies the Softplus activation function to each element of the specified two-dimensional array.
     /// </summary>

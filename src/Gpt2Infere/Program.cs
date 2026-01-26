@@ -20,13 +20,23 @@ internal class Program
     private const float NegativeInfinity = -1e10f;
     private const string ModelSize = "124M";
     private const string ModelsDir = "..\\..\\..\\..\\..\\data\\GPT-2\\";
-    private const int NumTokensToGenerate = 20;
+    private const int NumTokensToGenerate = 50;
+    private const int Seed = 42;
+
+    private sealed record GenerateOptions(float Temperature, int TopK, float TopP);
+
+    private static readonly GenerateOptions Deterministic = new(1f, 1, 1f);
+    private static readonly GenerateOptions LittleFreedom = new(1f, 4, 1f);
+    private static readonly GenerateOptions Nondeterministic = new(1f, 40, 0.9f);
+    private static readonly GenerateOptions Creative = new(0.7f, 40, 0.9f);
 
     private static void Main(string[] args)
     {
         Console.WriteLine($"NumTokensToGenerate: {NumTokensToGenerate}");
         Console.WriteLine($"ModelSize: {ModelSize}");
         Console.WriteLine($"ModelsDir: {ModelsDir}");
+
+        SeededRandom seededRandom = new(Seed);
 
         // Prepare the model - load encoder, hparams, and params from the released open-ai gpt-2 files or create dummy model
         bool createDummy = ModelSize == "0";
@@ -36,8 +46,6 @@ internal class Program
 
         if (createDummy)
         {
-            SeededRandom seededRandom = new(42);
-
             hParams = new();
             encoder = Gpt2Encoder.CreateDummy(hParams);
             modelParams = Gpt2Params.CreateNew(hParams, seededRandom);
@@ -68,7 +76,7 @@ internal class Program
 
             // Console.WriteLine("Input token ids: " + string.Join(", ", inputIds));
 
-            foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate))
+            foreach (int outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, LittleFreedom, seededRandom))
             {
                 // Console.Write($" [{outputId}] ");
                 Console.Write(encoder.Decode(outputId));
@@ -80,14 +88,57 @@ internal class Program
         Console.ReadLine();
     }
 
-    private static IEnumerable<int> Generate(int[] inputIds, Gpt2Params modelParams, int headCount, int nTokensToGenerate)
+    private static IEnumerable<int> Generate(int[] inputIds, Gpt2Params modelParams, int headCount, int nTokensToGenerate, GenerateOptions options, Random random)
     {
         List<int> inputs = [.. inputIds];
         for (int i = 0; i < nTokensToGenerate; i++)
         {
-            float[,] logits = Forward(inputs.ToArray(), modelParams, headCount);
+            float[,] logits = Forward([.. inputs], modelParams, headCount);
             float[] lastTokenLogits = logits.GetRow(logits.GetLength(0) - 1);
-            int nextId = lastTokenLogits.Argmax();
+
+            float[] softmaxedLogits = lastTokenLogits.SoftmaxStableWithTemperature(options.Temperature);
+
+            List<(int TokenId, float Probability)> tokenList = softmaxedLogits
+                .Select((probability, tokenId) => (tokenId, probability))
+                .ToList();
+
+            tokenList.Sort((a, b) => b.Probability.CompareTo(a.Probability)); // Sort descending by probabilities
+
+            if (options.TopK > 0)
+                tokenList = [.. tokenList.Take(options.TopK)];
+
+            if (options.TopP < 1f)
+            {
+                float cumulativeProbability = 0f;
+                int cutOffIndex = tokenList.Count;
+                for (int j = 0; j < tokenList.Count; j++)
+                {
+                    cumulativeProbability += tokenList[j].Probability;
+                    if (cumulativeProbability >= options.TopP)
+                    {
+                        cutOffIndex = j + 1;
+                        break;
+                    }
+                }
+                tokenList = [.. tokenList.Take(cutOffIndex)];
+            }
+
+            float sumProbability = tokenList.Sum(t => t.Probability);
+            float sample = random.NextSingle() * sumProbability;
+
+            // Find the token corresponding to the sampled probability
+            float cumulative = 0f;
+            int nextId = 0;
+            for (int tokenIndex = 0; tokenIndex < tokenList.Count; tokenIndex++)
+            {
+                cumulative += tokenList[tokenIndex].Probability;
+                if (cumulative >= sample)
+                {
+                    nextId = tokenList[tokenIndex].TokenId;
+                    break;
+                }
+            }
+
             inputs.Add(nextId);
             yield return nextId;
         }
@@ -166,7 +217,7 @@ internal class Program
 
         Debug.Assert(gamma.Length == beta.Length);
 
-        float[,] normalized = x.StandardizeByRows(); 
+        float[,] normalized = x.StandardizeByRows();
 
         float[,] res = normalized.MultiplyElementwise(gamma).AddRow(beta);
         return res;
