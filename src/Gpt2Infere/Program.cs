@@ -2,8 +2,10 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-// Translated for C# from the original Python code at https://github.com/kowaliszyn-pl/pico-gpt-2 (fork)
-// Also, part of the code also copied from https://github.com/kowaliszyn-pl/sharp-gpt-2 (fork)
+// Translated for C# from the original Python code at https://github.com/jaymody/picoGPT (fork https://github.com/kowaliszyn-pl/pico-gpt-2)
+// Also, part of the code also copied from https://github.com/lofcz/gpt2sharp (fork https://github.com/kowaliszyn-pl/sharp-gpt-2)
+
+// Backwards: https://github.com/nietras/Llm.cs/blob/main/src/Llm/Llm.cs
 
 using System.Text.Json;
 
