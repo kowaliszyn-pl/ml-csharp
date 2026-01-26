@@ -74,7 +74,20 @@ internal sealed record Gpt2Params
         };
     }
 
-    private sealed record Tensor(string Name, int[] Shape, float[] Data);
+    private sealed record Tensor(string Name, int[] Shape, float[] As1D)
+    {
+        public float[,] As2D
+        {
+            get
+            {
+                int rows = Shape[0];
+                int cols = Shape[1];
+                float[,] matrix = new float[rows, cols];
+                Buffer.BlockCopy(As1D, 0, matrix, 0, As1D.Length * sizeof(float));
+                return matrix;
+            }
+        }
+    }
 
     internal static Gpt2Params FromDirectory(string modelDirectory, Gpt2HParams gpt2HParams)
     {
@@ -107,12 +120,12 @@ internal sealed record Gpt2Params
 
         Gpt2Params gpt2Params = new()
         {
-            TokenEmbeddings = ToMatrix(GetTensor(tensors, "token_embeddings")),
-            PositionalEmbeddings = ToMatrix(GetTensor(tensors, "positional_embeddings")),
+            TokenEmbeddings = tensors["token_embeddings"].As2D,
+            PositionalEmbeddings = tensors["positional_embeddings"].As2D,
             FinalLayerNorm = new Gpt2LayerNormParams
             {
-                Gamma = GetTensor(tensors, "final_layer_norm.gamma").Data,
-                Beta = GetTensor(tensors, "final_layer_norm.beta").Data
+                Gamma = tensors["final_layer_norm.gamma"].As1D,
+                Beta = tensors["final_layer_norm.beta"].As1D
             },
             Blocks = Enumerable.Range(0, gpt2HParams.LayerCount).Select(i =>
             {
@@ -121,38 +134,38 @@ internal sealed record Gpt2Params
                 {
                     LayerNorm1 = new Gpt2LayerNormParams
                     {
-                        Gamma = GetTensor(tensors, $"{prefix}ln1.gamma").Data,
-                        Beta = GetTensor(tensors, $"{prefix}ln1.beta").Data
+                        Gamma = tensors[$"{prefix}ln1.gamma"].As1D,
+                        Beta = tensors[$"{prefix}ln1.beta"].As1D
                     },
                     Attention = new Gpt2MultiHeadAttentionParams
                     {
                         Projection = new Gpt2LinearParams
                         {
-                            Weights = ToMatrix(GetTensor(tensors, $"{prefix}attn.qkv.weight")),
-                            Bias = GetTensor(tensors, $"{prefix}attn.qkv.bias").Data
+                            Weights = tensors[$"{prefix}attn.qkv.weight"].As2D,
+                            Bias = tensors[$"{prefix}attn.qkv.bias"].As1D
                         },
                         OutputProjection = new Gpt2LinearParams
                         {
-                            Weights = ToMatrix(GetTensor(tensors, $"{prefix}attn.out.weight")),
-                            Bias = GetTensor(tensors, $"{prefix}attn.out.bias").Data
+                            Weights = tensors[$"{prefix}attn.out.weight"].As2D,
+                            Bias = tensors[$"{prefix}attn.out.bias"].As1D
                         }
                     },
                     LayerNorm2 = new Gpt2LayerNormParams
                     {
-                        Gamma = GetTensor(tensors, $"{prefix}ln2.gamma").Data,
-                        Beta = GetTensor(tensors, $"{prefix}ln2.beta").Data
+                        Gamma = tensors[$"{prefix}ln2.gamma"].As1D,
+                        Beta = tensors[$"{prefix}ln2.beta"].As1D
                     },
                     MultiLayerPerceptron = new Gpt2MultiLayerPerceptron
                     {
                         FullyConnected = new Gpt2LinearParams
                         {
-                            Weights = ToMatrix(GetTensor(tensors, $"{prefix}mlp.up.weight")),
-                            Bias = GetTensor(tensors, $"{prefix}mlp.up.bias").Data
+                            Weights = tensors[$"{prefix}mlp.up.weight"].As2D,
+                            Bias = tensors[$"{prefix}mlp.up.bias"].As1D
                         },
                         OutputProjection = new Gpt2LinearParams
                         {
-                            Weights = ToMatrix(GetTensor(tensors, $"{prefix}mlp.down.weight")),
-                            Bias = GetTensor(tensors, $"{prefix}mlp.down.bias").Data
+                            Weights = tensors[$"{prefix}mlp.down.weight"].As2D,
+                            Bias = tensors[ $"{prefix}mlp.down.bias"].As1D
                         }
                     }
                 };
@@ -170,7 +183,10 @@ internal sealed record Gpt2Params
 
         static Tensor ReadTensor(BinaryReader reader, string name)
         {
+            // First, read the rank
             int rank = reader.ReadInt32();
+
+            // Then, read the shape
             int[] shape = new int[rank];
             long elementCount = 1;
             for (int i = 0; i < rank; i++)
@@ -179,23 +195,14 @@ internal sealed record Gpt2Params
                 shape[i] = dimension;
                 elementCount = checked(elementCount * dimension);
             }
+
+            // Finally, read the data
             float[] data = new float[elementCount];
             for (int i = 0; i < data.Length; i++)
                 data[i] = reader.ReadSingle();
 
             return new Tensor(name, shape, data);
         }
-
-        static float[,] ToMatrix(Tensor tensor)
-        {
-            int rows = tensor.Shape[0];
-            int cols = tensor.Shape[1];
-            float[,] matrix = new float[rows, cols];
-            Buffer.BlockCopy(tensor.Data, 0, matrix, 0, tensor.Data.Length * sizeof(float));
-            return matrix;
-        }
-
-        static Tensor GetTensor(Dictionary<string, Tensor> tensors, string name) => tensors[name];
     }
 }
 
