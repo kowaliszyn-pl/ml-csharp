@@ -41,13 +41,13 @@ internal class Program
         // Prepare the model - load encoder, hparams, and params from the released open-ai gpt-2 files or create dummy model
         bool createDummy = ModelSize == "0";
         Gpt2HParams hParams;
-        Gpt2Encoder encoder;
+        Gpt2Tokenizer tokenizer;
         Gpt2Params modelParams;
 
         if (createDummy)
         {
             hParams = new();
-            encoder = Gpt2Encoder.CreateDummy(hParams);
+            tokenizer = Gpt2Tokenizer.CreateDummy(hParams);
             modelParams = Gpt2Params.CreateNew(hParams, seededRandom);
         }
         else
@@ -55,7 +55,7 @@ internal class Program
             string modelDirectory = Path.Combine(ModelsDir, ModelSize);
 
             hParams = Gpt2HParams.FromDirectory(modelDirectory);
-            encoder = Gpt2Encoder.FromDirectory(modelDirectory);
+            tokenizer = Gpt2Tokenizer.FromDirectory(modelDirectory);
             modelParams = Gpt2Params.FromDirectory(modelDirectory, hParams);
         }
 
@@ -69,7 +69,7 @@ internal class Program
             if (string.IsNullOrEmpty(prompt))
                 break;
 
-            int[] inputIds = encoder.Encode(prompt);
+            int[] inputIds = tokenizer.Encode(prompt);
 
             if (inputIds.Length + NumTokensToGenerate >= hParams.ContextSize)
             {
@@ -82,7 +82,7 @@ internal class Program
 
             foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, Crazy, seededRandom))
             {
-                string nextWord = encoder.Decode(outputId.TokenId);
+                string nextWord = tokenizer.Decode(outputId.TokenId);
 
                 if (WithProbabilities)
                 {
@@ -90,7 +90,7 @@ internal class Program
                     Console.Write($"{nextWord} ");
                     Console.ResetColor();
 
-                    string candidatesStr = string.Join(", ", outputId.Candidates.Select(c => $"'{encoder.Decode(c.Item1)}' - {c.Item2:P2}"));
+                    string candidatesStr = string.Join(", ", outputId.Candidates.Select(c => $"'{tokenizer.Decode(c.Item1)}' - {c.Item2:P2}"));
                     Console.WriteLine($"[{candidatesStr}] ");
                 }
                 else

@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Byte Pair Encoding implementation adapted from the original Python GPT-2 encoder.
 /// </summary>
-internal sealed partial class Gpt2Encoder
+internal sealed partial class Gpt2Tokenizer
 {
     private readonly Dictionary<string, int> _encoder;
     private readonly Dictionary<int, string> _decoder;
@@ -20,7 +20,7 @@ internal sealed partial class Gpt2Encoder
     private readonly Regex _tokenPattern;
     private readonly Encoding _utf8;
 
-    private Gpt2Encoder(
+    private Gpt2Tokenizer(
         Dictionary<string, int> encoder,
         IReadOnlyList<(string First, string Second)> merges,
         bool throwOnInvalidBytes)
@@ -35,7 +35,7 @@ internal sealed partial class Gpt2Encoder
         _utf8 = new UTF8Encoding(false, throwOnInvalidBytes);
     }
 
-    public static Gpt2Encoder CreateDummy(Gpt2HParams hParams)
+    public static Gpt2Tokenizer CreateDummy(Gpt2HParams hParams)
     {
         int vocabSize = hParams.VocabularySize;
         Dictionary<string, int> encoder = new(vocabSize);
@@ -44,10 +44,10 @@ internal sealed partial class Gpt2Encoder
             encoder[$"token_{i}"] = i;
         }
         List<(string, string)> merges = [];
-        return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes: false);
+        return new Gpt2Tokenizer(encoder, merges, throwOnInvalidBytes: false);
     }
 
-    public static Gpt2Encoder FromDirectory(string modelDirectory, bool throwOnInvalidBytes = false)
+    public static Gpt2Tokenizer FromDirectory(string modelDirectory, bool throwOnInvalidBytes = false)
     {
         string encoderPath = Path.Combine(modelDirectory, "encoder.json");
         string mergesPath = Path.Combine(modelDirectory, "vocab.bpe");
@@ -67,7 +67,7 @@ internal sealed partial class Gpt2Encoder
             .Select(static parts => (parts[0], parts[1]))
             .ToList();
 
-        return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes);
+        return new Gpt2Tokenizer(encoder, merges, throwOnInvalidBytes);
     }
 
     public void SaveToDirectory(string modelDirectory)
@@ -84,15 +84,15 @@ internal sealed partial class Gpt2Encoder
         File.WriteAllLines(mergesPath, mergeLines);
     }
 
-    public static Gpt2Encoder CreateCustom(
+    public static Gpt2Tokenizer CreateCustom(
         Dictionary<string, int> encoder,
         IReadOnlyList<(string First, string Second)> merges,
         bool throwOnInvalidBytes = false)
     {
-        return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes);
+        return new Gpt2Tokenizer(encoder, merges, throwOnInvalidBytes);
     }
 
-    public static Gpt2Encoder TrainFromText(
+    public static Gpt2Tokenizer TrainFromText(
         string text,
         int vocabSize,
         int numMerges,
@@ -165,7 +165,7 @@ internal sealed partial class Gpt2Encoder
             }
         }
 
-        return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes);
+        return new Gpt2Tokenizer(encoder, merges, throwOnInvalidBytes);
     }
 
     private static List<string> ApplyMerge(List<string> word, string first, string second, string merged)
