@@ -198,8 +198,9 @@ internal sealed record Gpt2Params
 
             // Finally, read the data
             float[] data = new float[elementCount];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = reader.ReadSingle();
+            int byteCount = (int)elementCount * sizeof(float);
+            byte[] buffer = reader.ReadBytes(byteCount);
+            Buffer.BlockCopy(buffer, 0, data, 0, byteCount);
 
             return new Tensor(name, shape, data);
         }

@@ -28,8 +28,8 @@ internal class Program
 
     private static readonly GenerateOptions Deterministic = new(1f, 1, 1f);
     private static readonly GenerateOptions LittleFreedom = new(1f, 5, 1f);
-    private static readonly GenerateOptions Nondeterministic = new(1f, 40, 1f);
-    private static readonly GenerateOptions Crazy = new(1.3f, 40, 0.9f);
+    private static readonly GenerateOptions Nondeterministic = new(1f, 30, 1f);
+    private static readonly GenerateOptions Crazy = new(1.3f, 30, 0.9f);
     private static readonly GenerateOptions Wise = new(0.6f, 30, 0.75f);
 
     private static void Main(string[] args)
@@ -80,7 +80,7 @@ internal class Program
 
             // Console.WriteLine("Input token ids: " + string.Join(", ", inputIds));
 
-            foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, Wise, seededRandom))
+            foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, Crazy, seededRandom))
             {
                 string nextWord = encoder.Decode(outputId.TokenId);
 
