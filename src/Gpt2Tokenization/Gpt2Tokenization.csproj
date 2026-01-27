@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Gpt2Inference\Gpt2Inference.csproj" />
+  </ItemGroup>
+
 </Project>

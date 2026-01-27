@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Byte Pair Encoding implementation adapted from the original Python GPT-2 encoder.
 /// </summary>
-internal sealed partial class Gpt2Tokenizer
+public sealed partial class Gpt2Tokenizer
 {
     private readonly Dictionary<string, int> _encoder;
     private readonly Dictionary<int, string> _decoder;
@@ -107,15 +107,15 @@ internal sealed partial class Gpt2Tokenizer
             encoder[byteToken] = tokenId++;
         }
 
-        // Use TokenizationPattern to split text into tokens
-        Regex tokenPattern = TokenizationPattern();
+        // Use TestTokenizationPattern to split text into tokens
+        Regex tokenPattern = TestTokenizationPattern();
         UTF8Encoding utf8 = new(false, throwOnInvalidBytes);
-        List<string> tokens = [];
-        foreach (Match match in tokenPattern.Matches(text))
-        {
-            byte[] tokenBytes = utf8.GetBytes(match.Value);
-            tokens.AddRange(tokenBytes.Select(b => byteEncoder[b]));
-        }
+        //List<string> tokens = [];
+        //foreach (Match match in tokenPattern.Matches(text))
+        //{
+        //    byte[] tokenBytes = utf8.GetBytes(match.Value);
+        //    tokens.AddRange(tokenBytes.Select(b => byteEncoder[b]));
+        //}
 
         // Group tokens into words (each match is a "word" for BPE training)
         List<List<string>> words = tokenPattern.Matches(text)
@@ -383,4 +383,7 @@ internal sealed partial class Gpt2Tokenizer
 
     [GeneratedRegex("""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""", RegexOptions.Compiled)]
     private static partial Regex TokenizationPattern();
+
+    [GeneratedRegex(@"(ami|em|owi|ą|ę|u|y|i|ów|ach|owie|e|a|o|ska|ski|skie|ego|ej|ym|ych|emu|ej|iem|ią)\b| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+", RegexOptions.Compiled)]
+    private static partial Regex TestTokenizationPattern();
 }

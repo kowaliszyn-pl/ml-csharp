@@ -7,7 +7,7 @@
 
 using System.Text.Json.Serialization;
 
-internal class Gpt2HParams
+public class Gpt2HParams
 {
     [JsonPropertyName("n_ctx")]
     public int ContextSize { get; set; } = 1024;
