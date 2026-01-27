@@ -20,7 +20,7 @@ internal class Program
     private const float NegativeInfinity = -1e10f;
     private const string ModelSize = "124M";
     private const string ModelsDir = "..\\..\\..\\..\\..\\data\\GPT-2\\";
-    private const int NumTokensToGenerate = 100;
+    private const int NumTokensToGenerate = 20;
     private const int Seed = 42;
     private const bool WithProbabilities = true;
 
@@ -80,6 +80,8 @@ internal class Program
 
             // Console.WriteLine("Input token ids: " + string.Join(", ", inputIds));
 
+            Stopwatch sw = Stopwatch.StartNew();
+
             foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, Crazy, seededRandom))
             {
                 string nextWord = encoder.Decode(outputId.TokenId);
@@ -98,7 +100,8 @@ internal class Program
                     Console.Write(nextWord);
                 }
             }
-            Console.WriteLine("\n");
+            sw.Stop();
+            Console.WriteLine($"\n{(sw.ElapsedMilliseconds / 1000f) / NumTokensToGenerate:F2} sec. per token.\n");
         }
         Console.WriteLine("\nPress ENTER...");
         Console.ReadLine();

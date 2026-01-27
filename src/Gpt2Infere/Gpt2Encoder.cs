@@ -11,7 +11,7 @@ namespace Gpt2Infere;
 /// <summary>
 /// Byte Pair Encoding implementation adapted from the original Python GPT-2 encoder.
 /// </summary>
-internal sealed class Gpt2Encoder
+internal sealed partial class Gpt2Encoder
 {
     private readonly Dictionary<string, int> _encoder;
     private readonly Dictionary<int, string> _decoder;
@@ -33,8 +33,7 @@ internal sealed class Gpt2Encoder
         _bpeRanks = merges
             .Select((pair, index) => (pair, index))
             .ToDictionary(static x => x.pair, static x => x.index);
-        _tokenPattern = new Regex("""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""",
-            RegexOptions.Compiled);
+        _tokenPattern = TokenizationPattern();
         _utf8 = new UTF8Encoding(false, throwOnInvalidBytes);
     }
 
@@ -399,4 +398,7 @@ internal sealed class Gpt2Encoder
 
         return encoded.ToString();
     }
+
+    [GeneratedRegex("""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""", RegexOptions.Compiled)]
+    private static partial Regex TokenizationPattern();
 }
