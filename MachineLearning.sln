@@ -32,7 +32,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PermuteBenchmark", "perform
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpanBenchmark", "performance\SpanBenchmark\SpanBenchmark.csproj", "{6881416D-627B-4E93-8976-936AE5F27D9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gpt2Infere", "src\Gpt2Infere\Gpt2Infere.csproj", "{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gpt2Inference", "src\Gpt2Inference\Gpt2Inference.csproj", "{AF6F6DD1-6669-4BE4-B1B2-0699C4334E0E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

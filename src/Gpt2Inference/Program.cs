@@ -9,8 +9,6 @@
 
 using System.Diagnostics;
 
-using Gpt2Infere;
-
 using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.ArrayExtensions;
@@ -34,10 +32,6 @@ internal class Program
 
     private static void Main(string[] args)
     {
-        Gpt2Encoder res = Gpt2Encoder.TrainFromText("To jest tekst do wytrenowania. Dziękuję za uwagę!", 300, 300);
-        var tkns = res.Encode("To jest tekst do wytrenowania. Dziękuję za uwagę!");
-
-
         Console.WriteLine($"NumTokensToGenerate: {NumTokensToGenerate}");
         Console.WriteLine($"ModelSize: {ModelSize}");
         Console.WriteLine($"ModelsDir: {ModelsDir}");

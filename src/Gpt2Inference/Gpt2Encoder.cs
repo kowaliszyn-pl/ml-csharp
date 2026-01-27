@@ -6,8 +6,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace Gpt2Infere;
-
 /// <summary>
 /// Byte Pair Encoding implementation adapted from the original Python GPT-2 encoder.
 /// </summary>
