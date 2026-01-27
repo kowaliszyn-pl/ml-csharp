@@ -22,13 +22,13 @@ Roman Kowaliszyn
 www.kowaliszyn.pl
 
 Słowa:
-królami królem królowi króla królowe królów królach królami królowie 
+królami królem królowi króla królowe królów królach królami królowie królewska królewskie królewskim królewskich królewskości królewskością
 należny należnemu należnej należnym
 
 😎
 ";
         Console.OutputEncoding = System.Text.Encoding.UTF8;
-        Gpt2Tokenizer tokenizer = Gpt2Tokenizer.TrainFromText(Text, 6000, 600);
+        Gpt2Tokenizer tokenizer = Gpt2Tokenizer.TrainFromText(Text, 1000, 1000);
 
         int[] tokens = tokenizer.Encode(Text);
         string decodedTokens = string.Join("\n", tokens

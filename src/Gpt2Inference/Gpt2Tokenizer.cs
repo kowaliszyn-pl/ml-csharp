@@ -384,6 +384,7 @@ public sealed partial class Gpt2Tokenizer
     [GeneratedRegex("""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""", RegexOptions.Compiled)]
     private static partial Regex TokenizationPattern();
 
-    [GeneratedRegex(@"(ami|em|owi|ą|ę|u|y|i|ów|ach|owie|e|a|o|ska|ski|skie|ego|ej|ym|ych|emu|ej|iem|ią)\b| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+", RegexOptions.Compiled)]
+    //[GeneratedRegex(@"(?<! )\b(ami|em|owi|ą|ę|u|y|i|ów|ach|owie|e|a|o|ska|ski|skie|nego|nej|nym|nych|emu|ej|iem|ią)\b| ?\p{L}+|[\+\-\*/]", RegexOptions.Compiled)]
+    [GeneratedRegex("""owi|em|ów|ach|ami|owie|ska| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""", RegexOptions.Compiled)]
     private static partial Regex TestTokenizationPattern();
 }
