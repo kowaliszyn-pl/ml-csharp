@@ -109,13 +109,24 @@ internal sealed partial class Gpt2Encoder
             encoder[byteToken] = tokenId++;
         }
 
-        // Encode text as byte-level tokens
+        // Use TokenizationPattern to split text into tokens
+        Regex tokenPattern = TokenizationPattern();
         UTF8Encoding utf8 = new(false, throwOnInvalidBytes);
-        byte[] textBytes = utf8.GetBytes(text);
-        List<string> tokens = textBytes.Select(b => byteEncoder[b]).ToList();
+        List<string> tokens = [];
+        foreach (Match match in tokenPattern.Matches(text))
+        {
+            byte[] tokenBytes = utf8.GetBytes(match.Value);
+            tokens.AddRange(tokenBytes.Select(b => byteEncoder[b]));
+        }
 
-        // Split into words (sequences separated by whitespace-like boundaries)
-        List<List<string>> words = SplitIntoWords(tokens);
+        // Group tokens into words (each match is a "word" for BPE training)
+        List<List<string>> words = tokenPattern.Matches(text)
+            .Select(m =>
+            {
+                byte[] tokenBytes = utf8.GetBytes(m.Value);
+                return tokenBytes.Select(b => byteEncoder[b]).ToList();
+            })
+            .ToList();
 
         List<(string First, string Second)> merges = [];
 
@@ -157,33 +168,6 @@ internal sealed partial class Gpt2Encoder
         }
 
         return new Gpt2Encoder(encoder, merges, throwOnInvalidBytes);
-    }
-
-    private static List<List<string>> SplitIntoWords(List<string> tokens)
-    {
-        List<List<string>> words = [];
-        List<string> currentWord = [];
-
-        foreach (string token in tokens)
-        {
-            currentWord.Add(token);
-            // Simple word boundary: split on space-like characters
-            if (token.Length == 1 && char.IsWhiteSpace(token[0]))
-            {
-                if (currentWord.Count > 0)
-                {
-                    words.Add(currentWord);
-                    currentWord = [];
-                }
-            }
-        }
-
-        if (currentWord.Count > 0)
-        {
-            words.Add(currentWord);
-        }
-
-        return words;
     }
 
     private static List<string> ApplyMerge(List<string> word, string first, string second, string merged)
