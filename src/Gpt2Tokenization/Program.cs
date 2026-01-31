@@ -17,6 +17,13 @@ Będziemy obserwować, jak tokenizator radzi sobie z tymi końcówkami i czy pot
 
 Test apostrofów: I'll be there. You're amazing! It's a beautiful day.
 
+Test matematyki:
+2 + 3 = 5
+kropki dziesiętne: 234.78 + 876.22 = 1111.0
+przecinki dziesiętne: 234,78 + 876,22 = 1111,0
+E = mc^2
+Całka od 0 do nieskończoności z e^(-x) dx = 1
+
 Podpisano
 Roman Kowaliszyn
 www.kowaliszyn.pl
@@ -28,7 +35,7 @@ należny należnemu należnej należnym
 😎
 ";
         Console.OutputEncoding = System.Text.Encoding.UTF8;
-        Gpt2Tokenizer tokenizer = Gpt2Tokenizer.TrainFromText(Text, 1000, 1000);
+        Gpt2Tokenizer tokenizer = Gpt2Tokenizer.TrainFromText(Text, 600, 1000);
 
         int[] tokens = tokenizer.Encode(Text);
         string decodedTokens = string.Join("\n", tokens
@@ -36,7 +43,12 @@ należny należnemu należnej należnym
             .Select(t => $"[{t.tokenId}: \"{t.tokenString}\"]"));
 
         Console.WriteLine(decodedTokens);
-        Console.WriteLine($"Token count: {tokens.Length}");
+        Console.WriteLine($"\nToken count: {tokens.Length}");
+
+        string decodedText = tokenizer.Decode(tokens);
+        Console.WriteLine("\nDecoded text:");
+        Console.WriteLine(decodedText);
+
         Console.ReadLine();
     }
 }

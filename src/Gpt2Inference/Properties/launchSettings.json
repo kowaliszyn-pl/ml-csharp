@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Gpt2Infere": {
+    "Gpt2Inference": {
       "commandName": "Project"
     }
   }

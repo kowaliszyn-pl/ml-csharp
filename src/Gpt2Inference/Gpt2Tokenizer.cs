@@ -11,13 +11,15 @@ using System.Text.RegularExpressions;
 /// </summary>
 public sealed partial class Gpt2Tokenizer
 {
+    private const char SingleSpace = ' ';
+
     private readonly Dictionary<string, int> _encoder;
     private readonly Dictionary<int, string> _decoder;
     private readonly Dictionary<byte, string> _byteEncoder;
     private readonly Dictionary<char, byte> _byteDecoder;
     private readonly Dictionary<(string First, string Second), int> _bpeRanks;
     private readonly Dictionary<string, string> _cache = [];
-    private readonly Regex _tokenPattern;
+    private readonly Regex _wordPattern;
     private readonly Encoding _utf8;
 
     private Gpt2Tokenizer(
@@ -31,7 +33,7 @@ public sealed partial class Gpt2Tokenizer
         _bpeRanks = merges
             .Select((pair, index) => (pair, index))
             .ToDictionary(static x => x.pair, static x => x.index);
-        _tokenPattern = TokenizationPattern();
+        _wordPattern = TokenizationPattern();
         _utf8 = new UTF8Encoding(false, throwOnInvalidBytes);
     }
 
@@ -62,7 +64,7 @@ public sealed partial class Gpt2Tokenizer
         List<(string, string)> merges = mergeLines
             .Skip(1) // skip version line
             .Where(static line => !string.IsNullOrWhiteSpace(line))
-            .Select(static line => line.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            .Select(static line => line.Split(SingleSpace, StringSplitOptions.RemoveEmptyEntries))
             .Where(static parts => parts.Length == 2)
             .Select(static parts => (parts[0], parts[1]))
             .ToList();
@@ -192,53 +194,40 @@ public sealed partial class Gpt2Tokenizer
 
     public int[] Encode(string text)
     {
-        List<int> tokens = [];
-        foreach (Match match in _tokenPattern.Matches(text))
+        List<int> tokenIds = [];
+        foreach (Match match in _wordPattern.Matches(text))
         {
-            string token = match.Value;
-            string encoded = EncodeUtf8(token);
-            string[] bpeTokens = ApplyBpe(encoded).Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            foreach (string bpeToken in bpeTokens)
+            string word = match.Value;
+            string encodedWord = EncodeUtf8(word);
+            string tokenTextsAsString = GetTokenTexts(encodedWord);
+            string[] tokenTexts = tokenTextsAsString.Split(SingleSpace, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string tokenText in tokenTexts)
             {
-                if (!_encoder.TryGetValue(bpeToken, out int tokenId))
+                if (!_encoder.TryGetValue(tokenText, out int tokenId))
                 {
-                    throw new InvalidOperationException($"Token '{bpeToken}' not present in vocabulary.");
+                    throw new InvalidOperationException($"Token '{tokenText}' not present in vocabulary.");
                 }
 
-                tokens.Add(tokenId);
+                tokenIds.Add(tokenId);
             }
         }
 
-        return tokens.ToArray();
+        return tokenIds.ToArray();
     }
 
-    public string Decode(params IEnumerable<int> tokens)
+    private string EncodeUtf8(string word)
     {
-        StringBuilder textBuilder = new();
-        foreach (int token in tokens)
+        byte[] utf8Bytes = _utf8.GetBytes(word);
+        StringBuilder encoded = new(word.Length);
+        foreach (byte b in utf8Bytes)
         {
-            if (!_decoder.TryGetValue(token, out string? piece))
-            {
-                throw new InvalidOperationException($"Token id '{token}' not present in decoder.");
-            }
-
-            textBuilder.Append(piece);
+            encoded.Append(_byteEncoder[b]);
         }
 
-        List<byte> byteBuffer = new(textBuilder.Length);
-        foreach (char c in textBuilder.ToString())
-        {
-            if (!_byteDecoder.TryGetValue(c, out byte value))
-            {
-                throw new InvalidOperationException($"Character '{c}' missing from byte decoder.");
-            }
-            byteBuffer.Add(value);
-        }
-
-        return _utf8.GetString(byteBuffer.ToArray());
+        return encoded.ToString();
     }
 
-    private string ApplyBpe(string token)
+    private string GetTokenTexts(string token)
     {
         if (_cache.TryGetValue(token, out string? cached))
         {
@@ -306,10 +295,38 @@ public sealed partial class Gpt2Tokenizer
             pairs = GetPairs(word);
         }
 
-        string result = string.Join(' ', word);
+        string result = string.Join(SingleSpace, word);
         _cache[token] = result;
         return result;
     }
+
+    public string Decode(params IEnumerable<int> tokens)
+    {
+        StringBuilder textBuilder = new();
+        foreach (int token in tokens)
+        {
+            if (!_decoder.TryGetValue(token, out string? piece))
+            {
+                throw new InvalidOperationException($"Token id '{token}' not present in decoder.");
+            }
+
+            textBuilder.Append(piece);
+        }
+
+        List<byte> byteBuffer = new(textBuilder.Length);
+        foreach (char c in textBuilder.ToString())
+        {
+            if (!_byteDecoder.TryGetValue(c, out byte value))
+            {
+                throw new InvalidOperationException($"Character '{c}' missing from byte decoder.");
+            }
+            byteBuffer.Add(value);
+        }
+
+        return _utf8.GetString(byteBuffer.ToArray());
+    }
+
+    
 
     private static HashSet<(string, string)> GetPairs(IReadOnlyList<string> word)
     {
@@ -369,22 +386,12 @@ public sealed partial class Gpt2Tokenizer
         return (byteEncoder, byteDecoder);
     }
 
-    private string EncodeUtf8(string token)
-    {
-        byte[] utf8Bytes = _utf8.GetBytes(token);
-        StringBuilder encoded = new(token.Length);
-        foreach (byte b in utf8Bytes)
-        {
-            encoded.Append(_byteEncoder[b]);
-        }
-
-        return encoded.ToString();
-    }
+    
 
     [GeneratedRegex("""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""", RegexOptions.Compiled)]
     private static partial Regex TokenizationPattern();
 
     //[GeneratedRegex(@"(?<! )\b(ami|em|owi|ą|ę|u|y|i|ów|ach|owie|e|a|o|ska|ski|skie|nego|nej|nym|nych|emu|ej|iem|ią)\b| ?\p{L}+|[\+\-\*/]", RegexOptions.Compiled)]
-    [GeneratedRegex("""owi|em|ów|ach|ami|owie|ska| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""", RegexOptions.Compiled)]
+    [GeneratedRegex(@"owie| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+", RegexOptions.Compiled)]
     private static partial Regex TestTokenizationPattern();
 }

@@ -18,7 +18,7 @@ internal class Program
     private const float NegativeInfinity = -1e10f;
     private const string ModelSize = "124M";
     private const string ModelsDir = "..\\..\\..\\..\\..\\data\\GPT-2\\";
-    private const int NumTokensToGenerate = 20;
+    private const int NumTokensToGenerate = 3;
     private const int Seed = 42;
     private const bool WithProbabilities = true;
 
@@ -290,6 +290,7 @@ internal class Program
         // Attention for each head
         int headDim = qHeads.GetLength(2);
         float[,,] outHeads = new float[headCount, inputSequenceLength, headDim]; // headCount * headDim = embedding size
+        //Parallel.For(0, headCount, headIndex => // it deos not speed up the execution
         for (int headIndex = 0; headIndex < headCount; headIndex++)
         {
             // headIndex goes from 0 to 11 (for GPT-2 124M)
@@ -301,7 +302,7 @@ internal class Program
             for (int i = 0; i < inputSequenceLength; i++)
                 for (int j = 0; j < headDim; j++)
                     outHeads[headIndex, i, j] = attn[i, j];
-        }
+        };
 
         // Merge heads: [n_head, n_seq, headDim] -> [n_seq, n_embd]
         float[,] mergedHeads = new float[inputSequenceLength, headCount * headDim];
