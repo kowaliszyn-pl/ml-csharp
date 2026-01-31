@@ -17,7 +17,7 @@ public partial class Gpt2Tokenizer
 
     private readonly Dictionary<string, int> _textToTokenId;
     private readonly Dictionary<int, string> _tokenIdToText;
-    private readonly Dictionary<byte, string> _byteToChar;
+    private readonly Dictionary<byte, char> _byteToChar;
     private readonly Dictionary<char, byte> _charToByte;
     private readonly Dictionary<(string First, string Second), int> _pairRanks;
     private readonly Dictionary<string, string> _cache = [];
@@ -94,6 +94,7 @@ public partial class Gpt2Tokenizer
         IReadOnlyList<(string First, string Second)> merges,
         bool throwOnInvalidBytes = false) => new(encoder, merges, throwOnInvalidBytes);
 
+    /*
     public static Gpt2Tokenizer TrainFromText(
         string text,
         int vocabSize,
@@ -101,10 +102,10 @@ public partial class Gpt2Tokenizer
         bool throwOnInvalidBytes = false)
     {
         // Build base vocabulary from byte encoder (256 base tokens)
-        (Dictionary<byte, string> byteEncoder, _) = CreateByteCharMapping();
+        (Dictionary<byte, char> byteEncoder, _) = CreateByteCharMapping();
         Dictionary<string, int> encoder = [];
         int tokenId = 0;
-        foreach (string byteToken in byteEncoder.Values)
+        foreach (char byteToken in byteEncoder.Values)
         {
             encoder[byteToken] = tokenId++;
         }
@@ -168,7 +169,7 @@ public partial class Gpt2Tokenizer
         }
 
         return new Gpt2Tokenizer(encoder, merges, throwOnInvalidBytes);
-    }
+    }*/
 
     private static List<string> ApplyMerge(List<string> word, string first, string second, string merged)
     {
@@ -364,7 +365,7 @@ public partial class Gpt2Tokenizer
         return pairs;
     }
 
-    private static (Dictionary<byte, string> Encoder, Dictionary<char, byte> Decoder) CreateByteCharMapping()
+    private static (Dictionary<byte, char> Encoder, Dictionary<char, byte> Decoder) CreateByteCharMapping()
     {
         List<int> bs =
         [
@@ -390,13 +391,13 @@ public partial class Gpt2Tokenizer
             n++;
         }
 
-        Dictionary<byte, string> byteEncoder = new(bs.Count);
+        Dictionary<byte, char> byteEncoder = new(bs.Count);
         Dictionary<char, byte> byteDecoder = new(bs.Count);
         for (int i = 0; i < bs.Count; i++)
         {
             byte b = (byte)bs[i];
             char c = (char)cs[i];
-            byteEncoder[b] = c.ToString();
+            byteEncoder[b] = c;
             byteDecoder[c] = b;
         }
 

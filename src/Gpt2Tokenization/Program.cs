@@ -58,6 +58,7 @@ Po hebrajsku:
 היום אני מביט למרחק ובוכה.
 ";
         Console.OutputEncoding = System.Text.Encoding.UTF8;
+        /*
         Gpt2Tokenizer tokenizer = Gpt2Tokenizer.TrainFromText(Text, 600, 1000);
 
         int[] tokens = tokenizer.Encode(Text);
@@ -72,6 +73,6 @@ Po hebrajsku:
         Console.WriteLine("\nDecoded text:");
         Console.WriteLine(decodedText);
 
-        Console.ReadLine();
+        Console.ReadLine();*/
     }
 }
