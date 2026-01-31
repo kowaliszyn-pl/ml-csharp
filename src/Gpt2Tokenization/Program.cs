@@ -2,6 +2,8 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using Gpt2Inference;
+
 namespace Gpt2Tokenization;
 
 internal class Program
@@ -33,6 +35,27 @@ królami królem królowi króla królowe królów królach królami królowie k
 należny należnemu należnej należnym
 
 😎
+
+Po japońskui:
+今日も遠くを眺，涙を流す。 (Kyō mo tōku o nage, namida o nagasu.)
+
+Po rosyjsku:
+Сегодня я смотрю вдаль и плачу.
+
+Po polsku:
+Dziś znowu patrzę w dal i płaczę.
+
+Po angielsku:
+Today I look into the distance and cry.
+
+Po arabsku:
+اليوم أنظر إلى المسافة وأبكي.
+
+Po chińsku:
+今天我望向远方，哭泣。
+
+Po hebrajsku:
+היום אני מביט למרחק ובוכה.
 ";
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Gpt2Tokenizer tokenizer = Gpt2Tokenizer.TrainFromText(Text, 600, 1000);

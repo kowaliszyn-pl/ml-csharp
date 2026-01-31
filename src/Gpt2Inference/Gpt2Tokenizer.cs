@@ -6,6 +6,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
+namespace Gpt2Inference;
+
 /// <summary>
 /// Byte Pair Encoding implementation adapted from the original Python GPT-2 encoder.
 /// </summary>
@@ -13,29 +15,29 @@ public partial class Gpt2Tokenizer
 {
     private const char SingleSpace = ' ';
 
-    private readonly Dictionary<string, int> _encoder;
-    private readonly Dictionary<int, string> _decoder;
+    private readonly Dictionary<string, int> _textToTokenId;
+    private readonly Dictionary<int, string> _tokenIdToText;
     private readonly Dictionary<byte, string> _byteToChar;
     private readonly Dictionary<char, byte> _charToByte;
-    private readonly Dictionary<(string First, string Second), int> _bpeRanks;
+    private readonly Dictionary<(string First, string Second), int> _pairRanks;
     private readonly Dictionary<string, string> _cache = [];
     private readonly Regex _wordPattern;
-    private readonly UTF8Encoding _utf8;
+    private readonly UTF8Encoding _utf8Encoding;
 
     public Gpt2Tokenizer(
-        Dictionary<string, int> encoder,
-        IReadOnlyList<(string First, string Second)> merges,
-        bool throwOnInvalidBytes
+        Dictionary<string, int> textToTokenId,
+        IReadOnlyList<(string First, string Second)> pairs,
+        bool throwOnInvalidBytes = true
     )
     {
-        _encoder = encoder;
-        _decoder = encoder.ToDictionary(static kvp => kvp.Value, static kvp => kvp.Key);
+        _textToTokenId = textToTokenId;
+        _tokenIdToText = textToTokenId.ToDictionary(static kvp => kvp.Value, static kvp => kvp.Key);
         (_byteToChar, _charToByte) = CreateByteCharMapping();
-        _bpeRanks = merges
+        _pairRanks = pairs
             .Select((pair, index) => (pair, index))
             .ToDictionary(static x => x.pair, static x => x.index);
         _wordPattern = GetWordPatternRegex();
-        _utf8 = new(false, throwOnInvalidBytes);
+        _utf8Encoding = new(false, throwOnInvalidBytes);
     }
 
     public static Gpt2Tokenizer CreateDummy(Gpt2HParams hParams)
@@ -77,10 +79,10 @@ public partial class Gpt2Tokenizer
     {
         string encoderPath = Path.Combine(modelDirectory, "encoder.json");
         string mergesPath = Path.Combine(modelDirectory, "vocab.bpe");
-        string encoderJson = JsonSerializer.Serialize(_encoder, new JsonSerializerOptions { WriteIndented = true });
+        string encoderJson = JsonSerializer.Serialize(_textToTokenId, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(encoderPath, encoderJson);
         List<string> mergeLines = ["#version: 0.2"];
-        foreach ((string First, string Second) pair in _bpeRanks.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key))
+        foreach ((string First, string Second) pair in _pairRanks.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key))
         {
             mergeLines.Add($"{pair.First} {pair.Second}");
         }
@@ -211,7 +213,7 @@ public partial class Gpt2Tokenizer
             string[] tokenTexts = tokenTextsAsString.Split(SingleSpace, StringSplitOptions.RemoveEmptyEntries);
             foreach (string tokenText in tokenTexts)
             {
-                if (!_encoder.TryGetValue(tokenText, out int tokenId))
+                if (!_textToTokenId.TryGetValue(tokenText, out int tokenId))
                 {
                     throw new InvalidOperationException($"Token '{tokenText}' not present in vocabulary.");
                 }
@@ -234,11 +236,11 @@ public partial class Gpt2Tokenizer
     /// <returns>A string containing the encoded representation of the input word.</returns>
     private string EncodeUtf8(string word)
     {
-        byte[] utf8Bytes = _utf8.GetBytes(word);
+        byte[] utf8Bytes = _utf8Encoding.GetBytes(word);
         StringBuilder encoded = new(word.Length);
-        foreach (byte b in utf8Bytes)
+        foreach (byte utf8Byte in utf8Bytes)
         {
-            encoded.Append(_byteToChar[b]);
+            encoded.Append(_byteToChar[utf8Byte]);
         }
 
         return encoded.ToString();
@@ -263,10 +265,10 @@ public partial class Gpt2Tokenizer
         while (pairs.Count > 0)
         {
             (string, string) bigram = pairs
-                .OrderBy(pair => _bpeRanks.TryGetValue(pair, out int value) ? value : int.MaxValue)
+                .OrderBy(pair => _pairRanks.TryGetValue(pair, out int value) ? value : int.MaxValue)
                 .First();
 
-            if (!_bpeRanks.ContainsKey(bigram))
+            if (!_pairRanks.ContainsKey(bigram))
             {
                 break;
             }
@@ -322,7 +324,7 @@ public partial class Gpt2Tokenizer
         StringBuilder textBuilder = new();
         foreach (int token in tokens)
         {
-            if (!_decoder.TryGetValue(token, out string? piece))
+            if (!_tokenIdToText.TryGetValue(token, out string? piece))
             {
                 throw new InvalidOperationException($"Token id '{token}' not present in decoder.");
             }
@@ -340,7 +342,7 @@ public partial class Gpt2Tokenizer
             byteBuffer.Add(value);
         }
 
-        return _utf8.GetString(byteBuffer.ToArray());
+        return _utf8Encoding.GetString(byteBuffer.ToArray());
     }
 
     private static HashSet<(string, string)> GetPairs(IReadOnlyList<string> word)

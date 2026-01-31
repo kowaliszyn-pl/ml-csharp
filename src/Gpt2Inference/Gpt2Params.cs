@@ -10,6 +10,8 @@ using System.Text;
 
 using static NeuralNetworks.Core.RandomUtils;
 
+namespace Gpt2Inference;
+
 internal sealed record Gpt2Params
 {
     public float[,] TokenEmbeddings { get; init; } = default!;

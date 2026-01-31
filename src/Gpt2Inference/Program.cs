@@ -13,6 +13,8 @@ using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.ArrayExtensions;
 
+namespace Gpt2Inference;
+
 internal class Program
 {
     private const float NegativeInfinity = -1e10f;

@@ -7,6 +7,8 @@
 
 using System.Text.Json.Serialization;
 
+namespace Gpt2Inference;
+
 public class Gpt2HParams
 {
     [JsonPropertyName("n_ctx")]
