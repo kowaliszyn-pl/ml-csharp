@@ -15,7 +15,7 @@ public partial class Gpt2Tokenizer
 {
     private const char SingleSpace = ' ';
 
-    private readonly Dictionary<string, int> _textToTokenId;
+    private readonly Dictionary<string, int> _textToTokenId; // If number of tokens <= 65,535 use ushort
     private readonly Dictionary<int, string> _tokenIdToText;
     private readonly Dictionary<byte, char> _byteToChar;
     private readonly Dictionary<char, byte> _charToByte;
@@ -94,7 +94,6 @@ public partial class Gpt2Tokenizer
         IReadOnlyList<(string First, string Second)> merges,
         bool throwOnInvalidBytes = false) => new(encoder, merges, throwOnInvalidBytes);
 
-    /*
     public static Gpt2Tokenizer TrainFromText(
         string text,
         int vocabSize,
@@ -107,7 +106,7 @@ public partial class Gpt2Tokenizer
         int tokenId = 0;
         foreach (char byteToken in byteEncoder.Values)
         {
-            encoder[byteToken] = tokenId++;
+            encoder[byteToken.ToString()] = tokenId++;
         }
 
         // Use TestTokenizationPattern to split text into tokens
@@ -125,7 +124,8 @@ public partial class Gpt2Tokenizer
             .Select(m =>
             {
                 byte[] tokenBytes = utf8.GetBytes(m.Value);
-                return tokenBytes.Select(b => byteEncoder[b]).ToList();
+                return tokenBytes.Select(b => byteEncoder[b].ToString())
+                    .ToList();
             })
             .ToList();
 
@@ -169,7 +169,7 @@ public partial class Gpt2Tokenizer
         }
 
         return new Gpt2Tokenizer(encoder, merges, throwOnInvalidBytes);
-    }*/
+    }
 
     private static List<string> ApplyMerge(List<string> word, string first, string second, string merged)
     {
