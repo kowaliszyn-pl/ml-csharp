@@ -192,12 +192,24 @@ public sealed partial class Gpt2Tokenizer
         return newWord;
     }
 
+    /// <summary>
+    /// Encodes the specified text into an array of token identifiers using the current vocabulary.
+    /// </summary>
+    /// <param name="text">The input text to encode. Cannot be null.</param>
+    /// <returns>An array of integers representing the token identifiers corresponding to the encoded text. The array will be
+    /// empty if the input text contains no tokens.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the text contains a token that is not present in the vocabulary.</exception>
     public int[] Encode(string text)
     {
         List<int> tokenIds = [];
+
+        // Split text into words using the word pattern
         foreach (Match match in _wordPattern.Matches(text))
         {
             string word = match.Value;
+
+            // Encode word to UTF-8 byte representation and then to byte tokens
+            // Word " is" will be encoded to "Ġis"
             string encodedWord = EncodeUtf8(word);
             string tokenTextsAsString = GetTokenTexts(encodedWord);
             string[] tokenTexts = tokenTextsAsString.Split(SingleSpace, StringSplitOptions.RemoveEmptyEntries);
@@ -215,6 +227,11 @@ public sealed partial class Gpt2Tokenizer
         return tokenIds.ToArray();
     }
 
+    /// <summary>
+    /// Encodes the specified string into a custom UTF-8-based encoded representation.
+    /// </summary>
+    /// <param name="word">The string to encode. Cannot be null.</param>
+    /// <returns>A string containing the encoded representation of the input word.</returns>
     private string EncodeUtf8(string word)
     {
         byte[] utf8Bytes = _utf8.GetBytes(word);
