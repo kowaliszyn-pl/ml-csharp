@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: Gpt2Encoder.cs
+// File name: Gpt2Tokenizer.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Text;
@@ -9,32 +9,33 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Byte Pair Encoding implementation adapted from the original Python GPT-2 encoder.
 /// </summary>
-public sealed partial class Gpt2Tokenizer
+public partial class Gpt2Tokenizer
 {
     private const char SingleSpace = ' ';
 
     private readonly Dictionary<string, int> _encoder;
     private readonly Dictionary<int, string> _decoder;
-    private readonly Dictionary<byte, string> _byteEncoder;
-    private readonly Dictionary<char, byte> _byteDecoder;
+    private readonly Dictionary<byte, string> _byteToChar;
+    private readonly Dictionary<char, byte> _charToByte;
     private readonly Dictionary<(string First, string Second), int> _bpeRanks;
     private readonly Dictionary<string, string> _cache = [];
     private readonly Regex _wordPattern;
-    private readonly Encoding _utf8;
+    private readonly UTF8Encoding _utf8;
 
-    private Gpt2Tokenizer(
+    public Gpt2Tokenizer(
         Dictionary<string, int> encoder,
         IReadOnlyList<(string First, string Second)> merges,
-        bool throwOnInvalidBytes)
+        bool throwOnInvalidBytes
+    )
     {
         _encoder = encoder;
         _decoder = encoder.ToDictionary(static kvp => kvp.Value, static kvp => kvp.Key);
-        (_byteEncoder, _byteDecoder) = BuildByteUnicodeLookups();
+        (_byteToChar, _charToByte) = CreateByteCharMapping();
         _bpeRanks = merges
             .Select((pair, index) => (pair, index))
             .ToDictionary(static x => x.pair, static x => x.index);
-        _wordPattern = TokenizationPattern();
-        _utf8 = new UTF8Encoding(false, throwOnInvalidBytes);
+        _wordPattern = GetWordPatternRegex();
+        _utf8 = new(false, throwOnInvalidBytes);
     }
 
     public static Gpt2Tokenizer CreateDummy(Gpt2HParams hParams)
@@ -79,7 +80,7 @@ public sealed partial class Gpt2Tokenizer
         string encoderJson = JsonSerializer.Serialize(_encoder, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(encoderPath, encoderJson);
         List<string> mergeLines = ["#version: 0.2"];
-        foreach (var pair in _bpeRanks.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key))
+        foreach ((string First, string Second) pair in _bpeRanks.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key))
         {
             mergeLines.Add($"{pair.First} {pair.Second}");
         }
@@ -89,10 +90,7 @@ public sealed partial class Gpt2Tokenizer
     public static Gpt2Tokenizer CreateCustom(
         Dictionary<string, int> encoder,
         IReadOnlyList<(string First, string Second)> merges,
-        bool throwOnInvalidBytes = false)
-    {
-        return new Gpt2Tokenizer(encoder, merges, throwOnInvalidBytes);
-    }
+        bool throwOnInvalidBytes = false) => new(encoder, merges, throwOnInvalidBytes);
 
     public static Gpt2Tokenizer TrainFromText(
         string text,
@@ -101,7 +99,7 @@ public sealed partial class Gpt2Tokenizer
         bool throwOnInvalidBytes = false)
     {
         // Build base vocabulary from byte encoder (256 base tokens)
-        (Dictionary<byte, string> byteEncoder, _) = BuildByteUnicodeLookups();
+        (Dictionary<byte, string> byteEncoder, _) = CreateByteCharMapping();
         Dictionary<string, int> encoder = [];
         int tokenId = 0;
         foreach (string byteToken in byteEncoder.Values)
@@ -110,7 +108,7 @@ public sealed partial class Gpt2Tokenizer
         }
 
         // Use TestTokenizationPattern to split text into tokens
-        Regex tokenPattern = TestTokenizationPattern();
+        Regex tokenPattern = GetWordPatternRegex();
         UTF8Encoding utf8 = new(false, throwOnInvalidBytes);
         //List<string> tokens = [];
         //foreach (Match match in tokenPattern.Matches(text))
@@ -138,7 +136,7 @@ public sealed partial class Gpt2Tokenizer
             {
                 for (int i = 0; i < word.Count - 1; i++)
                 {
-                    var pair = (word[i], word[i + 1]);
+                    (string, string) pair = (word[i], word[i + 1]);
                     pairCounts[pair] = pairCounts.GetValueOrDefault(pair) + 1;
                 }
             }
@@ -149,7 +147,7 @@ public sealed partial class Gpt2Tokenizer
             }
 
             // Find most frequent pair
-            var bestPair = pairCounts.MaxBy(static kvp => kvp.Value).Key;
+            (string, string) bestPair = pairCounts.MaxBy(static kvp => kvp.Value).Key;
 
             // Create new merged token
             string newToken = bestPair.Item1 + bestPair.Item2;
@@ -203,13 +201,11 @@ public sealed partial class Gpt2Tokenizer
     {
         List<int> tokenIds = [];
 
-        // Split text into words using the word pattern
-        foreach (Match match in _wordPattern.Matches(text))
-        {
-            string word = match.Value;
+        IEnumerable<string> words = GetWords(text);
 
-            // Encode word to UTF-8 byte representation and then to byte tokens
-            // Word " is" will be encoded to "Ġis"
+        foreach (string word in words)
+        {
+            // Encode word to custom UTF-8-based byte representation. Word " is" will be encoded to "Ġis".
             string encodedWord = EncodeUtf8(word);
             string tokenTextsAsString = GetTokenTexts(encodedWord);
             string[] tokenTexts = tokenTextsAsString.Split(SingleSpace, StringSplitOptions.RemoveEmptyEntries);
@@ -227,6 +223,10 @@ public sealed partial class Gpt2Tokenizer
         return tokenIds.ToArray();
     }
 
+    protected virtual IEnumerable<string> GetWords(string text)
+        // Split text into words using the word pattern
+        => _wordPattern.Matches(text).Select(m => m.Value);
+
     /// <summary>
     /// Encodes the specified string into a custom UTF-8-based encoded representation.
     /// </summary>
@@ -238,7 +238,7 @@ public sealed partial class Gpt2Tokenizer
         StringBuilder encoded = new(word.Length);
         foreach (byte b in utf8Bytes)
         {
-            encoded.Append(_byteEncoder[b]);
+            encoded.Append(_byteToChar[b]);
         }
 
         return encoded.ToString();
@@ -333,7 +333,7 @@ public sealed partial class Gpt2Tokenizer
         List<byte> byteBuffer = new(textBuilder.Length);
         foreach (char c in textBuilder.ToString())
         {
-            if (!_byteDecoder.TryGetValue(c, out byte value))
+            if (!_charToByte.TryGetValue(c, out byte value))
             {
                 throw new InvalidOperationException($"Character '{c}' missing from byte decoder.");
             }
@@ -342,8 +342,6 @@ public sealed partial class Gpt2Tokenizer
 
         return _utf8.GetString(byteBuffer.ToArray());
     }
-
-    
 
     private static HashSet<(string, string)> GetPairs(IReadOnlyList<string> word)
     {
@@ -364,7 +362,7 @@ public sealed partial class Gpt2Tokenizer
         return pairs;
     }
 
-    private static (Dictionary<byte, string> Encoder, Dictionary<char, byte> Decoder) BuildByteUnicodeLookups()
+    private static (Dictionary<byte, string> Encoder, Dictionary<char, byte> Decoder) CreateByteCharMapping()
     {
         List<int> bs =
         [
@@ -403,12 +401,6 @@ public sealed partial class Gpt2Tokenizer
         return (byteEncoder, byteDecoder);
     }
 
-    
-
     [GeneratedRegex("""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""", RegexOptions.Compiled)]
-    private static partial Regex TokenizationPattern();
-
-    //[GeneratedRegex(@"(?<! )\b(ami|em|owi|ą|ę|u|y|i|ów|ach|owie|e|a|o|ska|ski|skie|nego|nej|nym|nych|emu|ej|iem|ią)\b| ?\p{L}+|[\+\-\*/]", RegexOptions.Compiled)]
-    [GeneratedRegex(@"owie| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+", RegexOptions.Compiled)]
-    private static partial Regex TestTokenizationPattern();
+    private static partial Regex GetWordPatternRegex();
 }
