@@ -42,23 +42,23 @@ internal class Program
 
         // Prepare the model - load encoder, hparams, and params from the released open-ai gpt-2 files or create dummy model
         bool createDummy = ModelSize == "0";
-        Gpt2HParams hParams;
+        Gpt2HParams hyperParams;
         Gpt2Tokenizer tokenizer;
         Gpt2Params modelParams;
 
         if (createDummy)
         {
-            hParams = new();
-            tokenizer = Gpt2Tokenizer.CreateDummy(hParams);
-            modelParams = Gpt2Params.CreateNew(hParams, seededRandom);
+            hyperParams = new();
+            tokenizer = Gpt2Tokenizer.CreateDummy(hyperParams);
+            modelParams = Gpt2Params.CreateNew(hyperParams, seededRandom);
         }
         else
         {
             string modelDirectory = Path.Combine(ModelsDir, ModelSize);
 
-            hParams = Gpt2HParams.FromDirectory(modelDirectory);
+            hyperParams = Gpt2HParams.FromDirectory(modelDirectory);
             tokenizer = Gpt2Tokenizer.FromDirectory(modelDirectory);
-            modelParams = Gpt2Params.FromDirectory(modelDirectory, hParams);
+            modelParams = Gpt2Params.FromDirectory(modelDirectory, hyperParams);
         }
 
         while (true)
@@ -73,7 +73,7 @@ internal class Program
 
             int[] inputIds = tokenizer.Encode(prompt);
 
-            if (inputIds.Length + NumTokensToGenerate >= hParams.ContextSize)
+            if (inputIds.Length + NumTokensToGenerate >= hyperParams.ContextSize)
             {
                 throw new ArgumentException("Input prompt is too long for the model's context size.");
             }
@@ -82,7 +82,7 @@ internal class Program
 
             Stopwatch sw = Stopwatch.StartNew();
 
-            foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hParams.HeadCount, NumTokensToGenerate, Crazy, seededRandom))
+            foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hyperParams.HeadCount, NumTokensToGenerate, Crazy, seededRandom))
             {
                 string nextWord = tokenizer.Decode(outputId.TokenId);
 
@@ -186,26 +186,42 @@ internal class Program
     private static float[,] Forward(int[] inputIds, Gpt2Params modelParams, int headCount)
     {
         // [inputTokens, embeddingSize]
-        float[,] tokenEmbeddings = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
+        float[,] inputTokenEmbeddings = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
 
         for (int blockIndex = 0; blockIndex < modelParams.Blocks.Length; blockIndex++)
         {
             Gpt2Block block = modelParams.Blocks[blockIndex];
 
             // [inputTokens, embeddingSize]
-            tokenEmbeddings = TransformerBlockForward(tokenEmbeddings, block, headCount);
+            inputTokenEmbeddings = TransformerBlockForward(inputTokenEmbeddings, block, headCount);
         }
 
         // Final layer norm: [inputTokens, embeddingSize]
-        tokenEmbeddings = LayerNormForward(tokenEmbeddings, modelParams.FinalLayerNorm);
+        inputTokenEmbeddings = LayerNormForward(inputTokenEmbeddings, modelParams.FinalLayerNorm);
 
         // Project to vocab: [inputTokens, embeddingSize] -> [inputTokens, vocabularySize]
-        float[,] logitsMatrix = tokenEmbeddings.MultiplyDot(modelParams.TokenEmbeddings.Transpose());
+        float[,] logitsMatrix = inputTokenEmbeddings.MultiplyDot(modelParams.TokenEmbeddings.Transpose());
 
         // [inputTokens, vocabularySize]
         return logitsMatrix;
     }
 
+    /// <summary>
+    /// Combines token and positional embeddings for a sequence of input token IDs, producing the embedded
+    /// representation for each token position.
+    /// </summary>
+    /// <remarks>The returned array can be used as input to subsequent layers in a transformer-based model.
+    /// The method assumes that all input token IDs are within the valid range of the token embeddings matrix and that
+    /// the input sequence length does not exceed the available positional embeddings.</remarks>
+    /// <param name="inputTokenIds">An array of token IDs representing the input sequence. Each value must be a valid index into the token
+    /// embeddings matrix.</param>
+    /// <param name="tokenEmbeddings">A two-dimensional array containing the embedding vectors for each token in the vocabulary. The first dimension
+    /// corresponds to the vocabulary size; the second dimension corresponds to the embedding size.</param>
+    /// <param name="positionalEmbeddings">A two-dimensional array containing the positional embedding vectors for each possible position in the input
+    /// sequence. The first dimension corresponds to the maximum context size; the second dimension corresponds to the
+    /// embedding size.</param>
+    /// <returns>A two-dimensional array of shape [inputTokenIds.Length, embeddingSize], where each row contains the sum of the
+    /// token embedding and positional embedding for the corresponding input token position.</returns>
     private static float[,] EmbedTokens(int[] inputTokenIds, float[,] tokenEmbeddings, float[,] positionalEmbeddings)
     {
         // tokenEmbeddings are of size [vocabularySize, embeddingSize],
@@ -222,8 +238,8 @@ internal class Program
         for (int positionInInputSequence = 0; positionInInputSequence < inputTokens; positionInInputSequence++)
         {
             int tokenId = inputTokenIds[positionInInputSequence];
-            if (tokenId < 0 || tokenId >= tokenEmbeddings.GetLength(0))
-                throw new ArgumentOutOfRangeException(nameof(inputTokenIds), $"Token id {tokenId} is outside the vocabulary range.");
+
+            Debug.Assert(tokenId > 0 && tokenId < tokenEmbeddings.GetLength(0), $"Token id {tokenId} is outside the vocabulary range.");
 
             // The purpose of this loop is to add token embeddings (for e given token) and positional embeddings (for a given position in the input sequence)
             for (int embeddingIndex = 0; embeddingIndex < embeddingSize; embeddingIndex++)
@@ -236,21 +252,24 @@ internal class Program
             }
         }
 
+        // [inputTokens, embeddingSize]
         return result;
     }
 
-    private static float[,] TransformerBlockForward(float[,] x, Gpt2Block block, int headCount)
+    private static float[,] TransformerBlockForward(float[,] inputTokenEmbeddings, Gpt2Block block, int headCount)
     {
+        // inputTokenEmbeddings are of size [inputTokens, embeddingSize]
+
         // Multi-head causal self attention
-        float[,] normalizedXForAttention = LayerNormForward(x, block.LayerNorm1);
+        float[,] normalizedXForAttention = LayerNormForward(inputTokenEmbeddings, block.LayerNorm1);
         float[,] attentionOutput = MultiHeadAttention(normalizedXForAttention, block.Attention, headCount);
-        x = x.Add(attentionOutput);
+        inputTokenEmbeddings = inputTokenEmbeddings.Add(attentionOutput);
 
         // Position-wise feed forward network
-        float[,] normalizedXForFeedForward = LayerNormForward(x, block.LayerNorm2);
+        float[,] normalizedXForFeedForward = LayerNormForward(inputTokenEmbeddings, block.LayerNorm2);
         float[,] feedForwardOutput = FeedForwardNetwork(normalizedXForFeedForward, block.MultiLayerPerceptron);
-        x = x.Add(feedForwardOutput);
-        return x;
+        inputTokenEmbeddings = inputTokenEmbeddings.Add(feedForwardOutput);
+        return inputTokenEmbeddings;
     }
 
     private static float[,] LayerNormForward(float[,] x, Gpt2LayerNormParams layerNorm)
