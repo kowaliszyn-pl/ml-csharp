@@ -280,7 +280,7 @@ internal class Program
         // Split into heads: [n_seq, n_embd] -> [n_head, n_seq, headDim]
         // where headDim = n_embd / n_head
         // In GPT-2 124M, n_embd = 768, n_head = 12, so headDim = 64
-        // Interpretation of n_heads: each head is a separate attention mechanism that can focus on different parts of the input sequence. For example, one head might focus on syntactic structure, while another might focus on semantic meaning.
+        // Interpretation of n_heads: each head is a separate attention mechanism that can focus on different aspects of the input sequence. For example, one head might focus on syntactic structure, while another might focus on semantic meaning.
         float[,,] qHeads = SplitHeads(q, headCount);
         float[,,] kHeads = SplitHeads(k, headCount);
         float[,,] vHeads = SplitHeads(v, headCount);

@@ -210,7 +210,11 @@ public partial class Gpt2Tokenizer
         {
             // Encode word to custom UTF-8-based byte representation. Word " is" will be encoded to "Ġis".
             string encodedWord = EncodeUtf8(word);
+
+            // Word "Poland" will be split to tokens "Pol", "and" and returned as "Pol and"
             string tokenTextsAsString = GetTokenTexts(encodedWord);
+
+            // Split token texts by space. Word "Pol and" will be split to token texts: ["Pol", "and"]
             string[] tokenTexts = tokenTextsAsString.Split(SingleSpace, StringSplitOptions.RemoveEmptyEntries);
             foreach (string tokenText in tokenTexts)
             {
@@ -223,7 +227,7 @@ public partial class Gpt2Tokenizer
             }
         }
 
-        return tokenIds.ToArray();
+        return [.. tokenIds];
     }
 
     protected virtual IEnumerable<string> GetWords(string text)
@@ -247,20 +251,20 @@ public partial class Gpt2Tokenizer
         return encoded.ToString();
     }
 
-    private string GetTokenTexts(string token)
+    private string GetTokenTexts(string word)
     {
-        if (_cache.TryGetValue(token, out string? cached))
+        if (_cache.TryGetValue(word, out string? cached))
         {
             return cached;
         }
 
-        List<string> word = token.Select(static c => c.ToString()).ToList();
-        HashSet<(string, string)> pairs = GetPairs(word);
+        List<string> wordParts = word.Select(static c => c.ToString()).ToList();
+        HashSet<(string, string)> pairs = GetPairs(wordParts);
 
         if (pairs.Count == 0)
         {
-            _cache[token] = token;
-            return token;
+            _cache[word] = word;
+            return word;
         }
 
         while (pairs.Count > 0)
@@ -279,44 +283,44 @@ public partial class Gpt2Tokenizer
             string second = bigram.Item2;
             int i = 0;
 
-            while (i < word.Count)
+            while (i < wordParts.Count)
             {
-                int j = word.FindIndex(i, s => s == first);
+                int j = wordParts.FindIndex(i, s => s == first);
                 if (j == -1)
                 {
-                    newWord.AddRange(word.GetRange(i, word.Count - i));
+                    newWord.AddRange(wordParts.GetRange(i, wordParts.Count - i));
                     break;
                 }
 
                 if (j > i)
                 {
-                    newWord.AddRange(word.GetRange(i, j - i));
+                    newWord.AddRange(wordParts.GetRange(i, j - i));
                     i = j;
                 }
 
-                if (i < word.Count - 1 && word[i] == first && word[i + 1] == second)
+                if (i < wordParts.Count - 1 && wordParts[i] == first && wordParts[i + 1] == second)
                 {
                     newWord.Add(first + second);
                     i += 2;
                 }
                 else
                 {
-                    newWord.Add(word[i]);
+                    newWord.Add(wordParts[i]);
                     i += 1;
                 }
             }
 
-            word = newWord;
-            if (word.Count == 1)
+            wordParts = newWord;
+            if (wordParts.Count == 1)
             {
                 break;
             }
 
-            pairs = GetPairs(word);
+            pairs = GetPairs(wordParts);
         }
 
-        string result = string.Join(SingleSpace, word);
-        _cache[token] = result;
+        string result = string.Join(SingleSpace, wordParts);
+        _cache[word] = result;
         return result;
     }
 
@@ -346,7 +350,7 @@ public partial class Gpt2Tokenizer
         return _utf8Encoding.GetString(byteBuffer.ToArray());
     }
 
-    private static HashSet<(string, string)> GetPairs(IReadOnlyList<string> word)
+    private static HashSet<(string, string)> GetPairs(List<string> word)
     {
         HashSet<(string, string)> pairs = [];
         if (word.Count < 2)
