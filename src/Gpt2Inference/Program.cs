@@ -171,33 +171,49 @@ internal class Program
         }
     }
 
+    /// <summary>
+    /// Processes the specified input token IDs through the GPT-2 model and returns the logits matrix representing the
+    /// likelihood of each token in the vocabulary.
+    /// </summary>
+    /// <remarks>The method applies all transformer blocks sequentially to the input embeddings, performs a
+    /// final layer normalization, and projects the result to the vocabulary space. The returned logits can be used for
+    /// tasks such as next-token prediction or language modeling.</remarks>
+    /// <param name="inputIds">An array of token IDs to be processed by the model. Each element represents a token in the input sequence.</param>
+    /// <param name="modelParams">The parameters of the GPT-2 model, including token embeddings, positional embeddings, and transformer blocks.</param>
+    /// <param name="headCount">The number of attention heads to use in each transformer block during processing. Must be a positive integer.</param>
+    /// <returns>A two-dimensional array of floats containing the logits for each input token across the vocabulary. Each row
+    /// corresponds to an input token, and each column corresponds to a vocabulary token.</returns>
     private static float[,] Forward(int[] inputIds, Gpt2Params modelParams, int headCount)
     {
-        // X is [inputTokens, embeddingSize]
-        float[,] x = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
+        // [inputTokens, embeddingSize]
+        float[,] tokenEmbeddings = EmbedTokens(inputIds, modelParams.TokenEmbeddings, modelParams.PositionalEmbeddings);
 
         for (int blockIndex = 0; blockIndex < modelParams.Blocks.Length; blockIndex++)
         {
             Gpt2Block block = modelParams.Blocks[blockIndex];
-            x = TransformerBlockForward(x, block, headCount);
+
+            // [inputTokens, embeddingSize]
+            tokenEmbeddings = TransformerBlockForward(tokenEmbeddings, block, headCount);
         }
 
-        x = LayerNormForward(x, modelParams.FinalLayerNorm);
+        // Final layer norm: [inputTokens, embeddingSize]
+        tokenEmbeddings = LayerNormForward(tokenEmbeddings, modelParams.FinalLayerNorm);
 
-        // Project to vocab: [n_seq, n_embd] -> [n_seq, n_vocab]
-        float[,] logitsMatrix = x.MultiplyDot(modelParams.TokenEmbeddings.Transpose());
+        // Project to vocab: [inputTokens, embeddingSize] -> [inputTokens, vocabularySize]
+        float[,] logitsMatrix = tokenEmbeddings.MultiplyDot(modelParams.TokenEmbeddings.Transpose());
+
+        // [inputTokens, vocabularySize]
         return logitsMatrix;
     }
 
     private static float[,] EmbedTokens(int[] inputTokenIds, float[,] tokenEmbeddings, float[,] positionalEmbeddings)
     {
-        // tokenEmbeddings are of size [vocab_size, embedding_size],
-        // where embedding_size is a size of the model embeddings (for GPT-2 124M it is 768)
-        // and vocab_size is the size of the vocabulary (for GPT-2 124M it is 50257)
+        // tokenEmbeddings are of size [vocabularySize, embeddingSize],
+        // where embeddingSize is a size of the model embeddings (for GPT-2 124M it is 768)
+        // and vocabularySize is the size of the vocabulary (for GPT-2 124M it is 50257)
 
-        // positionalEmbeddings are of size [context_size, embedding_size],
-        // where context_size is the maximum context size of the model (for GPT-2 124M it is 1024)
-        // where embedding_size is a size of the model embeddings (for GPT-2 124M it is 768)
+        // positionalEmbeddings are of size [contextSize, embeddingSize],
+        // where contextSize is the maximum context size of the model (for GPT-2 124M it is 1024)
 
         int inputTokens = inputTokenIds.Length;
         int embeddingSize = tokenEmbeddings.GetLength(1);
