@@ -253,34 +253,38 @@ public partial class Gpt2Tokenizer
 
     private string GetTokenTexts(string word)
     {
+        // Check cache first to avoid redundant computations for the same word
         if (_cache.TryGetValue(word, out string? cached))
         {
             return cached;
         }
 
-        List<string> wordParts = word.Select(static c => c.ToString()).ToList();
+        // Split word into list of characters (initially each character is a separate token)
+        List<string> wordParts = [.. word.Select(static c => c.ToString())];
+
+        // Get all adjacent pairs in the current word representation
         HashSet<(string, string)> pairs = GetPairs(wordParts);
 
-        if (pairs.Count == 0)
-        {
-            _cache[word] = word;
-            return word;
-        }
+        //// If there are no pairs, return the word as is (no merges possible)
+        //if (pairs.Count == 0)
+        //{
+        //    _cache[word] = word;
+        //    return word;
+        //}
 
+        // Iteratively merge the most frequent pair until no more merges are possible
         while (pairs.Count > 0)
         {
-            (string, string) bigram = pairs
+            (string first, string second) = pairs
                 .OrderBy(pair => _pairRanks.TryGetValue(pair, out int value) ? value : int.MaxValue)
                 .First();
 
-            if (!_pairRanks.ContainsKey(bigram))
+            if (!_pairRanks.ContainsKey((first, second)))
             {
                 break;
             }
 
-            List<string> newWord = [];
-            string first = bigram.Item1;
-            string second = bigram.Item2;
+            List<string> mergedWordParts = [];
             int i = 0;
 
             while (i < wordParts.Count)
@@ -288,29 +292,29 @@ public partial class Gpt2Tokenizer
                 int j = wordParts.FindIndex(i, s => s == first);
                 if (j == -1)
                 {
-                    newWord.AddRange(wordParts.GetRange(i, wordParts.Count - i));
+                    mergedWordParts.AddRange(wordParts.GetRange(i, wordParts.Count - i));
                     break;
                 }
 
                 if (j > i)
                 {
-                    newWord.AddRange(wordParts.GetRange(i, j - i));
+                    mergedWordParts.AddRange(wordParts.GetRange(i, j - i));
                     i = j;
                 }
 
                 if (i < wordParts.Count - 1 && wordParts[i] == first && wordParts[i + 1] == second)
                 {
-                    newWord.Add(first + second);
+                    mergedWordParts.Add(first + second);
                     i += 2;
                 }
                 else
                 {
-                    newWord.Add(wordParts[i]);
+                    mergedWordParts.Add(wordParts[i]);
                     i += 1;
                 }
             }
 
-            wordParts = newWord;
+            wordParts = mergedWordParts;
             if (wordParts.Count == 1)
             {
                 break;

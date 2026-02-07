@@ -26,17 +26,22 @@ internal class Program
 
     private sealed record GenerateOptions(float Temperature, int TopK, float TopP);
 
-    private static readonly GenerateOptions Deterministic = new(1f, 1, 1f);
-    private static readonly GenerateOptions LittleFreedom = new(1f, 5, 1f);
-    private static readonly GenerateOptions Nondeterministic = new(1f, 30, 1f);
-    private static readonly GenerateOptions Crazy = new(1.3f, 30, 0.9f);
-    private static readonly GenerateOptions Wise = new(0.6f, 30, 0.75f);
+    private static readonly GenerateOptions s_deterministic = new(1f, 1, 1f);
+    private static readonly GenerateOptions s_littleFreedom = new(1f, 5, 1f);
+    private static readonly GenerateOptions s_nondeterministic = new(1f, 30, 1f);
+    private static readonly GenerateOptions s_crazy = new(1.3f, 30, 0.9f);
+    private static readonly GenerateOptions s_wise = new(0.6f, 30, 0.75f);
+
+    private static readonly GenerateOptions s_current = s_deterministic;
 
     private static void Main(string[] args)
     {
-        Console.WriteLine($"NumTokensToGenerate: {NumTokensToGenerate}");
-        Console.WriteLine($"ModelSize: {ModelSize}");
         Console.WriteLine($"ModelsDir: {ModelsDir}");
+        Console.WriteLine($"ModelSize: {ModelSize}");
+        Console.WriteLine($"Seed: {Seed}");
+        Console.WriteLine($"Generate options: Temperature={s_current.Temperature}, TopK={s_current.TopK}, TopP={s_current.TopP}");
+        Console.WriteLine($"NumTokensToGenerate: {NumTokensToGenerate}");
+        Console.WriteLine();
 
         SeededRandom seededRandom = new(Seed);
 
@@ -82,7 +87,7 @@ internal class Program
 
             Stopwatch sw = Stopwatch.StartNew();
 
-            foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hyperParams.HeadCount, NumTokensToGenerate, Crazy, seededRandom))
+            foreach ((int TokenId, List<(int, float)> Candidates) outputId in Generate(inputIds, modelParams, hyperParams.HeadCount, NumTokensToGenerate, s_current, seededRandom))
             {
                 string nextWord = tokenizer.Decode(outputId.TokenId);
 
