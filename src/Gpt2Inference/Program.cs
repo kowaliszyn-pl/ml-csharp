@@ -246,7 +246,7 @@ internal class Program
 
             Debug.Assert(tokenId > 0 && tokenId < tokenEmbeddings.GetLength(0), $"Token id {tokenId} is outside the vocabulary range.");
 
-            // The purpose of this loop is to add token embeddings (for e given token) and positional embeddings (for a given position in the input sequence)
+            // The purpose of this loop is to add token embeddings (for a given token) and positional embeddings (for a given position in the input sequence)
             for (int embeddingIndex = 0; embeddingIndex < embeddingSize; embeddingIndex++)
             {
                 // For each position in the input sequence, we get the token embedding and add the positional embedding
@@ -263,28 +263,32 @@ internal class Program
 
     private static float[,] TransformerBlockForward(float[,] inputTokenEmbeddings, Gpt2Block block, int headCount)
     {
-        // inputTokenEmbeddings are of size [inputTokens, embeddingSize]
+        // Arrays: inputTokenEmbeddings, normalizedEmbeddingsForAttention, attentionOutput, normalizedEmbeddingsForFeedForward, feedForwardOutput are all of size [inputTokens, embeddingSize].
 
         // Multi-head causal self attention
-        float[,] normalizedXForAttention = LayerNormForward(inputTokenEmbeddings, block.LayerNorm1);
-        float[,] attentionOutput = MultiHeadAttention(normalizedXForAttention, block.Attention, headCount);
+        float[,] normalizedEmbeddingsForAttention = LayerNormForward(inputTokenEmbeddings, block.LayerNorm1);
+        float[,] attentionOutput = MultiHeadAttention(normalizedEmbeddingsForAttention, block.Attention, headCount);
         inputTokenEmbeddings = inputTokenEmbeddings.Add(attentionOutput);
 
         // Position-wise feed forward network
-        float[,] normalizedXForFeedForward = LayerNormForward(inputTokenEmbeddings, block.LayerNorm2);
-        float[,] feedForwardOutput = FeedForwardNetwork(normalizedXForFeedForward, block.MultiLayerPerceptron);
+        float[,] normalizedEmbeddingsForFeedForward = LayerNormForward(inputTokenEmbeddings, block.LayerNorm2);
+        float[,] feedForwardOutput = FeedForwardNetwork(normalizedEmbeddingsForFeedForward, block.MultiLayerPerceptron);
         inputTokenEmbeddings = inputTokenEmbeddings.Add(feedForwardOutput);
         return inputTokenEmbeddings;
     }
 
-    private static float[,] LayerNormForward(float[,] x, Gpt2LayerNormParams layerNorm)
+    private static float[,] LayerNormForward(float[,] inputTokenEmbeddings, Gpt2LayerNormParams layerNorm)
     {
+        // [embeddingSize]
         float[] gamma = layerNorm.Gamma;
+
+        // [embeddingSize]
         float[] beta = layerNorm.Beta;
 
         Debug.Assert(gamma.Length == beta.Length);
+        Debug.Assert(gamma.Length == inputTokenEmbeddings.GetLength(1), $"Layer norm parameters size  must match the embedding size.");
 
-        float[,] normalized = x.StandardizeByRows();
+        float[,] normalized = inputTokenEmbeddings.StandardizeByRows();
 
         float[,] res = normalized.MultiplyElementwise(gamma).AddRow(beta);
         return res;
@@ -311,13 +315,13 @@ internal class Program
     {
         Gpt2LinearParams Projection = attention.Projection;
 
-        // [n_seq, n_embd] -> [n_seq, 3*n_embd]
+        // [inputTokens, embeddingSize] -> [inputTokens, 3 * embeddingSize]
         x = LinearForward(x, Projection);
 
-        // Split into qkv: [n_seq, 3*n_embd] -> 3 * [n_seq, n_embd]
+        // Split into qkv: [inputTokens, 3 * embeddingSize] -> 3 * [inputTokens, embeddingSize]
         (float[,] q, float[,] k, float[,] v) = SplitIntoQKV(x);
 
-        // Split into heads: [n_seq, n_embd] -> [n_head, n_seq, headDim]
+        // Split qkv into heads: [n_seq, n_embd] -> [n_head, n_seq, headDim]
         // where headDim = n_embd / n_head
         // In GPT-2 124M, n_embd = 768, n_head = 12, so headDim = 64
         // Interpretation of n_heads: each head is a separate attention mechanism that can focus on different aspects of the input sequence. For example, one head might focus on syntactic structure, while another might focus on semantic meaning.
@@ -332,7 +336,7 @@ internal class Program
         // Attention for each head
         int headDim = qHeads.GetLength(2);
         float[,,] outHeads = new float[headCount, inputSequenceLength, headDim]; // headCount * headDim = embedding size
-        //Parallel.For(0, headCount, headIndex => // it deos not speed up the execution
+        //Parallel.For(0, headCount, headIndex => // it does not speed up the execution
         for (int headIndex = 0; headIndex < headCount; headIndex++)
         {
             // headIndex goes from 0 to 11 (for GPT-2 124M)

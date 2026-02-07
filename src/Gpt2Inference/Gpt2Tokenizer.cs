@@ -283,23 +283,30 @@ public partial class Gpt2Tokenizer
             while (wordPartIndex < wordParts.Count)
             {
                 int firstPartFromPairIndex = wordParts.FindIndex(wordPartIndex, s => s == first);
+
+                // We have the following 4 cases to consider when merging pairs:
+
+                // 1. No more occurrences of the first part of the pair - we can add all remaining parts and break
                 if (firstPartFromPairIndex == -1)
                 {
                     mergedWordParts.AddRange(wordParts.GetRange(wordPartIndex, wordParts.Count - wordPartIndex));
                     break;
                 }
 
+                // 2. There are some parts before the first part of the pair - we can add them all before merging
                 if (firstPartFromPairIndex > wordPartIndex)
                 {
                     mergedWordParts.AddRange(wordParts.GetRange(wordPartIndex, firstPartFromPairIndex - wordPartIndex));
                     wordPartIndex = firstPartFromPairIndex;
                 }
 
+                // 3. We found the first part of the pair and it is followed by the second part - we can merge them and skip both parts
                 if (wordPartIndex < wordParts.Count - 1 && wordParts[wordPartIndex] == first && wordParts[wordPartIndex + 1] == second)
                 {
                     mergedWordParts.Add(first + second);
                     wordPartIndex += 2;
                 }
+                // 4. We found the first part of the pair but it is not followed by the second part - we can add the first part and continue searching for the next occurrence
                 else
                 {
                     mergedWordParts.Add(wordParts[wordPartIndex]);
