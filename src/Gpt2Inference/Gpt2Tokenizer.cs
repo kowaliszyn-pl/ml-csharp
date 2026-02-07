@@ -263,12 +263,12 @@ public partial class Gpt2Tokenizer
         List<string> wordParts = [.. word.Select(static c => c.ToString())];
 
         // Get all adjacent pairs in the current word representation
-        HashSet<(string, string)> pairs = GetPairs(wordParts);
+        HashSet<(string, string)> wordPairs = GetPairs(wordParts);
 
         // Iteratively merge the most frequent pair until no more merges are possible
-        while (pairs.Count > 0)
+        while (wordPairs.Count > 0)
         {
-            (string first, string second) = pairs
+            (string first, string second) = wordPairs
                 .OrderBy(pair => _pairRanks.TryGetValue(pair, out int value) ? value : int.MaxValue)
                 .First();
 
@@ -278,32 +278,32 @@ public partial class Gpt2Tokenizer
             }
 
             List<string> mergedWordParts = [];
-            int i = 0;
+            int wordPartIndex = 0;
 
-            while (i < wordParts.Count)
+            while (wordPartIndex < wordParts.Count)
             {
-                int j = wordParts.FindIndex(i, s => s == first);
-                if (j == -1)
+                int firstPartFromPairIndex = wordParts.FindIndex(wordPartIndex, s => s == first);
+                if (firstPartFromPairIndex == -1)
                 {
-                    mergedWordParts.AddRange(wordParts.GetRange(i, wordParts.Count - i));
+                    mergedWordParts.AddRange(wordParts.GetRange(wordPartIndex, wordParts.Count - wordPartIndex));
                     break;
                 }
 
-                if (j > i)
+                if (firstPartFromPairIndex > wordPartIndex)
                 {
-                    mergedWordParts.AddRange(wordParts.GetRange(i, j - i));
-                    i = j;
+                    mergedWordParts.AddRange(wordParts.GetRange(wordPartIndex, firstPartFromPairIndex - wordPartIndex));
+                    wordPartIndex = firstPartFromPairIndex;
                 }
 
-                if (i < wordParts.Count - 1 && wordParts[i] == first && wordParts[i + 1] == second)
+                if (wordPartIndex < wordParts.Count - 1 && wordParts[wordPartIndex] == first && wordParts[wordPartIndex + 1] == second)
                 {
                     mergedWordParts.Add(first + second);
-                    i += 2;
+                    wordPartIndex += 2;
                 }
                 else
                 {
-                    mergedWordParts.Add(wordParts[i]);
-                    i += 1;
+                    mergedWordParts.Add(wordParts[wordPartIndex]);
+                    wordPartIndex += 1;
                 }
             }
 
@@ -313,7 +313,7 @@ public partial class Gpt2Tokenizer
                 break;
             }
 
-            pairs = GetPairs(wordParts);
+            wordPairs = GetPairs(wordParts);
         }
 
         string result = string.Join(SingleSpace, wordParts);
@@ -350,11 +350,6 @@ public partial class Gpt2Tokenizer
     private static HashSet<(string, string)> GetPairs(List<string> word)
     {
         HashSet<(string, string)> pairs = [];
-        //if (word.Count < 2)
-        //{
-        //    return pairs;
-        //}
-
         string? first = word.FirstOrDefault();
 
         if (first != null)
