@@ -15,6 +15,14 @@ using static NeuralNetworks.Core.ArrayExtensions;
 
 namespace Gpt2Inference;
 
+/* Dictionary:
+ * - inputTokens (n_seq) - number of tokens in the input sequence (prompt + generated tokens so far)
+ * - embeddingSize (n_embd) - size of the model embeddings (for GPT-2 124M it is 768)
+ * - headCount (n_head) - number of attention heads (for GPT-2 124M it is 12)
+ * - headSize (head_dim) - size of each attention head (for GPT-2 124M it is 64, because 768 / 12 = 64)
+ * - vocabularySize (n_vocab) - size of the vocabulary (for GPT-2 124M it is 50257)
+ */
+
 internal class Program
 {
     private const float NegativeInfinity = -1e10f;
@@ -204,7 +212,7 @@ internal class Program
         // Final layer norm: [inputTokens, embeddingSize]
         inputTokenEmbeddings = LayerNormForward(inputTokenEmbeddings, modelParams.FinalLayerNorm);
 
-        // Project to vocab: [inputTokens, embeddingSize] -> [inputTokens, vocabularySize]
+        // Project to vocab: [inputTokens, embeddingSize] * [embeddingSize, vocabularySize] -> [inputTokens, vocabularySize]
         float[,] logitsMatrix = inputTokenEmbeddings.MultiplyDot(modelParams.TokenEmbeddings.Transpose());
 
         // [inputTokens, vocabularySize]
@@ -313,58 +321,79 @@ internal class Program
 
     private static float[,] MultiHeadAttention(float[,] x, Gpt2MultiHeadAttentionParams attention, int headCount)
     {
+        // For 124M: 3 * embeddingSize = 2304
+        // Projection weights: [embeddingSize, 3 * embeddingSize] ([768, 2304]), biases: [3 * embeddingSize]
         Gpt2LinearParams Projection = attention.Projection;
 
-        // [inputTokens, embeddingSize] -> [inputTokens, 3 * embeddingSize]
+        // [inputTokens, embeddingSize] * [embeddingSize, 3 * embeddingSize] + [3 * embeddingSize] -> [inputTokens, 3 * embeddingSize]
         x = LinearForward(x, Projection);
 
         // Split into qkv: [inputTokens, 3 * embeddingSize] -> 3 * [inputTokens, embeddingSize]
         (float[,] q, float[,] k, float[,] v) = SplitIntoQKV(x);
 
-        // Split qkv into heads: [n_seq, n_embd] -> [n_head, n_seq, headDim]
-        // where headDim = n_embd / n_head
-        // In GPT-2 124M, n_embd = 768, n_head = 12, so headDim = 64
-        // Interpretation of n_heads: each head is a separate attention mechanism that can focus on different aspects of the input sequence. For example, one head might focus on syntactic structure, while another might focus on semantic meaning.
+        // Split qkv into heads: [inputTokens, embeddingSize] -> [headCount, inputTokens, headSize]
+        // where headSize = embeddingSize / headCount
+        // In GPT-2 124M, embeddingSize = 768, headCount = 12, so headSize = 64
+        // Each head is a separate attention mechanism that can focus on different aspects of the input sequence. For example, one head might focus on syntactic structure, while another might focus on semantic meaning.
+
+        // [headCount, inputTokens, headSize]
         float[,,] qHeads = SplitHeads(q, headCount);
+
+        // [headCount, inputTokens, headSize]
         float[,,] kHeads = SplitHeads(k, headCount);
+
+        // [headCount, inputTokens, headSize]
         float[,,] vHeads = SplitHeads(v, headCount);
 
-        // Causal mask: [n_seq, n_seq]
-        int inputSequenceLength = x.GetLength(0);
-        float[,] causalMask = BuildCausalMask(inputSequenceLength);
+        // Create a causal mask to prevent attention from looking at future tokens
+
+        int inputTokens = x.GetLength(0);
+
+        // [inputTokens, inputTokens]
+        float[,] causalMask = BuildCausalMask(inputTokens);
 
         // Attention for each head
-        int headDim = qHeads.GetLength(2);
-        float[,,] outHeads = new float[headCount, inputSequenceLength, headDim]; // headCount * headDim = embedding size
+        int headSize = qHeads.GetLength(2);
+        float[,,] outHeads = new float[headCount, inputTokens, headSize];
         //Parallel.For(0, headCount, headIndex => // it does not speed up the execution
         for (int headIndex = 0; headIndex < headCount; headIndex++)
         {
             // headIndex goes from 0 to 11 (for GPT-2 124M)
+
+            // [inputTokens, headSize]
             float[,] qh = GetHead(qHeads, headIndex);
+
+            // [inputTokens, headSize]
             float[,] kh = GetHead(kHeads, headIndex);
+
+            // [inputTokens, headSize]
             float[,] vh = GetHead(vHeads, headIndex);
-            float[,] attn = Attention(qh, kh, vh, causalMask); // [n_seq, headDim]
 
-            for (int i = 0; i < inputSequenceLength; i++)
-                for (int j = 0; j < headDim; j++)
-                    outHeads[headIndex, i, j] = attn[i, j];
-        };
+            // [inputTokens, headSize]
+            float[,] attn = Attention(qh, kh, vh, causalMask);
 
-        // Merge heads: [n_head, n_seq, headDim] -> [n_seq, n_embd]
-        float[,] mergedHeads = new float[inputSequenceLength, headCount * headDim];
-        for (int i = 0; i < inputSequenceLength; i++)
+            for (int inputTokenIndex = 0; inputTokenIndex < inputTokens; inputTokenIndex++)
+                for (int headElementIndex = 0; headElementIndex < headSize; headElementIndex++)
+                    outHeads[headIndex, inputTokenIndex, headElementIndex] = attn[inputTokenIndex, headElementIndex];
+        }
+
+        // Merge heads: [headCount, inputTokens, headSize] -> [inputTokens, embeddingSize]
+        float[,] mergedHeads = new float[inputTokens, headCount * headSize];
+        for (int inputTokenIndex = 0; inputTokenIndex < inputTokens; inputTokenIndex++)
         {
-            for (int h = 0; h < headCount; h++)
+            for (int headIndex = 0; headIndex < headCount; headIndex++)
             {
-                for (int j = 0; j < headDim; j++)
+                for (int headElementIndex = 0; headElementIndex < headSize; headElementIndex++)
                 {
-                    mergedHeads[i, h * headDim + j] = outHeads[h, i, j];
+                    mergedHeads[inputTokenIndex, headIndex * headSize + headElementIndex] = outHeads[headIndex, inputTokenIndex, headElementIndex];
                 }
             }
         }
 
+        // Out projection weights: [embeddingSize, embeddingSize], biases: [embeddingSize]
         Gpt2LinearParams outputProjection = attention.OutputProjection;
-        // Out projection: [n_seq, n_embd] -> [n_seq, n_embd]
+
+        // [inputTokens, embeddingSize] * [embeddingSize, embeddingSize] + [embeddingSize] -> [inputTokens, embeddingSize]
         float[,] output = LinearForward(mergedHeads, outputProjection);
         return output;
     }

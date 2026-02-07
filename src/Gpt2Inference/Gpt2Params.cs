@@ -14,7 +14,14 @@ namespace Gpt2Inference;
 
 internal sealed record Gpt2Params
 {
+    /// <summary>
+    /// Gets the matrix of token embeddings used by the model.
+    /// </summary>
+    /// <remarks>Each row in the matrix corresponds to a token in the model's vocabulary, and each column
+    /// represents a dimension of the embedding vector. The shape of the matrix is [vocabularySize,
+    /// embeddingSize].</remarks>
     public float[,] TokenEmbeddings { get; init; } = default!;
+
     public float[,] PositionalEmbeddings { get; init; } = default!;
     public Gpt2Block[] Blocks { get; init; } = default!;
     public Gpt2LayerNormParams FinalLayerNorm { get; init; } = default!;
