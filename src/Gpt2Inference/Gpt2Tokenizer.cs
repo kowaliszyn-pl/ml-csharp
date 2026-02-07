@@ -265,13 +265,6 @@ public partial class Gpt2Tokenizer
         // Get all adjacent pairs in the current word representation
         HashSet<(string, string)> pairs = GetPairs(wordParts);
 
-        //// If there are no pairs, return the word as is (no merges possible)
-        //if (pairs.Count == 0)
-        //{
-        //    _cache[word] = word;
-        //    return word;
-        //}
-
         // Iteratively merge the most frequent pair until no more merges are possible
         while (pairs.Count > 0)
         {
@@ -357,17 +350,21 @@ public partial class Gpt2Tokenizer
     private static HashSet<(string, string)> GetPairs(List<string> word)
     {
         HashSet<(string, string)> pairs = [];
-        if (word.Count < 2)
-        {
-            return pairs;
-        }
+        //if (word.Count < 2)
+        //{
+        //    return pairs;
+        //}
 
-        string prev = word[0];
-        for (int i = 1; i < word.Count; i++)
+        string? first = word.FirstOrDefault();
+
+        if (first != null)
         {
-            string current = word[i];
-            pairs.Add((prev, current));
-            prev = current;
+            for (int i = 1; i < word.Count; i++)
+            {
+                string second = word[i];
+                pairs.Add((first, second));
+                first = second;
+            }
         }
 
         return pairs;
