@@ -31,11 +31,15 @@ namespace NeuralNetworksExamples;
 
 internal class MnistDenseModel: BaseModel<float[,], float[,]>
 {
-    public MnistDenseModel(SeededRandom? random) : base(new SoftmaxCrossEntropyLoss(), random)
+    public MnistDenseModel(SeededRandom? random) : this(null, random)
     {
     }
 
-    public MnistDenseModel(string? modelFilePath) : base(new SoftmaxCrossEntropyLoss(), null, modelFilePath)
+    public MnistDenseModel(string? modelFilePath) : this(modelFilePath, null)
+    {
+    }
+
+    private MnistDenseModel(string? modelFilePath, SeededRandom? random) : base(new SoftmaxCrossEntropyLoss(), random, modelFilePath)
     {
     }
 
