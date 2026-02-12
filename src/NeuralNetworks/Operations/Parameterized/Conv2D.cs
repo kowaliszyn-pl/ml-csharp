@@ -10,11 +10,12 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-// TODO: strides, custom padding, dilation
+// TODO: strides, custom padding, dilation, pooling
 
 /// <summary>
-/// Dimensions of the input are: [batch, channels, height, width]
-/// Dimensions of the param array are: [channels, filters, kernelSize, kernelSize]
+/// Dimensions of the input are: [batch, channels, height, width].
+/// Dimensions of the param array are: [channels, filters, kernelSize, kernelSize].
+/// CalcOutput returns an array of dimensions: [batch, filters, height, width].
 /// Padding is assumed to be the same on all sides = kernelSize / 2
 /// </summary>
 /// <param name="weights"></param>

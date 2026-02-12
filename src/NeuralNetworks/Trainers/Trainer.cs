@@ -31,6 +31,12 @@ public abstract class Trainer<TInputData, TPrediction>(
     where TInputData : notnull
     where TPrediction : notnull
 {
+#if DEBUG
+    const string BuildConfiguration = "Debug";
+#else
+    const string BuildConfiguration = "Release";
+#endif
+
     private float _bestLoss = float.MaxValue;
 
     /// <summary>
@@ -106,13 +112,6 @@ public abstract class Trainer<TInputData, TPrediction>(
                     WriteLine(message);
                 logger?.LogInformation(message);
             }
-
-#if DEBUG
-        string environment = "Debug";
-#else
-            string environment = "Release";
-#endif
-            logger?.LogInformation("Environment: {environment}.", environment);
 
             (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
             int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
@@ -321,6 +320,8 @@ public abstract class Trainer<TInputData, TPrediction>(
         res.Add($"{newIndent}Optimizer: {optimizer}");
         res.Add($"{newIndent}Operation backend: {OperationBackend.CurrentType}");
         res.Add($"{newIndent}Timing enabled: {OperationBackend.StatisticsEnabled}");
+        res.Add($"{newIndent}Build configuration: {BuildConfiguration}");
+        res.Add($"{newIndent}Machine name: {Environment.MachineName}");
         res.AddRange(model.Describe(indentation + Constants.Indentation));
         return res;
     }

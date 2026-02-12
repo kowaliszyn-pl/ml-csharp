@@ -40,6 +40,7 @@ public class Conv2DLayer : Layer<float[,,,], float[,,,]>
 
         OperationListBuilder<float[,,,], float[,,,]> res = 
             AddOperation(new Conv2D(weights))
+            // Add Bias4D
             .AddOperation(_activationFunction);
 
         if (_dropout != null)
