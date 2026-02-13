@@ -7,7 +7,7 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 /// <summary>
 /// "Identity" activation function
 /// </summary>
-public class Linear : ActivationFunction2D
+public class Linear : ActivationFunction<float[,], float[,]>
 {
     protected override float[,] CalcOutput(bool inference) 
         => Input;

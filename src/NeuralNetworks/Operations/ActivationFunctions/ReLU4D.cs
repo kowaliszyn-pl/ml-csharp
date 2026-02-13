@@ -6,7 +6,7 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class ReLU4D(float beta = 1f) : ActivationFunction4D
+public class ReLU4D(float beta = 1f) : ActivationFunction<float[,,,], float[,,,]>
 {
     protected override float[,,,] CalcOutput(bool inference)
         => ReLUOutput(Input, beta);

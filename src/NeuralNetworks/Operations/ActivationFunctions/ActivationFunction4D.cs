@@ -3,7 +3,7 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
-
+/*
 /// <summary>
 /// Defines an abstract 4D activation function operation applied element-wise to convolutional tensors.
 /// </summary>
@@ -16,3 +16,4 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 public abstract class ActivationFunction4D : Operation<float[,,,], float[,,,]>
 {
 }
+*/

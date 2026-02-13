@@ -6,7 +6,7 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class LeakyReLU4D(float alfa = 0.01f, float beta = 1f) : ActivationFunction4D
+public class LeakyReLU4D(float alfa = 0.01f, float beta = 1f) : ActivationFunction<float[,,,], float[,,,]>
 {
     protected override float[,,,] CalcOutput(bool inference)
         => LeakyReLUOutput(Input, alfa, beta);

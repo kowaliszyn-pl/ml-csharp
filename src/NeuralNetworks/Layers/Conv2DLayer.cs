@@ -21,11 +21,11 @@ public class Conv2DLayer : Layer<float[,,,], float[,,,]>
 {
     private readonly int _filters;
     private readonly int _kernelSize;
-    private readonly ActivationFunction4D _activationFunction;
+    private readonly ActivationFunction<float[,,,], float[,,,]> _activationFunction;
     private readonly ParamInitializer _paramInitializer;
     private readonly Dropout4D? _dropout;
 
-    public Conv2DLayer(int filters, int kernelSize, ActivationFunction4D activationFunction, ParamInitializer paramInitializer, Dropout4D? dropout = null)
+    public Conv2DLayer(int filters, int kernelSize, ActivationFunction<float[,,,], float[,,,]> activationFunction, ParamInitializer paramInitializer, Dropout4D? dropout = null)
     {
         _filters = filters;
         _kernelSize = kernelSize;

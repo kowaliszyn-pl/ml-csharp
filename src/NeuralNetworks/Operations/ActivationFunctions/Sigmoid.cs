@@ -9,7 +9,7 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 /// <summary>
 /// Sigmoid activation function.
 /// </summary>
-public class Sigmoid : ActivationFunction2D
+public class Sigmoid : ActivationFunction<float[,], float[,]>
 {
     protected override float[,] CalcOutput(bool inference)
         => SigmoidOutput(Input);

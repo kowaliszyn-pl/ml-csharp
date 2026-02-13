@@ -18,7 +18,7 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 /// </para>
 /// </remarks>
 /// <param name="scale">The scaling factor applied to the output of the sigmoid function. Must be non-zero.</param>
-public class BipolarSigmoid(float scale) : ActivationFunction2D
+public class BipolarSigmoid(float scale) : ActivationFunction<float[,], float[,]>
 {
     protected override float[,] CalcOutput(bool inference)
         => BipolarSigmoidOutput(Input, scale);

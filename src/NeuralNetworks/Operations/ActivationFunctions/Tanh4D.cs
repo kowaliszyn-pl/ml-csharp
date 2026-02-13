@@ -6,7 +6,7 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class Tanh4D : ActivationFunction4D
+public class Tanh4D : ActivationFunction<float[,,,], float[,,,]>
 {
     protected override float[,,,] CalcOutput(bool inference)
         => TanhOutput(Input);

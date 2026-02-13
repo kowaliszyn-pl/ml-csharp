@@ -6,7 +6,7 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class Softplus : ActivationFunction2D
+public class Softplus : ActivationFunction<float[,], float[,]>
 {
     protected override float[,] CalcInputGradient(float[,] outputGradient)
         => SoftplusInputGradient(outputGradient, Output);
