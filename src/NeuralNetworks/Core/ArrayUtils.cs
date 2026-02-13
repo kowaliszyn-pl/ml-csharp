@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+using ILGPU.Runtime.Cuda;
+
 using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Core;
@@ -30,44 +32,62 @@ public class ArrayUtils
         return matrix;
     }
 
-    [Conditional("DEBUG")]
-    public static void EnsureSameShape(float[,,,]? matrix1, float[,,,]? matrix2)
+    //[Conditional("DEBUG")]
+    //public static void EnsureSameShape(float[,,,]? matrix1, float[,,,]? matrix2)
+    //{
+    //    if (matrix1 is null || matrix2 is null)
+    //        throw new ArgumentException("Matrix is null.");
+
+    //    if (!matrix1.HasSameShape(matrix2))
+    //        throw new Exception("Matrices must have the same shape.");
+    //}
+
+    //[Conditional("DEBUG")]
+    //public static void EnsureSameShape(float[,,]? matrix1, float[,,]? matrix2)
+    //{
+    //    if (matrix1 is null || matrix2 is null)
+    //        throw new ArgumentException("Matrix is null.");
+
+    //    if (!matrix1.HasSameShape(matrix2))
+    //        throw new Exception("Matrices must have the same shape.");
+    //}
+
+    //[Conditional("DEBUG")]
+    //public static void EnsureSameShape(float[,]? matrix1, float[,]? matrix2)
+    //{
+    //    if (matrix1 is null || matrix2 is null)
+    //        throw new ArgumentException("Matrix is null.");
+
+    //    if (!matrix1.HasSameShape(matrix2))
+    //        throw new Exception("Matrices must have the same shape.");
+    //}
+
+    //[Conditional("DEBUG")]
+    //public static void EnsureSameShape(float[]? matrix1, float[]? matrix2)
+    //{
+    //    if (matrix1 is null || matrix2 is null)
+    //        throw new ArgumentException("Matrix is null.");
+
+    //    if (!matrix1.HasSameShape(matrix2))
+    //        throw new Exception("Matrices must have the same shape.");
+    //}
+
+    public static void EnsureSameShape<T>(T? matrix1, T? matrix2)
     {
         if (matrix1 is null || matrix2 is null)
             throw new ArgumentException("Matrix is null.");
 
-        if (!matrix1.HasSameShape(matrix2))
-            throw new Exception("Matrices must have the same shape.");
-    }
-
-    [Conditional("DEBUG")]
-    public static void EnsureSameShape(float[,,]? matrix1, float[,,]? matrix2)
-    {
-        if (matrix1 is null || matrix2 is null)
-            throw new ArgumentException("Matrix is null.");
-
-        if (!matrix1.HasSameShape(matrix2))
-            throw new Exception("Matrices must have the same shape.");
-    }
-
-    [Conditional("DEBUG")]
-    public static void EnsureSameShape(float[,]? matrix1, float[,]? matrix2)
-    {
-        if (matrix1 is null || matrix2 is null)
-            throw new ArgumentException("Matrix is null.");
-
-        if (!matrix1.HasSameShape(matrix2))
-            throw new Exception("Matrices must have the same shape.");
-    }
-
-    [Conditional("DEBUG")]
-    public static void EnsureSameShape(float[]? matrix1, float[]? matrix2)
-    {
-        if (matrix1 is null || matrix2 is null)
-            throw new ArgumentException("Matrix is null.");
-
-        if (!matrix1.HasSameShape(matrix2))
-            throw new Exception("Matrices must have the same shape.");
+        // Check if input and inputGradient are both arrays and have the same shape.
+        if (matrix1 is Array matrix1Array && matrix2 is Array matrix2Array)
+        {
+            if (matrix1Array.Rank != matrix2Array.Rank)
+                throw new InvalidOperationException($"Input and input gradient must have the same number of dimensions. Got {matrix1Array.Rank} and {matrix2Array.Rank}.");
+            for (int i = 0; i < matrix1Array.Rank; i++)
+            {
+                if (matrix1Array.GetLength(i) != matrix2Array.GetLength(i))
+                    throw new InvalidOperationException($"Input and input gradient must have the same shape. Dimension {i} has length {matrix1Array.GetLength(i)} and {matrix2Array.GetLength(i)}.");
+            }
+        }
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

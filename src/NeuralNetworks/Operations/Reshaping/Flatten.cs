@@ -15,11 +15,11 @@ public class Flatten : Operation<float[,,,], float[,]>
     protected override float[,,,] CalcInputGradient(float[,] outputGradient) 
         => Unflatten(outputGradient, Input);
 
-    protected override void EnsureSameShapeForInput(float[,,,]? input, float[,,,] inputGradient)
-        => EnsureSameShape(input, inputGradient);
+    //protected override void EnsureSameShapeForInput(float[,,,]? input, float[,,,] inputGradient)
+    //    => EnsureSameShape(input, inputGradient);
 
-    protected override void EnsureSameShapeForOutput(float[,]? output, float[,] outputGradient)
-        => EnsureSameShape(output, outputGradient);
+    //protected override void EnsureSameShapeForOutput(float[,]? output, float[,] outputGradient)
+    //    => EnsureSameShape(output, outputGradient);
 
     public override string ToString() 
         => "Flatten";

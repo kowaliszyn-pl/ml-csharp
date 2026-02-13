@@ -2,6 +2,7 @@
 // File name: Conv1DLayer.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+/*
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -43,7 +44,7 @@ public class Conv1DLayer(int filters, int kernelSize, ActivationFunction2D activ
 {
     public override OperationListBuilder<float[,,], float[,,]> CreateOperationListBuilder()
     {
-        float[,,] weights = paramInitializer.InitWeights(Input!.GetLength(1 /* channels */), filters, kernelSize);
+        float[,,] weights = paramInitializer.InitWeights(Input!.GetLength(1 /* channels *//*), filters, kernelSize);
 
         OperationListBuilder<float[,,], float[,,]> res = 
             AddOperation(new Conv1D(weights, padding ?? kernelSize / 2, stride, dilatation));
@@ -57,3 +58,4 @@ public class Conv1DLayer(int filters, int kernelSize, ActivationFunction2D activ
 
     protected override void EnsureSameShapeForOutput(float[,,]? output, float[,,]? outputGradient) => throw new NotImplementedException();
 }
+*/

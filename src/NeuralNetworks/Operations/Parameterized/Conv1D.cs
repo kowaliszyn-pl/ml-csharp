@@ -1,7 +1,7 @@
 ﻿// Neural Networks in C♯
 // File name: Conv1D.cs
 // www.kowaliszyn.pl, 2025 - 2026
-
+/*
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
@@ -33,3 +33,4 @@ public class Conv1D(float[,,] weights) : ParamOperation3D<float[,,]>(weights)
     internal override int GetParamCount()
         => Param.Length;
 }
+*/

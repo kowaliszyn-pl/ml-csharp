@@ -13,6 +13,6 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 /// in convolutional pipelines. Concrete implementations should provide the forward activation and, where applicable,
 /// support gradient computation for backpropagation by deriving from <see cref="Operation4D"/>.
 /// </remarks>
-public abstract class ActivationFunction4D : Operation4D
+public abstract class ActivationFunction4D : Operation<float[,,,], float[,,,]>
 {
 }

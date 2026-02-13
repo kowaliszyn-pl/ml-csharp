@@ -11,7 +11,7 @@ using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-public abstract class ParamOperation2D : Operation2D, IParamOperation
+public abstract class ParamOperation2D : Operation<float[,], float[,]>, IParamOperation
 {
     internal abstract int GetParamCount();
     internal abstract void UpdateParams(Layer? layer, Optimizer optimizer);

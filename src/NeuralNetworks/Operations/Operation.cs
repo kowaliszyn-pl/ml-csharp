@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+using static NeuralNetworks.Core.ArrayUtils;
+
 namespace NeuralNetworks.Operations;
 
 public abstract class Operation
@@ -75,10 +77,16 @@ public abstract class Operation<TIn, TOut> : Operation
     }
 
     [Conditional("DEBUG")]
-    protected abstract void EnsureSameShapeForInput(TIn? input, TIn inputGradient);
+    private void EnsureSameShapeForInput(TIn? input, TIn inputGradient)
+    {
+        EnsureSameShape(input, inputGradient);
+    }
 
     [Conditional("DEBUG")]
-    protected abstract void EnsureSameShapeForOutput(TOut? output, TOut outputGradient);
+    private void EnsureSameShapeForOutput(TOut? output, TOut outputGradient)
+    {
+        EnsureSameShape(output, outputGradient);
+    }
 
     /// <summary>
     /// Computes output.

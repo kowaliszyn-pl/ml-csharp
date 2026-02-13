@@ -4,7 +4,7 @@
 
 namespace NeuralNetworks.Operations.Dropouts;
 
-public abstract class BaseDropout2D : Operation2D
+public abstract class BaseDropout2D : Operation<float[,], float[,]>
 {
     protected float[,]? Mask { get; set; }
 }

@@ -14,6 +14,6 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 /// provide the forward activation and, where applicable, support gradient computation for backpropagation by
 /// deriving from <see cref="Operation2D"/>.
 /// </remarks>
-public abstract class ActivationFunction2D : Operation2D
+public abstract class ActivationFunction2D : Operation<float[,], float[,]>
 {
 }
