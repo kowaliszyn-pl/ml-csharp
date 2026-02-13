@@ -61,19 +61,12 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
     }
 
     [Conditional("DEBUG")]
-    private void EnsureSameShapeForParam(TParam? param, TParam paramGradient)
+    private static void EnsureSameShapeForParam(TParam? param, TParam paramGradient)
     {
         EnsureSameShape(param, paramGradient);
     }
 
     protected abstract TParam CalcParamGradient(TOut outputGradient);
-
-    //protected override Operation<float[,], float[,]> CloneBase()
-    //{
-    //    ParamOperation2D<TParam> clone = (ParamOperation2D<TParam>)base.CloneBase();
-    //    //clone._paramGradient = _paramGradient?.Clone();
-    //    return clone;
-    //}
 
     internal override ParamOperationData GetData()
     {

@@ -77,13 +77,13 @@ public abstract class Operation<TIn, TOut> : Operation
     }
 
     [Conditional("DEBUG")]
-    private void EnsureSameShapeForInput(TIn? input, TIn inputGradient)
+    private static void EnsureSameShapeForInput(TIn? input, TIn inputGradient)
     {
         EnsureSameShape(input, inputGradient);
     }
 
     [Conditional("DEBUG")]
-    private void EnsureSameShapeForOutput(TOut? output, TOut outputGradient)
+    private static void EnsureSameShapeForOutput(TOut? output, TOut outputGradient)
     {
         EnsureSameShape(output, outputGradient);
     }
@@ -108,20 +108,4 @@ public abstract class Operation<TIn, TOut> : Operation
     public override Type GetOutputType() => typeof(TOut);
 
     public override Type GetInputType() => typeof(TIn);
-
-    #region Clone
-
-    protected virtual Operation<TIn, TOut> CloneBase()
-    {
-        Operation<TIn, TOut> clone = (Operation<TIn, TOut>)MemberwiseClone();
-        // TODO:
-        //clone._input = _input?.Clone();
-        // TODO:
-        //clone._output = _output?.Clone();
-        return clone;
-    }
-
-    public Operation<TIn, TOut> Clone() => CloneBase();
-
-    #endregion
 }
