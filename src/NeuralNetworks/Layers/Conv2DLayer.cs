@@ -1,15 +1,12 @@
-﻿// Machine Learning Utils
-// File name: Conv2D.cs
-// Code It Yourself with .NET, 2024
+﻿// Neural Networks in C♯
+// File name: Conv2DLayer.cs
+// www.kowaliszyn.pl, 2025 - 2026
 
 using NeuralNetworks.Layers.OperationList;
-using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.ParamInitializers;
-
-using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworks.Layers;
 
@@ -36,9 +33,9 @@ public class Conv2DLayer : Layer<float[,,,], float[,,,]>
 
     public override OperationListBuilder<float[,,,], float[,,,]> CreateOperationListBuilder()
     {
-        float[,,,] weights = _paramInitializer.InitWeights(Input!.GetLength(1 /* channels */), _filters, _kernelSize);
+        float[,,,] weights = _paramInitializer.InitWeights(Input!.GetLength(1 /* channels */), _filters, _kernelSize, _kernelSize);
 
-        OperationListBuilder<float[,,,], float[,,,]> res = 
+        OperationListBuilder<float[,,,], float[,,,]> res =
             AddOperation(new Conv2D(weights))
             // Add Bias4D
             .AddOperation(_activationFunction);
@@ -48,12 +45,6 @@ public class Conv2DLayer : Layer<float[,,,], float[,,,]>
 
         return res;
     }
-
-    protected override void EnsureSameShapeForInput(float[,,,]? input, float[,,,]? inputGradient)
-        => EnsureSameShape(input, inputGradient);
-
-    protected override void EnsureSameShapeForOutput(float[,,,]? output, float[,,,]? outputGradient)
-        => EnsureSameShape(output, outputGradient);
 
     public override string ToString()
         => $"Conv2DLayer (filters={_filters}, kernelSize={_kernelSize}, activation={_activationFunction}, paramInitializer={_paramInitializer}, dropout={_dropout})";

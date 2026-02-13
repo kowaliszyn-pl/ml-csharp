@@ -37,9 +37,12 @@ public class RandomInitializer : ParamInitializer
     internal override float[,] InitWeights(int inputColumns, int neurons)
         => CreateRandom(inputColumns, neurons, _random);
 
-    internal override float[,,,] InitWeights(int inputChannels, int outputChannels, int kernelSize)
-        => CreateRandom(inputChannels, outputChannels, kernelSize, kernelSize, _random);
+    internal override float[,,] InitWeights(int inputChannels, int outputChannels, int kernelSize)
+        => throw new NotImplementedException();
+
+    internal override float[,,,] InitWeights(int inputChannels, int outputChannels, int kernelWidth, int kernelHeight) 
+        => CreateRandom(inputChannels, outputChannels, kernelWidth, kernelHeight, _random);
 
     public override string ToString() => $"RandomInitializer (seed={_seed})";
-
+    
 }

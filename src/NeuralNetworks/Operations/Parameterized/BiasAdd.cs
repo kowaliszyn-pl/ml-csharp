@@ -5,7 +5,6 @@
 using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
-using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;
@@ -28,10 +27,4 @@ public class BiasAdd(float[] bias) : ParamOperation<float[,], float[,], float[]>
 
     internal override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);
-
-    //protected override void EnsureSameShapeForParam(float[]? param, float[] paramGradient)
-    //    => EnsureSameShape(param, paramGradient);
-
-    internal override int GetParamCount()
-        => Param.Length;
 }

@@ -87,4 +87,12 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
 
         data.Parameters.CopyTo(array);
     }
+
+    internal override int GetParamCount()
+    {
+        if (param is Array array)
+            return array.Length;
+        else
+            throw new NotSupportedException();
+    }
 }

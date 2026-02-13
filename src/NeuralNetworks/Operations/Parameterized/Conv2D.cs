@@ -36,10 +36,4 @@ public class Conv2D(float[,,,] weights) : ParamOperation<float[,,,], float[,,,],
 
     internal override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);
-
-    //protected override void EnsureSameShapeForParam(float[,,,]? param, float[,,,] paramGradient)
-    //    => EnsureSameShape(param, paramGradient);
-
-    internal override int GetParamCount()
-        => Param.Length;
 }

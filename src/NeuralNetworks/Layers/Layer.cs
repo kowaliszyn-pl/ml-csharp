@@ -9,6 +9,7 @@ using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.Optimizers;
 
+using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Layers;
@@ -80,7 +81,7 @@ public abstract class Layer<TIn, TOut> : Layer
     /// </remarks>
     public TIn Backward(TOut outputGradient)
     {
-        EnsureSameShapeForOutput(_output, outputGradient);
+        Layer<TIn, TOut>.EnsureSameShapeForOutput(_output, outputGradient);
 
         Debug.Assert(_operations != null, "Operations were not set up.");
 
@@ -91,7 +92,7 @@ public abstract class Layer<TIn, TOut> : Layer
         //    .Select(po => po.ParamGradient)
         //    .ToList();
 
-        EnsureSameShapeForInput(_input, inputGradient);
+        Layer<TIn, TOut>.EnsureSameShapeForInput(_input, inputGradient);
 
         return inputGradient;
     }
@@ -122,10 +123,12 @@ public abstract class Layer<TIn, TOut> : Layer
     public override object Backward(object outputGradient) => Backward((TOut)outputGradient);
 
     [Conditional("DEBUG")]
-    protected abstract void EnsureSameShapeForInput(TIn? input, TIn? inputGradient);
+    private static void EnsureSameShapeForInput(TIn? input, TIn? inputGradient)
+        => EnsureSameShape(input, inputGradient);
 
     [Conditional("DEBUG")]
-    protected abstract void EnsureSameShapeForOutput(TOut? output, TOut? outputGradient);
+    private static void EnsureSameShapeForOutput(TOut? output, TOut? outputGradient)
+        => EnsureSameShape(output, outputGradient);
 
     public override int GetParamCount()
     {

@@ -10,7 +10,7 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Dropouts;
 
-public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : BaseDropout2D
+public class Dropout2D(float keepProb = 0.8f, SeededRandom? random = null) : BaseDropout<float[,]>
 {
     protected override float[,] CalcOutput(bool inference)
     {

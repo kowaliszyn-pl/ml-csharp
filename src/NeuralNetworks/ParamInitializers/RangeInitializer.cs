@@ -14,9 +14,11 @@ public class RangeInitializer(float from, float to) : ParamInitializer
     internal override float[,] InitWeights(int inputColumns, int neurons)
         => CreateRange(inputColumns, neurons, from, to);
 
-    internal override float[,,,] InitWeights(int inputChannels, int outputChannels, int kernelSize)
-       => CreateRange(inputChannels, outputChannels, kernelSize, kernelSize, from, to);
+    internal override float[,,,] InitWeights(int inputChannels, int outputChannels, int kernelWidth, int kernelHeight)
+       => CreateRange(inputChannels, outputChannels, kernelWidth, kernelHeight, from, to);
+
+    internal override float[,,] InitWeights(int inputChannels, int outputChannels, int kernelLength) => throw new NotImplementedException();
 
     public override string ToString() => $"RangeInitializer (from={from}, to={to})";
-
+    
 }

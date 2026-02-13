@@ -10,17 +10,19 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Dropouts;
 
-public class Dropout4D(float keepProb = 0.8f, SeededRandom? random = null) : Operation<float[,,,], float[,,,]>
+public class Dropout4D(float keepProb = 0.8f, SeededRandom? random = null) : BaseDropout<float[,,,]>
 {
-    private float[,,,]? _mask;
-
     protected override float[,,,] CalcOutput(bool inference)
-        => DropoutOutput(Input, inference, keepProb, random, out _mask);
+    {
+        float[,,,] result = DropoutOutput(Input, inference, keepProb, random, out float[,,,]? mask);
+        Mask = mask;
+        return result;
+    }
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
     {
-        Debug.Assert(_mask != null, "Mask must not be null here.");
-        return DropoutInputGradient(outputGradient, _mask);
+        Debug.Assert(Mask != null, "Mask must not be null here.");
+        return DropoutInputGradient(outputGradient, Mask);
     }
 
     public override string ToString()
