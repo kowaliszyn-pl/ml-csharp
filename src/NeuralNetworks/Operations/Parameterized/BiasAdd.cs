@@ -14,7 +14,7 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Computes bias addition.
 /// </summary>
 /// <param name="bias">Bias matrix.</param>
-public class BiasAdd(float[] bias) : ParamOperation2D<float[]>(bias)
+public class BiasAdd(float[] bias) : ParamOperation<float[,], float[,], float[]>(bias)
 {
 
     protected override float[,] CalcOutput(bool inference)
@@ -29,8 +29,8 @@ public class BiasAdd(float[] bias) : ParamOperation2D<float[]>(bias)
     internal override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);
 
-    protected override void EnsureSameShapeForParam(float[]? param, float[] paramGradient)
-        => EnsureSameShape(param, paramGradient);
+    //protected override void EnsureSameShapeForParam(float[]? param, float[] paramGradient)
+    //    => EnsureSameShape(param, paramGradient);
 
     internal override int GetParamCount()
         => Param.Length;

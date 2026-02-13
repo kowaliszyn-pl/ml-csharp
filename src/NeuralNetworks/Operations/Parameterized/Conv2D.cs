@@ -19,7 +19,7 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Padding is assumed to be the same on all sides = kernelSize / 2
 /// </summary>
 /// <param name="weights"></param>
-public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
+public class Conv2D(float[,,,] weights) : ParamOperation<float[,,,], float[,,,], float[,,,]>(weights)
 {
 
     protected override float[,,,] CalcOutput(bool inference) 
@@ -37,8 +37,8 @@ public class Conv2D(float[,,,] weights) : ParamOperation4D<float[,,,]>(weights)
     internal override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);
 
-    protected override void EnsureSameShapeForParam(float[,,,]? param, float[,,,] paramGradient)
-        => EnsureSameShape(param, paramGradient);
+    //protected override void EnsureSameShapeForParam(float[,,,]? param, float[,,,] paramGradient)
+    //    => EnsureSameShape(param, paramGradient);
 
     internal override int GetParamCount()
         => Param.Length;

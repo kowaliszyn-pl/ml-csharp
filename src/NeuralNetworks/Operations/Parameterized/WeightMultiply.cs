@@ -14,7 +14,7 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Weight multiplication operation for a neural network.
 /// </summary>
 /// <param name="weights">Weight matrix.</param>
-public class WeightMultiply(float[,] weights) : ParamOperation2D<float[,]>(weights)
+public class WeightMultiply(float[,] weights) : ParamOperation<float[,], float[,], float[,]>(weights)
 {
     protected override float[,] CalcOutput(bool inference)
         => WeightMultiplyOutput(Input, Param);
@@ -28,8 +28,8 @@ public class WeightMultiply(float[,] weights) : ParamOperation2D<float[,]>(weigh
     internal override void UpdateParams(Layer? layer, Optimizer optimizer)
         => optimizer.Update(layer, Param, ParamGradient);
 
-    protected override void EnsureSameShapeForParam(float[,]? param, float[,] paramGradient)
-        => EnsureSameShape(param, paramGradient);
+    //protected override void EnsureSameShapeForParam(float[,]? param, float[,] paramGradient)
+    //    => EnsureSameShape(param, paramGradient);
 
     internal override int GetParamCount()
         => Param.Length;

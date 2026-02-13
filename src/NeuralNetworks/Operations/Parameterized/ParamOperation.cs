@@ -8,10 +8,13 @@ using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
 using static NeuralNetworks.Utils.ModelUtils;
+using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-public abstract class ParamOperation2D : Operation<float[,], float[,]>, IParamOperation
+public abstract class ParamOperation<TIn, TOut> : Operation<TIn, TOut>, IParamOperation
+    where TIn : notnull
+    where TOut : notnull
 {
     internal abstract int GetParamCount();
     internal abstract void UpdateParams(Layer? layer, Optimizer optimizer);
@@ -30,14 +33,16 @@ public abstract class ParamOperation2D : Operation<float[,], float[,]>, IParamOp
 /// An Operation with parameters of type TParam.
 /// </summary>
 /// <param name="param">Parameter matrix.</param>
-public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D
+public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOperation<TIn, TOut>
+    where TIn : notnull
+    where TOut : notnull
     where TParam : class
 {
     private TParam? _paramGradient;
 
     protected TParam Param => param;
 
-    protected TParam ParamGradient
+    internal TParam ParamGradient
     {
         get
         {
@@ -46,9 +51,9 @@ public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D
         }
     }
 
-    public override float[,] Backward(float[,] outputGradient)
+    public override TIn Backward(TOut outputGradient)
     {
-        float[,] inputGrad = base.Backward(outputGradient);
+        TIn inputGrad = base.Backward(outputGradient);
 
         _paramGradient = CalcParamGradient(outputGradient);
         EnsureSameShapeForParam(param, _paramGradient);
@@ -56,16 +61,19 @@ public abstract class ParamOperation2D<TParam>(TParam param) : ParamOperation2D
     }
 
     [Conditional("DEBUG")]
-    protected abstract void EnsureSameShapeForParam(TParam? param, TParam paramGradient);
-
-    protected abstract TParam CalcParamGradient(float[,] outputGradient);
-
-    protected override Operation<float[,], float[,]> CloneBase()
+    private void EnsureSameShapeForParam(TParam? param, TParam paramGradient)
     {
-        ParamOperation2D<TParam> clone = (ParamOperation2D<TParam>)base.CloneBase();
-        //clone._paramGradient = _paramGradient?.Clone();
-        return clone;
+        EnsureSameShape(param, paramGradient);
     }
+
+    protected abstract TParam CalcParamGradient(TOut outputGradient);
+
+    //protected override Operation<float[,], float[,]> CloneBase()
+    //{
+    //    ParamOperation2D<TParam> clone = (ParamOperation2D<TParam>)base.CloneBase();
+    //    //clone._paramGradient = _paramGradient?.Clone();
+    //    return clone;
+    //}
 
     internal override ParamOperationData GetData()
     {

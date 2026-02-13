@@ -1,7 +1,7 @@
 ﻿// Neural Networks in C♯
 // File name: ParamOperation4D.cs
 // www.kowaliszyn.pl, 2025 - 2026
-
+/*
 using System.Diagnostics;
 
 using NeuralNetworks.Layers;
@@ -87,3 +87,4 @@ public abstract class ParamOperation4D<TParam>(TParam param) : ParamOperation4D
         data.Parameters.CopyTo(array);
     }
 }
+*/
