@@ -41,6 +41,16 @@ public class ArrayUtils
     }
 
     [Conditional("DEBUG")]
+    public static void EnsureSameShape(float[,,]? matrix1, float[,,]? matrix2)
+    {
+        if (matrix1 is null || matrix2 is null)
+            throw new ArgumentException("Matrix is null.");
+
+        if (!matrix1.HasSameShape(matrix2))
+            throw new Exception("Matrices must have the same shape.");
+    }
+
+    [Conditional("DEBUG")]
     public static void EnsureSameShape(float[,]? matrix1, float[,]? matrix2)
     {
         if (matrix1 is null || matrix2 is null)

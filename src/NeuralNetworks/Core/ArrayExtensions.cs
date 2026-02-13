@@ -733,6 +733,11 @@ public static class ArrayExtensions
         => source.GetLength(0) == matrix.GetLength(0)
             && source.GetLength(1) == matrix.GetLength(1);
 
+    public static bool HasSameShape(this float[,,] source, float[,,] matrix)
+        => source.GetLength(0) == matrix.GetLength(0)
+            && source.GetLength(1) == matrix.GetLength(1)
+            && source.GetLength(2) == matrix.GetLength(2);
+
     /// <summary>
     /// Checks whether two four-dimensional arrays have the same shape across all dimensions.
     /// </summary>
