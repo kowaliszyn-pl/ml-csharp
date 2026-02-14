@@ -4,7 +4,7 @@
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-internal sealed record ParamOperationParams(int[] Shape, float[] Values)
+public sealed record ParamOperationParams(int[] Shape, float[] Values)
 {
     internal static ParamOperationParams FromArray(Array array)
     {

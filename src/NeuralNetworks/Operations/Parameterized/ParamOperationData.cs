@@ -4,4 +4,4 @@
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-internal sealed record ParamOperationData(string OperationType, ParamOperationParams Parameters);
+public sealed record ParamOperationData(string OperationType, ParamOperationParams Parameters);

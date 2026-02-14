@@ -1,14 +1,13 @@
 ﻿// Neural Networks in C♯
-// File name: ParamOperation2D.cs
+// File name: ParamOperation.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
-using NeuralNetworks.Layers;
 using NeuralNetworks.Optimizers;
 
-using static NeuralNetworks.Utils.ModelUtils;
 using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
@@ -16,17 +15,10 @@ public abstract class ParamOperation<TIn, TOut> : Operation<TIn, TOut>, IParamOp
     where TIn : notnull
     where TOut : notnull
 {
-    internal abstract int GetParamCount();
-    internal abstract void UpdateParams(Optimizer optimizer);
-    internal abstract ParamOperationData GetData();
-    internal abstract void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
-
-    void IParamOperation.ApplyData(ParamOperationData data, int layerIndex, int operationIndex)
-        => ApplyData(data, layerIndex, operationIndex);
-
-    ParamOperationData IParamOperation.GetData() => GetData();
-    int IParamOperation.GetParamCount() => GetParamCount();
-    void IParamOperation.UpdateParams(Optimizer optimizer) => UpdateParams(optimizer);
+    public abstract int GetParamCount();
+    public abstract void UpdateParams(Optimizer optimizer);
+    public abstract ParamOperationData GetData();
+    public abstract void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
 }
 
 /// <summary>
@@ -61,14 +53,12 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
     }
 
     [Conditional("DEBUG")]
-    private static void EnsureSameShapeForParam(TParam? param, TParam paramGradient)
-    {
-        EnsureSameShape(param, paramGradient);
-    }
+    private static void EnsureSameShapeForParam(TParam? param, TParam paramGradient) 
+        => EnsureSameShape(param, paramGradient);
 
     protected abstract TParam CalcParamGradient(TOut outputGradient);
 
-    internal override ParamOperationData GetData()
+    public override ParamOperationData GetData()
     {
         if (param is not Array array)
             throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
@@ -78,7 +68,7 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
         return new ParamOperationData(operationType, ParamOperationParams.FromArray(array));
     }
 
-    internal override void ApplyData(ParamOperationData data, int layerIndex, int operationIndex)
+    public override void ApplyData(ParamOperationData data, int layerIndex, int operationIndex)
     {
         if (param is not Array array)
             throw new NotSupportedException($"Operation '{GetType().Name}' stores unsupported parameter type '{typeof(TParam)}'.");
@@ -88,7 +78,7 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
         data.Parameters.CopyTo(array);
     }
 
-    internal override int GetParamCount()
+    public override int GetParamCount()
     {
         if (param is Array array)
             return array.Length;
@@ -96,8 +86,6 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
             throw new NotSupportedException();
     }
 
-    internal override void UpdateParams(Optimizer optimizer)
-    {
-        optimizer.Update(param, ParamGradient);
-    }
+    public override void UpdateParams(Optimizer optimizer) 
+        => optimizer.Update(param, ParamGradient);
 }
