@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+using ILGPU.Runtime.Cuda;
+
 namespace NeuralNetworks.Core.Operations;
 
 public static class OperationBackend
@@ -298,7 +300,7 @@ public static class OperationBackend
 
     #region Parametric Operations
 
-    // Bias Addition Operations
+    #region Bias Addition Operations
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] BiasAddOutput(float[,] input, float[] bias)
@@ -309,7 +311,9 @@ public static class OperationBackend
         // outputGradient is already averaged over the batch size in the loss function, so we just need to sum by columns
         => Current.BiasAddParamGradient(outputGradient);
 
-    // Convolution Operations
+    #endregion
+
+    #region Convolution 2D Operations
 
     /// <summary>
     /// Computes the 2D convolution of the input array with the specified weights.
@@ -382,7 +386,22 @@ public static class OperationBackend
         return result;
     }
 
-    // Weight Multiplication Operations
+    #endregion
+
+    #region Convolution 1D Operations
+
+    internal static float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride, int dilatation)
+        => Current.Convolve1DOutput(input, weights, padding, stride, dilatation);
+
+    internal static float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride, int dilatation)
+        => Current.Convolve1DInputGradient(input, weights, outputGradient, padding, stride, dilatation);
+
+    internal static float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int padding, int stride, int dilatation)
+        => Current.Convolve1DParamGradient(input, outputGradient, padding, stride, dilatation);
+
+    #endregion
+
+    #region Weight Multiplication Operations
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
@@ -438,6 +457,8 @@ public static class OperationBackend
 
         return result;
     }
+
+    #endregion
 
     #endregion
 

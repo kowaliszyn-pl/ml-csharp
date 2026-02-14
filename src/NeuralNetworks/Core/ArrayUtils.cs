@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 using ILGPU.Runtime.Cuda;
 
@@ -89,7 +90,28 @@ public class ArrayUtils
             }
         }
     }
-    
+
+    public static Span<float> ConvertToSpan(Array array)
+    {
+        return array switch
+        {
+            float[] arr1D => arr1D.AsSpan(),
+            float[,] arr2D => MemoryMarshal.CreateSpan(ref arr2D[0, 0], arr2D.Length),
+            float[,,] arr3D => MemoryMarshal.CreateSpan(ref arr3D[0, 0, 0], arr3D.Length),
+            float[,,,] arr4D => MemoryMarshal.CreateSpan(ref arr4D[0, 0, 0, 0], arr4D.Length),
+            _ => throw new ArgumentException("Array must be of type float[] or float[,] or float[,,,].")
+        };
+
+        //if (array is float[] arr1D)
+        //    return arr1D.AsSpan();
+        //else if (array is float[,] arr2D)
+        //    return MemoryMarshal.CreateSpan(ref arr2D[0, 0], arr2D.Length);
+        //else if (array is float[,,,] arr4D)
+        //    return MemoryMarshal.CreateSpan(ref arr4D[0, 0, 0, 0], arr4D.Length);
+        //else
+        //    throw new ArgumentException("Array must be of type float[] or float[,] or float[,,,].");
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] CreateRange(int rows, int columns, float from, float to)
     {

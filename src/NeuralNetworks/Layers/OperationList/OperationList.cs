@@ -29,12 +29,11 @@ public class OperationList<TIn, TOut> : List<Operation>
         return (TIn)stream;
     }
 
-    /// <param name="layer">The layer this operation list belongs to.</param>
-    public void UpdateParams(Layer layer, Optimizer optimizer)
+    public void UpdateParams(Optimizer optimizer)
     {
         foreach (IParamOperation operation in this.OfType<IParamOperation>())
         {
-            operation.UpdateParams(layer, optimizer);
+            operation.UpdateParams(optimizer);
         }
     }
 

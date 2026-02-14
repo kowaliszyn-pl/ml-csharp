@@ -1,12 +1,8 @@
 ﻿// Neural Networks in C♯
 // File name: WeightMultiply.cs
-// www.kowaliszyn.pl, 2025
-
-using NeuralNetworks.Layers;
-using NeuralNetworks.Optimizers;
+// www.kowaliszyn.pl, 2025 - 2026
 
 using static NeuralNetworks.Core.Operations.OperationBackend;
-using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
@@ -24,7 +20,4 @@ public class WeightMultiply(float[,] weights) : ParamOperation<float[,], float[,
 
     protected override float[,] CalcParamGradient(float[,] outputGradient)
         => WeightMultiplyParamGradient(Input, outputGradient);
-
-    internal override void UpdateParams(Layer? layer, Optimizer optimizer)
-        => optimizer.Update(layer, Param, ParamGradient);
 }

@@ -24,7 +24,4 @@ public class BiasAdd(float[] bias) : ParamOperation<float[,], float[,], float[]>
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
       => outputGradient; // Input.AsOnes().MultiplyElementwise(outputGradient);
-
-    internal override void UpdateParams(Layer? layer, Optimizer optimizer)
-        => optimizer.Update(layer, Param, ParamGradient);
 }

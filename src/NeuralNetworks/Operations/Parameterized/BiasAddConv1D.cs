@@ -12,5 +12,4 @@ public class BiasAddConv1D(float[] bias) : ParamOperation<float[,,], float[,,], 
     protected override float[,,] CalcInputGradient(float[,,] outputGradient) => throw new NotImplementedException();
     protected override float[,,] CalcOutput(bool inference) => throw new NotImplementedException();
     protected override float[] CalcParamGradient(float[,,] outputGradient) => throw new NotImplementedException();
-    internal override void UpdateParams(Layer? layer, Optimizer optimizer) => throw new NotImplementedException();
 }

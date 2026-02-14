@@ -1,11 +1,7 @@
 ﻿// Neural Networks in C♯
 // File name: Conv2D.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Layers;
-using NeuralNetworks.Optimizers;
-
-using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;
@@ -22,10 +18,10 @@ namespace NeuralNetworks.Operations.Parameterized;
 public class Conv2D(float[,,,] weights) : ParamOperation<float[,,,], float[,,,], float[,,,]>(weights)
 {
 
-    protected override float[,,,] CalcOutput(bool inference) 
+    protected override float[,,,] CalcOutput(bool inference)
         => Convolve2DOutput(Input, Param);
 
-    protected override float[,,,] CalcInputGradient(float[,,,] outputGradient) 
+    protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
         => Convolve2DInputGradient(Input, Param, outputGradient);
 
     protected override float[,,,] CalcParamGradient(float[,,,] outputGradient)
@@ -33,7 +29,4 @@ public class Conv2D(float[,,,] weights) : ParamOperation<float[,,,], float[,,,],
         int kernelSize = Param.GetLength(2);
         return Convolve2DParamGradient(Input, outputGradient, kernelSize, kernelSize);
     }
-
-    internal override void UpdateParams(Layer? layer, Optimizer optimizer)
-        => optimizer.Update(layer, Param, ParamGradient);
 }

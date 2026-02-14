@@ -116,7 +116,6 @@ public interface IOperations
     // Bias Addition Operations
 
     public float[,] BiasAddOutput(float[,] input, float[] bias);
-
     public float[] BiasAddParamGradient(float[,] outputGradient);
 
     // Convolution Operations
@@ -124,6 +123,9 @@ public interface IOperations
     public float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights);
     public float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient);
     public float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth);
+    public float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride, int dilatation);
+    public float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride, int dilatation);
+    public float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int padding, int stride, int dilatation);
 
     // Weight Multiplication Operations
 
@@ -148,6 +150,8 @@ public interface IOperations
 
     public float[,] Flatten(float[,,,] source);
     public float[,,,] Unflatten(float[,] source, float[,,,] targetSize);
+    
+
 
     #endregion
 

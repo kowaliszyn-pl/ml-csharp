@@ -101,7 +101,7 @@ public abstract class Layer<TIn, TOut> : Layer
     {
         Debug.Assert(_operations != null, "Operations were not set up.");
 
-        _operations.UpdateParams(this, optimizer);
+        _operations.UpdateParams(optimizer);
     }
 
     public abstract OperationListBuilder<TIn, TOut> CreateOperationListBuilder();

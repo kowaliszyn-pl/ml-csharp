@@ -70,4 +70,7 @@ public class Conv1DLayer(
         res.AddOperation(activationFunction);
         return res;
     }
+
+    public override string ToString() 
+        => $"Conv1DLayer (kernels={kernels}, kernelLength={kernelLength}, activation={activationFunction}, paramInitializer={paramInitializer}, dropout={dropout}, addBias={addBias}, padding={padding}, stride={stride}, dilatation={dilatation})";
 }

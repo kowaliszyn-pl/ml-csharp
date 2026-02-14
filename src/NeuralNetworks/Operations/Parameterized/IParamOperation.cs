@@ -10,7 +10,7 @@ namespace NeuralNetworks.Operations.Parameterized;
 internal interface IParamOperation
 {
     public int GetParamCount();
-    public void UpdateParams(Layer? layer, Optimizer optimizer);
+    public void UpdateParams(Optimizer optimizer);
     public ParamOperationData GetData();
     public void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
 }

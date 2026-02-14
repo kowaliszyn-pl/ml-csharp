@@ -1,8 +1,9 @@
 ﻿// Neural Networks in C♯
 // File name: Optimizer.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Layers;
+using System.Runtime.InteropServices;
+
 using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
@@ -14,14 +15,36 @@ public abstract class Optimizer(LearningRate learningRate)
 {
     public LearningRate LearningRate => learningRate;
 
-    public virtual void UpdateLearningRate(int steps, int epoch, int epochs) 
+    public virtual void UpdateLearningRate(int steps, int epoch, int epochs)
         => learningRate.Update(steps, epoch, epochs);
 
-    // TODO::Deduplicate these Update procedures somehow
+    private static void ConvertToSpans<T>(T param, T paramGradient, out Span<float> paramSpan, out ReadOnlySpan<float> paramGradientSpan) where T : notnull
+    {
+        paramSpan = param switch
+        {
+            float[] arr1D => arr1D.AsSpan(),
+            float[,] arr2D => MemoryMarshal.CreateSpan(ref arr2D[0, 0], arr2D.Length),
+            float[,,] arr3D => MemoryMarshal.CreateSpan(ref arr3D[0, 0, 0], arr3D.Length),
+            float[,,,] arr4D => MemoryMarshal.CreateSpan(ref arr4D[0, 0, 0, 0], arr4D.Length),
+            _ => throw new ArgumentException()
+        };
 
-    public abstract void Update(Layer? layer, float[] param, float[] paramGradient);
+        paramGradientSpan = paramGradient switch
+        {
+            float[] arr1D => arr1D.AsSpan(),
+            float[,] arr2D => MemoryMarshal.CreateReadOnlySpan(ref arr2D[0, 0], arr2D.Length),
+            float[,,] arr3D => MemoryMarshal.CreateReadOnlySpan(ref arr3D[0, 0, 0], arr3D.Length),
+            float[,,,] arr4D => MemoryMarshal.CreateReadOnlySpan(ref arr4D[0, 0, 0, 0], arr4D.Length),
+            _ => throw new ArgumentException()
+        };
+    }
 
-    public abstract void Update(Layer? layer, float[,] param, float[,] paramGradient);
+    public void Update<T>(T paramsToUpdate, T paramGradients)
+        where T : notnull
+    {
+        ConvertToSpans(paramsToUpdate, paramGradients, out Span<float> paramSpan, out ReadOnlySpan<float> paramGradientSpan);
+        Update(paramsToUpdate, paramSpan, paramGradientSpan);
+    }
 
-    public abstract void Update(Layer? layer, float[,,,] param, float[,,,] paramGradient);
+    protected abstract void Update(object paramsKey, Span<float> paramsToUpdate, ReadOnlySpan<float> paramGradients);
 }

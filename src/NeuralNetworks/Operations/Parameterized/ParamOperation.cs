@@ -17,7 +17,7 @@ public abstract class ParamOperation<TIn, TOut> : Operation<TIn, TOut>, IParamOp
     where TOut : notnull
 {
     internal abstract int GetParamCount();
-    internal abstract void UpdateParams(Layer? layer, Optimizer optimizer);
+    internal abstract void UpdateParams(Optimizer optimizer);
     internal abstract ParamOperationData GetData();
     internal abstract void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
 
@@ -26,7 +26,7 @@ public abstract class ParamOperation<TIn, TOut> : Operation<TIn, TOut>, IParamOp
 
     ParamOperationData IParamOperation.GetData() => GetData();
     int IParamOperation.GetParamCount() => GetParamCount();
-    void IParamOperation.UpdateParams(Layer? layer, Optimizer optimizer) => UpdateParams(layer, optimizer);
+    void IParamOperation.UpdateParams(Optimizer optimizer) => UpdateParams(optimizer);
 }
 
 /// <summary>
@@ -94,5 +94,10 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
             return array.Length;
         else
             throw new NotSupportedException();
+    }
+
+    internal override void UpdateParams(Optimizer optimizer)
+    {
+        optimizer.Update(param, ParamGradient);
     }
 }

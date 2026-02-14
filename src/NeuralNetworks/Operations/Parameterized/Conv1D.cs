@@ -2,15 +2,19 @@
 // File name: Conv1D.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Layers;
-using NeuralNetworks.Optimizers;
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
 public class Conv1D(float[,,] weights, int padding, int stride, int dilatation) : ParamOperation<float[,,], float[,,], float[,,]>(weights)
 {
-    protected override float[,,] CalcInputGradient(float[,,] outputGradient) => throw new NotImplementedException();
-    protected override float[,,] CalcOutput(bool inference) => throw new NotImplementedException();
-    protected override float[,,] CalcParamGradient(float[,,] outputGradient) => throw new NotImplementedException();
-    internal override void UpdateParams(Layer? layer, Optimizer optimizer) => throw new NotImplementedException();
+    protected override float[,,] CalcOutput(bool inference)
+        => Convolve1DOutput(Input, Param, padding, stride, dilatation);
+
+    protected override float[,,] CalcInputGradient(float[,,] outputGradient)
+        => Convolve1DInputGradient(Input, Param, outputGradient, padding, stride, dilatation);
+
+    protected override float[,,] CalcParamGradient(float[,,] outputGradient)
+        => Convolve1DParamGradient(Input, outputGradient, padding, stride, dilatation);
+
 }

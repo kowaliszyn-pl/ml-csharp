@@ -334,9 +334,9 @@ public class OperationsArray : IOperations
                         {
                             for (int kh = 0; kh < kernelSize; kh++)
                             {
+                                int ih = oh + kh - padding;
                                 for (int kw = 0; kw < kernelSize; kw++)
                                 {
-                                    int ih = oh + kh - padding;
                                     int iw = ow + kw - padding;
                                     if (ih >= 0 && ih < inputHeight && iw >= 0 && iw < inputWidth)
                                     {
@@ -456,6 +456,127 @@ public class OperationsArray : IOperations
             }
         }
 
+        return paramGradient;
+    }
+
+    public virtual float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride = 1, int dilatation = 0)
+    {
+        int batchSize = input.GetLength(0);
+        int inputChannels = input.GetLength(1);
+        int inputLength = input.GetLength(2);
+
+        int outputChannels = weights.GetLength(1);
+        int kernelLength = weights.GetLength(2);
+
+        Debug.Assert(weights.GetLength(0) == inputChannels);
+
+        int effectiveInputLength = inputLength + 2 * padding;
+        int effectiveKernelLength = dilatation * (kernelLength - 1) + kernelLength;
+
+        int outputLength = (effectiveInputLength - effectiveKernelLength) / stride + 1;
+
+        float[,,] output = new float[batchSize, outputChannels, outputLength];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int oc = 0; oc < outputChannels; oc++)
+            {
+                for (int ol = 0; ol < outputLength; ol++)
+                {
+                    float sum = 0.0f;
+                    for (int ic = 0; ic < inputChannels; ic++)
+                    {
+                        for (int kl = 0; kl < kernelLength; kl++)
+                        {
+                            int il = ol * stride + kl * (dilatation + 1) - padding;
+                            if (il >= 0 && il < inputLength)
+                            {
+                                sum += input[b, ic, il] * weights[ic, oc, kl];
+                            }
+                        }
+                    }
+                    output[b, oc, ol] = sum;
+                }
+            }
+        }
+
+        return output;
+    }
+
+    public virtual float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride = 1, int dilatation = 0)
+    {
+        int inputChannels = input.GetLength(1);
+        int inputLength = input.GetLength(2);
+
+        int batchSize = outputGradient.GetLength(0);
+        int outputChannels = outputGradient.GetLength(1);
+        int outputLength = outputGradient.GetLength(2);
+        
+        int kernelLength = weights.GetLength(2);
+
+        Debug.Assert(weights.GetLength(0) == inputChannels);
+
+        float[,,] inputGradient = new float[batchSize, inputChannels, inputLength];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int ic = 0; ic < inputChannels; ic++)
+            {
+                for (int il = 0; il < inputLength; il++)
+                {
+                    float sum = 0.0f;
+                    for (int oc = 0; oc < outputChannels; oc++)
+                    {
+                        for (int kl = 0; kl < kernelLength; kl++)
+                        {
+                            int ol = (il + padding - kl * (dilatation + 1)) / stride;
+                            if (ol >= 0 && ol < outputLength && (il + padding - kl * (dilatation + 1)) % stride == 0)
+                            {
+                                sum += outputGradient[b, oc, ol] * weights[ic, oc, kl];
+                            }
+                        }
+                    }
+                    inputGradient[b, ic, il] += sum;
+                }
+            }
+        }
+        return inputGradient;
+    }
+
+    public virtual float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int padding, int stride, int dilatation)
+    {
+        int inputChannels = input.GetLength(1);
+        int inputLength = input.GetLength(2);
+
+        int batchSize = outputGradient.GetLength(0);
+        int outputChannels = outputGradient.GetLength(1);
+        int outputLength = outputGradient.GetLength(2);
+
+        int kernelLength = (inputLength + 2 * padding - (outputLength - 1) * stride) / (dilatation + 1);
+
+        float[,,] paramGradient = new float[inputChannels, outputChannels, kernelLength];
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int ic = 0; ic < inputChannels; ic++)
+            {
+                for (int oc = 0; oc < outputChannels; oc++)
+                {
+                    for (int kl = 0; kl < kernelLength; kl++)
+                    {
+                        float sum = 0.0f;
+                        for (int ol = 0; ol < outputLength; ol++)
+                        {
+                            int il = ol * stride + kl * (dilatation + 1) - padding;
+                            if (il >= 0 && il < inputLength)
+                            {
+                                sum += outputGradient[b, oc, ol] * input[b, ic, il];
+                            }
+                        }
+                        paramGradient[ic, oc, kl] += sum;
+                    }
+                }
+            }
+        }
         return paramGradient;
     }
 
