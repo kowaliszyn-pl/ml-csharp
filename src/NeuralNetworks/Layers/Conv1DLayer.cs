@@ -2,10 +2,6 @@
 // File name: Conv1DLayer.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Operations.Dropouts;
@@ -54,9 +50,9 @@ public class Conv1DLayer(
     {
         int inputChannels = Input!.GetLength(1 /* channels */);
         float[,,] weights = paramInitializer.InitWeights(inputChannels, kernels, kernelLength);
-        
 
-        OperationListBuilder<float[,,], float[,,]> res = 
+
+        OperationListBuilder<float[,,], float[,,]> res =
             AddOperation(new Conv1D(weights, padding ?? kernelLength / 2, stride, dilatation));
 
         if (addBias)
@@ -72,6 +68,6 @@ public class Conv1DLayer(
         return res;
     }
 
-    public override string ToString() 
+    public override string ToString()
         => $"Conv1DLayer (kernels={kernels}, kernelLength={kernelLength}, activation={activationFunction}, paramInitializer={paramInitializer}, dropout={dropout}, addBias={addBias}, padding={padding}, stride={stride}, dilatation={dilatation})";
 }

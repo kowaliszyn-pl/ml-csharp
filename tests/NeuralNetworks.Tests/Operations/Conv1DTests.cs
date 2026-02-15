@@ -2,10 +2,6 @@
 // File name: Conv1DTests.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using NeuralNetworks.Operations.Parameterized;
 
 namespace NeuralNetworks.Tests.Operations;
@@ -54,7 +50,6 @@ public class Conv1DTests
             }
         }, output);
 
-
         // Do backward
         float[,,] outputGradient = new float[1, 1, 5];
         for (int i = 0; i < 5; i++)
@@ -68,7 +63,6 @@ public class Conv1DTests
         Assert.AreEqual(1, inputGradient.GetLength(0));
         Assert.AreEqual(1, inputGradient.GetLength(1));
         Assert.AreEqual(5, inputGradient.GetLength(2));
-
 
         // The input gradient is obtained by convolving the gradient of the loss with respect to the output (outputGradient) with the reversed filter. Since the filter is [1, 0, -2], the reversed filter is [-2, 0, 1]. The convolution is done with 'same' padding, which means that the output has the same length as the input. The convolution is done by sliding the reversed filter over the output gradient and calculating the dot product at each position.
         CollectionAssert.AreEqual(new float[,,] {

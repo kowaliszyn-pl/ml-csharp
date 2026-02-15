@@ -236,7 +236,7 @@ public class OperationsArray : IOperations
         return outputGradient.MultiplyElementwise(sigmoidBackward);
     }
 
-    public virtual float[,] SoftplusOutput(float[,] input) 
+    public virtual float[,] SoftplusOutput(float[,] input)
         => input.Softplus();
 
     public virtual float[,] SoftplusInputGradient(float[,] outputGradient, float[,] output)
@@ -318,7 +318,7 @@ public class OperationsArray : IOperations
         Debug.Assert(channels == bias.Length, "The length of the bias array must match the number of channels in the input.");
 
         int batchSize = input.GetLength(0);
-        
+
         int outputLength = input.GetLength(2);
 
         float[,,] output = new float[batchSize, channels, outputLength];
@@ -568,7 +568,7 @@ public class OperationsArray : IOperations
         int batchSize = outputGradient.GetLength(0);
         int outputChannels = outputGradient.GetLength(1);
         int outputLength = outputGradient.GetLength(2);
-        
+
         int kernelLength = weights.GetLength(2);
 
         Debug.Assert(weights.GetLength(0) == inputChannels);
