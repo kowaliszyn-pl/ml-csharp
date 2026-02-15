@@ -4,7 +4,7 @@
 
 using NeuralNetworks.Operations.Parameterized;
 
-namespace NeuralNetworks.Tests.Operations;
+namespace NeuralNetworks.Operations.Tests;
 
 [TestClass]
 public class Conv1DTests
