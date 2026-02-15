@@ -53,7 +53,7 @@ public class Conv2DTests
         }
 
         // Create a Conv2DOperation
-        Conv2D conv2DOperation = new(param);
+        Conv2D conv2DOperation = new(param, 1, 1);
 
         // Do forward
         float[,,,] output = conv2DOperation.Forward(input, true);
@@ -163,7 +163,7 @@ public class Conv2DTests
         }
 
         // Create a Conv2DOperation
-        Conv2D conv2DOperation = new(param);
+        Conv2D conv2DOperation = new(param, 1, 1);
 
         // Do forward
         float[,,,] output = conv2DOperation.Forward(input, true);
@@ -285,7 +285,7 @@ public class Conv2DTests
         }
 
         // Create a Conv2DOperation
-        Conv2D conv2DOperation = new(param);
+        Conv2D conv2DOperation = new(param, 1, 1);
 
         // Do forward
         float[,,,] output = conv2DOperation.Forward(input, true);

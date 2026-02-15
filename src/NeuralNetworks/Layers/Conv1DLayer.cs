@@ -62,9 +62,11 @@ public class Conv1DLayer(
             res.AddOperation(new BiasAddConv1D(bias));
         }
 
+        res.AddOperation(activationFunction);
+
         if (dropout is not null)
             res.AddOperation(dropout);
-        res.AddOperation(activationFunction);
+        
         return res;
     }
 

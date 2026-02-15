@@ -12,41 +12,42 @@ namespace NeuralNetworks.Layers;
 
 /*
  * TIn and TOut are 4D arrays with the following dimensions: [batch, channels, height, width]
- * TODO: strides, padding, dilation
  */
-public class Conv2DLayer : Layer<float[,,,], float[,,,]>
+public class Conv2DLayer(
+    int kernels,
+    int kernelHeight, int kernelWidth,
+    ActivationFunction<float[,,,], float[,,,]> activationFunction,
+    ParamInitializer paramInitializer,
+    Dropout4D? dropout = null,
+    bool addBias = false,
+    int? paddingHeight = null, int? paddingWidth = null,
+    int strideHeight = 1, int strideWidth = 1,
+    int dilatationHeight = 0, int dilatationWidth = 0
+) : Layer<float[,,,], float[,,,]>
 {
-    private readonly int _filters;
-    private readonly int _kernelSize;
-    private readonly ActivationFunction<float[,,,], float[,,,]> _activationFunction;
-    private readonly ParamInitializer _paramInitializer;
-    private readonly Dropout4D? _dropout;
-
-    public Conv2DLayer(int filters, int kernelSize, ActivationFunction<float[,,,], float[,,,]> activationFunction, ParamInitializer paramInitializer, Dropout4D? dropout = null)
-    {
-        _filters = filters;
-        _kernelSize = kernelSize;
-        _activationFunction = activationFunction;
-        _paramInitializer = paramInitializer;
-        _dropout = dropout;
-    }
-
     public override OperationListBuilder<float[,,,], float[,,,]> CreateOperationListBuilder()
     {
         int inputChannels = Input!.GetLength(1 /* channels */);
-        float[,,,] weights = _paramInitializer.InitWeights(inputChannels, _filters, _kernelSize, _kernelSize);
+        float[,,,] weights = paramInitializer.InitWeights(inputChannels, kernels, kernelHeight, kernelWidth);
 
         OperationListBuilder<float[,,,], float[,,,]> res =
-            AddOperation(new Conv2D(weights))
-            // Add Bias4D
-            .AddOperation(_activationFunction);
+            AddOperation(new Conv2D(weights, paddingHeight ?? kernelHeight / 2, paddingWidth ?? kernelWidth / 2, strideHeight, strideWidth, dilatationHeight, dilatationWidth));
 
-        if (_dropout != null)
-            res = res.AddOperation(_dropout);
+        if (addBias)
+        {
+            // [batch = 1, kernels, outputLength]
+            float[] bias = paramInitializer.InitBiases(kernels);
+            //res.AddOperation(new BiasAddConv1D(bias));
+        }
+
+        res.AddOperation(activationFunction);
+
+        if (dropout != null)
+            res = res.AddOperation(dropout);
 
         return res;
     }
 
     public override string ToString()
-        => $"Conv2DLayer (filters={_filters}, kernelSize={_kernelSize}, activation={_activationFunction}, paramInitializer={_paramInitializer}, dropout={_dropout})";
+        => $"Conv2DLayer (kernels={kernels}, kernelHeight={kernelHeight}, kernelWidth={kernelWidth}, activation={activationFunction}, paramInitializer={paramInitializer}, dropout={dropout}, addBias={addBias}, paddingHeight={paddingHeight}, paddingWidth={paddingWidth}, strideHeight={strideHeight}, strideWidth={strideWidth}, dilatationHeight={dilatationHeight}, dilatationWidth={dilatationWidth})";
 }
