@@ -52,7 +52,8 @@ public class Conv1DLayer(
 {
     public override OperationListBuilder<float[,,], float[,,]> CreateOperationListBuilder()
     {
-        float[,,] weights = paramInitializer.InitWeights(Input!.GetLength(1 /* channels */), kernels, kernelLength);
+        int inputChannels = Input!.GetLength(1 /* channels */);
+        float[,,] weights = paramInitializer.InitWeights(inputChannels, kernels, kernelLength);
         
 
         OperationListBuilder<float[,,], float[,,]> res = 

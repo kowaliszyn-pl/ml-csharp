@@ -117,6 +117,8 @@ public interface IOperations
 
     public float[,] BiasAddOutput(float[,] input, float[] bias);
     public float[] BiasAddParamGradient(float[,] outputGradient);
+    public float[,,] BiasAddConv1DOutput(float[,,] input, float[] bias);
+    public float[] BiasAddConv1DParamGradient(float[,,] outputGradient);
 
     // Convolution Operations
 
@@ -151,8 +153,6 @@ public interface IOperations
     public float[,] Flatten(float[,,,] source);
     public float[,,,] Unflatten(float[,] source, float[,,,] targetSize);
     
-
-
     #endregion
 
 }

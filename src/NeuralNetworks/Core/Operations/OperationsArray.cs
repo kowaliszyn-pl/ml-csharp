@@ -299,6 +299,63 @@ public class OperationsArray : IOperations
     public virtual float[] BiasAddParamGradient(float[,] outputGradient)
         => outputGradient.SumByColumns();
 
+    /// <summary>
+    /// Applies a bias vector to the output of a 1-dimensional convolution operation.
+    /// </summary>
+    /// <remarks>
+    /// Each value in the bias array is added to the corresponding channel across all batches and
+    /// positions. The method does not modify the input array.
+    /// </remarks>
+    /// <param name="input">
+    /// A three-dimensional array representing the output of a 1D convolution, with shape [batch, kernels (output channels), outputLength].
+    /// </param>
+    /// <param name="bias">A one-dimensional array containing the bias values to add to each channel. The length must match the number of
+    /// channels in the input.</param>
+    /// <returns>A three-dimensional array of the same shape as the input, with the bias added to each channel.</returns>
+    public virtual float[,,] BiasAddConv1DOutput(float[,,] input, float[] bias)
+    {
+        int channels = input.GetLength(1);
+        Debug.Assert(channels == bias.Length, "The length of the bias array must match the number of channels in the input.");
+
+        int batchSize = input.GetLength(0);
+        
+        int outputLength = input.GetLength(2);
+
+        float[,,] output = new float[batchSize, channels, outputLength];
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int l = 0; l < outputLength; l++)
+                {
+                    output[b, c, l] = input[b, c, l] + bias[c];
+                }
+            }
+        }
+        return output;
+    }
+
+    public virtual float[] BiasAddConv1DParamGradient(float[,,] outputGradient)
+    {
+        int channels = outputGradient.GetLength(1);
+        int batchSize = outputGradient.GetLength(0);
+        int outputLength = outputGradient.GetLength(2);
+        float[] paramGradient = new float[channels];
+        for (int c = 0; c < channels; c++)
+        {
+            float sum = 0.0f;
+            for (int b = 0; b < batchSize; b++)
+            {
+                for (int l = 0; l < outputLength; l++)
+                {
+                    sum += outputGradient[b, c, l];
+                }
+            }
+            paramGradient[c] = sum;
+        }
+        return paramGradient;
+    }
+
     // Convolution Operations
 
     public virtual float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)

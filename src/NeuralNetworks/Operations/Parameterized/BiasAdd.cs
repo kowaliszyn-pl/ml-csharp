@@ -2,9 +2,6 @@
 // File name: BiasAdd.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Layers;
-using NeuralNetworks.Optimizers;
-
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;

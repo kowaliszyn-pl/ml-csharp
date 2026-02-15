@@ -313,6 +313,19 @@ public static class OperationBackend
 
     #endregion
 
+    #region Bias Addition Conv1D Operations
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,,] BiasAddConv1DOutput(float[,,] input, float[] bias)
+        => Current.BiasAddConv1DOutput(input, bias);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[] BiasAddConv1DParamGradient(float[,,] outputGradient)
+        // outputGradient is already averaged over the batch size in the loss function, so we just need to sum by columns
+        => Current.BiasAddConv1DParamGradient(outputGradient);
+
+    #endregion
+
     #region Convolution 2D Operations
 
     /// <summary>

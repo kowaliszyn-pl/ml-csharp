@@ -33,7 +33,8 @@ public class Conv2DLayer : Layer<float[,,,], float[,,,]>
 
     public override OperationListBuilder<float[,,,], float[,,,]> CreateOperationListBuilder()
     {
-        float[,,,] weights = _paramInitializer.InitWeights(Input!.GetLength(1 /* channels */), _filters, _kernelSize, _kernelSize);
+        int inputChannels = Input!.GetLength(1 /* channels */);
+        float[,,,] weights = _paramInitializer.InitWeights(inputChannels, _filters, _kernelSize, _kernelSize);
 
         OperationListBuilder<float[,,,], float[,,,]> res =
             AddOperation(new Conv2D(weights))
