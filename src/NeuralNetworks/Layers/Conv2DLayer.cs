@@ -40,7 +40,7 @@ public class Conv2DLayer(
             //res.AddOperation(new BiasAddConv1D(bias));
         }
 
-        res.AddOperation(activationFunction);
+        res = res.AddOperation(activationFunction);
 
         if (dropout != null)
             res = res.AddOperation(dropout);

@@ -25,7 +25,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
-// 97,72% - CpuSpansParallel - 97,71
+// 97,72% - CpuSpansParallel
 // 97,72% - Gpu
 // 97,31% - CpuSpans, CpuArrays
 
