@@ -97,7 +97,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
 
     private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
 
-    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
     {
         int batchSize = input.GetLength(0);
         int inputChannels = input.GetLength(1);

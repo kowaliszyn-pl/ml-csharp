@@ -17,14 +17,15 @@ public class Conv2D(float[,,,] weights, int paddingHeight, int paddingWidth, int
 {
 
     protected override float[,,,] CalcOutput(bool inference)
-        => Convolve2DOutput(Input, Param);
+        => Convolve2DOutput(Input, Param, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
-        => Convolve2DInputGradient(Input, Param, outputGradient);
+        => Convolve2DInputGradient(Input, Param, outputGradient, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
 
     protected override float[,,,] CalcParamGradient(float[,,,] outputGradient)
     {
-        int kernelSize = Param.GetLength(2);
-        return Convolve2DParamGradient(Input, outputGradient, kernelSize, kernelSize);
+        int kernelHeight = Param.GetLength(2);
+        int kernelWidth = Param.GetLength(3);
+        return Convolve2DParamGradient(Input, outputGradient, kernelHeight, kernelWidth, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
     }
 }

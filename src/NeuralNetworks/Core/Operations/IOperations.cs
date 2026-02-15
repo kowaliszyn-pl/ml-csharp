@@ -122,9 +122,9 @@ public interface IOperations
 
     // Convolution Operations
 
-    public float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights);
-    public float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient);
-    public float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth);
+    public float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0);
+    public float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0);
+    public float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0);
     public float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride, int dilatation);
     public float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride, int dilatation);
     public float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int padding, int stride, int dilatation);

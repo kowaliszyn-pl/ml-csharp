@@ -194,7 +194,7 @@ public class OperationsSpan : OperationsArray
 
     // Convolution Operations
 
-    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
     {
         int batchSize = input.GetLength(0);
 
@@ -279,7 +279,7 @@ public class OperationsSpan : OperationsArray
         return output;
     }
 
-    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
+    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -364,7 +364,7 @@ public class OperationsSpan : OperationsArray
         return inputGradient;
     }
 
-    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth)
+    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
     {
         int batchSize = outputGradient.GetLength(0);
 

@@ -338,11 +338,11 @@ public static class OperationBackend
     /// <param name="weights">The weights array (of the convolution filters) of shape [inputChannels, outputChannels, kernelHeight, kernelWidth]</param>
     /// <returns>The output array of shape [batchSize, outputChannels, outputHeight, outputWidth]</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights)
+    internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
     {
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
-        float[,,,] result = Current.Convolve2DOutput(input, weights);
+        float[,,,] result = Current.Convolve2DOutput(input, weights, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
 
         if (s_statisticsEnabled)
         {
@@ -364,11 +364,11 @@ public static class OperationBackend
     /// <returns>The input gradient array of shape [batchSize, inputChannels, inputHeight, inputWidth].
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient)
+    internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
     {
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
-        float[,,,] result = Current.Convolve2DInputGradient(input, weights, outputGradient);
+        float[,,,] result = Current.Convolve2DInputGradient(input, weights, outputGradient, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
 
         if (s_statisticsEnabled)
         {
@@ -382,11 +382,11 @@ public static class OperationBackend
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth)
+    internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
     {
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
-        float[,,,] result = Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth);
+        float[,,,] result = Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
 
         if (s_statisticsEnabled)
         {
