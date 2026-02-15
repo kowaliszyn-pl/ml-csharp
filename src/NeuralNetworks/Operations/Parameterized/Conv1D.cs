@@ -15,6 +15,9 @@ public class Conv1D(float[,,] weights, int padding, int stride = 1, int dilatati
         => Convolve1DInputGradient(Input, Param, outputGradient, padding, stride, dilatation);
 
     protected override float[,,] CalcParamGradient(float[,,] outputGradient)
-        => Convolve1DParamGradient(Input, outputGradient, padding, stride, dilatation);
+    {
+        int kernelLength = Param.GetLength(2);
+        return Convolve1DParamGradient(Input, outputGradient, kernelLength, padding, stride, dilatation);
+    }
 
 }

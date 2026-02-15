@@ -409,8 +409,8 @@ public static class OperationBackend
     internal static float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride, int dilatation)
         => Current.Convolve1DInputGradient(input, weights, outputGradient, padding, stride, dilatation);
 
-    internal static float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int padding, int stride, int dilatation)
-        => Current.Convolve1DParamGradient(input, outputGradient, padding, stride, dilatation);
+    internal static float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int kernelLength, int padding, int stride, int dilatation)
+        => Current.Convolve1DParamGradient(input, outputGradient, kernelLength, padding, stride, dilatation);
 
     #endregion
 
