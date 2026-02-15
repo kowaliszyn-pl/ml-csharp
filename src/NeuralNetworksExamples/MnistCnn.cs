@@ -25,7 +25,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
-// 97,72% - CpuSpansParallel
+// 97,83% - CpuSpansParallel
 // 97,72% - Gpu
 // 97,31% - CpuSpans, CpuArrays
 
@@ -44,7 +44,8 @@ internal class MnistConvModel(SeededRandom? random)
                 kernelWidth: 5,
                 activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer,
-                dropout: dropout
+                dropout: dropout,
+                addBias: true
             ))
             .AddLayer(new FlattenLayer())
             .AddLayer(new DenseLayer(10, new Linear(), initializer));

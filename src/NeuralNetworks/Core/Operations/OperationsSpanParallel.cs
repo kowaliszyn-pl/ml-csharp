@@ -200,6 +200,104 @@ public class OperationsSpanParallel : OperationsSpan
 
     #region Parametric Operations
 
+    // Bias
+
+    public override float[,] BiasAddOutput(float[,] input, float[] bias)
+    {
+        int batchSize = input.GetLength(0);
+        int features = input.GetLength(1);
+
+        Debug.Assert(bias.Length == features, "Bias length must match the number of features in the input.");
+
+        float[,] output = new float[batchSize, features];
+        Parallel.For(0, output.Length, i =>
+        {
+            //ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            //ReadOnlySpan<float> biasSpan = bias.AsSpan();
+            //Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
+            
+            int batchIndex = Math.DivRem(i, features, out int featureIndex);
+            
+            //outputSpan[i] = inputSpan[i] + biasSpan[featureIndex];
+            output[batchIndex, featureIndex] = input[batchIndex, featureIndex] + bias[featureIndex];
+        });
+        return output;
+    }
+
+    //public override float[] BiasAddParamGradient(float[,] outputGradient)
+    //{
+    //    int batchSize = outputGradient.GetLength(0);
+    //    int features = outputGradient.GetLength(1);
+    //    float[] paramGradient = new float[features];
+    //    Parallel.For(0, features, feature =>
+    //    {
+    //        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+    //        Span<float> paramGradientSpan = paramGradient.AsSpan();
+    //        float sum = 0f;
+    //        for (int i = 0; i < batchSize; i++)
+    //        {
+    //            sum += outputGradientSpan[i * features + feature];
+    //        }
+    //        paramGradientSpan[feature] = sum;
+    //    });
+    //    return paramGradient;
+    //}
+
+    public override float[,,,] BiasAddConv2DOutput(float[,,,] input, float[] bias)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int height = input.GetLength(2);
+        int width = input.GetLength(3);
+        int spatialSize = height * width;
+
+        Debug.Assert(bias.Length == channels, "Bias length must match the number of channels in the input.");
+
+        float[,,,] output = new float[batchSize, channels, height, width];
+        Parallel.For(0, output.Length, i =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            ReadOnlySpan<float> biasSpan = MemoryMarshal.CreateReadOnlySpan(ref bias[0], bias.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+            
+            int channelIndex = (i / spatialSize) % channels;
+            outputSpan[i] = inputSpan[i] + biasSpan[channelIndex];
+        });
+
+        return output;
+    }
+
+    //public override float[] BiasAddConv2DParamGradient(float[,,,] outputGradient)
+    //{
+    //    int batchSize = outputGradient.GetLength(0);
+    //    int channels = outputGradient.GetLength(1);
+    //    int height = outputGradient.GetLength(2);
+    //    int width = outputGradient.GetLength(3);
+    //    int itemsPerChannel = height * width;
+    //    int elementCount = batchSize * itemsPerChannel;
+
+    //    float[] paramGradient = new float[channels];
+
+    //    Parallel.For(0, channels, channel =>
+    //    {
+            
+    //        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+    //        Span<float> paramGradientSpan = paramGradient.AsSpan();
+
+    //        int channelOffset = channel * itemsPerChannel;
+    //        float sum = 0f;
+            
+    //        for (int i = 0; i < elementCount; i++)
+    //        {
+    //            int idx = channelOffset + i;
+    //            sum += outputGradientSpan[idx];
+    //        }
+    //        paramGradient[channel] = sum;
+    //    });
+        
+    //    return paramGradient;
+    //}
+
     // Convolution Operations
 
     public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)

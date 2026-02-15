@@ -35,9 +35,9 @@ public class Conv2DLayer(
 
         if (addBias)
         {
-            // [batch = 1, kernels, outputLength]
+            // Input: [batch, kernels, outputHeight, outputWidth]
             float[] bias = paramInitializer.InitBiases(kernels);
-            //res.AddOperation(new BiasAddConv1D(bias));
+            res = res.AddOperation(new BiasAddConv2D(bias));
         }
 
         res = res.AddOperation(activationFunction);

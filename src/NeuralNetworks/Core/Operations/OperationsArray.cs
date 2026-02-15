@@ -356,6 +356,59 @@ public class OperationsArray : IOperations
         return paramGradient;
     }
 
+    public virtual float[,,,] BiasAddConv2DOutput(float[,,,] input, float[] bias)
+    {
+        // Input: [batch, kernels, outputHeight, outputWidth]
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int outputHeight = input.GetLength(2);
+        int outputWidth = input.GetLength(3);
+
+        Debug.Assert(channels == bias.Length, "The length of the bias array must match the number of channels in the input.");
+
+        float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < outputHeight; h++)
+                {
+                    for (int w = 0; w < outputWidth; w++)
+                    {
+                        output[b, c, h, w] = input[b, c, h, w] + bias[c];
+                    }
+                }
+            }
+        }
+
+        return output;
+    }
+
+    public virtual float[] BiasAddConv2DParamGradient(float[,,,] outputGradient)
+    {
+        int channels = outputGradient.GetLength(1);
+        int batchSize = outputGradient.GetLength(0);
+        int outputHeight = outputGradient.GetLength(2);
+        int outputWidth = outputGradient.GetLength(3);
+        float[] paramGradient = new float[channels];
+        for (int c = 0; c < channels; c++)
+        {
+            float sum = 0.0f;
+            for (int b = 0; b < batchSize; b++)
+            {
+                for (int h = 0; h < outputHeight; h++)
+                {
+                    for (int w = 0; w < outputWidth; w++)
+                    {
+                        sum += outputGradient[b, c, h, w];
+                    }
+                }
+            }
+            paramGradient[c] = sum;
+        }
+        return paramGradient;
+    }
+
     // Convolution Operations
 
     public virtual float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride = 1, int dilatation = 0)

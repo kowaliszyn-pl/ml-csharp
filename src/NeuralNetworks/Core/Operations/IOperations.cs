@@ -119,6 +119,9 @@ public interface IOperations
     public float[] BiasAddParamGradient(float[,] outputGradient);
     public float[,,] BiasAddConv1DOutput(float[,,] input, float[] bias);
     public float[] BiasAddConv1DParamGradient(float[,,] outputGradient);
+    public float[,,,] BiasAddConv2DOutput(float[,,,] input, float[] bias);
+    public float[] BiasAddConv2DParamGradient(float[,,,] outputGradient);
+
 
     // Convolution Operations
 
