@@ -97,7 +97,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
 
     private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
 
-    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
         int batchSize = input.GetLength(0);
         int inputChannels = input.GetLength(1);
@@ -137,22 +137,25 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
         weightsDev.View.CopyFromCPU(ref weights[0, 0, 0, 0], weights.Length);
 
         Convolve2DOutputMeta meta = new(
-            pad,
             inputChannels,
             inputHeight,
             inputWidth,
             kernelHeight,
             kernelWidth,
             outputChannels,
-            //batchSize,
-            //outputHeight,
             outputWidth,
             inputBatchSize,
             inputChannelSize,
             weightsChannelSize,
             weightsOutputChannelSize,
             outputBatchSize,
-            outputChannelSize);
+            outputChannelSize,
+            paddingHeight, 
+            paddingWidth, 
+            strideHeight,
+            strideWidth,
+            dilatationHeight,
+            dilatationWidth);
 
         _convolve2DOutputKernel(
                 new Index3D(batchSize * outputChannels, outputHeight, outputWidth),
@@ -168,31 +171,20 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
 
     private static void Convolve2DOutputKernel(Index3D index, FloatDense1DView input, FloatDense1DView weights, FloatDense1DView output, Convolve2DOutputMeta meta)
     {
-        int pad = meta.Pad;
+        int paddingHeight = meta.PaddingHeight;
+        int paddingWidth = meta.PaddingWidth;
         int inputChannels = meta.InputChannels;
         int inputHeight = meta.InputHeight;
         int inputWidth = meta.InputWidth;
         int kernelHeight = meta.KernelHeight;
         int kernelWidth = meta.KernelWidth;
         int outputChannels = meta.OutputChannels;
-        //int batchSize = meta.BatchSize;
-        //int outputHeight = meta.OutputHeight;
         int outputWidth = meta.OutputWidth;
 
         int batchOutputChannelIndex = index.X;
         int oh = index.Y;
         int ow = index.Z;
-
-        //if (oh >= outputHeight || ow >= outputWidth)
-        //{
-        //    return;
-        //}
-
         int b = batchOutputChannelIndex / outputChannels;
-        //if (b >= batchSize)
-        //{
-        //    return;
-        //}
 
         int oc = batchOutputChannelIndex - (b * outputChannels);
 
@@ -203,8 +195,8 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
         int inputBIndex = b * meta.InputBatchSize;
         int weightsOutputCIndex = oc * meta.WeightsOutputChannelSize;
 
-        int ohMinusPad = oh - pad;
-        int owMinusPad = ow - pad;
+        int ohMinusPad = oh * meta.StrideHeight - paddingHeight;
+        int owMinusPad = ow * meta.StrideWidth - paddingWidth;
         float sum = 0f;
 
         for (int ic = 0; ic < inputChannels; ic++)
@@ -213,7 +205,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
             int weightsInputCIndex = ic * meta.WeightsChannelSize;
             for (int kh = 0; kh < kernelHeight; kh++)
             {
-                int ih = kh + ohMinusPad;
+                int ih = kh * meta.DilatationHeight + ohMinusPad;
                 if (ih < 0 || ih >= inputHeight)
                 {
                     continue;
@@ -223,7 +215,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
                 int inputHIndex = ih * inputWidth;
                 for (int kw = 0; kw < kernelWidth; kw++)
                 {
-                    int iw = kw + owMinusPad;
+                    int iw = kw * meta.DilatationWidth + owMinusPad;
                     if (iw < 0 || iw >= inputWidth)
                     {
                         continue;

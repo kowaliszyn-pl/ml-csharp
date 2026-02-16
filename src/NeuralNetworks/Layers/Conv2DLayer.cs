@@ -22,7 +22,7 @@ public class Conv2DLayer(
     bool addBias = false,
     int? paddingHeight = null, int? paddingWidth = null,
     int strideHeight = 1, int strideWidth = 1,
-    int dilatationHeight = 0, int dilatationWidth = 0
+    int dilatationHeight = 1, int dilatationWidth = 1
 ) : Layer<float[,,,], float[,,,]>
 {
     public override OperationListBuilder<float[,,,], float[,,,]> CreateOperationListBuilder()

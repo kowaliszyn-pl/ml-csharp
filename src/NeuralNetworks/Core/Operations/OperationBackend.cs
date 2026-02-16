@@ -351,8 +351,10 @@ public static class OperationBackend
     /// <param name="weights">The weights array (of the convolution filters) of shape [inputChannels, outputChannels, kernelHeight, kernelWidth]</param>
     /// <returns>The output array of shape [batchSize, outputChannels, outputHeight, outputWidth]</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
+    internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
+        Debug.Assert(paddingHeight > 0 && paddingWidth > 0 && strideHeight > 0 && strideWidth > 0 && dilatationHeight > 0 && dilatationWidth > 0, "Padding, stride and dilatation must be positive.");
+
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
         float[,,,] result = Current.Convolve2DOutput(input, weights, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
@@ -377,8 +379,10 @@ public static class OperationBackend
     /// <returns>The input gradient array of shape [batchSize, inputChannels, inputHeight, inputWidth].
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
+    internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
+        Debug.Assert(paddingHeight > 0 && paddingWidth > 0 && strideHeight > 0 && strideWidth > 0 && dilatationHeight > 0 && dilatationWidth > 0, "Padding, stride and dilatation must be positive.");
+
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
         float[,,,] result = Current.Convolve2DInputGradient(input, weights, outputGradient, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
@@ -395,8 +399,10 @@ public static class OperationBackend
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
+    internal static float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
+        Debug.Assert(paddingHeight > 0 && paddingWidth > 0 && strideHeight > 0 && strideWidth > 0 && dilatationHeight > 0 && dilatationWidth > 0, "Padding, stride and dilatation must be positive.");
+
         long start = s_statisticsEnabled ? Stopwatch.GetTimestamp() : 0;
 
         float[,,,] result = Current.Convolve2DParamGradient(input, outputGradient, kernelHeight, kernelWidth, paddingHeight, paddingWidth, strideHeight, strideWidth, dilatationHeight, dilatationWidth);
@@ -417,13 +423,24 @@ public static class OperationBackend
     #region Convolution 1D Operations
 
     internal static float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride, int dilatation)
-        => Current.Convolve1DOutput(input, weights, padding, stride, dilatation);
+    {
+        Debug.Assert(padding > 0 && stride > 0 && dilatation > 0, "Padding, stride and dilatation must be positive.");
+
+        return Current.Convolve1DOutput(input, weights, padding, stride, dilatation);
+    }
 
     internal static float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride, int dilatation)
-        => Current.Convolve1DInputGradient(input, weights, outputGradient, padding, stride, dilatation);
+    {
+        Debug.Assert(padding > 0 && stride > 0 && dilatation > 0, "Padding, stride and dilatation must be positive.");
+
+        return Current.Convolve1DInputGradient(input, weights, outputGradient, padding, stride, dilatation);
+    }
 
     internal static float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int kernelLength, int padding, int stride, int dilatation)
-        => Current.Convolve1DParamGradient(input, outputGradient, kernelLength, padding, stride, dilatation);
+    { 
+        Debug.Assert(padding > 0 && stride > 0 && dilatation > 0, "Padding, stride and dilatation must be positive.");
+        return Current.Convolve1DParamGradient(input, outputGradient, kernelLength, padding, stride, dilatation); 
+    }
 
     #endregion
 

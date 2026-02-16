@@ -13,7 +13,7 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Padding is assumed to be the same on all sides = kernelSize / 2
 /// </summary>
 /// <param name="weights"></param>
-public class Conv2D(float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0) : ParamOperation<float[,,,], float[,,,], float[,,,]>(weights)
+public class Conv2D(float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1) : ParamOperation<float[,,,], float[,,,], float[,,,]>(weights)
 {
 
     protected override float[,,,] CalcOutput(bool inference)

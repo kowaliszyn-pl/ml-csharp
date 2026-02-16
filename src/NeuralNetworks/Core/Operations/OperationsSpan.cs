@@ -194,7 +194,7 @@ public class OperationsSpan : OperationsArray
 
     // Convolution Operations
 
-    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
+    public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
         int batchSize = input.GetLength(0);
 
@@ -208,12 +208,15 @@ public class OperationsSpan : OperationsArray
         int kernelWidth = weights.GetLength(3);
 
         Debug.Assert(weightChannels == inputChannels);
-        Debug.Assert(kernelHeight == kernelWidth);
 
-        int padding = kernelHeight / 2;
+        int effectiveInputHeight = inputHeight + 2 * paddingHeight;
+        int effectiveInputWidth = inputWidth + 2 * paddingWidth;
 
-        int outputHeight = inputHeight - kernelHeight + 1 + 2 * padding;
-        int outputWidth = inputWidth - kernelWidth + 1 + 2 * padding;
+        int effectiveKernelHeight = kernelHeight + dilatationHeight * (kernelHeight - 1);
+        int effectiveKernelWidth = kernelWidth + dilatationWidth * (kernelWidth - 1);
+
+        int outputHeight = (effectiveInputHeight - effectiveKernelHeight) / strideHeight + 1;
+        int outputWidth = (effectiveInputWidth - effectiveKernelWidth) / strideWidth + 1;
 
         float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
 
@@ -240,10 +243,10 @@ public class OperationsSpan : OperationsArray
                 for (int oh = 0; oh < outputHeight; oh++) // ~28
                 {
                     int outputHIndex = oh * outputWidth;
-                    int ohMinusPad = oh - padding;
+                    int ohMinusPad = oh * strideHeight - paddingHeight;
                     for (int ow = 0; ow < outputWidth; ow++) // ~28
                     {
-                        int owMinusPad = ow - padding;
+                        int owMinusPad = ow * strideWidth - paddingWidth;
                         float sum = 0f;
                         for (int ic = 0; ic < inputChannels; ic++) // 1 (black&white) or 3 (RGB)
                         {
@@ -252,13 +255,13 @@ public class OperationsSpan : OperationsArray
                             for (int kh = 0; kh < kernelHeight; kh++) // ~3
                             {
                                 int weightsKernelHIndex = kh * kernelWidth;
-                                int ih = kh + ohMinusPad;
+                                int ih = kh * dilatationHeight + ohMinusPad;
                                 if (ih >= 0 && ih < inputHeight)
                                 {
                                     int inputHIndex = ih * inputWidth;
                                     for (int kw = 0; kw < kernelWidth; kw++) // ~3
                                     {
-                                        int iw = kw + owMinusPad;
+                                        int iw = kw * dilatationWidth + owMinusPad;
                                         if (iw >= 0 && iw < inputWidth)
                                         {
                                             // sum += input[b, ic, ih, iw] * weights[ic, oc, kh, kw];
@@ -279,7 +282,7 @@ public class OperationsSpan : OperationsArray
         return output;
     }
 
-    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
+    public override float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -296,9 +299,6 @@ public class OperationsSpan : OperationsArray
 
         Debug.Assert(weights.GetLength(0) == inputChannels);
         Debug.Assert(weights.GetLength(1) == outputGradientChannels);
-        Debug.Assert(kernelHeight == kernelWidth);
-
-        int padding = kernelHeight / 2;
 
         float[,,,] inputGradient = new float[batchSize, inputChannels, inputHeight, inputWidth];
 
@@ -325,26 +325,26 @@ public class OperationsSpan : OperationsArray
                 for (int ih = 0; ih < inputHeight; ih++)
                 {
                     int inputGradientHIndex = ih * inputWidth;
-                    int ihPlusPad = ih + padding;
+                    int ihPlusPad = ih + paddingHeight;
                     for (int iw = 0; iw < inputWidth; iw++)
                     {
                         float sum = 0f;
-                        int iwPlusPad = iw + padding;
+                        int iwPlusPad = iw + paddingWidth;
                         for (int oc = 0; oc < outputGradientChannels; oc++)
                         {
                             int outputGradientCIndex = oc * outputGradientCSize;
                             int weightsOutputCIndex = oc * weightsOutputCSize;
                             for (int kh = 0; kh < kernelHeight; kh++)
                             {
-                                int oh = ihPlusPad - kh;
-                                if (oh >= 0 && oh < outputGradientHeight)
+                                int oh = Math.DivRem(ihPlusPad - kh * dilatationHeight, strideHeight, out int remH);
+                                if (oh >= 0 && oh < outputGradientHeight && remH == 0)
                                 {
                                     int weightsKernelHIndex = kh * kernelWidth;
                                     int outputHIndex = oh * outputGradientWidth;
                                     for (int kw = 0; kw < kernelWidth; kw++)
                                     {
-                                        int ow = iwPlusPad - kw;
-                                        if (ow >= 0 && ow < outputGradientWidth)
+                                        int ow = Math.DivRem(iwPlusPad - kw * dilatationWidth, strideWidth, out int remW);
+                                        if (ow >= 0 && ow < outputGradientWidth && remW == 0)
                                         {
                                             // sum += outputGradient[b, oc, oh, ow] * weights[ic, oc, kh, kw];
                                             sum += outputGradientSpan[outputGradientBIndex + outputGradientCIndex + outputHIndex + ow]
@@ -364,7 +364,7 @@ public class OperationsSpan : OperationsArray
         return inputGradient;
     }
 
-    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 0, int dilatationWidth = 0)
+    public override float[,,,] Convolve2DParamGradient(float[,,,] input, float[,,,] outputGradient, int kernelHeight, int kernelWidth, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
         int batchSize = outputGradient.GetLength(0);
 
@@ -375,9 +375,6 @@ public class OperationsSpan : OperationsArray
         int outputGradientChannels = outputGradient.GetLength(1);
         int outputGradientHeight = outputGradient.GetLength(2);
         int outputGradientWidth = outputGradient.GetLength(3);
-
-        Debug.Assert(kernelHeight == kernelWidth);
-        int padding = kernelHeight / 2;
 
         float[,,,] paramGradient = new float[inputChannels, outputGradientChannels, kernelHeight, kernelWidth];
 
@@ -408,21 +405,21 @@ public class OperationsSpan : OperationsArray
                     for (int kh = 0; kh < kernelHeight; kh++)
                     {
                         int paramGradientKernelHIndex = kh * kernelWidth;
-                        int khMinusPad = kh - padding;
+                        int khMinusPad = kh * dilatationHeight - paddingHeight;
                         for (int kw = 0; kw < kernelWidth; kw++)
                         {
-                            int kwMinusPad = kw - padding;
+                            int kwMinusPad = kw * dilatationWidth - paddingWidth;
                             float sum = 0f;
                             for (int oh = 0; oh < outputGradientHeight; oh++)
                             {
-                                int ih = oh + khMinusPad;
+                                int ih = oh * strideHeight + khMinusPad;
                                 if (ih >= 0 && ih < inputHeight)
                                 {
                                     int inputHIndex = ih * inputWidth;
                                     int outputGradientHIndex = oh * outputGradientWidth;
                                     for (int ow = 0; ow < outputGradientWidth; ow++)
                                     {
-                                        int iw = ow + kwMinusPad;
+                                        int iw = ow * strideWidth + kwMinusPad;
                                         if (iw >= 0 && iw < inputWidth)
                                         {
                                             // sum += outputGradient[b, oc, oh, ow] * input[b, ic, ih, iw]
