@@ -168,7 +168,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
         outputDev.View.CopyToCPU(ref output[0, 0, 0, 0], output.Length);
         return output;
     }
-
+    
     private static void Convolve2DOutputKernel(Index3D index, FloatDense1DView input, FloatDense1DView weights, FloatDense1DView output, Convolve2DOutputMeta meta)
     {
         int paddingHeight = meta.PaddingHeight;

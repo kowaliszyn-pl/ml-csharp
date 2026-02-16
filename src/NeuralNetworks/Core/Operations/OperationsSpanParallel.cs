@@ -201,7 +201,7 @@ public class OperationsSpanParallel : OperationsSpan
     #region Parametric Operations
 
     // Bias
-
+    
     public override float[,] BiasAddOutput(float[,] input, float[] bias)
     {
         int batchSize = input.GetLength(0);
@@ -212,36 +212,34 @@ public class OperationsSpanParallel : OperationsSpan
         float[,] output = new float[batchSize, features];
         Parallel.For(0, output.Length, i =>
         {
-            //ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
-            //ReadOnlySpan<float> biasSpan = bias.AsSpan();
-            //Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
-            
-            int batchIndex = Math.DivRem(i, features, out int featureIndex);
-            
-            //outputSpan[i] = inputSpan[i] + biasSpan[featureIndex];
-            output[batchIndex, featureIndex] = input[batchIndex, featureIndex] + bias[featureIndex];
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            ReadOnlySpan<float> biasSpan = bias.AsSpan();
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
+
+            int featureIndex = i % features;
+            outputSpan[i] = inputSpan[i] + biasSpan[featureIndex];
         });
         return output;
     }
 
-    //public override float[] BiasAddParamGradient(float[,] outputGradient)
-    //{
-    //    int batchSize = outputGradient.GetLength(0);
-    //    int features = outputGradient.GetLength(1);
-    //    float[] paramGradient = new float[features];
-    //    Parallel.For(0, features, feature =>
-    //    {
-    //        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-    //        Span<float> paramGradientSpan = paramGradient.AsSpan();
-    //        float sum = 0f;
-    //        for (int i = 0; i < batchSize; i++)
-    //        {
-    //            sum += outputGradientSpan[i * features + feature];
-    //        }
-    //        paramGradientSpan[feature] = sum;
-    //    });
-    //    return paramGradient;
-    //}
+    public override float[] BiasAddParamGradient(float[,] outputGradient)
+    {
+        int batchSize = outputGradient.GetLength(0);
+        int features = outputGradient.GetLength(1);
+        float[] paramGradient = new float[features];
+        Parallel.For(0, features, feature =>
+        {
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+            Span<float> paramGradientSpan = paramGradient.AsSpan();
+            float sum = 0f;
+            for (int i = 0; i < batchSize; i++)
+            {
+                sum += outputGradientSpan[i * features + feature];
+            }
+            paramGradientSpan[feature] = sum;
+        });
+        return paramGradient;
+    }
 
     public override float[,,,] BiasAddConv2DOutput(float[,,,] input, float[] bias)
     {
@@ -266,37 +264,35 @@ public class OperationsSpanParallel : OperationsSpan
 
         return output;
     }
+    
+    public override float[] BiasAddConv2DParamGradient(float[,,,] outputGradient)
+    {
+        int batchSize = outputGradient.GetLength(0);
+        int channels = outputGradient.GetLength(1);
+        int height = outputGradient.GetLength(2);
+        int width = outputGradient.GetLength(3);
+        int itemsPerChannel = height * width;
+        int elementCount = batchSize * itemsPerChannel;
 
-    //public override float[] BiasAddConv2DParamGradient(float[,,,] outputGradient)
-    //{
-    //    int batchSize = outputGradient.GetLength(0);
-    //    int channels = outputGradient.GetLength(1);
-    //    int height = outputGradient.GetLength(2);
-    //    int width = outputGradient.GetLength(3);
-    //    int itemsPerChannel = height * width;
-    //    int elementCount = batchSize * itemsPerChannel;
+        float[] paramGradient = new float[channels];
 
-    //    float[] paramGradient = new float[channels];
+        Parallel.For(0, channels, channel =>
+        {
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+            Span<float> paramGradientSpan = paramGradient.AsSpan();
 
-    //    Parallel.For(0, channels, channel =>
-    //    {
-            
-    //        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
-    //        Span<float> paramGradientSpan = paramGradient.AsSpan();
+            int channelOffset = channel * itemsPerChannel;
+            float sum = 0f;
 
-    //        int channelOffset = channel * itemsPerChannel;
-    //        float sum = 0f;
-            
-    //        for (int i = 0; i < elementCount; i++)
-    //        {
-    //            int idx = channelOffset + i;
-    //            sum += outputGradientSpan[idx];
-    //        }
-    //        paramGradient[channel] = sum;
-    //    });
-        
-    //    return paramGradient;
-    //}
+            for (int i = 0; i < elementCount; i++)
+            {
+                sum += outputGradientSpan[channelOffset + i];
+            }
+            paramGradient[channel] = sum;
+        });
+
+        return paramGradient;
+    }
 
     // Convolution Operations
 

@@ -82,7 +82,8 @@ public abstract class Trainer<TInputData, TPrediction>(
         bool earlyStop = false,
         bool restart = true,
         bool displayDescriptionOnStart = true,
-        bool operationBackendTimingEnabled = false
+        bool operationBackendTimingEnabled = false,
+        bool saveParamsOnBestLoss = true
     )
     {
         try
@@ -148,7 +149,6 @@ public abstract class Trainer<TInputData, TPrediction>(
                 int step = 0;
 
                 float? stepsPerSecond = null;
-                TimeSpan eta;
                 long calculatedOn = -500;
 
                 Stopwatch stepWatch = Stopwatch.StartNew();
@@ -177,9 +177,10 @@ public abstract class Trainer<TInputData, TPrediction>(
                                 long milisecondsPerStep = currentTimeInMlliseconds / stepsDone;
                                 long remainingMiliseconds = remainingSteps * milisecondsPerStep;
 
-                                eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
+                                TimeSpan eta = TimeSpan.FromMilliseconds(remainingMiliseconds);
+                                TimeSpan total = TimeSpan.FromMilliseconds(currentTimeInMlliseconds + remainingMiliseconds);
                                 calculatedOn = currentTimeInMlliseconds;
-                                speedAndEtaInfo = $" {stepsPerSecond.Value:F2} steps/s - {eta.Hours}h {eta.Minutes}m {eta.Seconds}s left   ";
+                                speedAndEtaInfo = $" {stepsPerSecond.Value:F2} steps/s - {eta.Hours}h {eta.Minutes}m {eta.Seconds}s left of {total.Hours}h {total.Minutes}m {total.Seconds}s total   ";
                             }
                         }
 
@@ -223,7 +224,7 @@ public abstract class Trainer<TInputData, TPrediction>(
                         logger?.LogInformation("Eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
                     }
 
-                    if (testLoss < _bestLoss)
+                    if (saveParamsOnBestLoss && testLoss < _bestLoss)
                     {
                         _bestLoss = testLoss;
                         string fileName = $"best_model_{epoch}.json";

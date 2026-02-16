@@ -26,7 +26,7 @@ namespace NeuralNetworksExamples;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
 // 97,83% - CpuSpansParallel
-// 97,72% - Gpu
+// 97,81% - Gpu
 // 97,31% - CpuSpans, CpuArrays
 
 internal class MnistConvModel(SeededRandom? random)
@@ -56,7 +56,7 @@ internal class MnistConvModel(SeededRandom? random)
 internal class MnistCnn
 {
     private const int RandomSeed = 44; // From Mickiewicz's poetry.
-    private const int Epochs = 15;
+    private const int Epochs = 3; // 15;
     private const int BatchSize = 400;
     private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
@@ -121,7 +121,7 @@ internal class MnistCnn
             operationBackendTimingEnabled: true
         )
         {
-            Memo = $"Calling class: {nameof(MnistCnn)}."
+            Memo = $"Calling class: {nameof(MnistCnn)}. BiasAdd array"
         };
 
         trainer.Fit(
@@ -130,7 +130,8 @@ internal class MnistCnn
             epochs: Epochs,
             evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
-            batchSize: BatchSize
+            batchSize: BatchSize,
+            saveParamsOnBestLoss: false
         );
     }
 
