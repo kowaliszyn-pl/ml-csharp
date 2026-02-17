@@ -192,7 +192,7 @@ public class OperationsSpan : OperationsArray
 
     #region Parametric Operations
 
-    // Convolution Operations
+    #region Convolution 2D
 
     public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
@@ -212,8 +212,8 @@ public class OperationsSpan : OperationsArray
         int effectiveInputHeight = inputHeight + 2 * paddingHeight;
         int effectiveInputWidth = inputWidth + 2 * paddingWidth;
 
-        int effectiveKernelHeight = kernelHeight + dilatationHeight * (kernelHeight - 1);
-        int effectiveKernelWidth = kernelWidth + dilatationWidth * (kernelWidth - 1);
+        int effectiveKernelHeight = kernelHeight + (dilatationHeight - 1) * (kernelHeight - 1);
+        int effectiveKernelWidth = kernelWidth + (dilatationWidth - 1) * (kernelWidth - 1);
 
         int outputHeight = (effectiveInputHeight - effectiveKernelHeight) / strideHeight + 1;
         int outputWidth = (effectiveInputWidth - effectiveKernelWidth) / strideWidth + 1;
@@ -440,7 +440,9 @@ public class OperationsSpan : OperationsArray
         return paramGradient;
     }
 
-    // Weight Multiplication Operations
+    #endregion
+
+    #region WeightMultiply
 
     public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {
@@ -542,6 +544,8 @@ public class OperationsSpan : OperationsArray
         }
         return paramGradient;
     }
+
+    #endregion
 
     #endregion
 

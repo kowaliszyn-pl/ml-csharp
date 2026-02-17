@@ -112,10 +112,14 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
         Debug.Assert(weightChannels == inputChannels);
         Debug.Assert(kernelHeight == kernelWidth);
 
-        int pad = kernelHeight / 2;
+        int effectiveInputHeight = inputHeight + 2 * paddingHeight;
+        int effectiveInputWidth = inputWidth + 2 * paddingWidth;
 
-        int outputHeight = inputHeight - kernelHeight + 1 + (2 * pad);
-        int outputWidth = inputWidth - kernelWidth + 1 + (2 * pad);
+        int effectiveKernelHeight = kernelHeight + (dilatationHeight - 1) * (kernelHeight - 1);
+        int effectiveKernelWidth = kernelWidth + (dilatationWidth - 1) * (kernelWidth - 1);
+
+        int outputHeight = (effectiveInputHeight - effectiveKernelHeight) / strideHeight + 1;
+        int outputWidth = (effectiveInputWidth - effectiveKernelWidth) / strideWidth + 1;
 
         float[,,,] output = new float[batchSize, outputChannels, outputHeight, outputWidth];
 
@@ -164,7 +168,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
                 outputDev.View,
                 meta);
 
-        //_accelerator.Synchronize();
+        _accelerator.Synchronize();
         outputDev.View.CopyToCPU(ref output[0, 0, 0, 0], output.Length);
         return output;
     }

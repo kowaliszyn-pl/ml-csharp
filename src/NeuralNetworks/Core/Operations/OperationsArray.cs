@@ -411,7 +411,7 @@ public class OperationsArray : IOperations
 
     // Convolution Operations
 
-    public virtual float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride = 1, int dilatation = 0)
+    public virtual float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride = 1, int dilatation = 1)
     {
         int batchSize = input.GetLength(0);
         int inputChannels = input.GetLength(1);
@@ -423,7 +423,7 @@ public class OperationsArray : IOperations
         Debug.Assert(weights.GetLength(0) == inputChannels);
 
         int effectiveInputLength = inputLength + 2 * padding;
-        int effectiveKernelLength = dilatation * (kernelLength - 1) + kernelLength;
+        int effectiveKernelLength = kernelLength + (dilatation - 1) * (kernelLength - 1);
 
         int outputLength = (effectiveInputLength - effectiveKernelLength) / stride + 1;
 
@@ -547,8 +547,8 @@ public class OperationsArray : IOperations
         int effectiveInputHeight = inputHeight + 2 * paddingHeight;
         int effectiveInputWidth = inputWidth + 2 * paddingWidth;
 
-        int effectiveKernelHeight = kernelHeight + dilatationHeight * (kernelHeight - 1);
-        int effectiveKernelWidth = kernelWidth + dilatationWidth * (kernelWidth - 1);
+        int effectiveKernelHeight = kernelHeight + (dilatationHeight - 1) * (kernelHeight - 1);
+        int effectiveKernelWidth = kernelWidth + (dilatationWidth - 1) * (kernelWidth - 1);
 
         int outputHeight = (effectiveInputHeight - effectiveKernelHeight) / strideHeight + 1;
         int outputWidth = (effectiveInputWidth - effectiveKernelWidth) / strideWidth + 1;
