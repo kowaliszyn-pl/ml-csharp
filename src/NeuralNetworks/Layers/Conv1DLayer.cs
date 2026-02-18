@@ -41,7 +41,7 @@ public class Conv1DLayer(
     ActivationFunction<float[,,], float[,,]> activationFunction,
     ParamInitializer paramInitializer,
     Dropout3D? dropout = null,
-    bool addBias = false,
+    bool addBias = true,
     int? padding = null,
     int stride = 1,
     int dilatation = 0) : Layer<float[,,], float[,,]>

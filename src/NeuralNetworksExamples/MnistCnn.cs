@@ -44,8 +44,7 @@ internal class MnistConvModel(SeededRandom? random)
                 kernelWidth: 5,
                 activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer,
-                dropout: dropout,
-                addBias: true
+                dropout: dropout
             ))
             .AddLayer(new FlattenLayer())
             .AddLayer(new DenseLayer(10, new Linear(), initializer));

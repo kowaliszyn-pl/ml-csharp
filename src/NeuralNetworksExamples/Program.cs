@@ -41,6 +41,7 @@ internal static class Program
             Console.WriteLine("2. Boston Housing data set (generic model)");
             Console.WriteLine("D. MNIST data set (dense layers)");
             Console.WriteLine("C. MNIST data set (CNN 2D)");
+            Console.WriteLine("E. ECG 200 (CNN 1D)");
             Console.WriteLine("L. Load and evaluate MNIST data set (dense layers)");
             Console.WriteLine("Other: Exit");
             Console.WriteLine();
@@ -70,6 +71,9 @@ internal static class Program
                     break;
                 case "C":
                     MnistCnn.Run();
+                    break;
+                case "E":
+                    Ecg200.Run();
                     break;
                 case "L":
                     MnistDense.LoadAndEvaluate();

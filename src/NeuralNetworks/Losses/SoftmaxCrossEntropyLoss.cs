@@ -14,7 +14,7 @@ namespace NeuralNetworks.Losses;
 /// Categorical Cross-Entropy Loss combined with Softmax activation function.
 /// </summary>
 /// <param name="eps"></param>
-public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss2D
+public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
 {
     private float[,]? _softmaxPrediction;
 

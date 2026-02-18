@@ -6,7 +6,7 @@ using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Losses;
 
-public class SoftmaxLogSumExpCrossEntropyLoss(float eps = 1e-7f) : Loss2D
+public class SoftmaxLogSumExpCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
 {
     protected override float CalculateLoss()
     {

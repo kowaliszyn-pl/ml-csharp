@@ -8,7 +8,7 @@ using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Losses;
 
-public class MeanSquaredError : Loss2D
+public class MeanSquaredErrorLoss : Loss<float[,]>
 {
     float[,]? _errors;
 

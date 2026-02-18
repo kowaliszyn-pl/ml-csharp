@@ -22,7 +22,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 class BostonHousingModel(SeededRandom? random)
-    : BaseModel<float[,], float[,]>(new MeanSquaredError(), random)
+    : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
@@ -103,7 +103,7 @@ internal class BostonHousing
                     .AddLayer(new DenseLayer(neurons: 4, new Tanh2D(), new GlorotInitializer(commonRandom)))
                     .AddLayer(new DenseLayer(neurons: 1, new Linear(), new GlorotInitializer(commonRandom))),
 
-                lossFunction: new MeanSquaredError(),
+                lossFunction: new MeanSquaredErrorLoss(),
                 random: commonRandom);
         }
 
