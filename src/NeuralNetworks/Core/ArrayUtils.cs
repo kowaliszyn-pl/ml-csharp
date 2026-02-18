@@ -15,15 +15,20 @@ namespace NeuralNetworks.Core;
 public class ArrayUtils
 {
     public static float[,] LoadCsv(string filePath, int skipHeaderLines = 0)
+        => LoadSv(filePath, ',', skipHeaderLines);
+
+    public static float[,] LoadTsv(string filePath, int skipHeaderLines = 0)
+        => LoadSv(filePath, '\t', skipHeaderLines);
+
+    public static float[,] LoadSv(string filePath, char separator, int skipHeaderLines)
     {
-        // string[] lines = File.ReadAllLines(filePath);
         string[] lines = [.. File.ReadAllLines(filePath).Skip(skipHeaderLines)];
         int rows = lines.Length;
-        int cols = lines[0].Split(',').Length;
+        int cols = lines[0].Split(separator).Length;
         float[,] matrix = new float[rows, cols];
         for (int i = 0; i < rows; i++)
         {
-            string[] values = lines[i].Split(',');
+            string[] values = lines[i].Split(separator);
             for (int j = 0; j < cols; j++)
             {
                 string value = values[j].Trim('"');
@@ -32,46 +37,6 @@ public class ArrayUtils
         }
         return matrix;
     }
-
-    //[Conditional("DEBUG")]
-    //public static void EnsureSameShape(float[,,,]? matrix1, float[,,,]? matrix2)
-    //{
-    //    if (matrix1 is null || matrix2 is null)
-    //        throw new ArgumentException("Matrix is null.");
-
-    //    if (!matrix1.HasSameShape(matrix2))
-    //        throw new Exception("Matrices must have the same shape.");
-    //}
-
-    //[Conditional("DEBUG")]
-    //public static void EnsureSameShape(float[,,]? matrix1, float[,,]? matrix2)
-    //{
-    //    if (matrix1 is null || matrix2 is null)
-    //        throw new ArgumentException("Matrix is null.");
-
-    //    if (!matrix1.HasSameShape(matrix2))
-    //        throw new Exception("Matrices must have the same shape.");
-    //}
-
-    //[Conditional("DEBUG")]
-    //public static void EnsureSameShape(float[,]? matrix1, float[,]? matrix2)
-    //{
-    //    if (matrix1 is null || matrix2 is null)
-    //        throw new ArgumentException("Matrix is null.");
-
-    //    if (!matrix1.HasSameShape(matrix2))
-    //        throw new Exception("Matrices must have the same shape.");
-    //}
-
-    //[Conditional("DEBUG")]
-    //public static void EnsureSameShape(float[]? matrix1, float[]? matrix2)
-    //{
-    //    if (matrix1 is null || matrix2 is null)
-    //        throw new ArgumentException("Matrix is null.");
-
-    //    if (!matrix1.HasSameShape(matrix2))
-    //        throw new Exception("Matrices must have the same shape.");
-    //}
 
     public static void EnsureSameShape<T>(T? matrix1, T? matrix2)
     {
