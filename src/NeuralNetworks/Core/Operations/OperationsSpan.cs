@@ -192,7 +192,7 @@ public class OperationsSpan : OperationsArray
 
     #region Parametric Operations
 
-    #region Convolution 2D
+    #region Convolution 2D Operations
 
     public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
@@ -442,7 +442,7 @@ public class OperationsSpan : OperationsArray
 
     #endregion
 
-    #region WeightMultiply
+    #region Weight Multiplication Operations
 
     public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {

@@ -93,7 +93,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
 
     #region Parametric Operations
 
-    // Convolution Operations
+    #region Convolution 2D Operations
 
     private readonly Action<Index3D, FloatDense1DView, FloatDense1DView, FloatDense1DView, Convolve2DOutputMeta> _convolve2DOutputKernel;
 
@@ -235,7 +235,10 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
         output[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
     }
 
-    // Weight Multiplication Operations
+    #endregion
+
+
+    #region Weight Multiplication Operations
 
     // WeightMultiplyOutput
 
@@ -382,6 +385,8 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
 
     #endregion
 
+    #endregion
+
     /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int? padding = null)
@@ -460,7 +465,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
     // Encoded as: batchOutputChannelIndex = index.X = b * outputChannels + oc
     // oc = batchOutputChannelIndex % outputChannels; b = batchOutputChannelIndex / outputChannels
     // oh = index.Y; ow = index.Z
-    
+
 
     /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

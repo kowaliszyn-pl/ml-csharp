@@ -291,13 +291,17 @@ public class OperationsArray : IOperations
 
     #region Parametric Operations
 
-    // Bias Addition Operations
+    #region Bias Addition Operations
 
     public virtual float[,] BiasAddOutput(float[,] input, float[] bias)
         => input.AddRow(bias);
 
     public virtual float[] BiasAddParamGradient(float[,] outputGradient)
         => outputGradient.SumByColumns();
+
+    #endregion
+
+    #region Bias Addition Conv1D Operations
 
     /// <summary>
     /// Applies a bias vector to the output of a 1-dimensional convolution operation.
@@ -356,6 +360,10 @@ public class OperationsArray : IOperations
         return paramGradient;
     }
 
+    #endregion
+
+    #region Bias Addition Conv2D Operations
+
     public virtual float[,,,] BiasAddConv2DOutput(float[,,,] input, float[] bias)
     {
         // Input: [batch, kernels, outputHeight, outputWidth]
@@ -409,7 +417,9 @@ public class OperationsArray : IOperations
         return paramGradient;
     }
 
-    // Convolution Operations
+    #endregion
+
+    #region Convolution 1D Operations
 
     public virtual float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride = 1, int dilatation = 1)
     {
@@ -529,6 +539,10 @@ public class OperationsArray : IOperations
         }
         return paramGradient;
     }
+
+    #endregion
+
+    #region Convolution 2D Operations
 
     public virtual float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
     {
@@ -690,9 +704,9 @@ public class OperationsArray : IOperations
         return paramGradient;
     }
 
-    
+    #endregion
 
-    // Weight Multiplication Operations
+    #region Weight Multiplication Operations
 
     public virtual float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     => input.MultiplyDot(weights);
@@ -702,6 +716,8 @@ public class OperationsArray : IOperations
 
     public virtual float[,] WeightMultiplyParamGradient(float[,] input, float[,] outputGradient)
         => input.Transpose().MultiplyDot(outputGradient);
+
+    #endregion
 
     #endregion
 

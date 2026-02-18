@@ -200,8 +200,8 @@ public class OperationsSpanParallel : OperationsSpan
 
     #region Parametric Operations
 
-    // Bias
-    
+    #region Bias Addition Operations
+
     public override float[,] BiasAddOutput(float[,] input, float[] bias)
     {
         int batchSize = input.GetLength(0);
@@ -240,6 +240,10 @@ public class OperationsSpanParallel : OperationsSpan
         });
         return paramGradient;
     }
+
+    #endregion
+
+    #region Bias Addition Conv2D Operations
 
     public override float[,,,] BiasAddConv2DOutput(float[,,,] input, float[] bias)
     {
@@ -293,6 +297,8 @@ public class OperationsSpanParallel : OperationsSpan
 
         return paramGradient;
     }
+
+    #endregion
 
     #region Convolution 2D Operations
 
@@ -556,7 +562,7 @@ public class OperationsSpanParallel : OperationsSpan
 
     #endregion
 
-    // Weight Multiplication Operations
+    #region Weight Multiplication Operations
 
     public override float[,] WeightMultiplyOutput(float[,] input, float[,] weights)
     {
@@ -662,6 +668,8 @@ public class OperationsSpanParallel : OperationsSpan
         });
         return paramGradient;
     }
+
+    #endregion
 
     #endregion
 }
