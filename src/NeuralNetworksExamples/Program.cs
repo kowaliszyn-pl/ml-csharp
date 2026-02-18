@@ -36,11 +36,11 @@ internal static class Program
             bool fromSubmenu = false;
             Console.WriteLine("Select a routine to run (Neural Networks Examples):");
             Console.WriteLine("B. Select operation backend");
-            Console.WriteLine("1. Function data set");
-            Console.WriteLine("2. Boston Housing data set (custom model)");
-            Console.WriteLine("3. Boston Housing data set (generic model)");
+            Console.WriteLine("F. Function data set");
+            Console.WriteLine("1. Boston Housing data set (custom model)");
+            Console.WriteLine("2. Boston Housing data set (generic model)");
             Console.WriteLine("D. MNIST data set (dense layers)");
-            Console.WriteLine("C. MNIST data set (CNN)");
+            Console.WriteLine("C. MNIST data set (CNN 2D)");
             Console.WriteLine("L. Load and evaluate MNIST data set (dense layers)");
             Console.WriteLine("Other: Exit");
             Console.WriteLine();
@@ -56,13 +56,13 @@ internal static class Program
                     Console.WriteLine();
                     fromSubmenu = true;
                     break;
-                case "1":
+                case "F":
                     Function.Run();
                     break;
-                case "2":
+                case "1":
                     BostonHousing.Run(true);
                     break;
-                case "3":
+                case "2":
                     BostonHousing.Run(false);
                     break;
                 case "D":

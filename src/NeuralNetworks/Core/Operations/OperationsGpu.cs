@@ -237,7 +237,6 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
 
     #endregion
 
-
     #region Weight Multiplication Operations
 
     // WeightMultiplyOutput
@@ -273,11 +272,6 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
     {
         int row = index.X; // batchSize
         int col = index.Y; // outputFeatures
-
-        //if (row >= output.Extent.X || col >= output.Extent.Y)
-        //{
-        //    return;
-        //}
 
         float sum = 0f;
         for (int k = 0; k < inputFeatures; k++)
@@ -321,11 +315,6 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
         int row = index.X;
         int col = index.Y;
 
-        //if (row >= inputGradient.Extent.X || col >= inputGradient.Extent.Y)
-        //{
-        //    return;
-        //}
-
         float sum = 0f;
         for (int k = 0; k < outputFeatures; k++)
         {
@@ -367,11 +356,6 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
     {
         int row = index.X; // inputFeatures
         int col = index.Y; // outputFeatures
-
-        //if (row >= paramGradient.Extent.X || col >= paramGradient.Extent.Y)
-        //{
-        //    return;
-        //}
 
         long batch = input.Extent.X;
         float sum = 0f;

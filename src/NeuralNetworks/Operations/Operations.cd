@@ -1,124 +1,109 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="NeuralNetworks.Operations.Operation">
-    <Position X="1.25" Y="0.5" Width="1.5" />
+    <Position X="0.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAKAAAAAAQCAAAAAAAI=</HashCode>
       <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.Operation2D" Collapsed="true">
-    <Position X="3.75" Y="3.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\Operation2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.Operation4D" Collapsed="true">
-    <Position X="8.5" Y="3.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\Operation4D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="NeuralNetworks.Operations.Operation&lt;TIn, TOut&gt;" Collapsed="true">
-    <Position X="6" Y="1" Width="1.75" />
+    <Position X="3.5" Y="1" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAgAAACAAAIAAAAAAgAIAAAAEBIEAAAAEACAAAAQABI=</HashCode>
+      <HashCode>AAgAAACAAAIAAAAAAgAIAAAAEBIEAAAAAACAAAAQAAI=</HashCode>
       <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction2D" Collapsed="true">
-    <Position X="2.25" Y="5.25" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\ActivationFunctions\ActivationFunction2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction4D" Collapsed="true">
-    <Position X="10.25" Y="5.25" Width="1.75" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\ActivationFunctions\ActivationFunction4D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.Dropouts.BaseDropout2D" Collapsed="true">
-    <Position X="5" Y="5.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Dropouts.BaseDropout&lt;T&gt;" Collapsed="true">
+    <Position X="6" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
-      <FileName>Operations\Dropouts\BaseDropout2D.cs</FileName>
+      <FileName>Operations\Dropouts\BaseDropout.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Dropouts.Dropout2D" Collapsed="true">
-    <Position X="3.75" Y="6.75" Width="1.5" />
+    <Position X="4.25" Y="5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Dropouts\Dropout2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Dropouts.InvertedDropout2D" Collapsed="true">
-    <Position X="5" Y="7.75" Width="1.5" />
+    <Position X="7.75" Y="5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Dropouts\InvertedDropout2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Dropouts.Dropout4D" Collapsed="true">
-    <Position X="8.5" Y="5.25" Width="1.5" />
+    <Position X="6" Y="5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAAAAAAEAAEAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Dropouts\Dropout4D.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation2D" Collapsed="true">
-    <Position X="0.5" Y="5.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\Parameterized\ParamOperation2D.cs</FileName>
-    </TypeIdentifier>
-    <Lollipop Position="0.2" />
-  </Class>
-  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation2D&lt;TParam&gt;" Collapsed="true">
-    <Position X="0.5" Y="6.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
-      <FileName>Operations\Parameterized\ParamOperation2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="NeuralNetworks.Operations.Parameterized.WeightMultiply" Collapsed="true">
-    <Position X="0.5" Y="7.75" Width="1.5" />
+    <Position X="0.5" Y="7" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Parameterized\WeightMultiply.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Parameterized.BiasAdd" Collapsed="true">
-    <Position X="2.25" Y="7.75" Width="1.5" />
+    <Position X="2.75" Y="7" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Parameterized\BiasAdd.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation4D" Collapsed="true">
-    <Position X="6.75" Y="5.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Parameterized.Conv2D" Collapsed="true">
+    <Position X="5" Y="8.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAIAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\Parameterized\ParamOperation4D.cs</FileName>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\Conv2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation&lt;TIn, TOut, TParam&gt;" Collapsed="true">
+    <Position X="1" Y="5.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAKAEAgCAAAAAAAAABAgAAAQAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\ParamOperation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation&lt;TIn, TOut&gt;" Collapsed="true">
+    <Position X="1.75" Y="3.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAEAgCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\Parameterized\ParamOperation.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
-  <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation4D&lt;TParam&gt;" Collapsed="true">
-    <Position X="6.75" Y="6.75" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Parameterized.BiasAddConv1D" Collapsed="true">
+    <Position X="2.75" Y="8.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAKAAAAAAAAAAAAAABAgAAAQAAAAEAAAAAAQAAA=</HashCode>
-      <FileName>Operations\Parameterized\ParamOperation4D.cs</FileName>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\BiasAddConv1D.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.Parameterized.Conv2D" Collapsed="true">
-    <Position X="6.75" Y="8" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.Parameterized.BiasAddConv2D" Collapsed="true">
+    <Position X="2.75" Y="9.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAIAAAgAAAAAAAAAABAgAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\Parameterized\Conv2D.cs</FileName>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\BiasAddConv2D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.Conv1D" Collapsed="true">
+    <Position X="5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\Conv1D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction&lt;TIn, TOut&gt;" Collapsed="true">
+    <Position X="8.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\ActivationFunctions\ActivationFunction.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

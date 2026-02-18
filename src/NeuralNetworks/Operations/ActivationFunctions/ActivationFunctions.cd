@@ -1,33 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction2D" Collapsed="true">
-    <Position X="0.5" Y="2" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\ActivationFunctions\ActivationFunction2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction4D" Collapsed="true">
-    <Position X="4.5" Y="2" Width="2" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\ActivationFunctions\ActivationFunction4D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.Operation2D" Collapsed="true">
-    <Position X="0.75" Y="0.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\Operation2D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="NeuralNetworks.Operations.Operation4D" Collapsed="true">
-    <Position X="4.75" Y="0.75" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>Operations\Operation4D.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.Tanh4D" Collapsed="true">
     <Position X="4.75" Y="3.25" Width="1.5" />
     <TypeIdentifier>
@@ -36,31 +8,31 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.BipolarSigmoid" Collapsed="true">
-    <Position X="2.25" Y="5.25" Width="1.5" />
+    <Position X="2.25" Y="7.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\BipolarSigmoid.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.LeakyReLU2D" Collapsed="true">
-    <Position X="2.25" Y="7.25" Width="1.5" />
+    <Position X="2.25" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\LeakyReLU2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.Sigmoid" Collapsed="true">
-    <Position X="2.25" Y="4.25" Width="1.5" />
+    <Position X="2.25" Y="6.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\Sigmoid.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ReLU" Collapsed="true">
-    <Position X="2.25" Y="6.25" Width="1.5" />
+  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ReLU2D" Collapsed="true">
+    <Position X="2.25" Y="4.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
-      <FileName>Operations\ActivationFunctions\ReLU.cs</FileName>
+      <FileName>Operations\ActivationFunctions\ReLU2D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.Linear" Collapsed="true">
@@ -85,10 +57,38 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.ActivationFunctions.LeakyReLU4D" Collapsed="true">
-    <Position X="4.75" Y="4.5" Width="1.5" />
+    <Position X="4.75" Y="5.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\LeakyReLU4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ActivationFunction&lt;TIn, TOut&gt;" Collapsed="true">
+    <Position X="0.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Operations\ActivationFunctions\ActivationFunction.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.ActivationFunctions.ReLU4D" Collapsed="true">
+    <Position X="4.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\ActivationFunctions\ReLU4D.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Operation" Collapsed="true">
+    <Position X="3.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAKAAAAAAQCAAAAAAAI=</HashCode>
+      <FileName>Operations\Operation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Operation&lt;TIn, TOut&gt;" Collapsed="true">
+    <Position X="0.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAACAAAIAAAAAAgAIAAAAEBIEAAAAAACAAAAQAAI=</HashCode>
+      <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />
