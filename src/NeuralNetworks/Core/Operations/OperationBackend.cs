@@ -422,21 +422,21 @@ public static class OperationBackend
 
     #region Convolution 1D Operations
 
-    internal static float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride, int dilatation)
+    internal static float[,,] Convolve1DOutput(float[,,] input, float[,,] weights, int padding, int stride = 1, int dilatation = 1)
     {
         Debug.Assert(padding > 0 && stride > 0 && dilatation > 0, "Padding, stride and dilatation must be positive.");
 
         return Current.Convolve1DOutput(input, weights, padding, stride, dilatation);
     }
 
-    internal static float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride, int dilatation)
+    internal static float[,,] Convolve1DInputGradient(float[,,] input, float[,,] weights, float[,,] outputGradient, int padding, int stride = 1, int dilatation = 1)
     {
         Debug.Assert(padding > 0 && stride > 0 && dilatation > 0, "Padding, stride and dilatation must be positive.");
 
         return Current.Convolve1DInputGradient(input, weights, outputGradient, padding, stride, dilatation);
     }
 
-    internal static float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int kernelLength, int padding, int stride, int dilatation)
+    internal static float[,,] Convolve1DParamGradient(float[,,] input, float[,,] outputGradient, int kernelLength, int padding, int stride = 1, int dilatation = 1)
     { 
         Debug.Assert(padding > 0 && stride > 0 && dilatation > 0, "Padding, stride and dilatation must be positive.");
         return Current.Convolve1DParamGradient(input, outputGradient, kernelLength, padding, stride, dilatation); 
