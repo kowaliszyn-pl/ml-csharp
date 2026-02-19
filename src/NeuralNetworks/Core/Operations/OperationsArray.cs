@@ -944,6 +944,54 @@ public class OperationsArray : IOperations
         return inputGradient;
     }
 
+    public virtual float[,] GlobalAveragePooling1DOutput(float[,,] input)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int length = input.GetLength(2);
+
+        float[,] output = new float[batchSize, channels];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                float sum = 0f;
+                for (int l = 0; l < length; l++)
+                {
+                    sum += input[b, c, l];
+                }
+                output[b, c] = sum / length;
+            }
+        }
+        return output;
+    }
+
+    public virtual float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient)
+    {
+        int inputLength = input.GetLength(2);
+
+        int channels = input.GetLength(1);
+        int length = input.GetLength(2);
+        int batchSize = outputGradient.GetLength(0);
+
+        float[,,] inputGradient = new float[batchSize, channels, length];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                float distributedGrad = outputGradient[b, c] / inputLength;
+                for (int l = 0; l < length; l++)
+                {
+                    inputGradient[b, c, l] = distributedGrad;
+                }
+            }
+        }
+
+        return inputGradient;
+    }
+
     #endregion
 
 }

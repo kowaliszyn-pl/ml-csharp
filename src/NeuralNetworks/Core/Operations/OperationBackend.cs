@@ -553,5 +553,13 @@ public static class OperationBackend
     internal static float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices)
         => Current.MaxPooling1DInputGradient(input, outputGradient, size, maxIndices);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] GlobalAveragePooling1DOutput(float[,,] input)
+        => Current.GlobalAveragePooling1DOutput(input);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient)
+        => Current.GlobalAveragePooling1DInputGradient(input, outputGradient);
+
     #endregion
 }

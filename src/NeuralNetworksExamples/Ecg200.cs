@@ -21,7 +21,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 internal class Ecg200Model(SeededRandom? random)
-    : BaseModel<float[,,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
+    : BaseModel<float[,,], float[,]>(new BinaryCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,,], float[,]> CreateLayerListBuilder()
     {
@@ -42,7 +42,7 @@ internal class Ecg200Model(SeededRandom? random)
                 activationFunction: new ReLU3D(),
                 paramInitializer: initializer
             ))
-            .AddLayer(new GlobalAveragePooling3DLayer())
+            .AddLayer(new GlobalAveragePooling1DLayer())
             .AddLayer(new DenseLayer(1, new Sigmoid(), initializer));
     }
 }

@@ -161,6 +161,9 @@ public interface IOperations
     float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices);
     float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices);
 
+    float[,] GlobalAveragePooling1DOutput(float[,,] input);
+    float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient);
+
     #endregion
 
 }
