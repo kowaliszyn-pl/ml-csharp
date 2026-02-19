@@ -92,6 +92,36 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Adds the specified scalar value to each element of the three-dimensional array in place.
+    /// </summary>
+    /// <remarks>
+    /// This method modifies the contents of the <paramref name="source"/> array directly.
+    /// <para/>
+    /// Complexity: O(a * b * c) for dimensions of <paramref name="source"/>.
+    /// </remarks>
+    /// <param name="source">The three-dimensional array whose elements will be incremented.</param>
+    /// <param name="scalar">The scalar value to add to each element of the array.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void AddInPlace(this float[,,] source, float scalar)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    source[i, j, k] += scalar;
+                }
+            }
+        }
+
+    }
+
+    /// <summary>
     /// Adds the specified scalar value to each element of the four-dimensional array in place.
     /// </summary>
     /// <remarks>
@@ -468,6 +498,30 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Divides each element of a three-dimensional array by a scalar in place.
+    /// </summary>
+    /// <param name="source">The array to modify.</param>
+    /// <param name="scalar">The divisor.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void DivideInPlace(this float[,,] source, float scalar)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        for (int d1 = 0; d1 < dim1; d1++)
+        {
+            for (int d2 = 0; d2 < dim2; d2++)
+            {
+                for (int d3 = 0; d3 < dim3; d3++)
+                {
+                    source[d1, d2, d3] /= scalar;
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Divides each element of the four-dimensional array by a scalar in place.
     /// </summary>
     /// <param name="source">The array to modify.</param>
@@ -797,6 +851,34 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Returns the maximum element value across all elements of a three-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to scan.</param>
+    /// <returns>The maximum value found.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Max(this float[,,] source)
+    {
+        float max = float.MinValue;
+
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    max = Math.Max(max, source[i, j, k]);
+                }
+            }
+        }
+
+        return max;
+    }
+
+    /// <summary>
     /// Returns the maximum element value across all elements of a four-dimensional array.
     /// </summary>
     /// <param name="source">The array to scan.</param>
@@ -838,6 +920,15 @@ public static class ArrayExtensions
         => source.Sum() / source.Length;
 
     /// <summary>
+    /// Calculates the mean of all elements in the source.
+    /// </summary>
+    /// <param name="source">The array whose mean will be computed.</param>
+    /// <returns>The arithmetic mean of all elements.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Mean(this float[,,] source)
+        => source.Sum() / source.Length;
+
+    /// <summary>
     /// Returns the minimum element value across all elements of a two-dimensional array.
     /// </summary>
     /// <param name="source">The array to scan.</param>
@@ -857,6 +948,34 @@ public static class ArrayExtensions
                 min = Math.Min(min, source[row, col]);
             }
         }
+        return min;
+    }
+
+    /// <summary>
+    /// Returns the minimum element value across all elements of a three-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to scan.</param>
+    /// <returns>The minimum value found.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Min(this float[,,] source)
+    {
+        float min = float.MaxValue;
+
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    min = Math.Min(min, source[i, j, k]);
+                }
+            }
+        }
+
         return min;
     }
 
@@ -2024,6 +2143,8 @@ public static class ArrayExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float StdDev(this float[,] source)
     {
+        Debug.Assert(source.Length > 0, "Source array must contain at least one element to compute standard deviation.");
+
         float mean = source.Mean();
         float sum = 0;
 
@@ -2043,6 +2164,41 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Calculates the standard deviation for all elements of a three-dimensional array.
+    /// </summary>
+    /// <remarks>
+    /// Standard deviation is calculated using the formula: <c>sqrt(sum((x - mean)^2) / N)</c>, where N is the number of all elements in the array.
+    /// </remarks>
+    /// <param name="source">The array whose standard deviation will be computed.</param>
+    /// <returns>The standard deviation of all elements.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float StdDev(this float[,,] source)
+    {
+        Debug.Assert(source.Length > 0, "Source array must contain at least one element to compute standard deviation.");
+
+        float mean = source.Mean();
+        float sum = 0;
+
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    float value = source[i, j, k] - mean;
+                    sum += value * value;
+                }
+            }
+        }
+
+        return MathF.Sqrt(sum / source.Length);
+    }
+
+    /// <summary>
     /// Calculates the standard deviation for all elements of a four-dimensional array.
     /// </summary>
     /// <remarks>
@@ -2053,6 +2209,8 @@ public static class ArrayExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float StdDev(this float[,,,] source)
     {
+        Debug.Assert(source.Length > 0, "Source array must contain at least one element to compute standard deviation.");
+
         float mean = source.Mean();
         float sum = 0;
 
@@ -2183,6 +2341,35 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Calculates the sum of all elements in the three-dimensional array.
+    /// </summary>
+    /// <param name="source">The array to sum.</param>
+    /// <returns>The sum of all elements.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float Sum(this float[,,] source)
+    {
+        // Sum over all elements.
+        float sum = 0;
+
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    sum += source[i, j, k];
+                }
+            }
+        }
+
+        return sum;
+    }
+
+    /// <summary>
     /// Calculates the sum of all elements in the four-dimensional array.
     /// </summary>
     /// <param name="source">The array to sum.</param>
@@ -2193,18 +2380,18 @@ public static class ArrayExtensions
         // Sum over all elements.
         float sum = 0;
 
-        int rows = source.GetLength(0);
-        int cols = source.GetLength(1);
-        int depth = source.GetLength(2);
-        int channels = source.GetLength(3);
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
 
-        for (int i = 0; i < rows; i++)
+        for (int i = 0; i < dim1; i++)
         {
-            for (int j = 0; j < cols; j++)
+            for (int j = 0; j < dim2; j++)
             {
-                for (int k = 0; k < depth; k++)
+                for (int k = 0; k < dim3; k++)
                 {
-                    for (int l = 0; l < channels; l++)
+                    for (int l = 0; l < dim4; l++)
                     {
                         sum += source[i, j, k, l];
                     }

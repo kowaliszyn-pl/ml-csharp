@@ -9,6 +9,9 @@ namespace NeuralNetworks.Layers;
 
 public class MaxPooling1DLayer(int size) : Layer<float[,,], float[,,]>
 {
-    public override OperationListBuilder<float[,,], float[,,]> CreateOperationListBuilder() 
+    public override OperationListBuilder<float[,,], float[,,]> CreateOperationListBuilder()
         => AddOperation(new MaxPooling1D(size));
+
+    public override string ToString()
+        => $"MaxPooling1DLayer (size={size})";
 }

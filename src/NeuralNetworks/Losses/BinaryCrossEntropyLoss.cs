@@ -6,7 +6,7 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Losses;
 
-public class BinaryCrossEntropyLoss : Loss<float[,]>
+public class BinaryCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
 {
     protected override float CalculateLoss()
         => BinaryCrossEntropyLoss(Prediction, Target);

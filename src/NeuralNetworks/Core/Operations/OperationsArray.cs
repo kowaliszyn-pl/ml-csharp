@@ -29,7 +29,7 @@ public class OperationsArray : IOperations
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        // Clip the probabilities to avoid log(0).
+        // Clip the probabilities to avoid log(0) and log(1).
         float[,] clippedSoftmax = predicted.Clip(eps, 1 - eps);
         return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
     }
@@ -50,8 +50,17 @@ public class OperationsArray : IOperations
         float[,] clippedPredicted = predicted.Clip(eps, 1 - eps);
 
         float[,] oneMinusPredicted = clippedPredicted.AsOnes().Subtract(clippedPredicted);
+        float[,] oneMinusPredictedLog = oneMinusPredicted.Log();
+        float[,] oneMinusTarget = target.AsOnes().Subtract(target);
+        float[,] predictedLog = clippedPredicted.Log();
 
-        return -target.MultiplyElementwise(clippedPredicted.Log()).Subtract(target.AsOnes().Subtract(target).MultiplyElementwise(clippedPredicted.AsOnes().Subtract(clippedPredicted).Log())).Mean();
+        float[,] res = target
+            .MultiplyElementwise(predictedLog)
+            .Add(oneMinusTarget
+                .MultiplyElementwise(oneMinusPredictedLog)
+            );
+
+        return -res.Mean();
     }
 
     public virtual float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
