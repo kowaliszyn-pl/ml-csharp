@@ -42,6 +42,9 @@ public interface IOperations
     public float[,] ReLUOutput(float[,] input, float beta = 1f);
     public float[,] ReLUInputGradient(float[,] outputGradient, float[,] input, float beta);
 
+    public float[,,] ReLUOutput(float[,,] input, float beta = 1f);
+    public float[,,] ReLUInputGradient(float[,,] outputGradient, float[,,] input, float beta);
+
     public float[,,,] ReLUOutput(float[,,,] input, float beta = 1f);
     public float[,,,] ReLUInputGradient(float[,,,] outputGradient, float[,,,] input, float beta);
 

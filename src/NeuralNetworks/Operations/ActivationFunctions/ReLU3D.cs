@@ -1,15 +1,19 @@
 ﻿// Neural Networks in C♯
-// File name: ReLU1D.cs
+// File name: ReLU3D.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
-public class ReLU3D : ActivationFunction<float[,,], float[,,]>
+public class ReLU3D(float beta = 1f) : ActivationFunction<float[,,], float[,,]>
 {
-    protected override float[,,] CalcInputGradient(float[,,] outputGradient) => throw new NotImplementedException();
-    protected override float[,,] CalcOutput(bool inference) => throw new NotImplementedException();
+    protected override float[,,] CalcInputGradient(float[,,] outputGradient)
+        => ReLUInputGradient(outputGradient, Input, beta);
+
+    protected override float[,,] CalcOutput(bool inference)
+        => ReLUOutput(Input, beta);
+
+    public override string ToString()
+        => $"ReLU3D (beta={beta})";
 }
