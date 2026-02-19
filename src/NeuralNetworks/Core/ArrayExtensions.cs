@@ -734,6 +734,37 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Gets a contiguous range of dim1 (dimension 0) from a three-dimensional array.
+    /// </summary>
+    /// <param name="source">The three-dimensional array to slice.</param>
+    /// <param name="range">The range applied to dimension 0.</param>
+    /// <returns>A new four-dimensional array containing the selected dim1.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,] GetRows(this float[,,] source, Range range)
+    {
+        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(0));
+
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        float[,,] res = new float[length, dim2, dim3];
+
+        for (int i = 0; i < length; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    res[i, j, k] = source[i + offset, j, k];
+                }
+            }
+        }
+
+        return res;
+
+    }
+
+    /// <summary>
     /// Gets a contiguous range of dim1 (dimension 0) from a four-dimensional array.
     /// </summary>
     /// <param name="source">The four-dimensional array to slice.</param>
@@ -1438,6 +1469,38 @@ public static class ArrayExtensions
                 for (int col = 0; col < secondColumns; col++)
                 {
                     (secondMatrix[j, col], secondMatrix[i, col]) = (secondMatrix[i, col], secondMatrix[j, col]);
+                }
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith(this float[,,] source, float[,] secondMatrix, Random? random)
+    {
+        random ??= new();
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+
+        int secondColumns = secondMatrix.GetLength(1);
+
+        Debug.Assert(dim1 == secondMatrix.GetLength(0), "Both matrices must have the same number of dim1 to permute them together.");
+
+        for (int i = dim1 - 1; i > 0; i--)
+        {
+            int i2 = random.Next(i + 1);
+            if (i != i2)
+            {
+                // Swap row i with row j
+                for (int j = 0; j < dim2; j++)
+                {
+                    for (int k = 0; k < source.GetLength(2); k++)
+                    {
+                        (source[i2, j, k], source[i, j, k]) = (source[i, j, k], source[i2, j, k]);
+                    }
+                }
+                for (int col = 0; col < secondColumns; col++)
+                {
+                    (secondMatrix[i2, col], secondMatrix[i, col]) = (secondMatrix[i, col], secondMatrix[i2, col]);
                 }
             }
         }

@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: Trainer2D.cs
+// File name: Trainer4D.cs
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
@@ -12,13 +12,14 @@ using NeuralNetworks.Optimizers;
 
 namespace NeuralNetworks.Trainers;
 
-public class Trainer2D : Trainer<float[,], float[,]>
+public class Trainer3D : Trainer<float[,,], float[,]>
 {
-    public Trainer2D(
-        Model<float[,], float[,]> model, 
+    public Trainer3D(
+        Model<float[,,], float[,]> model, 
         Optimizer optimizer, 
-        SeededRandom? random, 
-        ILogger<Trainer2D>? logger = null
+        SeededRandom random, 
+        ILogger<Trainer3D> logger,
+        bool operationBackendTimingEnabled = false
     ) : base(model, optimizer, random: random, logger: logger)
     {
     }
@@ -32,7 +33,7 @@ public class Trainer2D : Trainer<float[,], float[,]>
     /// <param name="y">The output matrix.</param>
     /// <param name="batchSize">The batch size.</param>
     /// <returns>An enumerable of batches.</returns>
-    protected override IEnumerable<(float[,] xBatch, float[,] yBatch)> GenerateBatches(float[,] x, float[,] y, int batchSize)
+    protected override IEnumerable<(float[,,] xBatch, float[,] yBatch)> GenerateBatches(float[,,] x, float[,] y, int batchSize)
     {
         int trainRows = x.GetLength(0);
         Debug.Assert(trainRows == y.GetLength(0), "Number of samples in x and y do not match.");
@@ -41,17 +42,17 @@ public class Trainer2D : Trainer<float[,], float[,]>
         {
             int effectiveBatchSize = Math.Min(batchSize, trainRows - batchStart);
             int batchEnd = effectiveBatchSize + batchStart;
-            float[,] xBatch = x.GetRows(batchStart..batchEnd);
+            float[,,] xBatch = x.GetRows(batchStart..batchEnd);
             float[,] yBatch = y.GetRows(batchStart..batchEnd);
             yield return (xBatch, yBatch);
         }
     }
 
-    protected override void PermuteData(float[,] x, float[,] y, Random random)
+    protected override void PermuteData(float[,,] x, float[,] y, Random random)
         // => ArrayUtils.PermuteData(x, y, random);
         => x.PermuteInPlaceTogetherWith(y, random);
 
-    protected override float GetRows(float[,] x)
+    protected override float GetRows(float[,,] x)
         => x.GetLength(0);
 
     // TODO: eval function

@@ -24,6 +24,8 @@ public class Trainer4D : Trainer<float[,,,], float[,]>
     {
     }
 
+    // TODO: DRY
+
     /// <summary>
     /// Generates batches of input and output matrices.
     /// </summary>

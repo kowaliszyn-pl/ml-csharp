@@ -9,10 +9,12 @@ using Microsoft.Extensions.Logging;
 using NeuralNetworks.Core;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
+using NeuralNetworks.LearningRates;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
+using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
@@ -65,14 +67,14 @@ internal class Ecg200
 
     internal static void Run()
     {
-        ILogger<Trainer4D> logger = Program.LoggerFactory.CreateLogger<Trainer4D>();
+        ILogger<Trainer3D> logger = Program.LoggerFactory.CreateLogger<Trainer3D>();
 
         // rows - batch
         // cols - features
         float[,] train = LoadTsv("..\\..\\..\\..\\..\\data\\ecg200\\ECG200_TRAIN.tsv");
         float[,] test = LoadTsv("..\\..\\..\\..\\..\\data\\ecg200\\ECG200_TEST.tsv");
 
-        // float[,] y = [batch, class (1 or -1)]
+        // float[,] y = [batch, 0] = class 1 probability
 
         (float[,,] xTrain, float[,] yTrain) = Split(train);
         (float[,,] xTest, float[,] yTest) = Split(test);
@@ -100,7 +102,71 @@ internal class Ecg200
 
         SimpleDataSource<float[,,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);
+
+        // Create a model
+
+        Ecg200Model model = new(commonRandom);
+
+        WriteLine("\nStart training...");
+
+        LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
+        Trainer3D trainer = new(
+            model,
+            // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
+            new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
+            random: commonRandom,
+            logger: logger,
+            operationBackendTimingEnabled: true
+        )
+        {
+            Memo = $"Calling class: {nameof(Ecg200)}"
+        };
+
+        trainer.Fit(
+            dataSource,
+            s_evalFunction,
+            epochs: Epochs,
+            evalEveryEpochs: EvalEveryEpochs,
+            logEveryEpochs: LogEveryEpochs,
+            batchSize: BatchSize,
+            saveParamsOnBestLoss: false
+        );
     }
+
+    private static readonly EvalFunction<float[,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
+    {
+        float[,] prediction; // [batch, 0] = probability of being normal (class 1)
+        if (predictionLogits != null)
+        {
+            prediction = predictionLogits;
+        }
+        else
+        {
+            prediction = model.Forward(xEvalTest, true);
+        }
+
+        int rows = prediction.GetLength(0);
+
+        Debug.Assert(rows == yEvalTest.GetLength(0), "Number of samples in prediction and yEvalTest do not match.");
+
+        int hits = 0;
+        for (int row = 0; row < rows; row++)
+        {
+            //int predictedDigit = predictionArgmax[row];
+
+            // yEvalTest is [batch, 0] = 100%, if normal (class 1), or 0%, if abnormal (class 0). So we check if the predicted class (normal or abnormal) matches the actual class.
+            
+            float predictedProbabilityOfNormal = prediction[row, 0];
+            float actualClass = yEvalTest[row, 0]; // 1 for normal, 0 for abnormal
+
+            if ((predictedProbabilityOfNormal >= 0.5f && actualClass == 1f) 
+                || (predictedProbabilityOfNormal < 0.5f && actualClass == 0f))
+                hits++;
+        }
+
+        float accuracy = (float)hits / rows;
+        return accuracy;
+    };
 
     private static (float[,,] xTest, float[,] yTest) Split(float[,] source)
     {
