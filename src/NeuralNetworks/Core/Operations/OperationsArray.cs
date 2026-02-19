@@ -42,6 +42,26 @@ public class OperationsArray : IOperations
         return predicted.Subtract(target).Divide(batchSize);
     }
 
+    public virtual float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1E-07F)
+    {
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        // Clip the predicted probabilities to avoid log(0) and log(1).
+        float[,] clippedPredicted = predicted.Clip(eps, 1 - eps);
+
+        float[,] oneMinusPredicted = clippedPredicted.AsOnes().Subtract(clippedPredicted);
+
+        return -target.MultiplyElementwise(clippedPredicted.Log()).Subtract(target.AsOnes().Subtract(target).MultiplyElementwise(clippedPredicted.AsOnes().Subtract(clippedPredicted).Log())).Mean();
+    }
+
+    public virtual float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
+    {
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = predicted.GetLength(0);
+        return predicted.Subtract(target).Divide(batchSize);
+    }
+
     #endregion
 
     #region Activations Functions

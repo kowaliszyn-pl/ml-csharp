@@ -165,6 +165,14 @@ public static class OperationBackend
     internal static float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
         => Current.CrossEntropyLossGradient(predicted, target);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
+       => Current.BinaryCrossEntropyLoss(predicted, target, eps);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
+        => Current.BinaryCrossEntropyLossGradient(predicted, target);
+
     #endregion
 
     #region Activation Functions

@@ -43,6 +43,8 @@ internal class Ecg200Model(SeededRandom? random)
                 paramInitializer: initializer
             ))
             .AddLayer(new GlobalAveragePooling1DLayer())
+
+            // Probability of being normal (class 1)
             .AddLayer(new DenseLayer(1, new Sigmoid(), initializer));
     }
 }
@@ -58,22 +60,26 @@ internal class Ecg200
         float[,] train = LoadTsv("..\\..\\..\\..\\..\\data\\ecg200\\ECG200_TRAIN.tsv");
         float[,] test = LoadTsv("..\\..\\..\\..\\..\\data\\ecg200\\ECG200_TEST.tsv");
 
-        (float[,] xTrain, bool[,] yTrain) = Split(train);
-        (float[,] xTest, bool[,] yTest) = Split(test);
+        // float[,] y = [batch, class (1 or -1)]
+
+        (float[,] xTrain, float[,] yTrain) = Split(train);
+        (float[,] xTest, float[,] yTest) = Split(test);
     }
 
-    private static (float[,] xTest, bool[,] yTest) Split(float[,] source)
+    private static (float[,] xTest, float[,] yTest) Split(float[,] source)
     {
         // Split into xTest (all columns except the first one) and yTest (the first column with values 1 or -1, where 1 means normal and -1 means abnormal (myocardial infarction)).
 
         float[,] xTest = source.GetColumns(1..source.GetLength(1));
-        float[,] yTestAsNumber = source.GetColumn(0);
+        float[,] yTest = source.GetColumn(0);
 
-        bool[,] yTest = new bool[yTestAsNumber.GetLength(0), 1];
-        for (int row = 0; row < yTestAsNumber.GetLength(0); row++)
+        //bool[,] yTest = new bool[yTestAsNumber.GetLength(0), 1];
+        for (int row = 0; row < yTest.GetLength(0); row++)
         {
-            Debug.Assert(yTestAsNumber[row, 0] == 1f || yTestAsNumber[row, 0] == -1f, $"Expected values in the first column to be either 1 or -1, but got {yTestAsNumber[row, 0]} at row {row}.");
-            yTest[row, 0] = yTestAsNumber[row, 0] == 1f; // 1 = true = normal, -1 = false = abnormal (myocardial infarction)
+            Debug.Assert(yTest[row, 0] == 1f || yTest[row, 0] == -1f, $"Expected values in the first column to be either 1 or -1, but got {yTest[row, 0]} at row {row}.");
+
+            // Convert the values in yTest to 100% for normal (1) and 0% for abnormal (-1).
+            yTest[row, 0] = yTest[row, 0] == 1f ? 1f : 0f;
         }
 
         Debug.Assert(xTest.GetLength(0) == yTest.GetLength(0), "Number of samples in xTest and yTest do not match.");

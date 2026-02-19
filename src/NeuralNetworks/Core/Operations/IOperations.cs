@@ -17,6 +17,9 @@ public interface IOperations
     public float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f);
     public float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target);
 
+    float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f);
+    float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target);
+
     #endregion
 
     #region Activations Functions
