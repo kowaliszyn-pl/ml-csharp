@@ -879,6 +879,71 @@ public class OperationsArray : IOperations
         return res;
     }
 
+    public virtual float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int length = input.GetLength(2);
+
+        int outputLength = length / size;
+
+        float[,,] output = new float[batchSize, channels, outputLength];
+        maxIndices = new int[batchSize, channels, outputLength];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int ol = 0; ol < outputLength; ol++)
+                {
+                    float maxVal = float.NegativeInfinity;
+                    int maxIdx = -1;
+                    for (int i = 0; i < size; i++)
+                    {
+                        int idx = ol * size + i;
+                        if (idx < length)
+                        {
+                            float val = input[b, c, idx];
+                            if (val > maxVal)
+                            {
+                                maxVal = val;
+                                maxIdx = idx;
+                            }
+                        }
+                    }
+                    output[b, c, ol] = maxVal;
+                    maxIndices[b, c, ol] = maxIdx;
+                }
+            }
+        }
+        return output;
+    }
+
+    public virtual float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices)
+    {
+        int inputLength = input.GetLength(2);
+        int batchSize = outputGradient.GetLength(0);
+        int channels = outputGradient.GetLength(1);
+
+        int outputLength = outputGradient.GetLength(2);
+        float[,,] inputGradient = new float[batchSize, channels, inputLength];
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int ol = 0; ol < outputLength; ol++)
+                {
+                    int maxIdx = maxIndices[b, c, ol];
+                    if (maxIdx >= 0 && maxIdx < inputLength)
+                    {
+                        inputGradient[b, c, maxIdx] += outputGradient[b, c, ol];
+                    }
+                }
+            }
+        }
+        return inputGradient;
+    }
+
     #endregion
 
 }

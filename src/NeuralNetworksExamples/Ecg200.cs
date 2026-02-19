@@ -34,7 +34,7 @@ internal class Ecg200Model(SeededRandom? random)
                 activationFunction: new ReLU3D(),
                 paramInitializer: initializer
             ))
-            .AddLayer(new MaxPooling3DLayer(2))
+            .AddLayer(new MaxPooling1DLayer(2))
             .AddLayer(new Conv1DLayer(
                 kernels: 32,
                 kernelLength: 3,

@@ -545,5 +545,13 @@ public static class OperationBackend
     internal static float[,,,] Unflatten(float[,] source, float[,,,] targetSize)
         => Current.Unflatten(source, targetSize);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices)
+            => Current.MaxPooling1DOutput(input, size, out maxIndices);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices)
+        => Current.MaxPooling1DInputGradient(input, outputGradient, size, maxIndices);
+
     #endregion
 }

@@ -158,6 +158,9 @@ public interface IOperations
     public float[,] Flatten(float[,,,] source);
     public float[,,,] Unflatten(float[,] source, float[,,,] targetSize);
     
+    float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices);
+    float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices);
+
     #endregion
 
 }
