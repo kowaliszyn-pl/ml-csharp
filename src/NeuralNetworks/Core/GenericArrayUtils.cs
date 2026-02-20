@@ -2,13 +2,9 @@
 // File name: GenericUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace NeuralNetworks.Core;
 
-public static class GenericUtils
+public static class GenericArrayUtils
 {
     public static void EnsureSameShape<T>(T? matrix1, T? matrix2)
     {
@@ -30,7 +26,7 @@ public static class GenericUtils
 
     public static void PermuteData<TX, TY>(TX matrix1, TY matrix2, Random random)
         where TX : notnull
-        where TY: notnull
+        where TY : notnull
     {
         // TODO: let's use Span<T> (and Memory<T>?) to make it more efficient and avoid copying data when possible.
         switch (matrix1, matrix2)

@@ -79,7 +79,7 @@ public abstract class Loss<TPrediction>
 
     [Conditional("DEBUG")]
     private void EnsureSameShape(TPrediction? prediction, TPrediction target)
-        => GenericUtils.EnsureSameShape(prediction, target);
+        => GenericArrayUtils.EnsureSameShape(prediction, target);
 
     #endregion EnsureSameShape
 }
