@@ -149,8 +149,13 @@ public interface IOperations
 
     public float[,] DropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask);
     public float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask);
+
+    public float[,,] DropoutOutput(float[,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,]? mask);
+    public float[,,] DropoutInputGradient(float[,,] outputGradient, float[,,] mask);
+
     public float[,,,] DropoutOutput(float[,,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,,]? mask);
     public float[,,,] DropoutInputGradient(float[,,,] outputGradient, float[,,,] mask);
+
     public float[,] InvertedDropoutOutput(float[,] input, bool inference, float keepProb, SeededRandom? random, out float[,]? mask);
     public float[,] InvertedDropoutInputGradient(float[,] outputGradient, float[,] mask, float keepProb);
 

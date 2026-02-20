@@ -35,7 +35,7 @@ internal class MnistConvModel(SeededRandom? random)
     protected override LayerListBuilder<float[,,,], float[,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
-        Dropout4D? dropout = new(0.80f, Random);
+        Dropout4D dropout = new(0.80f, Random);
 
         return
             AddLayer(new Conv2DLayer(

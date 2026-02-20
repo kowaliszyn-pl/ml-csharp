@@ -807,7 +807,24 @@ public class OperationsArray : IOperations
         }
     }
 
-    public float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask)
+    public virtual float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask)
+        => outputGradient.MultiplyElementwise(mask);
+
+    public virtual float[,,] DropoutOutput(float[,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,]? mask)
+    {
+        if (inference)
+        {
+            mask = null;
+            return input.Multiply(keepProb);
+        }
+        else
+        {
+            mask = input.AsZeroOnes(keepProb, random ?? new());
+            return input.MultiplyElementwise(mask);
+        }
+    }
+
+    public virtual float[,,] DropoutInputGradient(float[,,] outputGradient, float[,,] mask)
         => outputGradient.MultiplyElementwise(mask);
 
     public virtual float[,,,] DropoutOutput(float[,,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,,]? mask)

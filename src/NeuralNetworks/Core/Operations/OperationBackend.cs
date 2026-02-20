@@ -529,6 +529,12 @@ public static class OperationBackend
     internal static float[,] DropoutInputGradient(float[,] outputGradient, float[,] mask)
         => Current.DropoutInputGradient(outputGradient, mask);
 
+    internal static float[,,] DropoutOutput(float[,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,]? mask)
+        => Current.DropoutOutput(input, inference, keepProb, random, out mask);
+
+    internal static float[,,] DropoutInputGradient(float[,,] outputGradient, float[,,] mask)
+        => Current.DropoutInputGradient(outputGradient, mask);
+
     internal static float[,,,] DropoutOutput(float[,,,] input, bool inference, float keepProb, SeededRandom? random, out float[,,,]? mask)
         => Current.DropoutOutput(input, inference, keepProb, random, out mask);
 

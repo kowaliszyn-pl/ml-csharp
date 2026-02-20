@@ -83,7 +83,8 @@ public abstract class Trainer<TInputData, TPrediction>(
         bool restart = true,
         bool displayDescriptionOnStart = true,
         bool operationBackendTimingEnabled = false,
-        bool saveParamsOnBestLoss = true
+        bool saveParamsOnBestLoss = true,
+        bool showTrainEval = false
     )
     {
         try
@@ -217,11 +218,20 @@ public abstract class Trainer<TInputData, TPrediction>(
 
                     if (evalFunction is not null)
                     {
-                        float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
+                        float evalValue;
+                        if (showTrainEval)
+                        {
+                            evalValue = evalFunction(model, xTrain, yTrain, default);
+                            if (consoleOutputMode > ConsoleOutputMode.Disable)
+                                WriteLine($"Train eval: {evalValue:P2}");
+                            logger?.LogInformation("Train eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
+                        }
+
+                        evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
 
                         if (consoleOutputMode > ConsoleOutputMode.Disable)
-                            WriteLine($"Eval: {evalValue:P2}");
-                        logger?.LogInformation("Eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
+                            WriteLine($"Test eval: {evalValue:P2}");
+                        logger?.LogInformation("Test eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
                     }
 
                     if (saveParamsOnBestLoss && testLoss < _bestLoss)

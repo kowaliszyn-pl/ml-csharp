@@ -14,6 +14,7 @@ using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
+using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
@@ -29,13 +30,15 @@ internal class Ecg200Model(SeededRandom? random)
     protected override LayerListBuilder<float[,,], float[,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
+        Dropout3D dropout = new(0.80f, Random);
         return
             AddLayer(new Conv1DLayer(
                 kernels: 16,
                 kernelLength: 5,
                 stride: 1,
                 activationFunction: new ReLU3D(),
-                paramInitializer: initializer
+                paramInitializer: initializer,
+                dropout: dropout
             ))
             .AddLayer(new MaxPooling1DLayer(2))
             .AddLayer(new Conv1DLayer(
@@ -55,13 +58,13 @@ internal class Ecg200Model(SeededRandom? random)
 internal class Ecg200
 {
     private const int RandomSeed = 44; // From Mickiewicz's poetry.
-    private const int Epochs = 3; // 15;
-    private const int BatchSize = 400;
-    private const int EvalEveryEpochs = 2;
-    private const int LogEveryEpochs = 1;
+    private const int Epochs = 400;
+    private const int BatchSize = 25;
+    private const int EvalEveryEpochs = 20;
+    private const int LogEveryEpochs = 10;
 
-    private const float InitialLearningRate = 0.002f;
-    private const float FinalLearningRate = 0.0005f;
+    private const float InitialLearningRate = 0.006f;
+    private const float FinalLearningRate = 0.003f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
 
@@ -129,7 +132,8 @@ internal class Ecg200
             evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize,
-            saveParamsOnBestLoss: false
+            saveParamsOnBestLoss: true,
+            showTrainEval: true
         );
     }
 

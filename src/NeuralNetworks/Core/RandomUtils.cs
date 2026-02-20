@@ -34,6 +34,23 @@ public class RandomUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,] CreateRandomNormal(int dim1, int dim2, int dim3, Random random, float mean = 0, float stdDev = 1)
+    {
+        float[,,] res = new float[dim1, dim2, dim3];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    res[i, j, k] = NextBoxMuller(random) * stdDev + mean;
+                }
+            }
+        }
+        return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] CreateRandomNormal(int dim1, int dim2, int dim3, int dim4, Random random, float mean = 0, float stdDev = 1)
     {
         float[,,,] res = new float[dim1, dim2, dim3, dim4];

@@ -352,6 +352,30 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,] AsZeroOnes(this float[,,] source, float onesProbability, Random random)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        float[,,] res = new float[dim1, dim2, dim3];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    if (random.NextDouble() < onesProbability)
+                    {
+                        res[i, j, k] = 1;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Creates a new four-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>, otherwise 0.
     /// </summary>
@@ -1121,6 +1145,29 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,] Multiply(this float[,,] source, float scalar)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        float[,,] res = new float[dim1, dim2, dim3];
+
+        for (int d1 = 0; d1 < dim1; d1++)
+        {
+            for (int d2 = 0; d2 < dim2; d2++)
+            {
+                for (int d3 = 0; d3 < dim3; d3++)
+                {
+                    res[d1, d2, d3] = source[d1, d2, d3] * scalar;
+                }
+            }
+        }
+
+        return res;
+    }
+
     /// <summary>
     /// Multiplies each element of the source by a scalar value.
     /// </summary>
@@ -1270,6 +1317,36 @@ public static class ArrayExtensions
         }
 
         return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,] MultiplyElementwise(this float[,,] source, float[,,] matrix)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+
+        int maxDim1 = Math.Max(dim1, matrix.GetLength(0));
+        int maxDim2 = Math.Max(dim2, matrix.GetLength(1));
+        int maxDim3 = Math.Max(dim3, matrix.GetLength(2));
+
+        float[,,] res = new float[maxDim1, maxDim2, maxDim3];
+
+        for (int d1 = 0; d1 < maxDim1; d1++)
+        {
+            for (int d2 = 0; d2 < maxDim2; d2++)
+            {
+                for (int d3 = 0; d3 < maxDim3; d3++)
+                {
+                    float thisValue = source[d1 % dim1, d2 % dim2, d3 % dim3];
+                    float matrixValue = matrix[d1 % matrix.GetLength(0), d2 % matrix.GetLength(1), d3 % matrix.GetLength(2)]; // TODO: Refactor to avoid repeated calls to GetLength in the inner loop.
+                    res[d1, d2, d3] = thisValue * matrixValue;
+                }
+            }
+        }
+
+        return res;
+
     }
 
     /// <summary>

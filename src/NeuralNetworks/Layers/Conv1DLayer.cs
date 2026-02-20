@@ -44,7 +44,7 @@ public class Conv1DLayer(
     bool addBias = true,
     int? padding = null,
     int stride = 1,
-    int dilatation = 0) : Layer<float[,,], float[,,]>
+    int dilatation = 1) : Layer<float[,,], float[,,]>
 {
     public override OperationListBuilder<float[,,], float[,,]> CreateOperationListBuilder()
     {
@@ -59,13 +59,13 @@ public class Conv1DLayer(
         {
             // [batch = 1, kernels, outputLength]
             float[] bias = paramInitializer.InitBiases(kernels);
-            res.AddOperation(new BiasAddConv1D(bias));
+            res = res.AddOperation(new BiasAddConv1D(bias));
         }
 
-        res.AddOperation(activationFunction);
+        res = res.AddOperation(activationFunction);
 
-        if (dropout is not null)
-            res.AddOperation(dropout);
+        if (dropout != null)
+            res = res.AddOperation(dropout);
         
         return res;
     }
