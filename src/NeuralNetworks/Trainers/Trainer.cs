@@ -53,7 +53,27 @@ public abstract class Trainer<TInputData, TPrediction>(
     /// <returns>An enumerable of batches.</returns>
     protected abstract IEnumerable<(TInputData xBatch, TPrediction yBatch)> GenerateBatches(TInputData x, TPrediction y, int batchSize = 32);
 
-    protected abstract void PermuteData(TInputData x, TPrediction y, Random random);
+    protected virtual void PermuteData(TInputData x, TPrediction y, Random random)
+    {
+        // TODO: let's use Span<T> (and Memory<T>?) to make it more efficient and avoid copying data when possible.
+        switch (x)
+        {
+            case float[,] x2 when y is float[,] y2:
+                x2.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
+            case float[,,] x3 when y is float[,] y2:
+                x3.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
+            case float[,,,] x4 when y is float[,] y2:
+                x4.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
+            default:
+                throw new NotSupportedException($"Unsupported permutation pair: x={x.GetType().Name}, y={y.GetType().Name}. Please override this method in the Trainer subclass or add here a permutation method for these data types.");
+        }
+    }
 
     protected virtual int GetRowCount(TInputData x)
     {

@@ -47,9 +47,6 @@ public class Trainer2D : Trainer<float[,], float[,]>
         }
     }
 
-    protected override void PermuteData(float[,] x, float[,] y, Random random)
-        // => ArrayUtils.PermuteData(x, y, random);
-        => x.PermuteInPlaceTogetherWith(y, random);
 
     // TODO: eval function
 }
