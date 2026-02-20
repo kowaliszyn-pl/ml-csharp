@@ -55,7 +55,14 @@ public abstract class Trainer<TInputData, TPrediction>(
 
     protected abstract void PermuteData(TInputData x, TPrediction y, Random random);
 
-    protected abstract float GetRows(TInputData x);
+    protected virtual int GetRowCount(TInputData x)
+    {
+        // Version for arrays and matrices. Can be overridden for other data types.
+        if(x is Array array)
+            return array.GetLength(0);
+
+        throw new NotImplementedException("GetRowCount is not implemented for the given input data type. Please override this method in the Trainer subclass.");
+    }
 
     /// <summary>
     /// Fits the neural network to the provided data source.
@@ -116,7 +123,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             }
 
             (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
-            int allSteps = (int)Math.Ceiling(GetRows(xTrain) / (float)batchSize);
+            int allSteps = ((GetRowCount(xTrain) - 1) / batchSize) + 1; 
             long allStepsInTraining = allSteps * epochs;
 
             for (int epoch = 1; epoch <= epochs; epoch++)

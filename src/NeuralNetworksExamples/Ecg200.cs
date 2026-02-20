@@ -122,7 +122,6 @@ internal class Ecg200
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 0);
         Trainer3D trainer = new(
             model,
-            // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
             random: commonRandom,
             logger: logger,
@@ -163,8 +162,6 @@ internal class Ecg200
         int hits = 0;
         for (int row = 0; row < rows; row++)
         {
-            //int predictedDigit = predictionArgmax[row];
-
             // yEvalTest is [batch, 0] = 100%, if normal (class 1), or 0%, if abnormal (class 0). So we check if the predicted class (normal or abnormal) matches the actual class.
             
             float predictedProbabilityOfNormal = prediction[row, 0];
