@@ -9,7 +9,7 @@ using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.Optimizers;
 
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.GenericUtils;
 using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Layers;

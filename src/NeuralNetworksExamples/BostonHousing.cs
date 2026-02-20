@@ -44,7 +44,7 @@ internal class BostonHousing
 
     public static void Run(bool useCustomModel)
     {
-        ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
+        ILogger logger = Program.LoggerFactory.CreateLogger<BostonHousing>();
 
         // Get data
 
@@ -112,7 +112,7 @@ internal class BostonHousing
             finalLearningRate: 0.0005f
         );
 
-        Trainer2D trainer = new(
+        Trainer<float[,], float[,]> trainer = new(
             model,
             new GradientDescentMomentumOptimizer(learningRate, 0.9f),
             // new AdamOptimizer(learningRate),

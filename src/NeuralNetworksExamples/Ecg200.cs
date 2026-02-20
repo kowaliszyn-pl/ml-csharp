@@ -77,7 +77,7 @@ internal class Ecg200
 
     internal static void Run()
     {
-        ILogger<Trainer3D> logger = Program.LoggerFactory.CreateLogger<Trainer3D>();
+        ILogger logger = Program.LoggerFactory.CreateLogger<Ecg200>();
 
         // rows - batch
         // cols - features
@@ -120,12 +120,11 @@ internal class Ecg200
         WriteLine("\nStart training...");
 
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 0);
-        Trainer3D trainer = new(
+        Trainer<float[,,], float[,]> trainer = new(
             model,
             new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
             random: commonRandom,
-            logger: logger,
-            operationBackendTimingEnabled: true
+            logger: logger
         )
         {
             Memo = $"Calling class: {nameof(Ecg200)}"

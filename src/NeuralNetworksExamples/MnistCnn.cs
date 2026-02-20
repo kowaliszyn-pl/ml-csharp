@@ -67,7 +67,7 @@ internal class MnistCnn
 
     public static void Run()
     {
-        ILogger<Trainer4D> logger = Program.LoggerFactory.CreateLogger<Trainer4D>();
+        ILogger logger = Program.LoggerFactory.CreateLogger<MnistCnn>();
 
         // rows - batch
         // cols - features
@@ -111,13 +111,12 @@ internal class MnistCnn
         WriteLine("\nStart training...");
 
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
-        Trainer4D trainer = new(
+        Trainer<float[,,,], float[,]> trainer = new(
             model,
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
             random: commonRandom,
-            logger: logger,
-            operationBackendTimingEnabled: true
+            logger: logger
         )
         {
             Memo = $"Calling class: {nameof(MnistCnn)}. BiasAdd array"

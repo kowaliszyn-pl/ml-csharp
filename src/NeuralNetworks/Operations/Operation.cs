@@ -1,20 +1,20 @@
 ﻿// Neural Networks in C♯
 // File name: Operation.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.GenericUtils;
 
 namespace NeuralNetworks.Operations;
 
 public abstract class Operation
 {
-    bool _registered = false;
+    private bool _registered = false;
 
     public void SetRegistered()
     {
-        if(_registered)
+        if (_registered)
             throw new InvalidOperationException($"Operation '{this}' is already registered.");
 
         _registered = true;
@@ -77,16 +77,12 @@ public abstract class Operation<TIn, TOut> : Operation
     }
 
     [Conditional("DEBUG")]
-    private static void EnsureSameShapeForInput(TIn? input, TIn inputGradient)
-    {
-        EnsureSameShape(input, inputGradient);
-    }
+    private static void EnsureSameShapeForInput(TIn? input, TIn inputGradient) 
+        => EnsureSameShape(input, inputGradient);
 
     [Conditional("DEBUG")]
-    private static void EnsureSameShapeForOutput(TOut? output, TOut outputGradient)
-    {
-        EnsureSameShape(output, outputGradient);
-    }
+    private static void EnsureSameShapeForOutput(TOut? output, TOut outputGradient) 
+        => EnsureSameShape(output, outputGradient);
 
     /// <summary>
     /// Computes output.

@@ -15,18 +15,19 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.Trainers.Logging;
 
 using static System.Console;
+using static NeuralNetworks.Core.GenericUtils;
 
 namespace NeuralNetworks.Trainers;
 
 /// <summary>
 /// Represents a trainer for a neural network.
 /// </summary>
-public abstract class Trainer<TInputData, TPrediction>(
+public class Trainer<TInputData, TPrediction>(
     Model<TInputData, TPrediction> model,
     Optimizer optimizer,
     ConsoleOutputMode consoleOutputMode = ConsoleOutputMode.OnlyOnEval,
     SeededRandom? random = null,
-    ILogger<Trainer<TInputData, TPrediction>>? logger = null
+    ILogger? logger = null
 )
     where TInputData : notnull
     where TPrediction : notnull
@@ -43,46 +44,6 @@ public abstract class Trainer<TInputData, TPrediction>(
     /// Gets or sets the memo associated with the trainer.
     /// </summary>
     public string? Memo { get; set; }
-
-    /// <summary>
-    /// Generates batches of input and output matrices.
-    /// </summary>
-    /// <param name="x">The input matrix.</param>
-    /// <param name="y">The output matrix.</param>
-    /// <param name="batchSize">The batch size.</param>
-    /// <returns>An enumerable of batches.</returns>
-    protected abstract IEnumerable<(TInputData xBatch, TPrediction yBatch)> GenerateBatches(TInputData x, TPrediction y, int batchSize = 32);
-
-    protected virtual void PermuteData(TInputData x, TPrediction y, Random random)
-    {
-        // TODO: let's use Span<T> (and Memory<T>?) to make it more efficient and avoid copying data when possible.
-        switch (x)
-        {
-            case float[,] x2 when y is float[,] y2:
-                x2.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            case float[,,] x3 when y is float[,] y2:
-                x3.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            case float[,,,] x4 when y is float[,] y2:
-                x4.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            default:
-                throw new NotSupportedException($"Unsupported permutation pair: x={x.GetType().Name}, y={y.GetType().Name}. Please override this method in the Trainer subclass or add here a permutation method for these data types.");
-        }
-    }
-
-    protected virtual int GetRowCount(TInputData x)
-    {
-        // Version for arrays and matrices. Can be overridden for other data types.
-        if(x is Array array)
-            return array.GetLength(0);
-
-        throw new NotImplementedException("GetRowCount is not implemented for the given input data type. Please override this method in the Trainer subclass.");
-    }
 
     /// <summary>
     /// Fits the neural network to the provided data source.
@@ -143,7 +104,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             }
 
             (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
-            int allSteps = ((GetRowCount(xTrain) - 1) / batchSize) + 1; 
+            int allSteps = ((GetRowCount(xTrain) - 1) / batchSize) + 1;
             long allStepsInTraining = allSteps * epochs;
 
             for (int epoch = 1; epoch <= epochs; epoch++)
@@ -266,7 +227,7 @@ public abstract class Trainer<TInputData, TPrediction>(
                         _bestLoss = testLoss;
                         string fileName = $"best_model_{epoch}.json";
                         model.SaveParams(fileName, $"Best model at epoch {epoch} with loss {testLoss:F5}");
-                        if(consoleOutputMode > ConsoleOutputMode.Disable)
+                        if (consoleOutputMode > ConsoleOutputMode.Disable)
                             WriteLine($"New best loss: {_bestLoss:F5}. Params saved at {fileName}.");
                         logger?.LogInformation("New best loss: {bestLoss} at epoch {epoch}. Params saved at {fileName}.", _bestLoss, epoch, fileName);
                     }
@@ -316,7 +277,7 @@ public abstract class Trainer<TInputData, TPrediction>(
             if (operationBackendTimingEnabled)
             {
                 WriteLine();
-                
+
                 string timingReport = OperationBackend.GetStatistics();
                 logger?.LogInformation("Operation backend timing report:\n{timingReport}", timingReport);
                 if (consoleOutputMode > ConsoleOutputMode.Disable)
@@ -363,4 +324,31 @@ public abstract class Trainer<TInputData, TPrediction>(
         res.AddRange(model.Describe(indentation + Constants.Indentation));
         return res;
     }
+
+    /// <summary>
+    /// Generates batches of input and output matrices.
+    /// </summary>
+    /// <param name="x">The input matrix.</param>
+    /// <param name="y">The output matrix.</param>
+    /// <param name="batchSize">The batch size.</param>
+    /// <returns>An enumerable of batches.</returns>
+    protected virtual IEnumerable<(TInputData xBatch, TPrediction yBatch)> GenerateBatches(TInputData x, TPrediction y, int batchSize = 32)
+    {
+        Debug.Assert(batchSize > 1, "Batch size should be at least 1.");
+
+        int rows = GenericUtils.GetRowCount(x);
+        Debug.Assert(rows == GenericUtils.GetRowCount(y), "Number of samples in x and y do not match.");
+
+        for (int batchStart = 0; batchStart < rows; batchStart += batchSize)
+        {
+            int batchEnd = Math.Min(batchStart + batchSize, rows);
+            yield return (SliceDim0(x, batchStart, batchEnd), SliceDim0(y, batchStart, batchEnd));
+        }
+    }
+
+    protected virtual void PermuteData(TInputData x, TPrediction y, Random random)
+        => GenericUtils.PermuteData(x, y, random);
+
+    protected virtual int GetRowCount(TInputData x)
+        => GenericUtils.GetRowCount(x);
 }

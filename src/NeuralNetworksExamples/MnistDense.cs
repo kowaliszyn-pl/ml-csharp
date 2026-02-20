@@ -71,7 +71,7 @@ internal class MnistDense
 
     public static void Run()
     {
-        ILogger<Trainer2D> logger = Program.LoggerFactory.CreateLogger<Trainer2D>();
+        ILogger logger = Program.LoggerFactory.CreateLogger<MnistDense>();
 
         // rows - batch
         // cols - features
@@ -115,7 +115,7 @@ internal class MnistDense
         WriteLine("\nStart training...");
 
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
-        Trainer2D trainer = new(
+        Trainer<float[,], float[,]> trainer = new(
             model,
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             new AdamOptimizer(learningRate, beta1: AdamBeta1, beta2: AdamBeta2),

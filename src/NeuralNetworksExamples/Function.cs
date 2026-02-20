@@ -21,7 +21,7 @@ using static System.Console;
 
 namespace NeuralNetworksExamples;
 
-file class FunctionModel(SeededRandom? random)
+internal class FunctionModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
@@ -63,11 +63,11 @@ class Function
 
         // Create trainer
         LearningRate learningRate = new ExponentialDecayLearningRate(0.01f, 0.005f);
-        var trainer = new Trainer2D(
+        var trainer = new Trainer<float[,], float[,]>(
             model,
             new GradientDescentMomentumOptimizer(learningRate, 0.9f),
-            random,
-            Program.LoggerFactory.CreateLogger<Trainer2D>()
+            random: random,
+            logger: Program.LoggerFactory.CreateLogger<Function>()
         );
 
         // Train model
