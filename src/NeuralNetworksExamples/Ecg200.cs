@@ -24,13 +24,20 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
+/*
+Train loss(average): 0,1799204
+Test loss: 0,31930596
+Train eval: 97,00%
+Test eval: 87,00%
+*/
+
 internal class Ecg200Model(SeededRandom? random)
     : BaseModel<float[,,], float[,]>(new BinaryCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,,], float[,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
-        Dropout3D dropout = new(0.80f, Random);
+        Dropout3D dropout = new(0.76f, Random);
         return
             AddLayer(new Conv1DLayer(
                 kernels: 16,
@@ -58,13 +65,13 @@ internal class Ecg200Model(SeededRandom? random)
 internal class Ecg200
 {
     private const int RandomSeed = 44; // From Mickiewicz's poetry.
-    private const int Epochs = 400;
+    private const int Epochs = 340;
     private const int BatchSize = 25;
     private const int EvalEveryEpochs = 20;
     private const int LogEveryEpochs = 10;
 
-    private const float InitialLearningRate = 0.006f;
-    private const float FinalLearningRate = 0.003f;
+    private const float InitialLearningRate = 0.009f;
+    private const float FinalLearningRate = 0.00165f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
 
@@ -112,7 +119,7 @@ internal class Ecg200
 
         WriteLine("\nStart training...");
 
-        LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
+        LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 0);
         Trainer3D trainer = new(
             model,
             // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
