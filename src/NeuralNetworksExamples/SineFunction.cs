@@ -23,8 +23,8 @@ using static System.Console;
 namespace NeuralNetworksExamples;
 
 /*
-Train loss (average): 8,890273E-05
-Test loss: 7,955757E-05
+Train loss (average): 0,0003026913
+Test loss: 0,0002103021
 */
 
 internal class SineFunctionModel(SeededRandom? random)
@@ -54,7 +54,7 @@ internal class SineFunction
         for (int i = 0; i < sampleCount; i++)
         {
             float x = -MathF.PI + 2 * MathF.PI * i / sampleCount;
-            float y = MathF.Sin(x);
+            float y = x * MathF.Sin(x);
             data.Add((x, y));
         }
 
@@ -154,9 +154,6 @@ internal class SineFunction
         float[,] predictions = model.Forward(xTest, true);
         foreach (int sampleIndex in showTestSamples)
         {
-            //float predictedValue = predictions[sampleIndex, 0];
-            //float actualValue = yTest![sampleIndex, 0];
-
             float predictedValue = predictions[sampleIndex, 0] * yStdDev + yMean;
             float actualValue = yTest[sampleIndex, 0] * yStdDev + yMean;
 
