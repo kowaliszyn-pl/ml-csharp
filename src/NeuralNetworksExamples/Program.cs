@@ -36,7 +36,7 @@ internal static class Program
             bool fromSubmenu = false;
             Console.WriteLine("Select a routine to run (Neural Networks Examples):");
             Console.WriteLine("B. Select operation backend");
-            Console.WriteLine("F. Function data set");
+            Console.WriteLine("S. Sine function approximation");
             Console.WriteLine("1. Boston Housing data set (custom model)");
             Console.WriteLine("2. Boston Housing data set (generic model)");
             Console.WriteLine("D. MNIST data set (dense layers)");
@@ -57,8 +57,8 @@ internal static class Program
                     Console.WriteLine();
                     fromSubmenu = true;
                     break;
-                case "F":
-                    Function.Run();
+                case "S":
+                    SineFunction.Run();
                     break;
                 case "1":
                     BostonHousing.Run(true);

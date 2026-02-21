@@ -64,7 +64,7 @@ internal class Ecg200Model(SeededRandom? random)
 
 internal class Ecg200
 {
-    private const int RandomSeed = 260221; // From Mickiewicz's poetry.
+    private const int RandomSeed = 260221;
     private const int Epochs = 340;
     private const int BatchSize = 25;
     private const int EvalEveryEpochs = 20;
