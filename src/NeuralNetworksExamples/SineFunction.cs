@@ -147,7 +147,7 @@ internal class SineFunction
 
         // Show predictions for the test set
 
-        int[] showTestSamples = { 0, 1, 2, testSize - 3, testSize - 2, testSize - 1 };
+        int[] showTestSamples = [0, 1, 2, testSize - 3, testSize - 2, testSize - 1];
 
         // Do a forward pass for all test samples at once
 
