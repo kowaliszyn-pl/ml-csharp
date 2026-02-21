@@ -25,10 +25,10 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 /*
-Train loss(average): 0,1799204
-Test loss: 0,31930596
-Train eval: 97,00%
-Test eval: 87,00%
+Train loss (average): 0,16014086
+Test loss: 0,3037759
+Train eval: 96,00%
+Test eval: 89,00%
 */
 
 internal class Ecg200Model(SeededRandom? random)
@@ -64,7 +64,7 @@ internal class Ecg200Model(SeededRandom? random)
 
 internal class Ecg200
 {
-    private const int RandomSeed = 44; // From Mickiewicz's poetry.
+    private const int RandomSeed = 260221; // From Mickiewicz's poetry.
     private const int Epochs = 340;
     private const int BatchSize = 25;
     private const int EvalEveryEpochs = 20;
