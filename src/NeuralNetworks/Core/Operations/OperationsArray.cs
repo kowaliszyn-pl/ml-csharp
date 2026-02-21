@@ -137,6 +137,44 @@ public class OperationsArray : IOperations
         return inputGradient;
     }
 
+    public virtual float[,,] LeakyReLUOutput(float[,,] input, float alpha = 0.01F, float beta = 1)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        float[,,] output = new float[dim1, dim2, dim3];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    output[i, j, k] = input[i, j, k] > 0 ? input[i, j, k] * beta : input[i, j, k] * alpha;
+                }
+            }
+        }
+        return output;
+    }
+
+    public virtual float[,,] LeakyReLUInputGradient(float[,,] outputGradient, float[,,] input, float alfa, float beta)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+        int dim3 = input.GetLength(2);
+        float[,,] inputGradient = new float[dim1, dim2, dim3];
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    inputGradient[i, j, k] = input[i, j, k] > 0 ? outputGradient[i, j, k] * beta : outputGradient[i, j, k] * alfa;
+                }
+            }
+        }
+        return inputGradient;
+    }
+
     public virtual float[,] LeakyReLUOutput(float[,] input, float alpha = 0.01f, float beta = 1f)
     {
         int rows = input.GetLength(0);
@@ -233,7 +271,7 @@ public class OperationsArray : IOperations
             {
                 for (int k = 0; k < dim3; k++)
                 {
-                        inputGradient[i, j, k] = input[i, j, k] > 0 ? outputGradient[i, j, k] * beta : 0f;
+                    inputGradient[i, j, k] = input[i, j, k] > 0 ? outputGradient[i, j, k] * beta : 0f;
                 }
             }
         }
