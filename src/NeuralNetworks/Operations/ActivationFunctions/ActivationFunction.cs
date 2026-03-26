@@ -12,7 +12,7 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 /// the contract for operations that transform 2D tensors (e.g., matrices or 2D feature maps), and are typically
 /// used in layers processing spatial data without an explicit channel dimension. Concrete implementations should
 /// provide the forward activation and, where applicable, support gradient computation for backpropagation by
-/// deriving from <see cref="Operation2D"/>.
+/// deriving from <see cref="Operation"/>.
 /// </remarks>
 public abstract class ActivationFunction<TIn, TOut> : Operation<TIn, TOut>
     where TIn : notnull

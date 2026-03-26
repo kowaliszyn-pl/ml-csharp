@@ -140,6 +140,55 @@ internal class Ecg200
             saveParamsOnBestLoss: true,
             showTrainEval: true
         );
+
+        // Now let's display some examples of predictions vs actual values for the test set.
+
+        float[,] results = model.Forward(xTest, true);
+
+        // We want to show the following examples (indexes in the test set):
+        // 1. A normal case (class 1) that was correctly predicted as normal
+        // 2. An abnormal case (class 0) that was correctly predicted as abnormal
+        // 3. A normal case (class 1) that was incorrectly predicted as abnormal
+        // 4. An abnormal case (class 0) that was incorrectly predicted as normal
+
+        int normalCorrectIndex = -1, abnormalCorrectIndex = -1, normalIncorrectIndex = -1, abnormalIncorrectIndex = -1;
+
+        for (int i = 0; i < results.GetLength(0); i++)
+        {
+            if(results[i, 0] >= 0.5f && yTest[i, 0] == 1f && normalCorrectIndex == -1)
+            {
+                normalCorrectIndex = i;
+            }
+            else if(results[i, 0] < 0.5f && yTest[i, 0] == 0f && abnormalCorrectIndex == -1)
+            {
+                abnormalCorrectIndex = i;
+            }
+            else if(results[i, 0] < 0.5f && yTest[i, 0] == 1f && normalIncorrectIndex == -1)
+            {
+                normalIncorrectIndex = i;
+            }
+            else if(results[i, 0] >= 0.5f && yTest[i, 0] == 0f && abnormalIncorrectIndex == -1)
+            {
+                abnormalIncorrectIndex = i;
+            }
+             if(normalCorrectIndex != -1 && abnormalCorrectIndex != -1 && normalIncorrectIndex != -1 && abnormalIncorrectIndex != -1)
+             {
+                break; // we found all examples
+            }
+        }
+
+        // Print the results
+        WriteLine("Examples of predictions vs actual values for the test set:");
+        WriteLine($"1. Normal case correctly predicted as normal. {DescribeThePrediction(normalCorrectIndex)}");
+        WriteLine($"2. Abnormal case correctly predicted as abnormal. {DescribeThePrediction(abnormalCorrectIndex)}");
+        WriteLine($"3. Normal case incorrectly predicted as abnormal. {DescribeThePrediction(normalIncorrectIndex)}");
+        WriteLine($"4. Abnormal case incorrectly predicted as normal. {DescribeThePrediction(abnormalIncorrectIndex)}");
+        WriteLine();
+
+        string DescribeThePrediction(int index)
+        {
+            return $"Index: {index}, predicted probability of being normal: {results[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}";
+        }
     }
 
     private static readonly EvalFunction<float[,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
