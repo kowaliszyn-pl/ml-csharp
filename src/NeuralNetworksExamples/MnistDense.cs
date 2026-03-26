@@ -136,7 +136,13 @@ internal class MnistDense
             displayDescriptionOnStart: true
         );
 
+        // Display some examples of predictions vs actual values for the test set for the digit "3", which is the most difficult digit to classify in the MNIST dataset (as Copilot says, I don't know if it's true 😉)
+
+        float[,] logits = model.Forward(xTest, true);
+        Utils.DisplayDigit3PredictionExamples(yTest, logits);
+
         // Save the model
+
         string modelPath = $"{ModelName}.json";
         model.SaveParams(modelPath, "Final trained model.");
         File.WriteAllText($"{ModelName}.stats", $"{mean};{stdDev}");

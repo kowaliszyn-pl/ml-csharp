@@ -171,21 +171,22 @@ internal class Ecg200
             {
                 abnormalIncorrectIndex = i;
             }
-             if(normalCorrectIndex != -1 && abnormalCorrectIndex != -1 && normalIncorrectIndex != -1 && abnormalIncorrectIndex != -1)
-             {
+            
+            if(normalCorrectIndex != -1 && abnormalCorrectIndex != -1 && normalIncorrectIndex != -1 && abnormalIncorrectIndex != -1)
+            {
                 break; // we found all examples
             }
         }
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the test set:");
-        WriteLine($"1. Normal case correctly predicted as normal. {DescribeThePrediction(normalCorrectIndex)}");
-        WriteLine($"2. Abnormal case correctly predicted as abnormal. {DescribeThePrediction(abnormalCorrectIndex)}");
-        WriteLine($"3. Normal case incorrectly predicted as abnormal. {DescribeThePrediction(normalIncorrectIndex)}");
-        WriteLine($"4. Abnormal case incorrectly predicted as normal. {DescribeThePrediction(abnormalIncorrectIndex)}");
+        WriteLine($"1. Normal case correctly predicted as normal. {FormatPredictionDetails(normalCorrectIndex)}");
+        WriteLine($"2. Abnormal case correctly predicted as abnormal. {FormatPredictionDetails(abnormalCorrectIndex)}");
+        WriteLine($"3. Normal case incorrectly predicted as abnormal. {FormatPredictionDetails(normalIncorrectIndex)}");
+        WriteLine($"4. Abnormal case incorrectly predicted as normal. {FormatPredictionDetails(abnormalIncorrectIndex)}");
         WriteLine();
 
-        string DescribeThePrediction(int index)
+        string FormatPredictionDetails(int index)
         {
             return $"Index: {index}, predicted probability of being normal: {results[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}";
         }

@@ -55,7 +55,7 @@ internal class MnistConvModel(SeededRandom? random)
 internal class MnistCnn
 {
     private const int RandomSeed = 44; // From Mickiewicz's poetry.
-    private const int Epochs = 3; // 15;
+    private const int Epochs = 1; // 15;
     private const int BatchSize = 400;
     private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
@@ -131,6 +131,11 @@ internal class MnistCnn
             batchSize: BatchSize,
             saveParamsOnBestLoss: false
         );
+
+        // Display some examples of predictions vs actual values for the test set for the digit "3", which is the most difficult digit to classify in the MNIST dataset (as Copilot says, I don't know if it's true 😉)
+
+        float[,] logits = model.Forward(xTest, true);
+        Utils.DisplayDigit3PredictionExamples(yTest, logits);
     }
 
     private static readonly EvalFunction<float[,,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
