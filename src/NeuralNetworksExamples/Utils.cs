@@ -10,7 +10,7 @@ namespace NeuralNetworksExamples;
 
 internal static class Utils
 {
-    public static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] xTest)
+    public static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages)
     {
         int[] results = logits.Argmax();
 
@@ -50,10 +50,10 @@ internal static class Utils
             }
         }
 
-        SaveMnistPicture(200, correctlyPredicted3, xTest);
-        SaveMnistPicture(200, correctlyPredictedNot3, xTest);
-        SaveMnistPicture(200, incorrectlyPredicted3, xTest);
-        SaveMnistPicture(200, incorrectlyPredictedNot3, xTest);
+        SaveMnistPicture(200, correctlyPredicted3, testImages, "correctlyPredicted3");
+        SaveMnistPicture(200, correctlyPredictedNot3, testImages, "correctlyPredictedNot3");
+        SaveMnistPicture(200, incorrectlyPredicted3, testImages, "incorrectlyPredicted3");
+        SaveMnistPicture(200, incorrectlyPredictedNot3, testImages, "incorrectlyPredictedNot3");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the digit \"3\":");
@@ -61,7 +61,7 @@ internal static class Utils
         WriteLine($"2. Not \"3\" that was correctly predicted as not \"3\": index {correctlyPredictedNot3}");
         WriteLine($"3. \"3\" that was incorrectly predicted as not \"3\": index {incorrectlyPredicted3}");
         WriteLine($"4. Not \"3\" that was incorrectly predicted as \"3\": index {incorrectlyPredictedNot3}");
-        WriteLine("The corresponding images have been saved as JPG files in the current directory with names based on their indexes (e.g., \"mnist_image_0.jpg\", \"mnist_image_1.jpg\", etc.).");
+        WriteLine($"The corresponding images have been saved as JPG files in the current bin directory with names based on their indexes: \"mnist_image_{correctlyPredicted3}.jpg\", \"mnist_image_{correctlyPredictedNot3}.jpg\", \"mnist_image_{incorrectlyPredicted3}.jpg\".");
         WriteLine();
     }
 
@@ -87,7 +87,7 @@ internal static class Utils
     /// </param>
     /// <returns>The full file path of the saved JPG image file.</returns>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Display one warning at begining of the method")]
-    public static string SaveMnistPicture(int size, int index, float[,] mnistData)
+    public static string SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
     {
 
 #warning The SaveMnistPicture method uses System.Drawing, which may not be fully supported on all platforms. Ensure that the necessary dependencies are available and that the application is run in an environment that supports System.Drawing (e.g., Windows).
@@ -116,7 +116,7 @@ internal static class Utils
             g.DrawImage(source, 0, 0, size, size);
         }
 
-        string fileName = $"mnist_image_{index}.jpg";
+        fileName = $"mnist_image_{fileName}.jpg";
         string filePath = Path.Combine(System.IO.Directory.GetCurrentDirectory(), fileName);
         resized.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
 

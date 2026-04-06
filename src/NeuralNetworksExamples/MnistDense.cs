@@ -57,7 +57,7 @@ internal class MnistDenseModel: BaseModel<float[,], float[,]>
 internal class MnistDense
 {
     private const int RandomSeed = 44; // From Mickiewicz's poetry.
-    private const int Epochs = 15;
+    private const int Epochs = 2; // 15;
     private const int BatchSize = 400;
     private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
@@ -80,6 +80,7 @@ internal class MnistDense
 
         (float[,] xTrain, float[,] yTrain) = Split(train);
         (float[,] xTest, float[,] yTest) = Split(test);
+        float[,] testImagesForDrawing = (float[,])xTest.Clone();
 
         // Standardize data
         // We can standardize all features (columns) together because they are all in the same scale (pixel values from 0 to 255) and have similar meaning (brightness). We calculate mean and stdDev on the training set only, because in a real-world scenario we would not have access to the test set during training.
@@ -139,7 +140,7 @@ internal class MnistDense
         // Display some examples of predictions vs actual values for the test set for the digit "3", which is the most difficult digit to classify in the MNIST dataset (as Copilot says, I don't know if it's true 😉)
 
         float[,] logits = model.Forward(xTest, true);
-        Utils.DisplayDigit3PredictionExamples(yTest, logits, xTest);
+        Utils.DisplayDigit3PredictionExamples(yTest, logits, testImagesForDrawing);
 
         // Save the model
 
