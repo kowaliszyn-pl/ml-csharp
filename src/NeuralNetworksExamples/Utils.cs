@@ -20,49 +20,80 @@ internal static class Utils
         // 3. "3" that was incorrectly predicted as not "3"
         // 4. Not "3" that was incorrectly predicted as "3"
 
-        int correctlyPredicted3 = -1, correctlyPredictedNot3 = -1, incorrectlyPredicted3 = -1, incorrectlyPredictedNot3 = -1;
+        int correctlyPredicted3Index = -1, correctlyPredictedNot3Index = -1, incorrectlyPredicted3Index = -1, incorrectlyPredictedNot3Index = -1;
+        int correctlyPredicted3Label = -1, correctlyPredictedNot3Label = -1, incorrectlyPredicted3Label = -1, incorrectlyPredictedNot3Label = -1;
+        int predicited = -1;
         int rows = results.Length;
 
         for (int i = 0; i < rows; i++)
         {
             bool is3Predicted = results[i] == 3;
             bool is3Actual = yTest[i, 3] == 1f;
-            if (is3Predicted && is3Actual && correctlyPredicted3 == -1) // predicted digit is "3" and actual digit is "3"
+
+            // Correctly predicted
+            if (is3Predicted && is3Actual && correctlyPredicted3Index == -1) // predicted digit is "3" and actual digit is "3"
             {
-                correctlyPredicted3 = i;
+                correctlyPredicted3Index = i;
+                correctlyPredicted3Label = FindDigit(yTest, i);
             }
-            else if (!is3Predicted && !is3Actual && correctlyPredictedNot3 == -1) // predicted digit is not "3" and actual digit is not "3"
+            else if (!is3Predicted && !is3Actual && correctlyPredictedNot3Index == -1) // predicted digit is not "3" and actual digit is not "3"
             {
-                correctlyPredictedNot3 = i;
-            }
-            else if (!is3Predicted && is3Actual && incorrectlyPredicted3 == -1) // predicted digit is not "3" but actual digit is "3"
-            {
-                incorrectlyPredicted3 = i;
-            }
-            else if (is3Predicted && !is3Actual && incorrectlyPredictedNot3 == -1) // predicted digit is "3" but actual digit is not "3"
-            {
-                incorrectlyPredictedNot3 = i;
+                correctlyPredictedNot3Index = i;
+                correctlyPredictedNot3Label = FindDigit(yTest, i);
             }
 
-            if (correctlyPredicted3 != -1 && correctlyPredictedNot3 != -1 && incorrectlyPredicted3 != -1 && incorrectlyPredictedNot3 != -1)
+            // Incorrectly predicted
+            else if (!is3Predicted && is3Actual && incorrectlyPredictedNot3Index == -1) // predicted digit is not "3" but actual digit is "3"
+            {
+                incorrectlyPredictedNot3Index = i;
+                incorrectlyPredictedNot3Label = FindDigit(yTest, i);
+                predicited = results[i];
+            }
+            else if (is3Predicted && !is3Actual && incorrectlyPredicted3Index == -1) // predicted digit is "3" but actual digit is not "3"
+            {
+                incorrectlyPredicted3Index = i;
+                incorrectlyPredicted3Label = FindDigit(yTest, i);
+            }
+
+            if (correctlyPredicted3Index != -1 && correctlyPredictedNot3Index != -1 && incorrectlyPredicted3Index != -1 && incorrectlyPredictedNot3Index != -1)
             {
                 break; // we found all examples
             }
         }
 
-        SaveMnistPicture(200, correctlyPredicted3, testImages, "correctlyPredicted3");
-        SaveMnistPicture(200, correctlyPredictedNot3, testImages, "correctlyPredictedNot3");
-        SaveMnistPicture(200, incorrectlyPredicted3, testImages, "incorrectlyPredicted3");
-        SaveMnistPicture(200, incorrectlyPredictedNot3, testImages, "incorrectlyPredictedNot3");
+        // Correctly predicted
+        SaveMnistPicture(200, correctlyPredicted3Index, testImages, $"correctlyPredicted3_its{correctlyPredicted3Label}");
+        SaveMnistPicture(200, correctlyPredictedNot3Index, testImages, $"correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
+
+        // Incorrectly predicted
+        SaveMnistPicture(200, incorrectlyPredictedNot3Index, testImages, $"incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
+        SaveMnistPicture(200, incorrectlyPredicted3Index, testImages, $"incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the digit \"3\":");
-        WriteLine($"1. \"3\" that was correctly predicted as \"3\": index {correctlyPredicted3}");
-        WriteLine($"2. Not \"3\" that was correctly predicted as not \"3\": index {correctlyPredictedNot3}");
-        WriteLine($"3. \"3\" that was incorrectly predicted as not \"3\": index {incorrectlyPredicted3}");
-        WriteLine($"4. Not \"3\" that was incorrectly predicted as \"3\": index {incorrectlyPredictedNot3}");
-        WriteLine($"The corresponding images have been saved as JPG files in the current bin directory with names based on their indexes: \"mnist_image_{correctlyPredicted3}.jpg\", \"mnist_image_{correctlyPredictedNot3}.jpg\", \"mnist_image_{incorrectlyPredicted3}.jpg\".");
+
+        // Correctly predicted
+        WriteLine($"1. \"{correctlyPredicted3Label}\" that was correctly predicted as \"3\": index {correctlyPredicted3Index}");
+        WriteLine($"2. \"{correctlyPredictedNot3Label}\" that was correctly predicted as not \"3\": index {correctlyPredictedNot3Index}");
+
+        // Incorrectly predicted
+        WriteLine($"3. \"{incorrectlyPredictedNot3Label}\" that was incorrectly predicted as not \"3\" (but \"{predicited}\"): index {incorrectlyPredictedNot3Index}");
+        WriteLine($"4. \"{incorrectlyPredicted3Label}\" that was incorrectly predicted as \"3\": index {incorrectlyPredicted3Index}");
+
+        WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
         WriteLine();
+    }
+
+    private static int FindDigit(float[,] yTest, int row)
+    {
+        for (int digit = 0; digit < 10; digit++)
+        {
+            if(yTest[row, digit] == 1f)
+            {
+                return digit;
+            }
+        }
+        throw new Exception("No 1 found in the row.");
     }
 
     /// <summary>
