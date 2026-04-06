@@ -25,8 +25,9 @@ internal static class Utils
         // 4. Not "3" that was incorrectly predicted as "3"
 
         int correctlyPredicted3Index = -1, correctlyPredictedNot3Index = -1, incorrectlyPredicted3Index = -1, incorrectlyPredictedNot3Index = -1;
+        int correctlyPredicted3Count = 0, correctlyPredictedNot3Count = 0, incorrectlyPredicted3Count = 0, incorrectlyPredictedNot3Count = 0;
         int correctlyPredicted3Label = -1, correctlyPredictedNot3Label = -1, incorrectlyPredicted3Label = -1, incorrectlyPredictedNot3Label = -1;
-        int predicited = -1;
+        int correctlyPredictedDigit = -1, incorrectlyPredictedDigit = -1;
         int rows = results.Length;
 
         for (int i = 0; i < rows; i++)
@@ -35,33 +36,45 @@ internal static class Utils
             bool is3Actual = yTest[i, 3] == 1f;
 
             // Correctly predicted
-            if (is3Predicted && is3Actual && correctlyPredicted3Index == -1) // predicted digit is "3" and actual digit is "3"
+            if (is3Predicted && is3Actual) // predicted digit is "3" and actual digit is "3"
             {
-                correctlyPredicted3Index = i;
-                correctlyPredicted3Label = FindDigit(yTest, i);
+                if (correctlyPredicted3Index == -1)
+                {
+                    correctlyPredicted3Index = i;
+                    correctlyPredicted3Label = FindDigit(yTest, i);
+                }
+                correctlyPredicted3Count++;
             }
-            else if (!is3Predicted && !is3Actual && correctlyPredictedNot3Index == -1) // predicted digit is not "3" and actual digit is not "3"
+            else if (!is3Predicted && !is3Actual) // predicted digit is not "3" and actual digit is not "3"
             {
-                correctlyPredictedNot3Index = i;
-                correctlyPredictedNot3Label = FindDigit(yTest, i);
+                if (correctlyPredictedNot3Index == -1)
+                {
+                    correctlyPredictedNot3Index = i;
+                    correctlyPredictedNot3Label = FindDigit(yTest, i);
+                    correctlyPredictedDigit = results[i];
+                }
+                correctlyPredictedNot3Count++;
             }
 
             // Incorrectly predicted
-            else if (!is3Predicted && is3Actual && incorrectlyPredictedNot3Index == -1) // predicted digit is not "3" but actual digit is "3"
+            else if (!is3Predicted && is3Actual) // predicted digit is not "3" but actual digit is "3"
             {
-                incorrectlyPredictedNot3Index = i;
-                incorrectlyPredictedNot3Label = FindDigit(yTest, i);
-                predicited = results[i];
+                if (incorrectlyPredictedNot3Index == -1)
+                {
+                    incorrectlyPredictedNot3Index = i;
+                    incorrectlyPredictedNot3Label = FindDigit(yTest, i);
+                    incorrectlyPredictedDigit = results[i];
+                }
+                incorrectlyPredictedNot3Count++;
             }
-            else if (is3Predicted && !is3Actual && incorrectlyPredicted3Index == -1) // predicted digit is "3" but actual digit is not "3"
+            else if (is3Predicted && !is3Actual) // predicted digit is "3" but actual digit is not "3"
             {
-                incorrectlyPredicted3Index = i;
-                incorrectlyPredicted3Label = FindDigit(yTest, i);
-            }
-
-            if (correctlyPredicted3Index != -1 && correctlyPredictedNot3Index != -1 && incorrectlyPredicted3Index != -1 && incorrectlyPredictedNot3Index != -1)
-            {
-                break; // we have found all examples
+                if (incorrectlyPredicted3Index == -1)
+                {
+                    incorrectlyPredicted3Index = i;
+                    incorrectlyPredicted3Label = FindDigit(yTest, i);
+                }
+                incorrectlyPredicted3Count++;
             }
         }
 
@@ -77,12 +90,12 @@ internal static class Utils
         WriteLine("Examples of predictions vs actual values for the digit \"3\":");
 
         // Correctly predicted
-        WriteLine($"1. \"{correctlyPredicted3Label}\" that was correctly predicted as \"3\": index {correctlyPredicted3Index}");
-        WriteLine($"2. \"{correctlyPredictedNot3Label}\" that was correctly predicted as not \"3\": index {correctlyPredictedNot3Index}");
+        WriteLine($"1. \"{correctlyPredicted3Label}\" that was correctly predicted as \"3\": index {correctlyPredicted3Index}, count {correctlyPredicted3Count}");
+        WriteLine($"2. \"{correctlyPredictedNot3Label}\" that was correctly predicted as not \"3\" (but \"{correctlyPredictedDigit}\"): index {correctlyPredictedNot3Index}, count {correctlyPredictedNot3Count}");
 
         // Incorrectly predicted
-        WriteLine($"3. \"{incorrectlyPredictedNot3Label}\" that was incorrectly predicted as not \"3\" (but \"{predicited}\"): index {incorrectlyPredictedNot3Index}");
-        WriteLine($"4. \"{incorrectlyPredicted3Label}\" that was incorrectly predicted as \"3\": index {incorrectlyPredicted3Index}");
+        WriteLine($"3. \"{incorrectlyPredictedNot3Label}\" that was incorrectly predicted as not \"3\" (but \"{incorrectlyPredictedDigit}\"): index {incorrectlyPredictedNot3Index}, count {incorrectlyPredicted3Count}");
+        WriteLine($"4. \"{incorrectlyPredicted3Label}\" that was incorrectly predicted as \"3\": index {incorrectlyPredicted3Index}, count {incorrectlyPredictedNot3Count}");
 
         WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
         WriteLine();
