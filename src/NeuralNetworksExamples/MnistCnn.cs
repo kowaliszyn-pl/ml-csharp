@@ -74,8 +74,8 @@ internal class MnistCnn
         float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_train_small.csv");
         float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_test.csv");
 
-        (float[,,,] xTrain, float[,] yTrain) = Split(train);
-        (float[,,,] xTest, float[,] yTest) = Split(test);
+        (float[,,,] xTrain, float[,] yTrain, _) = Split(train);
+        (float[,,,] xTest, float[,] yTest, float[,] xTest2D) = Split(test);
 
         // Standardize data
         // We can standardize all features (columns) together because they are all in the same scale (pixel values from 0 to 255) and have similar meaning (brightness). We calculate mean and stdDev on the training set only, because in a real-world scenario we would not have access to the test set during training.
@@ -135,7 +135,7 @@ internal class MnistCnn
         // Display some examples of predictions vs actual values for the test set for the digit "3", which is the most difficult digit to classify in the MNIST dataset (as Copilot says, I don't know if it's true 😉)
 
         float[,] logits = model.Forward(xTest, true);
-        Utils.DisplayDigit3PredictionExamples(yTest, logits);
+        Utils.DisplayDigit3PredictionExamples(yTest, logits, xTest2D);
     }
 
     private static readonly EvalFunction<float[,,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
@@ -171,7 +171,7 @@ internal class MnistCnn
         return accuracy;
     };
 
-    private static (float[,,,] xTest, float[,] yTest) Split(float[,] source)
+    private static (float[,,,] xTest, float[,] yTest, float[,] xTest2D) Split(float[,] source)
     {
         // Split into xTest (all columns except the first one) and yTest (a one-hot table from the first column with values from 0 to 9).
 
@@ -203,6 +203,6 @@ internal class MnistCnn
             }
         }
 
-        return (xTest4D, oneHot);
+        return (xTest4D, oneHot, xTest2D);
     }
 }
