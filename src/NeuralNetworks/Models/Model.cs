@@ -173,18 +173,18 @@ public abstract class Model<TInputData, TPrediction>
             {
                 Forward(initializationSample, inference: true);
             }
-            else if (modelParams.InputShape is not null)
+            else if (modelParams.Input is not null)
             {
-                TInputData syntheticSample = modelParams.InputShape.CreateSyntheticSample<TInputData>(true);
+                TInputData syntheticSample = modelParams.Input.CreateSyntheticSample<TInputData>(true);
                 Forward(syntheticSample, inference: true);
             }
             else
                 throw new InvalidOperationException("Model layers are not initialized. Provide an initialization sample via LoadParams(string, TInputData) or ensure the weights file contains input shape metadata.");
         }
 
-        if (_inputShape is null && modelParams.InputShape is not null)
+        if (_inputShape is null && modelParams.Input is not null)
         {
-            _inputShape = modelParams.InputShape;
+            _inputShape = modelParams.Input;
         }
 
         // Apply parameters to each layer
@@ -197,7 +197,7 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    private sealed record ModelParams(int Version, List<string> Architecture, string? Comment, ModelInputShape InputShape, List<LayerParams> Layers);
+    private sealed record ModelParams(int Version, List<string> ArchitectureDescription, string? Comment, ModelInputShape Input, List<LayerParams> Layers);
 
     #endregion Serialization
 

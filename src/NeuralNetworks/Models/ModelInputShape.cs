@@ -4,7 +4,7 @@
 
 namespace NeuralNetworks.Models;
 
-internal sealed record ModelInputShape(string InputType, int[] Dimensions)
+internal sealed record ModelInputShape(string InputType, int[] Shape)
 {
     internal T CreateSyntheticSample<T>(bool firstRowOnly) where T : notnull
     {
@@ -16,13 +16,13 @@ internal sealed record ModelInputShape(string InputType, int[] Dimensions)
         Type elementType = typeof(T).GetElementType()
             ?? throw new InvalidOperationException($"Unable to determine element type for '{typeof(T)}'.");
 
-        if (Dimensions is null || Dimensions.Length == 0)
+        if (Shape is null || Shape.Length == 0)
             throw new InvalidOperationException("Persisted input shape is empty.");
 
         if (firstRowOnly)
-            Dimensions[0] = 1;
+            Shape[0] = 1;
 
-        Array sample = Array.CreateInstance(elementType, Dimensions);
+        Array sample = Array.CreateInstance(elementType, Shape);
         return (T)(object)sample;
     }
 }

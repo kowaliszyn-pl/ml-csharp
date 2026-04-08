@@ -71,7 +71,7 @@ public class Trainer<TInputData, TPrediction>(
         bool restart = true,
         bool displayDescriptionOnStart = true,
         bool operationBackendTimingEnabled = false,
-        bool saveParamsOnBestLoss = true,
+        bool saveParamsOnBestLoss = false,
         bool showTrainEval = false
     )
     {

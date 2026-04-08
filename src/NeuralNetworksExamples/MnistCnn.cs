@@ -135,7 +135,7 @@ internal class MnistCnn
         // Display some examples of predictions vs actual values for the test set for the digit "3", which is the most difficult digit to classify in the MNIST dataset (as Copilot says, I don't know if it's true 😉)
 
         float[,] logits = model.Forward(xTest, true);
-        Utils.DisplayDigit3PredictionExamples(yTest, logits, testImagesForDrawing);
+        Utils.DisplayDigit3PredictionExamples(yTest, logits, testImagesForDrawing, "cnn");
     }
 
     private static readonly EvalFunction<float[,,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>

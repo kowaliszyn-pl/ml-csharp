@@ -14,7 +14,7 @@ internal static class Utils
 {
     private const int ImageSize = 100; // Size of the saved image in pixels
 
-    public static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages)
+    public static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
     {
         int[] results = logits.Argmax();
 
@@ -31,6 +31,7 @@ internal static class Utils
         int rows = results.Length;
 
         for (int i = 0; i < rows; i++)
+        //for (int i = rows - 1; i >= 0; i--) // reverse order to show the last examples in the test set
         {
             bool is3Predicted = results[i] == 3;
             bool is3Actual = yTest[i, 3] == 1f;
@@ -79,12 +80,12 @@ internal static class Utils
         }
 
         // Correctly predicted
-        SaveMnistPicture(ImageSize, correctlyPredicted3Index, testImages, $"correctlyPredicted3_its{correctlyPredicted3Label}");
-        SaveMnistPicture(ImageSize, correctlyPredictedNot3Index, testImages, $"correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
+        SaveMnistPicture(ImageSize, correctlyPredicted3Index, testImages, $"{prefix}_correctlyPredicted3_its{correctlyPredicted3Label}");
+        SaveMnistPicture(ImageSize, correctlyPredictedNot3Index, testImages, $"{prefix}_correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
 
         // Incorrectly predicted
-        SaveMnistPicture(ImageSize, incorrectlyPredictedNot3Index, testImages, $"incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
-        SaveMnistPicture(ImageSize, incorrectlyPredicted3Index, testImages, $"incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
+        SaveMnistPicture(ImageSize, incorrectlyPredictedNot3Index, testImages, $"{prefix}_incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
+        SaveMnistPicture(ImageSize, incorrectlyPredicted3Index, testImages, $"{prefix}_incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the digit \"3\":");
