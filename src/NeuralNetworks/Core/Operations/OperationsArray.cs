@@ -7,7 +7,8 @@ using System.Diagnostics;
 namespace NeuralNetworks.Core.Operations;
 
 /// <summary>
-/// Provides the baseline array-based CPU implementation of <see cref="IOperations"/> for deterministic reference execution.
+/// Provides the baseline array-based CPU implementation of <see cref="IOperations"/> for deterministic reference
+/// execution.
 /// </summary>
 /// <remarks>
 /// All kernels are written against standard multidimensional arrays and straightforward loops so the behavior mirrors
@@ -415,15 +416,20 @@ public class OperationsArray : IOperations
     /// Applies a bias vector to the output of a 1-dimensional convolution operation.
     /// </summary>
     /// <remarks>
-    /// Each value in the bias array is added to the corresponding channel across all batches and
-    /// positions. The method does not modify the input array.
+    /// Each value in the bias array is added to the corresponding channel across all batches and positions. The method
+    /// does not modify the input array.
     /// </remarks>
     /// <param name="input">
-    /// A three-dimensional array representing the output of a 1D convolution, with shape [batch, kernels (output channels), outputLength].
+    /// A three-dimensional array representing the output of a 1D convolution, with shape [batch, kernels (output
+    /// channels), outputLength].
     /// </param>
-    /// <param name="bias">A one-dimensional array containing the bias values to add to each channel. The length must match the number of
-    /// channels in the input.</param>
-    /// <returns>A three-dimensional array of the same shape as the input, with the bias added to each channel.</returns>
+    /// <param name="bias">
+    /// A one-dimensional array containing the bias values to add to each channel. The length must match the number of
+    /// channels in the input.
+    /// </param>
+    /// <returns>
+    /// A three-dimensional array of the same shape as the input, with the bias added to each channel.
+    /// </returns>
     public virtual float[,,] BiasAddConv1DOutput(float[,,] input, float[] bias)
     {
         int channels = input.GetLength(1);
@@ -1053,11 +1059,12 @@ public class OperationsArray : IOperations
 
     public virtual float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient)
     {
-        int inputLength = input.GetLength(2);
-
+        int batchSize = input.GetLength(0);
         int channels = input.GetLength(1);
         int length = input.GetLength(2);
-        int batchSize = outputGradient.GetLength(0);
+
+        Debug.Assert(outputGradient.GetLength(0) == batchSize, "outputGradient batch size must match input batch size.");
+        Debug.Assert(outputGradient.GetLength(1) == channels, "outputGradient channels must match input channels.");
 
         float[,,] inputGradient = new float[batchSize, channels, length];
 
@@ -1065,7 +1072,7 @@ public class OperationsArray : IOperations
         {
             for (int c = 0; c < channels; c++)
             {
-                float distributedGrad = outputGradient[b, c] / inputLength;
+                float distributedGrad = outputGradient[b, c] / length;
                 for (int l = 0; l < length; l++)
                 {
                     inputGradient[b, c, l] = distributedGrad;
