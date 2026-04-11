@@ -2,6 +2,7 @@
 // File name: Utils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 using NeuralNetworks.Core;
@@ -10,11 +11,12 @@ using static System.Console;
 
 namespace NeuralNetworksExamples;
 
+[SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Display one warning at begining of the method")]
 internal static class Utils
 {
     private const int ImageSize = 100; // Size of the saved image in pixels
 
-    public static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
+    internal static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
     {
         int[] results = logits.Argmax();
 
@@ -133,8 +135,8 @@ internal static class Utils
     /// represents a grayscale intensity value from 0 to 255.
     /// </param>
     /// <returns>The full file path of the saved JPG image file.</returns>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Display one warning at begining of the method")]
-    public static string SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
+
+    private static string SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
     {
 
 #warning The SaveMnistPicture method uses System.Drawing, which may not be fully supported on all platforms. Ensure that the necessary dependencies are available and that the application is run in an environment that supports System.Drawing (e.g., Windows).
@@ -167,4 +169,68 @@ internal static class Utils
 
         return filePath;
     }
+
+    internal static void DisplayClassificationPredictionExamples(float[,] yTest, float[,] predictions, float[,] testImages, string prefix)
+    {
+        // We want to show the following examples (indexes in the test set):
+        // 1. A normal case (class 1) that was correctly predicted as normal
+        // 2. An abnormal case (class 0) that was correctly predicted as abnormal
+        // 3. A normal case (class 1) that was incorrectly predicted as abnormal
+        // 4. An abnormal case (class 0) that was incorrectly predicted as normal
+
+        int normalCorrectIndex = -1, abnormalCorrectIndex = -1, normalIncorrectIndex = -1, abnormalIncorrectIndex = -1;
+
+        for (int i = 0; i < predictions.GetLength(0); i++)
+        {
+            if (predictions[i, 0] >= 0.5f && yTest[i, 0] == 1f && normalCorrectIndex == -1)
+            {
+                normalCorrectIndex = i;
+            }
+            else if (predictions[i, 0] < 0.5f && yTest[i, 0] == 0f && abnormalCorrectIndex == -1)
+            {
+                abnormalCorrectIndex = i;
+            }
+            else if (predictions[i, 0] < 0.5f && yTest[i, 0] == 1f && normalIncorrectIndex == -1)
+            {
+                normalIncorrectIndex = i;
+            }
+            else if (predictions[i, 0] >= 0.5f && yTest[i, 0] == 0f && abnormalIncorrectIndex == -1)
+            {
+                abnormalIncorrectIndex = i;
+            }
+
+            if (normalCorrectIndex != -1 && abnormalCorrectIndex != -1 && normalIncorrectIndex != -1 && abnormalIncorrectIndex != -1)
+            {
+                break; // we found all examples
+            }
+        }
+
+        //// Correctly predicted
+        //SaveMnistPicture(ImageSize, correctlyPredicted3Index, testImages, $"{prefix}_correctlyPredicted3_its{correctlyPredicted3Label}");
+        //SaveMnistPicture(ImageSize, correctlyPredictedNot3Index, testImages, $"{prefix}_correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
+
+        //// Incorrectly predicted
+        //SaveMnistPicture(ImageSize, incorrectlyPredictedNot3Index, testImages, $"{prefix}_incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
+        //SaveMnistPicture(ImageSize, incorrectlyPredicted3Index, testImages, $"{prefix}_incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
+
+        // Print the results
+        WriteLine("Examples of predictions vs actual values for the test set:");
+
+        // Correctly predicted
+        WriteLine($"1. Normal case correctly predicted as normal. {FormatPredictionDetails(normalCorrectIndex)}");
+        WriteLine($"2. Abnormal case correctly predicted as abnormal. {FormatPredictionDetails(abnormalCorrectIndex)}");
+
+        // Incorrectly predicted
+        WriteLine($"3. Normal case incorrectly predicted as abnormal. {FormatPredictionDetails(normalIncorrectIndex)}");
+        WriteLine($"4. Abnormal case incorrectly predicted as normal. {FormatPredictionDetails(abnormalIncorrectIndex)}");
+        
+        WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
+        WriteLine();
+
+        string FormatPredictionDetails(int index)
+        {
+            return $"Index: {index}, predicted probability of being normal: {predictions[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}";
+        }
+    }
+
 }

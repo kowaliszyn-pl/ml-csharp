@@ -86,8 +86,8 @@ internal class Ecg200
 
         // float[,] y = [batch, 0] = class 1 probability
 
-        (float[,,] xTrain, float[,] yTrain) = Split(train);
-        (float[,,] xTest, float[,] yTest) = Split(test);
+        (float[,,] xTrain, float[,] yTrain, _) = Split(train);
+        (float[,,] xTest, float[,] yTest, float[,] testImagesForDrawing) = Split(test);
 
         WriteLine("Standardize to mean 0 and variance 1 for all features together...");
 
@@ -143,53 +143,10 @@ internal class Ecg200
 
         // Now let's display some examples of predictions vs actual values for the test set.
 
-        float[,] results = model.Forward(xTest, true);
+        float[,] predictions = model.Forward(xTest, true);
+        Utils.DisplayClassificationPredictionExamples(yTest, predictions, testImagesForDrawing, "ecg200");
 
-        // We want to show the following examples (indexes in the test set):
-        // 1. A normal case (class 1) that was correctly predicted as normal
-        // 2. An abnormal case (class 0) that was correctly predicted as abnormal
-        // 3. A normal case (class 1) that was incorrectly predicted as abnormal
-        // 4. An abnormal case (class 0) that was incorrectly predicted as normal
-
-        int normalCorrectIndex = -1, abnormalCorrectIndex = -1, normalIncorrectIndex = -1, abnormalIncorrectIndex = -1;
-
-        for (int i = 0; i < results.GetLength(0); i++)
-        {
-            if(results[i, 0] >= 0.5f && yTest[i, 0] == 1f && normalCorrectIndex == -1)
-            {
-                normalCorrectIndex = i;
-            }
-            else if(results[i, 0] < 0.5f && yTest[i, 0] == 0f && abnormalCorrectIndex == -1)
-            {
-                abnormalCorrectIndex = i;
-            }
-            else if(results[i, 0] < 0.5f && yTest[i, 0] == 1f && normalIncorrectIndex == -1)
-            {
-                normalIncorrectIndex = i;
-            }
-            else if(results[i, 0] >= 0.5f && yTest[i, 0] == 0f && abnormalIncorrectIndex == -1)
-            {
-                abnormalIncorrectIndex = i;
-            }
-            
-            if(normalCorrectIndex != -1 && abnormalCorrectIndex != -1 && normalIncorrectIndex != -1 && abnormalIncorrectIndex != -1)
-            {
-                break; // we found all examples
-            }
-        }
-
-        // Print the results
-        WriteLine("Examples of predictions vs actual values for the test set:");
-        WriteLine($"1. Normal case correctly predicted as normal. {FormatPredictionDetails(normalCorrectIndex)}");
-        WriteLine($"2. Abnormal case correctly predicted as abnormal. {FormatPredictionDetails(abnormalCorrectIndex)}");
-        WriteLine($"3. Normal case incorrectly predicted as abnormal. {FormatPredictionDetails(normalIncorrectIndex)}");
-        WriteLine($"4. Abnormal case incorrectly predicted as normal. {FormatPredictionDetails(abnormalIncorrectIndex)}");
-        WriteLine();
-
-        string FormatPredictionDetails(int index)
-        {
-            return $"Index: {index}, predicted probability of being normal: {results[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}";
-        }
+        
     }
 
     private static readonly EvalFunction<float[,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
@@ -225,7 +182,7 @@ internal class Ecg200
         return accuracy;
     };
 
-    private static (float[,,] xTest, float[,] yTest) Split(float[,] source)
+    private static (float[,,] xTest, float[,] yTest, float[,] xTest2D) Split(float[,] source)
     {
         // Split into xTest (all columns except the first one) and yTest (the first column with values 1 or -1, where 1 means normal and -1 means abnormal (myocardial infarction)).
 
@@ -240,10 +197,12 @@ internal class Ecg200
             yTest[row, 0] = yTest[row, 0] == 1f ? 1f : 0f;
         }
 
-        float[,,] xTest = new float[xTest2D.GetLength(0), 1, xTest2D.GetLength(1)];
-        for (int row = 0; row < xTest2D.GetLength(0); row++)
+        int xTestRows = xTest2D.GetLength(0);
+        int xTestCols = xTest2D.GetLength(1);
+        float[,,] xTest = new float[xTestRows, 1, xTestCols];
+        for (int row = 0; row < xTestRows; row++)
         {
-            for (int col = 0; col < xTest2D.GetLength(1); col++)
+            for (int col = 0; col < xTestCols; col++)
             {
                 xTest[row, 0 /* one input channel */, col] = xTest2D[row, col];
             }
@@ -251,6 +210,6 @@ internal class Ecg200
 
         Debug.Assert(xTest.GetLength(0) == yTest.GetLength(0), "Number of samples in xTest and yTest do not match.");
 
-        return (xTest, yTest);
+        return (xTest, yTest, xTest2D);
     }
 }
