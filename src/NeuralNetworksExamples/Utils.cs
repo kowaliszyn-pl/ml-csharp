@@ -257,22 +257,26 @@ internal static class Utils
         float minValue = chartData.Min();
         float maxValue = chartData.Max();
 
-        // Draw the ECG line
-        using Pen pen = new(Color.Red, 2);
-
-        float xStep = canvasWidth / (float)(chartData.Length - 1);
-        float yScale = (maxValue - minValue) == 0 ? 1 : canvasHeight / (maxValue - minValue);
-
-        // Draw some horizontal grid lines for better visibility
-
+        // Draw some horizontal and vertical grid lines for better visibility
         using Pen gridPen = new(Color.LightGray, 1);
         for (int i = 0; i < 11; i++)
         {
             float y = canvasTop + canvasHeight * i / 10f;
             graphics.DrawLine(gridPen, canvasLeft, y, canvasLeft + canvasWidth, y);
         }
+        for(int i = 0; i < 11; i++)
+        {
+            float x = canvasLeft + canvasWidth * i / 10f;
+            graphics.DrawLine(gridPen, x, canvasTop, x, canvasTop + canvasHeight);
+        }
 
+        // Draw the ECG line
+        using Pen redPen = new(Color.Red, 2);
+
+        float xStep = canvasWidth / (float)(chartData.Length - 1);
+        float yScale = (maxValue - minValue) == 0 ? 1 : canvasHeight / (maxValue - minValue);
         int canvasBottom = canvasTop + canvasHeight;
+
         // Draw lines between consecutive points
         for (int i = 1; i < chartData.Length; i++)
         {
@@ -280,7 +284,7 @@ internal static class Utils
             float y1 = canvasBottom - ((chartData[i - 1] - minValue) * yScale);
             float x2 = canvasLeft + i * xStep;
             float y2 = canvasBottom - ((chartData[i] - minValue) * yScale);
-            graphics.DrawLine(pen, x1, y1, x2, y2);
+            graphics.DrawLine(redPen, x1, y1, x2, y2);
         }
 
         fileName = $"ecg200_chart_{fileName}.jpg";
