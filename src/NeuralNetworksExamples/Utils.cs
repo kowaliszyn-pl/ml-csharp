@@ -4,7 +4,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Drawing.Printing;
 
 using NeuralNetworks.Core;
 
