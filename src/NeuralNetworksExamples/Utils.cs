@@ -142,9 +142,6 @@ internal static class Utils
 
     private static string SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
     {
-
-
-
         float[] imageData = mnistData.GetRow(index);
 
         // Build the image from the pixel data
@@ -183,8 +180,8 @@ internal static class Utils
         // 4. An abnormal case (class 0) that was incorrectly predicted as normal
 
         int normalCorrectIndex = -1, abnormalCorrectIndex = -1, normalIncorrectIndex = -1, abnormalIncorrectIndex = -1;
-
-        for (int i = 0; i < predictions.GetLength(0); i++)
+        int rows = predictions.GetLength(0);
+        for (int i = 0; i < rows; i++)
         {
             if (predictions[i, 0] >= 0.5f && yTest[i, 0] == 1f && normalCorrectIndex == -1)
             {
@@ -237,7 +234,49 @@ internal static class Utils
         }
     }
 
-    private static void SaveEcg200Picture(int chartWidth, int chartHeight, int index, float[,] ecgData, string fileName)
+    private static string SaveEcg200Picture(int chartWidth, int chartHeight, int index, float[,] ecgData, string fileName)
     {
+        float[] chartData = ecgData.GetRow(index);
+
+        // Build the ECG chart from the data
+        using Bitmap bitmap = new(chartWidth, chartHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+        using Graphics graphics = Graphics.FromImage(bitmap);
+        graphics.Clear(Color.White);
+
+        // Find the min and max values in the data to scale the chart
+        float minValue = chartData.Min();
+        float maxValue = chartData.Max();
+
+        // Draw the ECG line
+        using Pen pen = new(Color.Red, 2);
+
+        float xStep = chartWidth / (float)(chartData.Length - 1);
+        float yScale = chartHeight / (maxValue - minValue);
+
+        // Draw some horizontal grid lines for better visibility
+
+        using Pen gridPen = new(Color.LightGray, 1);
+        for (int i = 1; i < 10; i++)
+        {
+            float y = chartHeight * i / 10f;
+            graphics.DrawLine(gridPen, 0, y, chartWidth, y);
+        }
+
+        // Draw lines between consecutive points
+        for (int i = 1; i < chartData.Length; i++)
+        {
+            float x1 = (i - 1) * xStep;
+            float y1 = chartHeight - ((chartData[i - 1] - minValue) * yScale);
+            float x2 = i * xStep;
+            float y2 = chartHeight - ((chartData[i] - minValue) * yScale);
+            graphics.DrawLine(pen, x1, y1, x2, y2);
+        }
+
+        fileName = $"ecg200_chart_{fileName}.jpg";
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+        bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+        return filePath;
     }
 }
