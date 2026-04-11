@@ -14,7 +14,11 @@ namespace NeuralNetworksExamples;
 [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Display one warning at begining of the method")]
 internal static class Utils
 {
-    private const int ImageSize = 100; // Size of the saved image in pixels
+#warning The Utils class uses System.Drawing, which may not be fully supported on all platforms. Ensure that the necessary dependencies are available and that the application is run in an environment that supports System.Drawing (e.g., Windows).
+
+    private const int DigitImageSize = 100; // Size of the saved image in pixels
+    private const int EcgChartWidth = 500; 
+    private const int EcgChartHeight = 250; 
 
     internal static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
     {
@@ -82,12 +86,12 @@ internal static class Utils
         }
 
         // Correctly predicted
-        SaveMnistPicture(ImageSize, correctlyPredicted3Index, testImages, $"{prefix}_correctlyPredicted3_its{correctlyPredicted3Label}");
-        SaveMnistPicture(ImageSize, correctlyPredictedNot3Index, testImages, $"{prefix}_correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
+        SaveMnistPicture(DigitImageSize, correctlyPredicted3Index, testImages, $"{prefix}_correctlyPredicted3_its{correctlyPredicted3Label}");
+        SaveMnistPicture(DigitImageSize, correctlyPredictedNot3Index, testImages, $"{prefix}_correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
 
         // Incorrectly predicted
-        SaveMnistPicture(ImageSize, incorrectlyPredictedNot3Index, testImages, $"{prefix}_incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
-        SaveMnistPicture(ImageSize, incorrectlyPredicted3Index, testImages, $"{prefix}_incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
+        SaveMnistPicture(DigitImageSize, incorrectlyPredictedNot3Index, testImages, $"{prefix}_incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
+        SaveMnistPicture(DigitImageSize, incorrectlyPredicted3Index, testImages, $"{prefix}_incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the digit \"3\":");
@@ -139,7 +143,7 @@ internal static class Utils
     private static string SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
     {
 
-#warning The SaveMnistPicture method uses System.Drawing, which may not be fully supported on all platforms. Ensure that the necessary dependencies are available and that the application is run in an environment that supports System.Drawing (e.g., Windows).
+
 
         float[] imageData = mnistData.GetRow(index);
 
@@ -205,13 +209,13 @@ internal static class Utils
             }
         }
 
-        //// Correctly predicted
-        //SaveMnistPicture(ImageSize, correctlyPredicted3Index, testImages, $"{prefix}_correctlyPredicted3_its{correctlyPredicted3Label}");
-        //SaveMnistPicture(ImageSize, correctlyPredictedNot3Index, testImages, $"{prefix}_correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
+        // Correctly predicted
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, normalCorrectIndex, testImages, $"{prefix}_correctlyPredictedNormal_its{yTest[normalCorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, abnormalCorrectIndex, testImages, $"{prefix}_correctlyPredictedAbnormal_its{yTest[abnormalCorrectIndex, 0]}");
 
-        //// Incorrectly predicted
-        //SaveMnistPicture(ImageSize, incorrectlyPredictedNot3Index, testImages, $"{prefix}_incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
-        //SaveMnistPicture(ImageSize, incorrectlyPredicted3Index, testImages, $"{prefix}_incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
+        // Incorrectly predicted
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, normalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedNormal_its{yTest[normalIncorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, abnormalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedAbnormal_its{yTest[abnormalIncorrectIndex, 0]}");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the test set:");
@@ -233,4 +237,7 @@ internal static class Utils
         }
     }
 
+    private static void SaveEcg200Picture(int chartWidth, int chartHeight, int index, float[,] ecgData, string fileName)
+    {
+    }
 }

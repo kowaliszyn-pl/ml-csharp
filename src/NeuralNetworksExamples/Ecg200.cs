@@ -65,7 +65,7 @@ internal class Ecg200Model(SeededRandom? random)
 internal class Ecg200
 {
     private const int RandomSeed = 260221;
-    private const int Epochs = 340;
+    private const int Epochs = 10; // 340;
     private const int BatchSize = 25;
     private const int EvalEveryEpochs = 20;
     private const int LogEveryEpochs = 10;
