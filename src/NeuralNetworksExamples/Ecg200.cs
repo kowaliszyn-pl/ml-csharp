@@ -65,7 +65,7 @@ internal class Ecg200Model(SeededRandom? random)
 internal class Ecg200
 {
     private const int RandomSeed = 260221;
-    private const int Epochs = 100; // 340;
+    private const int Epochs = 340;
     private const int BatchSize = 25;
     private const int EvalEveryEpochs = 20;
     private const int LogEveryEpochs = 10;
@@ -137,16 +137,13 @@ internal class Ecg200
             evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize,
-            saveParamsOnBestLoss: true,
             showTrainEval: true
         );
 
         // Now let's display some examples of predictions vs actual values for the test set.
 
         float[,] predictions = model.Forward(xTest, true);
-        Utils.DisplayClassificationPredictionExamples(yTest, predictions, testImagesForDrawing, "ecg200");
-
-        
+        Utils.DisplayClassificationPredictionExamples(yTest, predictions, testImagesForDrawing, "cnn");
     }
 
     private static readonly EvalFunction<float[,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>

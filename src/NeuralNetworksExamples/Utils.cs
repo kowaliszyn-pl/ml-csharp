@@ -4,6 +4,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Drawing.Printing;
 
 using NeuralNetworks.Core;
 
@@ -18,7 +19,8 @@ internal static class Utils
 
     private const int DigitImageSize = 100; // Size of the saved image in pixels
     private const int EcgChartWidth = 500; 
-    private const int EcgChartHeight = 250; 
+    private const int EcgChartHeight = 210;
+    private const int EcgChartMargin = 15;
 
     internal static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
     {
@@ -181,7 +183,8 @@ internal static class Utils
 
         int normalCorrectIndex = -1, abnormalCorrectIndex = -1, normalIncorrectIndex = -1, abnormalIncorrectIndex = -1;
         int rows = predictions.GetLength(0);
-        for (int i = 0; i < rows; i++)
+        //for (int i = 0; i < rows; i++)
+        for (int i = rows - 1; i >= 0; i--)
         {
             if (predictions[i, 0] >= 0.5f && yTest[i, 0] == 1f && normalCorrectIndex == -1)
             {
@@ -207,12 +210,12 @@ internal static class Utils
         }
 
         // Correctly predicted
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, normalCorrectIndex, testImages, $"{prefix}_correctlyPredictedNormal_its{yTest[normalCorrectIndex, 0]}");
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, abnormalCorrectIndex, testImages, $"{prefix}_correctlyPredictedAbnormal_its{yTest[abnormalCorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, normalCorrectIndex, testImages, $"{prefix}_correctlyPredictedNormal_its{yTest[normalCorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, abnormalCorrectIndex, testImages, $"{prefix}_correctlyPredictedAbnormal_its{yTest[abnormalCorrectIndex, 0]}");
 
         // Incorrectly predicted
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, normalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedNormal_its{yTest[normalIncorrectIndex, 0]}");
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, abnormalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedAbnormal_its{yTest[abnormalIncorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, normalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedNormal_its{yTest[normalIncorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, abnormalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedAbnormal_its{yTest[abnormalIncorrectIndex, 0]}");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the test set:");
@@ -234,7 +237,7 @@ internal static class Utils
         }
     }
 
-    private static string SaveEcg200Picture(int chartWidth, int chartHeight, int index, float[,] ecgData, string fileName)
+    private static string SaveEcg200Picture(int chartWidth, int chartHeight, int margin, int index, float[,] ecgData, string fileName)
     {
         float[] chartData = ecgData.GetRow(index);
 
@@ -244,6 +247,12 @@ internal static class Utils
         using Graphics graphics = Graphics.FromImage(bitmap);
         graphics.Clear(Color.White);
 
+        // Define the drawing area (canvas) inside the margins
+        int canvasLeft = margin;
+        int canvasTop = margin;
+        int canvasWidth = chartWidth - 2 * margin;
+        int canvasHeight = chartHeight - 2 * margin;
+
         // Find the min and max values in the data to scale the chart
         float minValue = chartData.Min();
         float maxValue = chartData.Max();
@@ -251,25 +260,26 @@ internal static class Utils
         // Draw the ECG line
         using Pen pen = new(Color.Red, 2);
 
-        float xStep = chartWidth / (float)(chartData.Length - 1);
-        float yScale = chartHeight / (maxValue - minValue);
+        float xStep = canvasWidth / (float)(chartData.Length - 1);
+        float yScale = (maxValue - minValue) == 0 ? 1 : canvasHeight / (maxValue - minValue);
 
         // Draw some horizontal grid lines for better visibility
 
         using Pen gridPen = new(Color.LightGray, 1);
-        for (int i = 1; i < 10; i++)
+        for (int i = 0; i < 11; i++)
         {
-            float y = chartHeight * i / 10f;
-            graphics.DrawLine(gridPen, 0, y, chartWidth, y);
+            float y = canvasTop + canvasHeight * i / 10f;
+            graphics.DrawLine(gridPen, canvasLeft, y, canvasLeft + canvasWidth, y);
         }
 
+        int canvasBottom = canvasTop + canvasHeight;
         // Draw lines between consecutive points
         for (int i = 1; i < chartData.Length; i++)
         {
-            float x1 = (i - 1) * xStep;
-            float y1 = chartHeight - ((chartData[i - 1] - minValue) * yScale);
-            float x2 = i * xStep;
-            float y2 = chartHeight - ((chartData[i] - minValue) * yScale);
+            float x1 = canvasLeft + (i - 1) * xStep;
+            float y1 = canvasBottom - ((chartData[i - 1] - minValue) * yScale);
+            float x2 = canvasLeft + i * xStep;
+            float y2 = canvasBottom - ((chartData[i] - minValue) * yScale);
             graphics.DrawLine(pen, x1, y1, x2, y2);
         }
 
