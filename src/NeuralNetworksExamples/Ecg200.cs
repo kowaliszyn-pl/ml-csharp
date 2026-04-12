@@ -169,9 +169,10 @@ internal class Ecg200
             
             float predictedProbabilityOfNormal = prediction[row, 0];
             float actualClass = yEvalTest[row, 0]; // 1 for normal, 0 for abnormal
+            bool actualNormalClass = actualClass == 1f;
 
-            if ((predictedProbabilityOfNormal >= 0.5f && actualClass == 1f) 
-                || (predictedProbabilityOfNormal < 0.5f && actualClass == 0f))
+            if ((predictedProbabilityOfNormal >= 0.5f && actualNormalClass) 
+                || (predictedProbabilityOfNormal < 0.5f && !actualNormalClass))
                 hits++;
         }
 
@@ -179,34 +180,32 @@ internal class Ecg200
         return accuracy;
     };
 
-    private static (float[,,] xTest, float[,] yTest, float[,] xTest2D) Split(float[,] source)
+    private static (float[,,] xData, float[,] yData, float[,] xData2D) Split(float[,] source)
     {
-        // Split into xTest (all columns except the first one) and yTest (the first column with values 1 or -1, where 1 means normal and -1 means abnormal (myocardial infarction)).
+        // Split into xData (all columns except the first one) and yData (the first column with values 1 or -1, where 1 means normal and -1 means abnormal (myocardial infarction)).
 
-        float[,] xTest2D = source.GetColumns(1..source.GetLength(1));
-        float[,] yTest = source.GetColumn(0);
+        float[,] xData2D = source.GetColumns(1..source.GetLength(1));
+        float[,] yData = source.GetColumn(0);
 
-        for (int row = 0; row < yTest.GetLength(0); row++)
+        for (int row = 0; row < yData.GetLength(0); row++)
         {
-            Debug.Assert(yTest[row, 0] == 1f || yTest[row, 0] == -1f, $"Expected values in the first column to be either 1 or -1, but got {yTest[row, 0]} at row {row}.");
-
-            // Convert the values in yTest to 100% for normal (1) and 0% for abnormal (-1).
-            yTest[row, 0] = yTest[row, 0] == 1f ? 1f : 0f;
+            Debug.Assert(yData[row, 0] == 1f || yData[row, 0] == -1f, $"Expected values in the first column to be either 1 or -1, but got {yData[row, 0]} at row {row}.");
+            // Convert the values in yData to 100% for normal (1) and 0% for abnormal (-1).
+            yData[row, 0] = yData[row, 0] == 1f ? 1f : 0f;
         }
 
-        int xTestRows = xTest2D.GetLength(0);
-        int xTestCols = xTest2D.GetLength(1);
-        float[,,] xTest = new float[xTestRows, 1, xTestCols];
-        for (int row = 0; row < xTestRows; row++)
+        int xDataRows = xData2D.GetLength(0);
+        int xDataCols = xData2D.GetLength(1);
+        float[,,] xData = new float[xDataRows, 1, xDataCols];
+        for (int row = 0; row < xDataRows; row++)
         {
-            for (int col = 0; col < xTestCols; col++)
+            for (int col = 0; col < xDataCols; col++)
             {
-                xTest[row, 0 /* one input channel */, col] = xTest2D[row, col];
+                xData[row, 0 /* one input channel */, col] = xData2D[row, col];
             }
         }
 
-        Debug.Assert(xTest.GetLength(0) == yTest.GetLength(0), "Number of samples in xTest and yTest do not match.");
-
-        return (xTest, yTest, xTest2D);
+        Debug.Assert(xData.GetLength(0) == yData.GetLength(0), "Number of samples in xData and yData do not match.");
+        return (xData, yData, xData2D);
     }
 }

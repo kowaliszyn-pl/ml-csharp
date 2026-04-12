@@ -171,38 +171,38 @@ internal class MnistCnn
         return accuracy;
     };
 
-    private static (float[,,,] xTest, float[,] yTest, float[,] xTest2D) Split(float[,] source)
+    private static (float[,,,] xData4D, float[,] yData, float[,] xData2D) Split(float[,] source)
     {
         // Split into xTest (all columns except the first one) and yTest (a one-hot table from the first column with values from 0 to 9).
 
-        float[,] xTest2D = source.GetColumns(1..source.GetLength(1));
-        float[,] yTest = source.GetColumn(0);
+        float[,] xData2D = source.GetColumns(1..source.GetLength(1));
+        float[,] yData = source.GetColumn(0);
 
-        Debug.Assert(xTest2D.GetLength(1) == 28 * 28);
+        Debug.Assert(xData2D.GetLength(1) == 28 * 28);
 
         // Convert yTest to a one-hot table.
-        int yTestRows = yTest.GetLength(0);
+        int yTestRows = yData.GetLength(0);
         float[,] oneHot = new float[yTestRows, 10];
         for (int row = 0; row < yTestRows; row++)
         {
-            int value = Convert.ToInt32(yTest[row, 0]);
+            int value = Convert.ToInt32(yData[row, 0]);
             oneHot[row, value] = 1f;
         }
 
-        int xTestRows = xTest2D.GetLength(0);
-        int xTestCols = xTest2D.GetLength(1);
-        float[,,,] xTest4D = new float[xTestRows, 1, 28, 28];
+        int xDataRows = xData2D.GetLength(0);
+        int xDataCols = xData2D.GetLength(1);
+        float[,,,] xData4D = new float[xDataRows, 1, 28, 28];
 
-        for (int row = 0; row < xTestRows; row++)
+        for (int row = 0; row < xDataRows; row++)
         {
-            for (int col = 0; col < xTestCols; col++)
+            for (int col = 0; col < xDataCols; col++)
             {
                 //int x = col % 28;
                 //int y = col / 28;
-                xTest4D[row, 0 /* one input channel */, col / 28, col % 28] = xTest2D[row, col];
+                xData4D[row, 0 /* one input channel */, col / 28, col % 28] = xData2D[row, col];
             }
         }
 
-        return (xTest4D, oneHot, xTest2D);
+        return (xData4D, oneHot, xData2D);
     }
 }

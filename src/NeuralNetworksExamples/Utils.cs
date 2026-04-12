@@ -180,59 +180,73 @@ internal static class Utils
         // 3. A normal case (class 1) that was incorrectly predicted as abnormal
         // 4. An abnormal case (class 0) that was incorrectly predicted as normal
 
-        int normalCorrectIndex = -1, abnormalCorrectIndex = -1, normalIncorrectIndex = -1, abnormalIncorrectIndex = -1;
+        int correctlyPredictedAsNormalIndex = -1, correctlyPredictedAsAbnormalIndex = -1, incorrectlyPredictedAsAbnormalIndex = -1, incorrectlyPredictedAsNormalIndex = -1;
+        int correctlyPredictedAsNormalCount = 0, correctlyPredictedAsAbnormalCount = 0, incorrectlyPredictedAsAbnormalCount = 0, incorrectlyPredictedAsNormalCount = 0;
         int rows = predictions.GetLength(0);
         //for (int i = 0; i < rows; i++)
         for (int i = rows - 1; i >= 0; i--)
         {
-            if (predictions[i, 0] >= 0.5f && yTest[i, 0] == 1f && normalCorrectIndex == -1)
-            {
-                normalCorrectIndex = i;
-            }
-            else if (predictions[i, 0] < 0.5f && yTest[i, 0] == 0f && abnormalCorrectIndex == -1)
-            {
-                abnormalCorrectIndex = i;
-            }
-            else if (predictions[i, 0] < 0.5f && yTest[i, 0] == 1f && normalIncorrectIndex == -1)
-            {
-                normalIncorrectIndex = i;
-            }
-            else if (predictions[i, 0] >= 0.5f && yTest[i, 0] == 0f && abnormalIncorrectIndex == -1)
-            {
-                abnormalIncorrectIndex = i;
-            }
+            bool actualNormalClass = yTest[i, 0] == 1f;
+            bool predictedNormalClass = predictions[i, 0] >= 0.5f; // predicted probability of being normal (class 1) is >= 50%
 
-            if (normalCorrectIndex != -1 && abnormalCorrectIndex != -1 && normalIncorrectIndex != -1 && abnormalIncorrectIndex != -1)
+            // A normal case (class 1) that was correctly predicted as normal
+            if (predictedNormalClass && actualNormalClass)
             {
-                break; // we found all examples
+                if(correctlyPredictedAsNormalIndex == -1)
+                    correctlyPredictedAsNormalIndex = i;
+                correctlyPredictedAsNormalCount++;
+            }
+            
+            // An abnormal case (class 0) that was correctly predicted as abnormal
+            else if (!predictedNormalClass && !actualNormalClass)
+            {
+                if(correctlyPredictedAsAbnormalIndex == -1)
+                    correctlyPredictedAsAbnormalIndex = i;
+                correctlyPredictedAsAbnormalCount++;
+            }
+            
+            // A normal case (class 1) that was incorrectly predicted as abnormal
+            else if (!predictedNormalClass && actualNormalClass)
+            {
+                if(incorrectlyPredictedAsAbnormalIndex == -1)
+                    incorrectlyPredictedAsAbnormalIndex = i;
+                incorrectlyPredictedAsAbnormalCount++;
+            }
+            
+            // An abnormal case (class 0) that was incorrectly predicted as normal
+            else if (predictedNormalClass && !actualNormalClass)
+            {
+                if(incorrectlyPredictedAsNormalIndex == -1)
+                    incorrectlyPredictedAsNormalIndex = i;
+                incorrectlyPredictedAsNormalCount++;
             }
         }
 
         // Correctly predicted
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, normalCorrectIndex, testImages, $"{prefix}_correctlyPredictedNormal_its{yTest[normalCorrectIndex, 0]}");
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, abnormalCorrectIndex, testImages, $"{prefix}_correctlyPredictedAbnormal_its{yTest[abnormalCorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, correctlyPredictedAsNormalIndex, testImages, $"{prefix}-correctlyPredictedNormal-its{yTest[correctlyPredictedAsNormalIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, correctlyPredictedAsAbnormalIndex, testImages, $"{prefix}-correctlyPredictedAbnormal-its{yTest[correctlyPredictedAsAbnormalIndex, 0]}");
 
         // Incorrectly predicted
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, normalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedNormal_its{yTest[normalIncorrectIndex, 0]}");
-        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, abnormalIncorrectIndex, testImages, $"{prefix}_incorrectlyPredictedAbnormal_its{yTest[abnormalIncorrectIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, incorrectlyPredictedAsAbnormalIndex, testImages, $"{prefix}-incorrectlyPredictedAbnormal-its{yTest[incorrectlyPredictedAsAbnormalIndex, 0]}");
+        SaveEcg200Picture(EcgChartWidth, EcgChartHeight, EcgChartMargin, incorrectlyPredictedAsNormalIndex, testImages, $"{prefix}-incorrectlyPredictedNormal-its{yTest[incorrectlyPredictedAsNormalIndex, 0]}");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the test set:");
 
         // Correctly predicted
-        WriteLine($"1. Normal case correctly predicted as normal. {FormatPredictionDetails(normalCorrectIndex)}");
-        WriteLine($"2. Abnormal case correctly predicted as abnormal. {FormatPredictionDetails(abnormalCorrectIndex)}");
+        WriteLine($"1. Normal case correctly predicted as normal. {FormatPredictionDetails(correctlyPredictedAsNormalIndex, correctlyPredictedAsNormalCount)}");
+        WriteLine($"2. Abnormal case correctly predicted as abnormal. {FormatPredictionDetails(correctlyPredictedAsAbnormalIndex, correctlyPredictedAsAbnormalCount)}");
 
         // Incorrectly predicted
-        WriteLine($"3. Normal case incorrectly predicted as abnormal. {FormatPredictionDetails(normalIncorrectIndex)}");
-        WriteLine($"4. Abnormal case incorrectly predicted as normal. {FormatPredictionDetails(abnormalIncorrectIndex)}");
+        WriteLine($"3. Normal case incorrectly predicted as abnormal. {FormatPredictionDetails(incorrectlyPredictedAsAbnormalIndex, incorrectlyPredictedAsAbnormalCount)}");
+        WriteLine($"4. Abnormal case incorrectly predicted as normal. {FormatPredictionDetails(incorrectlyPredictedAsNormalIndex, incorrectlyPredictedAsNormalCount)}");
         
         WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
         WriteLine();
 
-        string FormatPredictionDetails(int index)
+        string FormatPredictionDetails(int index, int count)
         {
-            return $"Index: {index}, predicted probability of being normal: {predictions[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}";
+            return $"Index: {index}, predicted probability of being normal: {predictions[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}, count: {count}";
         }
     }
 
@@ -286,7 +300,7 @@ internal static class Utils
             graphics.DrawLine(redPen, x1, y1, x2, y2);
         }
 
-        fileName = $"ecg200_chart_{fileName}.jpg";
+        fileName = $"ecg200-chart-{fileName}.jpg";
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
         bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
 

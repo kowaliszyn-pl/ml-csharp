@@ -185,22 +185,22 @@ internal class MnistDense
         return accuracy;
     };
 
-    private static (float[,] xTest, float[,] yTest) Split(float[,] source)
+    private static (float[,] xData, float[,] yData) Split(float[,] source)
     {
-        // Split into xTest (all columns except the first one) and yTest (a one-hot table from the first column with values from 0 to 9).
+        // Split into xData (all columns except the first one) and yData (a one-hot table from the first column with values from 0 to 9).
 
-        float[,] xTest = source.GetColumns(1..source.GetLength(1));
-        float[,] yTest = source.GetColumn(0);
+        float[,] xData = source.GetColumns(1..source.GetLength(1));
+        float[,] yData = source.GetColumn(0);
 
-        // Convert yTest to a one-hot table.
-        float[,] oneHot = new float[yTest.GetLength(0), 10];
-        for (int row = 0; row < yTest.GetLength(0); row++)
+        // Convert yData to a one-hot table.
+        float[,] oneHot = new float[yData.GetLength(0), 10];
+        for (int row = 0; row < yData.GetLength(0); row++)
         {
-            int value = Convert.ToInt32(yTest[row, 0]);
+            int value = Convert.ToInt32(yData[row, 0]);
             oneHot[row, value] = 1f;
         }
 
-        return (xTest, oneHot);
+        return (xData, oneHot);
     }
 
     internal static void LoadAndEvaluate()
