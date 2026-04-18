@@ -109,69 +109,6 @@ internal static class Utils
         WriteLine();
     }
 
-    private static int FindDigit(float[,] yTest, int row)
-    {
-        for (int digit = 0; digit < 10; digit++)
-        {
-            if (yTest[row, digit] == 1f)
-            {
-                return digit;
-            }
-        }
-        throw new Exception("No 1 found in the row.");
-    }
-
-    /// <summary>
-    /// Saves a single MNIST image (28 * 28) represented by the specified data to a JPG file (<paramref name="size"/> *
-    /// <paramref name="size"/> pixels) in the current directory and returns the file path.
-    /// </summary>
-    /// <remarks>
-    /// The method assumes that the input image data size is 28 * 28 = 784. The output image will be resized to the
-    /// specified size (<paramref name="size"/> * <paramref name="size"/> pixels) for better visibility. The pixel
-    /// values in the input data are expected to be in the range of 0 to 255, where 0 represents black and 255
-    /// represents white. The method will create a grayscale image based on these pixel values and save it as a JPG
-    /// file.
-    /// </remarks>
-    /// <param name="index">
-    /// The zero-based index (0..imageCount) of the image to save.
-    /// </param>
-    /// <param name="mnistData">
-    /// A two-dimensional array of size (imageCount, 784) containing the pixel values of the MNIST image. Each element
-    /// represents a grayscale intensity value from 0 to 255.
-    /// </param>
-    /// <returns>The full file path of the saved JPG image file.</returns>
-
-    private static string SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
-    {
-        float[] imageData = mnistData.GetRow(index);
-
-        // Build the image from the pixel data
-        using Bitmap originalBitmap = new(28, 28, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-        for (int y = 0; y < 28; y++)
-        {
-            for (int x = 0; x < 28; x++)
-            {
-                int i = (y * 28) + x;
-                int value = (int)Math.Clamp(imageData[i], 0f, 255f);
-                Color color = Color.FromArgb(value, value, value);
-                originalBitmap.SetPixel(x, y, color);
-            }
-        }
-
-        using Bitmap resizedBitmap = new(size, size, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-        using Graphics graphics = Graphics.FromImage(resizedBitmap);
-        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-        graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
-        graphics.DrawImage(originalBitmap, 0, 0, size, size);
-
-        fileName = $"mnist_image_{fileName}.jpg";
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-        resizedBitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
-
-        return filePath;
-    }
-
     internal static void DisplayClassificationPredictionExamples(float[,] yTest, float[,] predictions, float[,] testImages, string prefix)
     {
         // We want to show the following examples (indexes in the test set):
@@ -250,6 +187,70 @@ internal static class Utils
         }
     }
 
+    private static int FindDigit(float[,] yTest, int row)
+    {
+        for (int digit = 0; digit < 10; digit++)
+        {
+            if (yTest[row, digit] == 1f)
+            {
+                return digit;
+            }
+        }
+        throw new Exception("No 1 found in the row.");
+    }
+
+    #region Create and save pictures
+
+    /// <summary>
+    /// Saves a single MNIST image (28 * 28) represented by the specified data to a JPG file (<paramref name="size"/> *
+    /// <paramref name="size"/> pixels) in the current directory and returns the file path.
+    /// </summary>
+    /// <remarks>
+    /// The method assumes that the input image data size is 28 * 28 = 784. The output image will be resized to the
+    /// specified size (<paramref name="size"/> * <paramref name="size"/> pixels) for better visibility. The pixel
+    /// values in the input data are expected to be in the range of 0 to 255, where 0 represents black and 255
+    /// represents white. The method will create a grayscale image based on these pixel values and save it as a JPG
+    /// file.
+    /// </remarks>
+    /// <param name="index">
+    /// The zero-based index (0..imageCount) of the image to save.
+    /// </param>
+    /// <param name="mnistData">
+    /// A two-dimensional array of size (imageCount, 784) containing the pixel values of the MNIST image. Each element
+    /// represents a grayscale intensity value from 0 to 255.
+    /// </param>
+    /// <returns>The full file path of the saved JPG image file.</returns>
+    private static string SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
+    {
+        float[] imageData = mnistData.GetRow(index);
+
+        // Build the image from the pixel data
+        using Bitmap originalBitmap = new(28, 28, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+        for (int y = 0; y < 28; y++)
+        {
+            for (int x = 0; x < 28; x++)
+            {
+                int i = (y * 28) + x;
+                int value = (int)Math.Clamp(imageData[i], 0f, 255f);
+                Color color = Color.FromArgb(value, value, value);
+                originalBitmap.SetPixel(x, y, color);
+            }
+        }
+
+        using Bitmap resizedBitmap = new(size, size, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+        using Graphics graphics = Graphics.FromImage(resizedBitmap);
+        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+        graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+        graphics.DrawImage(originalBitmap, 0, 0, size, size);
+
+        fileName = $"mnist_image_{fileName}.jpg";
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+        resizedBitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+        return filePath;
+    }
+
     private static string SaveEcg200Picture(int chartWidth, int chartHeight, int margin, int index, float[,] ecgData, string fileName)
     {
         float[] chartData = ecgData.GetRow(index);
@@ -277,7 +278,7 @@ internal static class Utils
             float y = canvasTop + canvasHeight * i / 10f;
             graphics.DrawLine(gridPen, canvasLeft, y, canvasLeft + canvasWidth, y);
         }
-        for(int i = 0; i < 11; i++)
+        for (int i = 0; i < 11; i++)
         {
             float x = canvasLeft + canvasWidth * i / 10f;
             graphics.DrawLine(gridPen, x, canvasTop, x, canvasTop + canvasHeight);
@@ -306,4 +307,6 @@ internal static class Utils
 
         return filePath;
     }
+
+    #endregion
 }
