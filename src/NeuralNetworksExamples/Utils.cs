@@ -4,6 +4,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Drawing.Printing;
 
 using NeuralNetworks.Core;
 
@@ -17,9 +18,12 @@ internal static class Utils
 #warning The Utils class uses System.Drawing, which may not be fully supported on all platforms. Ensure that the necessary dependencies are available and that the application is run in an environment that supports System.Drawing (e.g., Windows).
 
     private const int DigitImageSize = 100; // Size of the saved image in pixels
-    private const int EcgChartWidth = 500; 
+    private const int EcgChartWidth = 500;
     private const int EcgChartHeight = 210;
     private const int EcgChartMargin = 15;
+    internal const int SineChartWidth = 500;
+    internal const int SineChartHeight = 210;
+    internal const int SineChartMargin = 15;
 
     internal static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
     {
@@ -129,31 +133,31 @@ internal static class Utils
             // A normal case (class 1) that was correctly predicted as normal
             if (predictedNormalClass && actualNormalClass)
             {
-                if(correctlyPredictedAsNormalIndex == -1)
+                if (correctlyPredictedAsNormalIndex == -1)
                     correctlyPredictedAsNormalIndex = i;
                 correctlyPredictedAsNormalCount++;
             }
-            
+
             // An abnormal case (class 0) that was correctly predicted as abnormal
             else if (!predictedNormalClass && !actualNormalClass)
             {
-                if(correctlyPredictedAsAbnormalIndex == -1)
+                if (correctlyPredictedAsAbnormalIndex == -1)
                     correctlyPredictedAsAbnormalIndex = i;
                 correctlyPredictedAsAbnormalCount++;
             }
-            
+
             // A normal case (class 1) that was incorrectly predicted as abnormal
             else if (!predictedNormalClass && actualNormalClass)
             {
-                if(incorrectlyPredictedAsAbnormalIndex == -1)
+                if (incorrectlyPredictedAsAbnormalIndex == -1)
                     incorrectlyPredictedAsAbnormalIndex = i;
                 incorrectlyPredictedAsAbnormalCount++;
             }
-            
+
             // An abnormal case (class 0) that was incorrectly predicted as normal
             else if (predictedNormalClass && !actualNormalClass)
             {
-                if(incorrectlyPredictedAsNormalIndex == -1)
+                if (incorrectlyPredictedAsNormalIndex == -1)
                     incorrectlyPredictedAsNormalIndex = i;
                 incorrectlyPredictedAsNormalCount++;
             }
@@ -177,7 +181,7 @@ internal static class Utils
         // Incorrectly predicted
         WriteLine($"3. Normal case incorrectly predicted as abnormal. {FormatPredictionDetails(incorrectlyPredictedAsAbnormalIndex, incorrectlyPredictedAsAbnormalCount)}");
         WriteLine($"4. Abnormal case incorrectly predicted as normal. {FormatPredictionDetails(incorrectlyPredictedAsNormalIndex, incorrectlyPredictedAsNormalCount)}");
-        
+
         WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
         WriteLine();
 
@@ -302,6 +306,66 @@ internal static class Utils
         }
 
         fileName = $"ecg200-chart-{fileName}.jpg";
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+        bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
+
+        return filePath;
+    }
+
+    internal static string SaveSineChart(int sineChartWidth, int sineChartHeight, int sineChartMargin, List<(float x, float yActual, float yPredicted)> chartData, string fileName)
+    {
+        // Draw 2 lines - one for actual values and one for predicted values - on the same chart, with x values from -2π to 2π and y values scaled to fit the chart height. The chart should have a white background, light gray grid lines, and the actual values line should be blue while the predicted values line should be red.
+        using Bitmap bitmap = new(sineChartWidth, sineChartHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+        using Graphics graphics = Graphics.FromImage(bitmap);
+        graphics.Clear(Color.White);
+
+        // Define the drawing area (canvas) inside the margins
+        int canvasLeft = sineChartMargin;
+        int canvasTop = sineChartMargin;
+        int canvasWidth = sineChartWidth - 2 * sineChartMargin;
+        int canvasHeight = sineChartHeight - 2 * sineChartMargin;
+
+        // Find the min and max values in the data to scale the chart
+        float minValue = chartData.Min(p => Math.Min(p.yActual, p.yPredicted));
+        float maxValue = chartData.Max(p => Math.Max(p.yActual, p.yPredicted));
+
+        // Draw 5 vertical and 11 horizontal grid lines for better visibility
+        using Pen gridPen = new(Color.LightGray, 1);
+        for (int i = 0; i < 11; i++)
+        {
+            float y = canvasTop + canvasHeight * i / 10f;
+            graphics.DrawLine(gridPen, canvasLeft, y, canvasLeft + canvasWidth, y);
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            float x = canvasLeft + canvasWidth * i / 4f;
+            graphics.DrawLine(gridPen, x, canvasTop, x, canvasTop + canvasHeight);
+        }
+
+        // Draw the chart lines
+        using Pen actualPen = new(Color.Blue, 2);
+        using Pen predictedPen = new(Color.Red, 2);
+
+        float xStep = canvasWidth / (float)(chartData.Count - 1);
+        float yScale = (maxValue - minValue) == 0 ? 1 : canvasHeight / (maxValue - minValue);
+        int canvasBottom = canvasTop + canvasHeight;
+
+        // Draw lines between consecutive points for both actual and predicted values
+
+        for (int i = 1; i < chartData.Count; i++)
+        {
+            float x1 = canvasLeft + (i - 1) * xStep;
+            float yActual1 = canvasBottom - ((chartData[i - 1].yActual - minValue) * yScale);
+            float yPredicted1 = canvasBottom - ((chartData[i - 1].yPredicted - minValue) * yScale);
+            float x2 = canvasLeft + i * xStep;
+            float yActual2 = canvasBottom - ((chartData[i].yActual - minValue) * yScale);
+            float yPredicted2 = canvasBottom - ((chartData[i].yPredicted - minValue) * yScale);
+            graphics.DrawLine(actualPen, x1, yActual1, x2, yActual2);
+            graphics.DrawLine(predictedPen, x1, yPredicted1, x2, yPredicted2);
+        }
+
+        fileName = $"sine-chart-{fileName}.jpg";
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
         bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Jpeg);
 

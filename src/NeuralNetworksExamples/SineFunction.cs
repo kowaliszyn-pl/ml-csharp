@@ -160,5 +160,30 @@ internal class SineFunction
             WriteLine($"{sampleIndex + 1,14}{predictedValue,14:F4}{actualValue,14:F4}");
         }
 
+        // Let's create a chart with 2 lines: actual and predicted values for arguments from -2π to 2π
+
+        // Build a list of 10_000 data points of (x, actual y, predicted y) for all test samples
+        float[,] xChart = new float[sampleCount, 1];
+        float[,] xInputModel = new float[sampleCount, 1];
+        float[,] yActualChart = new float[sampleCount, 1];
+        float[,] yPredictedChart;
+        for (int i = 0; i < sampleCount; i++)
+        {
+            float x = -2 * MathF.PI + 4 * MathF.PI * i / sampleCount;
+            float y = x * MathF.Sin(x);
+            xChart[i, 0] = x;
+            yActualChart[i, 0] = y;
+            xInputModel[i, 0] = (x - xMean) / xStdDev; // Standardize the same way as training data
+        }
+        yPredictedChart = model.Forward(xInputModel, true);
+        List<(float x, float yActual, float yPredicted)> chartData = [];
+        for (int i = 0; i < sampleCount; i++)
+        {
+            float yPredicted = yPredictedChart[i, 0] * yStdDev + yMean; // Un-standardize the predicted values
+            chartData.Add((xChart[i, 0], yActualChart[i, 0], yPredicted));
+        }
+        
+        Utils.SaveSineChart(Utils.SineChartWidth, Utils.SineChartHeight, Utils.SineChartMargin, chartData, "main");
+        WriteLine("\nChart with actual and predicted values saved as a JPG file.");
     }
 }
