@@ -44,6 +44,8 @@ internal class SineFunctionModel(SeededRandom? random)
 internal class SineFunction
 {
     private const int RandomSeed = 260221;
+    private const int FunctionRange = 2; // We will train the model to learn the function in the range from -2π to 2π
+    private const int ChartRange = 3; // We will create a chart in the range from -3π to 3π to see how the model extrapolates outside the training range
 
     public static void Run()
     {
@@ -53,8 +55,9 @@ internal class SineFunction
 
         for (int i = 0; i < sampleCount; i++)
         {
-            float x = -MathF.PI + 2 * MathF.PI * i / sampleCount;
-            float y = x * MathF.Sin(x);
+            float x = -FunctionRange * MathF.PI + 2 * FunctionRange * MathF.PI * i / sampleCount;
+            //float y = MathF.Abs(x) * MathF.Sin(x);
+            float y = MathF.Sin(x);
             data.Add((x, y));
         }
 
@@ -169,8 +172,9 @@ internal class SineFunction
         float[,] yPredictedChart;
         for (int i = 0; i < sampleCount; i++)
         {
-            float x = -2 * MathF.PI + 4 * MathF.PI * i / sampleCount;
-            float y = x * MathF.Sin(x);
+            float x = -ChartRange * MathF.PI + 2 * ChartRange * MathF.PI * i / sampleCount;
+            //float y = MathF.Abs(x) * MathF.Sin(x);
+            float y = MathF.Sin(x);
             xChart[i, 0] = x;
             yActualChart[i, 0] = y;
             xInputModel[i, 0] = (x - xMean) / xStdDev; // Standardize the same way as training data
@@ -183,7 +187,7 @@ internal class SineFunction
             chartData.Add((xChart[i, 0], yActualChart[i, 0], yPredicted));
         }
         
-        Utils.SaveSineChart(Utils.SineChartWidth, Utils.SineChartHeight, Utils.SineChartMargin, chartData, "main");
+        Utils.SaveSineChart(Utils.SineChartWidth, Utils.SineChartHeight, Utils.SineChartMargin, chartData, 2 * ChartRange + 1, "main");
         WriteLine("\nChart with actual and predicted values saved as a JPG file.");
     }
 }

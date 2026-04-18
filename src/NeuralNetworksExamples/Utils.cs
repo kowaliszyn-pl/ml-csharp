@@ -21,8 +21,8 @@ internal static class Utils
     private const int EcgChartWidth = 500;
     private const int EcgChartHeight = 210;
     private const int EcgChartMargin = 15;
-    internal const int SineChartWidth = 500;
-    internal const int SineChartHeight = 210;
+    internal const int SineChartWidth = 550;
+    internal const int SineChartHeight = 230;
     internal const int SineChartMargin = 15;
 
     internal static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
@@ -312,7 +312,7 @@ internal static class Utils
         return filePath;
     }
 
-    internal static string SaveSineChart(int sineChartWidth, int sineChartHeight, int sineChartMargin, List<(float x, float yActual, float yPredicted)> chartData, string fileName)
+    internal static string SaveSineChart(int sineChartWidth, int sineChartHeight, int sineChartMargin, List<(float x, float yActual, float yPredicted)> chartData, int verticalLines, string fileName)
     {
         // Draw 2 lines - one for actual values and one for predicted values - on the same chart, with x values from -2π to 2π and y values scaled to fit the chart height. The chart should have a white background, light gray grid lines, and the actual values line should be blue while the predicted values line should be red.
         using Bitmap bitmap = new(sineChartWidth, sineChartHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -330,16 +330,16 @@ internal static class Utils
         float minValue = chartData.Min(p => Math.Min(p.yActual, p.yPredicted));
         float maxValue = chartData.Max(p => Math.Max(p.yActual, p.yPredicted));
 
-        // Draw 5 vertical and 11 horizontal grid lines for better visibility
+        // Draw 'verticalLines' vertical and 11 horizontal grid lines for better visibility
         using Pen gridPen = new(Color.LightGray, 1);
         for (int i = 0; i < 11; i++)
         {
             float y = canvasTop + canvasHeight * i / 10f;
             graphics.DrawLine(gridPen, canvasLeft, y, canvasLeft + canvasWidth, y);
         }
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < verticalLines; i++)
         {
-            float x = canvasLeft + canvasWidth * i / 4f;
+            float x = canvasLeft + canvasWidth * i / (verticalLines - 1f);
             graphics.DrawLine(gridPen, x, canvasTop, x, canvasTop + canvasHeight);
         }
 
