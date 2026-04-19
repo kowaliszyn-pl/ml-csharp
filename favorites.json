@@ -1,13 +1,4 @@
 {
   "version": 2,
-  "items": [
-    {
-      "name": "MnistCnn.cs",
-      "path": "src\\NeuralNetworksExamples\\MnistCnn.cs"
-    },
-    {
-      "name": "MnistDense.cs",
-      "path": "src\\NeuralNetworksExamples\\MnistDense.cs"
-    }
-  ]
+  "items": []
 }

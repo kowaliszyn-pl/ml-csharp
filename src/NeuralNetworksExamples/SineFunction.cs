@@ -23,8 +23,8 @@ using static System.Console;
 namespace NeuralNetworksExamples;
 
 /*
-Train loss (average): 0,0003026913
-Test loss: 0,0002103021
+Train loss (average): 0,00031
+Test loss: 0,00029
 */
 
 internal class SineFunctionModel(SeededRandom? random)
