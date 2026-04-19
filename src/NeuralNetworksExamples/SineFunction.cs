@@ -56,8 +56,8 @@ internal class SineFunction
         for (int i = 0; i < sampleCount; i++)
         {
             float x = -FunctionRange * MathF.PI + 2 * FunctionRange * MathF.PI * i / sampleCount;
-            //float y = MathF.Abs(x) * MathF.Sin(x);
-            float y = MathF.Sin(x);
+            float y = MathF.Abs(x) * MathF.Sin(x);
+            //float y = MathF.Sin(x);
             data.Add((x, y));
         }
 
@@ -173,8 +173,8 @@ internal class SineFunction
         for (int i = 0; i < sampleCount; i++)
         {
             float x = -ChartRange * MathF.PI + 2 * ChartRange * MathF.PI * i / sampleCount;
-            //float y = MathF.Abs(x) * MathF.Sin(x);
-            float y = MathF.Sin(x);
+            float y = MathF.Abs(x) * MathF.Sin(x);
+            // float y = MathF.Sin(x);
             xChart[i, 0] = x;
             yActualChart[i, 0] = y;
             xInputModel[i, 0] = (x - xMean) / xStdDev; // Standardize the same way as training data
