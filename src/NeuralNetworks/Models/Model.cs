@@ -31,7 +31,7 @@ public abstract class Model<TInputData, TPrediction>
     where TPrediction : notnull
 {
     private LayerList<TInputData, TPrediction> _layers;
-    private float _lastLoss; // TODO: move the loss function value to the Trainer class that will be responsible for training loop and metrics tracking.
+    private float _lastLoss; 
     private readonly string? _modelFilePath;
     private ModelInputShape? _inputShape;
 
@@ -55,7 +55,7 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    public Loss<TPrediction> LossFunction { get; private set; }
+    public Loss<TPrediction> LossFunction { get; private set; } // TODO: move the loss function to the Trainer class that will be responsible for training loop and metrics tracking. Add a parameter to the TrainBatch method that will be the loss function to use for that batch (if not provided, use the **default** one from the model). This will allow us to easily track different metrics during training without having to change the model.
 
     protected SeededRandom? Random { get; }
 
