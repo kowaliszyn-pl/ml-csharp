@@ -46,6 +46,7 @@ public abstract class Layer<TIn, TOut> : Layer
     private OperationList<TIn, TOut>? _operations;
 
     protected TIn? Input => _input;
+    public TOut? Output => _output;
 
     /// <summary>
     /// Passes input forward through a series of operations.
