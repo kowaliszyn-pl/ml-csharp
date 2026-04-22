@@ -56,9 +56,7 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    private Loss<TPrediction>? _defaultLossFunction;
-
-    // public Loss<TPrediction>? DefaultLossFunction { get; private set; } 
+    private readonly Loss<TPrediction>? _defaultLossFunction;
 
     protected SeededRandom? Random { get; }
 
@@ -75,9 +73,7 @@ public abstract class Model<TInputData, TPrediction>
 
     public float TrainBatch(TInputData xBatch, TPrediction yBatch, Loss<TPrediction>? lossFunction = null)
     {
-        lossFunction ??= _defaultLossFunction;
-
-        Debug.Assert(lossFunction != null, "A loss function must be provided for training either via the method parameter or as the model's default loss function.");
+        lossFunction = ResolveLossFunction(lossFunction);
 
         TPrediction predictions = Forward(xBatch, false);
         _lastLoss = lossFunction.Forward(predictions, yBatch);
@@ -87,11 +83,17 @@ public abstract class Model<TInputData, TPrediction>
 
     public float CalculateLoss(TPrediction predictions, TPrediction targets, Loss<TPrediction>? lossFunction = null)
     {
+        lossFunction = ResolveLossFunction(lossFunction);
+        return lossFunction.Forward(predictions, targets);
+    }
+
+    private Loss<TPrediction> ResolveLossFunction(Loss<TPrediction>? lossFunction)
+    {
         lossFunction ??= _defaultLossFunction;
 
         Debug.Assert(lossFunction != null, "A loss function must be provided either via the method parameter or as the model's default loss function.");
 
-        return lossFunction.Forward(predictions, targets);
+        return lossFunction;
     }
 
     public void UpdateParams(Optimizer optimizer)
