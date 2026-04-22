@@ -198,7 +198,7 @@ public class Trainer<TInputData, TPrediction>(
                 if (eval)
                 {
                     TPrediction testPredictions = model.Forward(xTest!, true);
-                    float testLoss = model.LossFunction.Forward(testPredictions, yTest!);
+                    float testLoss = model.DefaultLossFunction.Forward(testPredictions, yTest!);
 
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
                         WriteLine($"Test loss: {testLoss}");
@@ -263,7 +263,7 @@ public class Trainer<TInputData, TPrediction>(
                 WriteLine($"{paramCount:n0} parameters trained.");
                 ForegroundColor = ConsoleColor.Yellow;
                 TPrediction testPredictions = model.Forward(xTest!, true);
-                float testLoss = model.LossFunction.Forward(testPredictions, yTest!);
+                float testLoss = model.DefaultLossFunction.Forward(testPredictions, yTest!);
                 WriteLine($"\nLoss on test data: {testLoss:F5}");
                 if (evalFunction is not null)
                 {

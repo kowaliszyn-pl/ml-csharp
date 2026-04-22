@@ -237,7 +237,7 @@ internal class MnistDense
                 hits++;
         }
         float accuracy = (float)hits / rows;
-        float loss = model.LossFunction.Forward(prediction, yTest);
+        float loss = model.DefaultLossFunction.Forward(prediction, yTest);
 
         WriteLine($"Model accuracy on test set: {accuracy:P2}");
         WriteLine($"Model loss on test set: {loss:F4}");

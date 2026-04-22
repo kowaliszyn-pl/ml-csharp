@@ -8,26 +8,22 @@ using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
-using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.ParamInitializers;
-
-using static System.Console;
-using static NeuralNetworks.Core.ArrayUtils;
 
 namespace Autoencoder;
 
 internal class AutoencoderModel(int bottleneckDim, SeededRandom? random)
     : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(), random)
 {
-    Layer<float[,], float[,]>? bottleneckLayer;
+    private const int InnerChannels = 7;
+    private const int ImageInnerSize = 28;
+    private Layer<float[,], float[,]>? _bottleneckLayer;
 
     protected override LayerListBuilder<float[,,,], float[,,,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
-        // Dropout4D dropout = new(0.80f, Random);
-        Dropout2D dropout = new(0.80f, Random);
 
-        bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer, dropout);
+        _bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer);
 
         return
             AddLayer(new Conv2DLayer(
@@ -45,9 +41,9 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random)
                 paramInitializer: initializer
             ))
             .AddLayer(new FlattenLayer())
-            .AddLayer(bottleneckLayer)
-            .AddLayer(new DenseLayer(28 * 28 * 7, new Linear(), initializer))
-            .AddLayer(new UnflattenLayer(7, 28, 28))
+            .AddLayer(_bottleneckLayer)
+            .AddLayer(new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Linear(), initializer))
+            .AddLayer(new UnflattenLayer(InnerChannels, ImageInnerSize, ImageInnerSize))
             .AddLayer(new Conv2DLayer(
                 kernels: 14,
                 kernelHeight: 5,
@@ -66,7 +62,7 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random)
 
     public float[,] GetBottleneckData()
     {
-        return bottleneckLayer?.Output
+        return _bottleneckLayer?.Output
             ?? throw new InvalidOperationException("Bottleneck layer output is not available.");
     }
 
@@ -74,7 +70,7 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random)
 
 internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
         Console.WriteLine("Hello, World!");
     }

@@ -2,6 +2,7 @@
 // File name: Model.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using System.Diagnostics;
 using System.Text.Json;
 
 using NeuralNetworks.Core;
@@ -42,9 +43,9 @@ public abstract class Model<TInputData, TPrediction>
         WriteIndented = true
     };
 
-    protected Model(LayerListBuilder<TInputData, TPrediction>? layerListBuilder, Loss<TPrediction> lossFunction, SeededRandom? random = null, string? modelFilePath = null)
+    protected Model(LayerListBuilder<TInputData, TPrediction>? layerListBuilder, Loss<TPrediction>? defaultLossFunction = null, SeededRandom? random = null, string? modelFilePath = null)
     {
-        LossFunction = lossFunction;
+        DefaultLossFunction = defaultLossFunction;
         Random = random;
         _modelFilePath = modelFilePath;
         _layers = (layerListBuilder ?? CreateLayerListBuilderPrivate()).Build();
@@ -55,7 +56,7 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    public Loss<TPrediction> LossFunction { get; private set; } // TODO: move the loss function to the Trainer class that will be responsible for training loop and metrics tracking. Add a parameter to the TrainBatch method that will be the loss function to use for that batch (if not provided, use the **default** one from the model). This will allow us to easily track different metrics during training without having to change the model.
+    public Loss<TPrediction>? DefaultLossFunction { get; private set; } 
 
     protected SeededRandom? Random { get; }
 
@@ -70,11 +71,15 @@ public abstract class Model<TInputData, TPrediction>
     public void Backward(TPrediction lossGrad)
         => _layers.Backward(lossGrad);
 
-    public float TrainBatch(TInputData xBatch, TPrediction yBatch)
+    public float TrainBatch(TInputData xBatch, TPrediction yBatch, Loss<TPrediction>? lossFunction = null)
     {
+        lossFunction ??= DefaultLossFunction;
+
+        Debug.Assert(lossFunction != null, "A loss function must be provided for training either via the method parameter or as the model's default loss function.");
+
         TPrediction predictions = Forward(xBatch, false);
-        _lastLoss = LossFunction.Forward(predictions, yBatch);
-        Backward(LossFunction.Backward());
+        _lastLoss = lossFunction.Forward(predictions, yBatch);
+        Backward(lossFunction.Backward());
         return _lastLoss;
     }
 
@@ -93,7 +98,7 @@ public abstract class Model<TInputData, TPrediction>
         res.Add($"{indent}Model");
         res.Add($"{newIndent}Type: {this}");
         res.Add($"{newIndent}Random: {Random}");
-        res.Add($"{newIndent}LossFunction: {LossFunction}");
+        res.Add($"{newIndent}LossFunction: {DefaultLossFunction}");
         if (_modelFilePath != null)
             res.Add($"{newIndent}ModelFilePath: {_modelFilePath}");
         res.Add($"{newIndent}Layers");
@@ -219,7 +224,7 @@ public abstract class Model<TInputData, TPrediction>
         }
         // _checkpoint is already a deep copy so we can just copy its fields.
         _layers = _checkpoint._layers;
-        LossFunction = _checkpoint.LossFunction;
+        DefaultLossFunction = _checkpoint.DefaultLossFunction;
         _lastLoss = _checkpoint._lastLoss;
     }
 
@@ -231,7 +236,7 @@ public abstract class Model<TInputData, TPrediction>
     {
         Model<TInputData, TPrediction> clone = (Model<TInputData, TPrediction>)MemberwiseClone();
         clone._layers = _layers.Clone();
-        clone.LossFunction = LossFunction.Clone();
+        clone.DefaultLossFunction = DefaultLossFunction.Clone();
         return clone;
     }
 
