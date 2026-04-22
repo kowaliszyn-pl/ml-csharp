@@ -198,7 +198,7 @@ public class Trainer<TInputData, TPrediction>(
                 if (eval)
                 {
                     TPrediction testPredictions = model.Forward(xTest!, true);
-                    float testLoss = model.DefaultLossFunction.Forward(testPredictions, yTest!);
+                    float testLoss = model.CalculateLoss(testPredictions, yTest!);
 
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
                         WriteLine($"Test loss: {testLoss}");
@@ -231,20 +231,20 @@ public class Trainer<TInputData, TPrediction>(
                             WriteLine($"New best loss: {_bestLoss:F5}. Params saved at {fileName}.");
                         logger?.LogInformation("New best loss: {bestLoss} at epoch {epoch}. Params saved at {fileName}.", _bestLoss, epoch, fileName);
                     }
-                    else if (earlyStop)
-                    {
-                        if (model.HasCheckpoint())
-                        {
-                            model.RestoreCheckpoint();
-                            logger?.LogInformation("Checkpoint restored.");
-                        }
+                    //else if (earlyStop)
+                    //{
+                    //    if (model.HasCheckpoint())
+                    //    {
+                    //        model.RestoreCheckpoint();
+                    //        logger?.LogInformation("Checkpoint restored.");
+                    //    }
 
-                        if (consoleOutputMode > ConsoleOutputMode.Disable)
-                            WriteLine($"Early stopping, loss {testLoss} is greater than {_bestLoss}");
-                        logger?.LogInformation("Early stopping. Loss {loss} is greater than {bestLoss}.", testLoss, _bestLoss);
+                    //    if (consoleOutputMode > ConsoleOutputMode.Disable)
+                    //        WriteLine($"Early stopping, loss {testLoss} is greater than {_bestLoss}");
+                    //    logger?.LogInformation("Early stopping. Loss {loss} is greater than {bestLoss}.", testLoss, _bestLoss);
 
-                        break;
-                    }
+                    //    break;
+                    //}
 
                 }
             }
@@ -263,7 +263,7 @@ public class Trainer<TInputData, TPrediction>(
                 WriteLine($"{paramCount:n0} parameters trained.");
                 ForegroundColor = ConsoleColor.Yellow;
                 TPrediction testPredictions = model.Forward(xTest!, true);
-                float testLoss = model.DefaultLossFunction.Forward(testPredictions, yTest!);
+                float testLoss = model.CalculateLoss(testPredictions, yTest!);
                 WriteLine($"\nLoss on test data: {testLoss:F5}");
                 if (evalFunction is not null)
                 {
