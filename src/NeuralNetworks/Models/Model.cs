@@ -111,7 +111,7 @@ public abstract class Model<TInputData, TPrediction>
         res.Add($"{indent}Model");
         res.Add($"{newIndent}Type: {this}");
         res.Add($"{newIndent}Random: {Random}");
-        res.Add($"{newIndent}LossFunction: {_defaultLossFunction}");
+        res.Add($"{newIndent}DefaultLossFunction: {_defaultLossFunction}");
         if (_modelFilePath != null)
             res.Add($"{newIndent}ModelFilePath: {_modelFilePath}");
         res.Add($"{newIndent}Layers");

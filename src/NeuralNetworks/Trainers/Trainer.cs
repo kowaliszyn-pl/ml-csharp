@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NeuralNetworks.Core;
 using NeuralNetworks.Core.Operations;
 using NeuralNetworks.DataSources;
+using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.Trainers.Logging;
@@ -63,6 +64,7 @@ public class Trainer<TInputData, TPrediction>(
     public void Fit(
         DataSource<TInputData, TPrediction> dataSource,
         EvalFunction<TInputData, TPrediction>? evalFunction = null,
+        Loss<TPrediction>? lossFunction = null,
         int epochs = 100,
         int evalEveryEpochs = 10,
         int logEveryEpochs = 1,
@@ -176,7 +178,7 @@ public class Trainer<TInputData, TPrediction>(
                         Write(stepInfo + speedAndEtaInfo + "\r");
                     }
 
-                    trainLoss = (trainLoss ?? 0) + model.TrainBatch(xBatch, yBatch);
+                    trainLoss = (trainLoss ?? 0) + model.TrainBatch(xBatch, yBatch, lossFunction);
                     model.UpdateParams(optimizer);
 
                     long elapsedMsPerStep = stepWatch.ElapsedMilliseconds / step;
@@ -198,7 +200,7 @@ public class Trainer<TInputData, TPrediction>(
                 if (eval)
                 {
                     TPrediction testPredictions = model.Forward(xTest!, true);
-                    float testLoss = model.CalculateLoss(testPredictions, yTest!);
+                    float testLoss = model.CalculateLoss(testPredictions, yTest!, lossFunction);
 
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
                         WriteLine($"Test loss: {testLoss}");
@@ -263,7 +265,7 @@ public class Trainer<TInputData, TPrediction>(
                 WriteLine($"{paramCount:n0} parameters trained.");
                 ForegroundColor = ConsoleColor.Yellow;
                 TPrediction testPredictions = model.Forward(xTest!, true);
-                float testLoss = model.CalculateLoss(testPredictions, yTest!);
+                float testLoss = model.CalculateLoss(testPredictions, yTest!, lossFunction);
                 WriteLine($"\nLoss on test data: {testLoss:F5}");
                 if (evalFunction is not null)
                 {
