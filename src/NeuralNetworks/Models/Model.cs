@@ -32,7 +32,7 @@ public abstract class Model<TInputData, TPrediction>
     where TInputData : notnull
     where TPrediction : notnull
 {
-    private LayerList<TInputData, TPrediction> _layers;
+    private readonly LayerList<TInputData, TPrediction> _layers;
     private float _lastLoss; 
     private readonly string? _modelFilePath;
     private ModelInputShape? _inputShape;

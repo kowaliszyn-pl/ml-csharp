@@ -93,7 +93,6 @@ internal class AutoencoderModel : BaseModel<float[,,,], float[,,,]>
     public float[,,,] Decode(float[,] encoded)
     {
         // We need to pass the encoded data through the first decoder layer and then through the remaining layers of the model.
-        // The first decoder layer expects a 2D input, so we can directly pass the encoded data to it. After that, we can pass the output through the remaining layers of the model.
 
         if (_firstDecoderLayer is null)
             throw new InvalidOperationException("Decoder layer is not initialized.");
