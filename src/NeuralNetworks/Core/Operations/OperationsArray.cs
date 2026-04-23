@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core.Operations;
 
@@ -944,23 +945,50 @@ public class OperationsArray : IOperations
 
     public virtual float[,,,] Unflatten(float[,] source, float[,,,] targetSize)
     {
-        int batchSize = targetSize.GetLength(0);
+        //int batchSize = targetSize.GetLength(0);
         int channels = targetSize.GetLength(1);
         int height = targetSize.GetLength(2);
         int width = targetSize.GetLength(3);
 
-        float[,,,] res = new float[batchSize, channels, height, width];
+        return Unflatten(source, channels, height, width);
 
-        for (int b = 0; b < batchSize; b++)
+        //float[,,,] res = new float[batchSize, channels, height, width];
+
+        //for (int b = 0; b < batchSize; b++)
+        //{
+        //    for (int c = 0; c < channels; c++)
+        //    {
+        //        for (int h = 0; h < height; h++)
+        //        {
+        //            for (int w = 0; w < width; w++)
+        //            {
+        //                int index = c * height * width + h * width + w;
+        //                res[b, c, h, w] = source[b, index];
+        //            }
+        //        }
+        //    }
+        //}
+
+        //return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public virtual float[,,,] Unflatten(float[,] source, int dim2, int dim3, int dim4)
+    {
+        int dim1 = source.GetLength(0);
+
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+
+        for (int d1 = 0; d1 < dim1; d1++) // batch
         {
-            for (int c = 0; c < channels; c++)
+            for (int d2 = 0; d2 < dim2; d2++) // channels
             {
-                for (int h = 0; h < height; h++)
+                for (int d3 = 0; d3 < dim3; d3++) // height
                 {
-                    for (int w = 0; w < width; w++)
+                    for (int d4 = 0; d4 < dim4; d4++) // width
                     {
-                        int index = c * height * width + h * width + w;
-                        res[b, c, h, w] = source[b, index];
+                        int index = d2 * dim3 * dim4 + d3 * dim4 + d4;
+                        res[d1, d2, d3, d4] = source[d1, index];
                     }
                 }
             }

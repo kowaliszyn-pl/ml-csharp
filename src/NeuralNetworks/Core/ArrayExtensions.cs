@@ -1824,6 +1824,33 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] Power(this float[,,,] source, int scalar)
+    {
+        int dim1 = source.GetLength(0);
+        int dim2 = source.GetLength(1);
+        int dim3 = source.GetLength(2);
+        int dim4 = source.GetLength(3);
+
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+
+        for (int d1 = 0; d1 < dim1; d1++)
+        {
+            for (int d2 = 0; d2 < dim2; d2++)
+            {
+                for(int d3 = 0; d3 < dim3; d3++)
+                {
+                    for (int d4 = 0; d4 < dim4; d4++)
+                    {
+                        res[d1, d2, d3, d4] = MathF.Pow(source[d1, d2, d3, d4], scalar);
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
     /// <summary>
     /// Fills the source with random float values between -0.5 and 0.5 using the specified seed.
     /// </summary>

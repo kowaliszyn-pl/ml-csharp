@@ -10,7 +10,7 @@ namespace NeuralNetworks.Layers;
 public class UnflattenLayer(int channels, int height, int width) : Layer<float[,], float[,,,]>
 {
     public override OperationListBuilder<float[,], float[,,,]> CreateOperationListBuilder()
-        => AddOperation(new Unflatten());
+        => AddOperation(new Unflatten(channels, height, width));
 
     public override string ToString()
         => "UnflattenLayer";
