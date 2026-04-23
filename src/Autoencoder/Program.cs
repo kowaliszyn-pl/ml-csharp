@@ -119,7 +119,7 @@ internal class Program
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
 
-    private static void Main(string[] args)
+    private static void Main()
     {
         // Create ILogger using Serilog
         Serilog.Core.Logger serilog = new LoggerConfiguration()
@@ -161,7 +161,6 @@ internal class Program
         const float min = 0;
         const float max = 255f;
         const float scale = 2f / (max - min); // Scale to range [-1, 1]
-
 
         for (int channel = 0; channel < channels; channel++)
         {
@@ -218,7 +217,6 @@ internal class Program
 
         Trainer<float[,,,], float[,,,]> trainer = new(
             model,
-            // new GradientDescentMomentumOptimizer(learningRate, 0.9f), 
             new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
             random: commonRandom,
             logger: logger

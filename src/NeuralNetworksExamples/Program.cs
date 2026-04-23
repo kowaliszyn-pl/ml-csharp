@@ -14,7 +14,7 @@ internal static class Program
 {
     internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
 
-    private static void Main(string[] args)
+    private static void Main()
     {
         // Create ILogger using Serilog
         Serilog.Core.Logger serilog = new LoggerConfiguration()

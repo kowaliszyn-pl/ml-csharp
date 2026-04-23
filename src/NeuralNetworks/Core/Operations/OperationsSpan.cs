@@ -80,6 +80,24 @@ public class OperationsSpan : OperationsArray
         return loss;
     }
 
+    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
+    {
+        Debug.Assert(predicted.Length == errors.Length, "Predicted and errors arrays must have the same length.");
+
+        int batchSize = predicted.GetLength(0);
+        float[,,,] gradient = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
+
+        ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
+        Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradient.Length);
+
+        var scaleFactor = 2f / batchSize;
+        for (int i = 0; i < gradientSpan.Length; i++)
+        {
+            gradientSpan[i] = errorsSpan[i] * scaleFactor;
+        }
+        return gradient;
+    }
+
     #endregion
 
     #region Activations Functions

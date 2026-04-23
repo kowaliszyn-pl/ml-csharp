@@ -2,8 +2,8 @@
 // File name: OperationsSpanParallel.cs
 // www.kowaliszyn.pl, 2025
 
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core.Operations;
@@ -60,7 +60,36 @@ public class OperationsSpanParallel : OperationsSpan
         return gradient;
     }
 
-    
+    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
+    {
+        Debug.Assert(predicted.Length == errors.Length, "Predicted and errors arrays must have the same length.");
+
+        int batchSize = predicted.GetLength(0);
+        float[,,,] gradient = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
+
+        var scaleFactor = 2f / batchSize;
+        int gradientSpanLength = gradient.Length;
+        //Parallel.For, gradient.Length, i =>
+        //{
+        //    ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
+        //    Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradient.Length);
+
+        //    gradientSpan[i] = errorsSpan[i] * scaleFactor;
+        //});
+
+        Parallel.ForEach(Partitioner.Create(0, gradientSpanLength), range =>
+        {
+            ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
+            Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradientSpanLength);
+
+            for (int i = range.Item1; i < range.Item2; i++)
+            {
+                gradientSpan[i] = errorsSpan[i] * scaleFactor;
+            }
+        });
+
+        return gradient;
+    }
 
     #endregion
 
@@ -340,56 +369,60 @@ public class OperationsSpanParallel : OperationsSpan
         int weightsOutputCSize = kernelHeight * kernelWidth;
         int weightsCSize = outputChannels * weightsOutputCSize;
 
-        Parallel.For(0, batchSize, b =>
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
         {
-            int inputBIndex = b * inputBSize;
-            int outputBIndex = b * outputBSize;
-
-            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
-            ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
-            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
-
-            //Parallel.For(0, outputChannels, oc =>
-            for (int oc = 0; oc < outputChannels; oc++)
+            for (int b = range.Item1; b < range.Item2; b++)
             {
-                int weightsOutputCIndex = oc * weightsOutputCSize;
-                int outputCIndex = oc * outputCSize;
-                for (int oh = 0; oh < outputHeight; oh++) // ~28
+
+                int inputBIndex = b * inputBSize;
+                int outputBIndex = b * outputBSize;
+
+                ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
+                Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+
+                //Parallel.For(0, outputChannels, oc =>
+                for (int oc = 0; oc < outputChannels; oc++)
                 {
-                    int outputHIndex = oh * outputWidth;
-                    int ohMinusPad = oh * strideHeight - paddingHeight;
-                    for (int ow = 0; ow < outputWidth; ow++) // ~28
+                    int weightsOutputCIndex = oc * weightsOutputCSize;
+                    int outputCIndex = oc * outputCSize;
+                    for (int oh = 0; oh < outputHeight; oh++) // ~28
                     {
-                        int owMinusPad = ow * strideWidth - paddingWidth;
-                        float sum = 0f;
-                        for (int ic = 0; ic < inputChannels; ic++) // 1 (black&white) or 3 (RGB)
+                        int outputHIndex = oh * outputWidth;
+                        int ohMinusPad = oh * strideHeight - paddingHeight;
+                        for (int ow = 0; ow < outputWidth; ow++) // ~28
                         {
-                            int inputCIndex = ic * inputCSize;
-                            int weightsInputCIndex = ic * weightsCSize;
-                            for (int kh = 0; kh < kernelHeight; kh++) // ~3
+                            int owMinusPad = ow * strideWidth - paddingWidth;
+                            float sum = 0f;
+                            for (int ic = 0; ic < inputChannels; ic++) // 1 (black&white) or 3 (RGB)
                             {
-                                int weightsKernelHIndex = kh * kernelWidth;
-                                // int ih = oh * strideHeight + kh * dilatationHeight - paddingHeight;
-                                int ih = kh * dilatationHeight + ohMinusPad;
-                                if (ih >= 0 && ih < inputHeight)
+                                int inputCIndex = ic * inputCSize;
+                                int weightsInputCIndex = ic * weightsCSize;
+                                for (int kh = 0; kh < kernelHeight; kh++) // ~3
                                 {
-                                    int inputHIndex = ih * inputWidth;
-                                    for (int kw = 0; kw < kernelWidth; kw++) // ~3
+                                    int weightsKernelHIndex = kh * kernelWidth;
+                                    // int ih = oh * strideHeight + kh * dilatationHeight - paddingHeight;
+                                    int ih = kh * dilatationHeight + ohMinusPad;
+                                    if (ih >= 0 && ih < inputHeight)
                                     {
-                                        // int iw = ow * strideWidth + kw * dilatationWidth - paddingWidth;
-                                        int iw = kw * dilatationWidth + owMinusPad;
-                                        if (iw >= 0 && iw < inputWidth)
+                                        int inputHIndex = ih * inputWidth;
+                                        for (int kw = 0; kw < kernelWidth; kw++) // ~3
                                         {
-                                            // sum += input[b, ic, ih, iw] * weights[ic, oc, kh, kw];
-                                            sum += inputSpan[inputBIndex + inputCIndex + inputHIndex + iw] *
-                                                   weightsSpan[weightsInputCIndex + weightsOutputCIndex + weightsKernelHIndex + kw];
+                                            // int iw = ow * strideWidth + kw * dilatationWidth - paddingWidth;
+                                            int iw = kw * dilatationWidth + owMinusPad;
+                                            if (iw >= 0 && iw < inputWidth)
+                                            {
+                                                // sum += input[b, ic, ih, iw] * weights[ic, oc, kh, kw];
+                                                sum += inputSpan[inputBIndex + inputCIndex + inputHIndex + iw] *
+                                                       weightsSpan[weightsInputCIndex + weightsOutputCIndex + weightsKernelHIndex + kw];
+                                            }
                                         }
                                     }
                                 }
                             }
+                            // output[b, oc, oh, ow] = sum;
+                            outputSpan[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
                         }
-                        // output[b, oc, oh, ow] = sum;
-                        outputSpan[outputBIndex + outputCIndex + outputHIndex + ow] = sum;
                     }
                 }
             }
