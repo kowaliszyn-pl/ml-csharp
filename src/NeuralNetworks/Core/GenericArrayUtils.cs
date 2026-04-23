@@ -43,6 +43,10 @@ public static class GenericArrayUtils
                 x4.PermuteInPlaceTogetherWith(y2, random);
                 return;
 
+            case (float[,,,] x4, float[,,,] y2):
+                x4.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
             default:
                 throw new NotSupportedException($"Unsupported permutation pair: x={matrix1.GetType().Name}, y={matrix2.GetType().Name}. Please override this method in the Trainer subclass or add here a permutation method for these data types.");
         }

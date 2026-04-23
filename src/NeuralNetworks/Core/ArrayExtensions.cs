@@ -12,19 +12,20 @@ namespace NeuralNetworks.Core;
 /// <see cref="float"/>. These methods enable elementwise arithmetic, statistical calculations, source manipulation, and
 /// other common operations for arrays and matrices.
 /// </summary>
-/// <remarks>The <see cref="ArrayExtensions"/> class includes methods for both in-place and out-of-place
-/// operations, supporting 1D, 2D, and 4D float arrays. It offers functionality such as elementwise addition,
-/// multiplication, subtraction, standardization, transposition, and application of activation functions (e.g., sigmoid,
-/// softmax, tanh). Methods are designed to simplify array manipulation in numerical and machine learning scenarios.
-/// Thread safety is not guaranteed; callers should synchronize access if arrays are shared across threads.</remarks>
+/// <remarks>
+/// The <see cref="ArrayExtensions"/> class includes methods for both in-place and out-of-place operations, supporting
+/// 1D, 2D, and 4D float arrays. It offers functionality such as elementwise addition, multiplication, subtraction,
+/// standardization, transposition, and application of activation functions (e.g., sigmoid, softmax, tanh). Methods are
+/// designed to simplify array manipulation in numerical and machine learning scenarios. Thread safety is not
+/// guaranteed; callers should synchronize access if arrays are shared across threads.
+/// </remarks>
 public static class ArrayExtensions
 {
     /// <summary>
     /// Adds a scalar value to each element of the source.
     /// </summary>
     /// <remarks>
-    /// This method creates a new array and does not modify the original <paramref name="source"/> array.
-    /// <para/>
+    /// This method creates a new array and does not modify the original <paramref name="source"/> array. <para/>
     /// Complexity: O(n * m), where n = dim1 of <paramref name="source"/>, m = dim2 of <paramref name="source"/>.
     /// </remarks>
     /// <param name="source">The two-dimensional array to process.</param>
@@ -68,12 +69,13 @@ public static class ArrayExtensions
     /// Adds the specified scalar value to each element of the two-dimensional array in place.
     /// </summary>
     /// <remarks>
-    /// This method modifies the contents of the <paramref name="source"/> array directly. The array
-    /// must be initialized before calling this method.
-    /// <para/>
-    /// Complexity: O(n * m), where n = dim1 of <paramref name="source"/>, m = dim2 of <paramref name="source"/>.
+    /// This method modifies the contents of the <paramref name="source"/> array directly. The array must be initialized
+    /// before calling this method. <para/> Complexity: O(n * m), where n = dim1 of <paramref name="source"/>, m = dim2
+    /// of <paramref name="source"/>.
     /// </remarks>
-    /// <param name="source">The two-dimensional array of single-precision floating-point numbers whose elements will be incremented. Cannot be null.
+    /// <param name="source">
+    /// The two-dimensional array of single-precision floating-point numbers whose elements will be incremented. Cannot
+    /// be null.
     /// </param>
     /// <param name="scalar">The scalar value to add to each element of the array.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,9 +97,8 @@ public static class ArrayExtensions
     /// Adds the specified scalar value to each element of the three-dimensional array in place.
     /// </summary>
     /// <remarks>
-    /// This method modifies the contents of the <paramref name="source"/> array directly.
-    /// <para/>
-    /// Complexity: O(a * b * c) for dimensions of <paramref name="source"/>.
+    /// This method modifies the contents of the <paramref name="source"/> array directly. <para/> Complexity: O(a * b *
+    /// c) for dimensions of <paramref name="source"/>.
     /// </remarks>
     /// <param name="source">The three-dimensional array whose elements will be incremented.</param>
     /// <param name="scalar">The scalar value to add to each element of the array.</param>
@@ -125,9 +126,8 @@ public static class ArrayExtensions
     /// Adds the specified scalar value to each element of the four-dimensional array in place.
     /// </summary>
     /// <remarks>
-    /// This method modifies the contents of the <paramref name="source"/> array directly.
-    /// <para/>
-    /// Complexity: O(a * b * c * d) for dimensions of <paramref name="source"/>.
+    /// This method modifies the contents of the <paramref name="source"/> array directly. <para/> Complexity: O(a * b *
+    /// c * d) for dimensions of <paramref name="source"/>.
     /// </remarks>
     /// <param name="source">The four-dimensional array whose elements will be incremented.</param>
     /// <param name="scalar">The scalar value to add to each element of the array.</param>
@@ -159,12 +159,14 @@ public static class ArrayExtensions
     /// Adds a row to the current source by elementwise addition with the specified source.
     /// </summary>
     /// <remarks>
-    /// This method creates a new array and does not modify the original <paramref name="source"/> array. It adds <paramref name="matrix"/> to each row of <paramref name="source"/> elementwise.
-    /// <para/>
-    /// Complexity: O(n * m), where n = dim1 of <paramref name="source"/>, m = dim2 of <paramref name="source"/>.
+    /// This method creates a new array and does not modify the original <paramref name="source"/> array. It adds
+    /// <paramref name="matrix"/> to each row of <paramref name="source"/> elementwise. <para/> Complexity: O(n * m),
+    /// where n = dim1 of <paramref name="source"/>, m = dim2 of <paramref name="source"/>.
     /// </remarks>
     /// <param name="source">The source two-dimensional array.</param>
-    /// <param name="matrix">The row values to be added elementwise to each row of the source. Length must equal the number of dim2.</param>
+    /// <param name="matrix">
+    /// The row values to be added elementwise to each row of the source. Length must equal the number of dim2.
+    /// </param>
     /// <returns>A new array containing the elementwise sum of each row with <paramref name="matrix"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] AddRow(this float[,] source, float[] matrix)
@@ -216,7 +218,10 @@ public static class ArrayExtensions
     /// Computes the index of the maximum value for each row.
     /// </summary>
     /// <param name="source">The two-dimensional array to evaluate.</param>
-    /// <returns>An array of length equal to the number of rows, where each element is the column index of the maximum value in that row.</returns>
+    /// <returns>
+    /// An array of length equal to the number of rows, where each element is the column index of the maximum value in
+    /// that row.
+    /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int[] Argmax(this float[,] source)
     {
@@ -303,11 +308,8 @@ public static class ArrayExtensions
     /// Creates a new one-dimensional array filled with ones, with the same length as the specified source.
     /// </summary>
     /// <remarks>
-    /// Example: 
-    /// <code>
-    /// float[] source = new float[] { 2.0f, 3.0f, 4.0f };
-    /// var res = source.AsOnes(); // returns new float[] { 1.0f, 1.0f, 1.0f }
-    /// </code>
+    /// Example: <code> float[] source = new float[] { 2.0f, 3.0f, 4.0f }; var res = source.AsOnes(); // returns new
+    /// float[] { 1.0f, 1.0f, 1.0f} </code>
     /// </remarks>
     /// <param name="source">The one-dimensional array used to determine the length of the new array.</param>
     /// <returns>A new one-dimensional array filled with ones.</returns>
@@ -326,7 +328,8 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Creates a new two-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>, otherwise 0.
+    /// Creates a new two-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>,
+    /// otherwise 0.
     /// </summary>
     /// <param name="source">The array used only for shape (dim1 and dim2).</param>
     /// <param name="onesProbability">Probability of placing 1 in a cell. Must be between 0 and 1.</param>
@@ -377,7 +380,8 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Creates a new four-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>, otherwise 0.
+    /// Creates a new four-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>,
+    /// otherwise 0.
     /// </summary>
     /// <param name="source">The array used only for shape in all four dimensions.</param>
     /// <param name="onesProbability">Probability of placing 1 in a cell. Must be between 0 and 1.</param>
@@ -433,14 +437,18 @@ public static class ArrayExtensions
     /// Returns a new two-dimensional array with each element of the source array limited to the specified minimum and
     /// maximum values.
     /// </summary>
-    /// <remarks>If an element in the source array is less than the specified minimum, the result will contain
-    /// the minimum value at that position. If an element is greater than the specified maximum, the result will contain
-    /// the maximum value. The original array is not modified.</remarks>
+    /// <remarks>
+    /// If an element in the source array is less than the specified minimum, the result will contain the minimum value
+    /// at that position. If an element is greater than the specified maximum, the result will contain the maximum
+    /// value. The original array is not modified.
+    /// </remarks>
     /// <param name="source">The two-dimensional array of single-precision floating-point numbers to be clipped.</param>
     /// <param name="min">The minimum value to which elements in the array will be limited.</param>
     /// <param name="max">The maximum value to which elements in the array will be limited.</param>
-    /// <returns>A new two-dimensional array where each element is set to the corresponding value from the source array, limited
-    /// to the specified minimum and maximum values.</returns>
+    /// <returns>
+    /// A new two-dimensional array where each element is set to the corresponding value from the source array, limited
+    /// to the specified minimum and maximum values.
+    /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Clip(this float[,] source, float min, float max)
     {
@@ -577,12 +585,18 @@ public static class ArrayExtensions
     /// Applies the Gaussian Error Linear Unit (GELU) activation function to each element of the specified
     /// two-dimensional array.
     /// </summary>
-    /// <remarks>The GELU activation function is commonly used in neural networks and is defined as GELU(x) =
-    /// 0.5 * x * (1 + tanh(√(2/π) * (x + 0.044715 * x^3))). This method does not modify the input array; it returns a
-    /// new array containing the transformed values.</remarks>
-    /// <param name="source">A two-dimensional array of single-precision floating-point values to which the GELU function will be applied.</param>
-    /// <returns>A two-dimensional array of the same dimensions as the input, where each element is the result of applying the
-    /// GELU function to the corresponding element in the input array.</returns>
+    /// <remarks>
+    /// The GELU activation function is commonly used in neural networks and is defined as GELU(x) = 0.5 * x * (1 +
+    /// tanh(√(2/π) * (x + 0.044715 * x^3))). This method does not modify the input array; it returns a new array
+    /// containing the transformed values.
+    /// </remarks>
+    /// <param name="source">
+    /// A two-dimensional array of single-precision floating-point values to which the GELU function will be applied.
+    /// </param>
+    /// <returns>
+    /// A two-dimensional array of the same dimensions as the input, where each element is the result of applying the
+    /// GELU function to the corresponding element in the input array.
+    /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Gelu(this float[,] source)
     {
@@ -1075,7 +1089,7 @@ public static class ArrayExtensions
     public static float Mean(this float[,,,] source) => source.Sum() / source.Length;
 
     /// <summary>
-    /// Calculates the mean of each column in the source. 
+    /// Calculates the mean of each column in the source.
     /// </summary>
     /// <param name="source">The two-dimensional array to process.</param>
     /// <returns>A one-dimensional array where each element is the mean of a column.</returns>
@@ -1246,7 +1260,8 @@ public static class ArrayExtensions
     /// Multiplies the current source with another source using the dot product.
     /// </summary>
     /// <remarks>
-    /// Complexity: O(n * m * p), where n = dim1 of <paramref name="source"/>, m = shared dimension, p = dim2 of <paramref name="matrix"/>
+    /// Complexity: O(n * m * p), where n = dim1 of <paramref name="source"/>, m = shared dimension, p = dim2 of
+    /// <paramref name="matrix"/>
     /// </remarks>
     /// <param name="source">Left operand with shape [n, m].</param>
     /// <param name="matrix">Right operand with shape [m, p].</param>
@@ -1286,9 +1301,9 @@ public static class ArrayExtensions
     /// <param name="matrix">The source to multiply elementwise with.</param>
     /// <returns>A new source resulting from the elementwise multiplication.</returns>
     /// <remarks>
-    /// Multiplies each element of the source with the corresponding element of another source.
-    /// If the dimensions of the two matrices are not the same, the smaller source is broadcasted to match the larger source.
-    /// If the size of this source is (a * b), and the size of source is (c * d), then the resulting size is (max(a,c) * max(b,d))
+    /// Multiplies each element of the source with the corresponding element of another source. If the dimensions of the
+    /// two matrices are not the same, the smaller source is broadcasted to match the larger source. If the size of this
+    /// source is (a * b), and the size of source is (c * d), then the resulting size is (max(a,c) * max(b,d))
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyElementwise(this float[,] source, float[,] matrix)
@@ -1356,9 +1371,10 @@ public static class ArrayExtensions
     /// <param name="matrix">The source to multiply elementwise with.</param>
     /// <returns>A new source resulting from the elementwise multiplication.</returns>
     /// <remarks>
-    /// Multiplies each element of the source with the corresponding element of another source.
-    /// If the dimensions of the two matrices are not the same, the smaller source is broadcasted to match the larger source.
-    /// If the size of this source is (a * b * c * d), and the size of source is (e * f * g * h), then the resulting size is (max(a,e) * max(b,f) * max(c,g) * max(d,h))
+    /// Multiplies each element of the source with the corresponding element of another source. If the dimensions of the
+    /// two matrices are not the same, the smaller source is broadcasted to match the larger source. If the size of this
+    /// source is (a * b * c * d), and the size of source is (e * f * g * h), then the resulting size is (max(a,e) *
+    /// max(b,f) * max(c,g) * max(d,h))
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] MultiplyElementwise(this float[,,,] source, float[,,,] matrix)
@@ -1400,7 +1416,10 @@ public static class ArrayExtensions
     /// </summary>
     /// <param name="source">The one-dimensional array treated as a row vector.</param>
     /// <param name="matrix">The two-dimensional array to multiply elementwise.</param>
-    /// <returns>A new two-dimensional array of shape [dim1 of <paramref name="matrix"/>, max(dim2)] containing the elementwise product.</returns>
+    /// <returns>
+    /// A new two-dimensional array of shape [dim1 of <paramref name="matrix"/>, max(dim2)] containing the elementwise
+    /// product.
+    /// </returns>
     /// <remarks>
     /// If the dimensions are not the same, the smaller array is broadcasted across dim2.
     /// </remarks>
@@ -1454,7 +1473,8 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Randomly permutes the dim1 of the source in-place using the specified seed. It uses the Fisher-Yates shuffle algorithm.
+    /// Randomly permutes the dim1 of the source in-place using the specified seed. It uses the Fisher-Yates shuffle
+    /// algorithm.
     /// </summary>
     /// <remarks>
     /// Complexity: O(n * m), where n = dim1, m = dim2.
@@ -1510,18 +1530,24 @@ public static class ArrayExtensions
     /// Randomly permutes the dim1 of the specified matrices in place, ensuring that corresponding dim1 in both matrices
     /// remain aligned.
     /// </summary>
-    /// <remarks>This method performs an in-place permutation of the dim1 of both matrices, maintaining the
-    /// correspondence between dim1. This is useful when shuffling paired data, such as features and labels, for machine
-    /// learning tasks. The operation modifies the input matrices directly.
-    /// <para/>
-    /// This method is the quickest for permuting two 2D matrices together.
+    /// <remarks>
+    /// This method performs an in-place permutation of the dim1 of both matrices, maintaining the correspondence
+    /// between dim1. This is useful when shuffling paired data, such as features and labels, for machine learning
+    /// tasks. The operation modifies the input matrices directly. <para/> This method is the quickest for permuting two
+    /// 2D matrices together.
     /// </remarks>
-    /// <param name="source">The first matrix whose dim1 will be permuted. Must have the same number of dim1 as <paramref
-    /// name="secondMatrix"/>.</param>
-    /// <param name="secondMatrix">The second matrix whose dim1 will be permuted in tandem with <paramref name="source"/>. Must have the same
-    /// number of dim1 as <paramref name="source"/>.</param>
-    /// <param name="random">The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
-    /// will be created.</param>
+    /// <param name="source">
+    /// The first matrix whose dim1 will be permuted. Must have the same number of dim1 as
+    /// <paramref name="secondMatrix"/>.
+    /// </param>
+    /// <param name="secondMatrix">
+    /// The second matrix whose dim1 will be permuted in tandem with <paramref name="source"/>. Must have the same
+    /// number of dim1 as <paramref name="source"/>.
+    /// </param>
+    /// <param name="random">
+    /// The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
+    /// will be created.
+    /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this float[,] source, float[,] secondMatrix, Random? random)
     {
@@ -1587,16 +1613,23 @@ public static class ArrayExtensions
     /// Randomly permutes the dim1 of the specified four-dimensional array and the corresponding dim1 of the second
     /// matrix in place, ensuring that both arrays are shuffled together using the same permutation.
     /// </summary>
-    /// <remarks>Both <paramref name="source"/> and <paramref name="secondMatrix"/> must have the same number
-    /// of dim1; otherwise, the method will not perform a valid permutation. The permutation is performed in place and
-    /// affects the original arrays. This method is useful for maintaining alignment between related datasets when
-    /// shuffling.</remarks>
-    /// <param name="source">The four-dimensional array whose dim1 will be permuted in place. The first dimension represents the dim1 to be
-    /// shuffled.</param>
-    /// <param name="secondMatrix">The two-dimensional matrix whose dim1 will be permuted in place together with the dim1 of <paramref
-    /// name="source"/>. Must have the same number of dim1 as <paramref name="source"/>.</param>
-    /// <param name="random">The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
-    /// of <see cref="Random"/> will be created.</param>
+    /// <remarks>
+    /// Both <paramref name="source"/> and <paramref name="secondMatrix"/> must have the same number of dim1; otherwise,
+    /// the method will not perform a valid permutation. The permutation is performed in place and affects the original
+    /// arrays. This method is useful for maintaining alignment between related datasets when shuffling.
+    /// </remarks>
+    /// <param name="source">
+    /// The four-dimensional array whose dim1 will be permuted in place. The first dimension represents the dim1 to be
+    /// shuffled.
+    /// </param>
+    /// <param name="secondMatrix">
+    /// The two-dimensional matrix whose dim1 will be permuted in place together with the dim1 of
+    /// <paramref name="source"/>. Must have the same number of dim1 as <paramref name="source"/>.
+    /// </param>
+    /// <param name="random">
+    /// The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
+    /// of <see cref="Random"/> will be created.
+    /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this float[,,,] source, float[,] secondMatrix, Random? random)
     {
@@ -1633,19 +1666,92 @@ public static class ArrayExtensions
     }
 
     /// <summary>
+    /// Randomly permutes the rows of the specified four-dimensional array and the corresponding rows of the second
+    /// matrix in place, ensuring that both arrays are shuffled together using the same permutation.
+    /// </summary>
+    /// <remarks>
+    /// Both <paramref name="source"/> and <paramref name="secondMatrix"/> must have the same number of dim1; otherwise,
+    /// the method will not perform a valid permutation. The permutation is performed in place and affects the original
+    /// arrays. This method is useful for maintaining alignment between related datasets when shuffling.
+    /// </remarks>
+    /// <param name="source">
+    /// The four-dimensional array whose dim1 will be permuted in place. The first dimension represents the dim1 to be
+    /// shuffled.
+    /// </param>
+    /// <param name="secondMatrix">
+    /// The two-dimensional matrix whose dim1 will be permuted in place together with the dim1 of
+    /// <paramref name="source"/>. Must have the same number of dim1 as <paramref name="source"/>.
+    /// </param>
+    /// <param name="random">
+    /// The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
+    /// of <see cref="Random"/> will be created.
+    /// </param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith(this float[,,,] source, float[,,,] secondMatrix, Random? random)
+    {
+        random ??= new();
+        int sourceRows = source.GetLength(0);
+        int sourceDim2 = source.GetLength(1);
+        int sourceDim3 = source.GetLength(2);
+        int sourceDim4 = source.GetLength(3);
+
+        int secondDim2 = secondMatrix.GetLength(1);
+        int secondDim3 = secondMatrix.GetLength(2);
+        int secondDim4 = secondMatrix.GetLength(3);
+
+        Debug.Assert(sourceRows == secondMatrix.GetLength(0), "Both matrices must have the same number of dim1 to permute them together.");
+
+        for (int sourceRow = sourceRows - 1; sourceRow > 0; sourceRow--)
+        {
+            int randomRow = random.Next(sourceRow + 1);
+            if (sourceRow != randomRow)
+            {
+                // Swap row i with row j
+                for (int d2 = 0; d2 < sourceDim2; d2++)
+                {
+                    for (int d3 = 0; d3 < sourceDim3; d3++)
+                    {
+                        for (int d4 = 0; d4 < sourceDim4; d4++)
+                        {
+                            (source[randomRow, d2, d3, d4], source[sourceRow, d2, d3, d4]) = (source[sourceRow, d2, d3, d4], source[randomRow, d2, d3, d4]);
+                        }
+                    }
+                }
+                for (int d2 = 0; d2 < secondDim2; d2++)
+                {
+                    for (int d3 = 0; d3 < sourceDim3; d3++)
+                    {
+                        for (int d4 = 0; d4 < sourceDim4; d4++)
+                        {
+                            (secondMatrix[randomRow, d2, d3, d4], secondMatrix[sourceRow, d2, d3, d4]) = (secondMatrix[sourceRow, d2, d3, d4], secondMatrix[randomRow, d2, d3, d4]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Randomly permutes the dim1 of the specified matrices in place, ensuring that corresponding dim1 in both matrices
     /// remain aligned after permutation.
     /// </summary>
-    /// <remarks>This method performs a Fisher–Yates shuffle on the dim1 of both matrices, maintaining the
-    /// correspondence between dim1. This is useful when shuffling paired datasets, such as features and labels, to
-    /// preserve their alignment. Both matrices must have the same number of dim1; otherwise, the behavior is
-    /// undefined.</remarks>
-    /// <param name="source">The first matrix whose dim1 will be permuted in place. Must have the same number of dim1 as <paramref
-    /// name="secondMatrix"/>.</param>
-    /// <param name="secondMatrix">The second matrix whose dim1 will be permuted in place together with <paramref name="source"/>. Must have the
-    /// same number of dim1 as <paramref name="source"/>.</param>
-    /// <param name="random">The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
-    /// will be created.</param>
+    /// <remarks>
+    /// This method performs a Fisher–Yates shuffle on the dim1 of both matrices, maintaining the correspondence between
+    /// dim1. This is useful when shuffling paired datasets, such as features and labels, to preserve their alignment.
+    /// Both matrices must have the same number of dim1; otherwise, the behavior is undefined.
+    /// </remarks>
+    /// <param name="source">
+    /// The first matrix whose dim1 will be permuted in place. Must have the same number of dim1 as
+    /// <paramref name="secondMatrix"/>.
+    /// </param>
+    /// <param name="secondMatrix">
+    /// The second matrix whose dim1 will be permuted in place together with <paramref name="source"/>. Must have the
+    /// same number of dim1 as <paramref name="source"/>.
+    /// </param>
+    /// <param name="random">
+    /// The random number generator used to determine the permutation order. If <see langword="null"/>, a new instance
+    /// will be created.
+    /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWithSetRow(this float[,] source, float[,] secondMatrix, Random? random)
     {
@@ -1744,7 +1850,9 @@ public static class ArrayExtensions
     /// <param name="source">The two-dimensional array to modify.</param>
     /// <param name="rowIndex">The index of the row to set.</param>
     /// <param name="row">The array containing the values to set. Length must equal the number of dim2.</param>
-    /// <exception cref="System.Diagnostics.Debug">Asserts when the row index is out of bounds or lengths mismatch.</exception>
+    /// <exception cref="System.Diagnostics.Debug">
+    /// Asserts when the row index is out of bounds or lengths mismatch.
+    /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void SetRow(this float[,] source, int rowIndex, float[] row)
     {
@@ -1789,7 +1897,10 @@ public static class ArrayExtensions
     /// <summary>
     /// Applies the sigmoid function to each element of the source.
     /// </summary>
-    /// <returns>A new source with each element transformed by the sigmoid function with the same dimensions as the original source.</returns>
+    /// <returns>
+    /// A new source with each element transformed by the sigmoid function with the same dimensions as the original
+    /// source.
+    /// </returns>
     /// <param name="source">The two-dimensional array to transform.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Sigmoid(this float[,] source)
@@ -1815,7 +1926,10 @@ public static class ArrayExtensions
     /// <remarks>
     /// The derivative of the sigmoid function is calculated as: sigmoid(x) * (1 - sigmoid(x)).
     /// </remarks>
-    /// <returns>A new source with each element transformed by the derivative of the sigmoid function with the same dimensions as the original source.</returns>
+    /// <returns>
+    /// A new source with each element transformed by the derivative of the sigmoid function with the same dimensions as
+    /// the original source.
+    /// </returns>
     /// <param name="source">The two-dimensional array to transform.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] SigmoidDerivative(this float[,] source)
@@ -1878,7 +1992,8 @@ public static class ArrayExtensions
     /// Applies the softmax function (with log-sum-exp trick) to the source.
     /// </summary>
     /// <remarks>
-    /// The trick improves numerical stability by subtracting the maximum value in each row before exponentiation. This prevents overflow issues when dealing with large input values.
+    /// The trick improves numerical stability by subtracting the maximum value in each row before exponentiation. This
+    /// prevents overflow issues when dealing with large input values.
     /// </remarks>
     /// <returns>A new source with softmax-applied values.</returns>
     /// <param name="source">The two-dimensional array to transform (log-sum-exp softmax applied per row).</param>
@@ -1920,12 +2035,18 @@ public static class ArrayExtensions
     /// Computes the numerically stable softmax of each row in a two-dimensional array of single-precision
     /// floating-point values.
     /// </summary>
-    /// <remarks>This method applies the softmax function to each row independently, using a numerically
-    /// stable algorithm to prevent overflow or underflow. The input array is not modified.</remarks>
-    /// <param name="source">A two-dimensional array of type <see cref="float"/> representing the input data. Each row is treated as a
-    /// separate vector for which the softmax will be computed.</param>
-    /// <returns>A two-dimensional array of type <see cref="float"/> containing the softmax probabilities for each row of the
-    /// input array. Each row sums to 1.0.</returns>
+    /// <remarks>
+    /// This method applies the softmax function to each row independently, using a numerically stable algorithm to
+    /// prevent overflow or underflow. The input array is not modified.
+    /// </remarks>
+    /// <param name="source">
+    /// A two-dimensional array of type <see cref="float"/> representing the input data. Each row is treated as a
+    /// separate vector for which the softmax will be computed.
+    /// </param>
+    /// <returns>
+    /// A two-dimensional array of type <see cref="float"/> containing the softmax probabilities for each row of the
+    /// input array. Each row sums to 1.0.
+    /// </returns>
     public static float[,] SoftmaxStable(this float[,] source)
     {
         int rows = source.GetLength(0);
@@ -1997,13 +2118,19 @@ public static class ArrayExtensions
     /// <summary>
     /// Applies the Softplus activation function to each element of the specified two-dimensional array.
     /// </summary>
-    /// <remarks>The Softplus function is defined as <c>log(1 + exp(x))</c> and is commonly used as a smooth
-    /// approximation to the ReLU activation in machine learning applications. The returned array is a new instance; the
-    /// input array is not modified.</remarks>
-    /// <param name="source">A two-dimensional array of single-precision floating-point values to which the Softplus function will be
-    /// applied.</param>
-    /// <returns>A two-dimensional array of the same dimensions as <paramref name="source"/>, where each element is the result of
-    /// applying the Softplus function to the corresponding element in <paramref name="source"/>.</returns>
+    /// <remarks>
+    /// The Softplus function is defined as <c> log(1 + exp(x))</c> and is commonly used as a smooth approximation to
+    /// the ReLU activation in machine learning applications. The returned array is a new instance; the input array is
+    /// not modified.
+    /// </remarks>
+    /// <param name="source">
+    /// A two-dimensional array of single-precision floating-point values to which the Softplus function will be
+    /// applied.
+    /// </param>
+    /// <returns>
+    /// A two-dimensional array of the same dimensions as <paramref name="source"/>, where each element is the result of
+    /// applying the Softplus function to the corresponding element in <paramref name="source"/>.
+    /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Softplus(this float[,] source)
     {
@@ -2021,7 +2148,7 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Splits the source into two sets of dim1 based on the specified ratio. 
+    /// Splits the source into two sets of dim1 based on the specified ratio.
     /// </summary>
     /// <param name="source">The two-dimensional array to split.</param>
     /// <param name="ratio">The ratio for splitting the dim1.</param>
@@ -2053,10 +2180,12 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Standardizes the source in-place so that each column (or a specified range of dim2) has a mean of 0 and a standard deviation of 1 by applying the <c>(x - mean) / stdDev</c> transformation.
+    /// Standardizes the source in-place so that each column (or a specified range of dim2) has a mean of 0 and a
+    /// standard deviation of 1 by applying the <c> (x - mean) / stdDev</c> transformation.
     /// </summary>
     /// <remarks>
-    /// Standard deviation is calculated using the formula: <c>sqrt(sum((x - mean)^2) / N)</c>, where N is the number of dim1.
+    /// Standard deviation is calculated using the formula: <c> sqrt(sum((x - mean)^2) / N)</c>, where N is the number
+    /// of dim1.
     /// </remarks>
     /// <param name="source">The source to standardize.</param>
     /// <param name="columnRange">
@@ -2219,7 +2348,8 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Standardizes the source in-place so that each column (or a specified range of dim2) has mean 0 and standard deviation 1, computed in a single pass.
+    /// Standardizes the source in-place so that each column (or a specified range of dim2) has mean 0 and standard
+    /// deviation 1, computed in a single pass.
     /// </summary>
     /// <param name="source">The source to standardize.</param>
     /// <param name="columnRange">
@@ -2276,7 +2406,8 @@ public static class ArrayExtensions
     /// Calculates the standard deviation for all elements of a two-dimensional array.
     /// </summary>
     /// <remarks>
-    /// Standard deviation is calculated using the formula: <c>sqrt(sum((x - mean)^2) / N)</c>, where N is the number of all elements in the array.
+    /// Standard deviation is calculated using the formula: <c> sqrt(sum((x - mean)^2) / N)</c>, where N is the number
+    /// of all elements in the array.
     /// </remarks>
     /// <param name="source">The array whose standard deviation will be computed.</param>
     /// <returns>The standard deviation of all elements.</returns>
@@ -2307,7 +2438,8 @@ public static class ArrayExtensions
     /// Calculates the standard deviation for all elements of a three-dimensional array.
     /// </summary>
     /// <remarks>
-    /// Standard deviation is calculated using the formula: <c>sqrt(sum((x - mean)^2) / N)</c>, where N is the number of all elements in the array.
+    /// Standard deviation is calculated using the formula: <c> sqrt(sum((x - mean)^2) / N)</c>, where N is the number
+    /// of all elements in the array.
     /// </remarks>
     /// <param name="source">The array whose standard deviation will be computed.</param>
     /// <returns>The standard deviation of all elements.</returns>
@@ -2342,7 +2474,8 @@ public static class ArrayExtensions
     /// Calculates the standard deviation for all elements of a four-dimensional array.
     /// </summary>
     /// <remarks>
-    /// Standard deviation is calculated using the formula: <c>sqrt(sum((x - mean)^2) / N)</c>, where N is the number of all elements in the array.
+    /// Standard deviation is calculated using the formula: <c> sqrt(sum((x - mean)^2) / N)</c>, where N is the number
+    /// of all elements in the array.
     /// </remarks>
     /// <param name="source">The array whose standard deviation will be computed.</param>
     /// <returns>The standard deviation of all elements.</returns>
