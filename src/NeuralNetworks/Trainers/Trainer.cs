@@ -304,7 +304,7 @@ public class Trainer<TInputData, TPrediction>(
         List<string> DescribeFit()
         {
             List<string> res = [];
-            res.Add($"Fit (epochs={epochs}, batchSize={batchSize}, evalEveryEpochs={evalEveryEpochs}, logEveryEpochs={logEveryEpochs}, saveParamsOnBestLoss={saveParamsOnBestLoss})");
+            res.Add($"Fit (epochs={epochs}, batchSize={batchSize}, evalEveryEpochs={evalEveryEpochs}, logEveryEpochs={logEveryEpochs}, saveParamsOnBestLoss={saveParamsOnBestLoss}, lossFunction={lossFunction})");
             res.AddRange(Describe(Constants.Indentation));
             return res;
         }

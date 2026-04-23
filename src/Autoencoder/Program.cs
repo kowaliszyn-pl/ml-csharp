@@ -10,6 +10,7 @@ using NeuralNetworks.Core;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;
+using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
@@ -24,22 +25,11 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace Autoencoder;
 
-internal class AutoencoderModel : BaseModel<float[,,,], float[,,,]>
+internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null) : BaseModel<float[,,,], float[,,,]>(null, random, modelFilePath)
 {
-
-    public AutoencoderModel(int bottleneckDim, SeededRandom random) : base(random)
-    {
-        _bottleneckDim = bottleneckDim;
-    }
-
-    public AutoencoderModel(string modelFilePath) : base(modelFilePath)
-    {
-        _bottleneckDim = GetEncodedRepresentation().GetLength(1);
-    }
 
     private const int InnerChannels = 7;
     private const int ImageInnerSize = 28;
-    private readonly int _bottleneckDim;
     private Layer<float[,], float[,]>? _bottleneckLayer;
     private Layer<float[,], float[,]>? _firstDecoderLayer;
 
@@ -47,7 +37,7 @@ internal class AutoencoderModel : BaseModel<float[,,,], float[,,,]>
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
 
-        _bottleneckLayer = new DenseLayer(_bottleneckDim, new Linear(), initializer);
+        _bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer);
         _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Linear(), initializer);
 
         return
@@ -118,7 +108,7 @@ internal class Program
 {
     private const int RandomSeed = 260423;
     private const int BottleneckDim = 28;
-    private const int Epochs = 15;
+    private const int Epochs = 2; // 15;
     private const int BatchSize = 400;
     private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
@@ -222,6 +212,7 @@ internal class Program
         SeededRandom commonRandom = new(RandomSeed);
         AutoencoderModel model = new(BottleneckDim, commonRandom);
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
+        MeanSquaredErrorLoss4D lossFunction = new();
 
         Trainer<float[,,,], float[,,,]> trainer = new(
             model,
@@ -236,6 +227,7 @@ internal class Program
 
         trainer.Fit(
             dataSource,
+            lossFunction: lossFunction,
             epochs: Epochs,
             evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
