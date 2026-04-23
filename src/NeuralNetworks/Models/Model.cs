@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 
 using NeuralNetworks.Core;
@@ -35,6 +36,7 @@ public abstract class Model<TInputData, TPrediction>
     private float _lastLoss; 
     private readonly string? _modelFilePath;
     private ModelInputShape? _inputShape;
+    private readonly Loss<TPrediction>? _defaultLossFunction;
 
     private const int CurrentModelFormatVersion = 1;
 
@@ -56,9 +58,9 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    private readonly Loss<TPrediction>? _defaultLossFunction;
-
     protected SeededRandom? Random { get; }
+
+    //protected List<Layer> Layers => _layers;
 
     private protected abstract LayerListBuilder<TInputData, TPrediction> CreateLayerListBuilderPrivate();
 
@@ -66,6 +68,21 @@ public abstract class Model<TInputData, TPrediction>
     {
         RememberInputShape(input);
         return _layers.Forward(input, inference);
+    }
+
+    protected TPrediction InferenceFromLayer<TLayerInputData>(Layer fromLayer, TLayerInputData input)
+        where TLayerInputData : notnull
+    {
+        object stream = input;
+        int indexOfFirstDecoderLayer = _layers.IndexOf(fromLayer);
+
+        Debug.Assert(indexOfFirstDecoderLayer >= 0, "The specified layer was not found in the model's layer list.");
+
+        foreach (Layer layer in _layers.Skip(indexOfFirstDecoderLayer))
+        {
+            stream = layer.Forward(stream, inference: true);
+        }
+        return (TPrediction)stream;
     }
 
     public void Backward(TPrediction lossGrad)
@@ -102,7 +119,7 @@ public abstract class Model<TInputData, TPrediction>
     public int GetParamCount()
         => _layers.Sum(l => (int?)l.GetParamCount()) ?? 0;
 
-    public List<string> Describe(int indentation = 0)
+    public virtual List<string> Describe(int indentation = 0)
     {
         string indent = new(' ', indentation);
         string newIndent = new(' ', indentation + Constants.Indentation);
