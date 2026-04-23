@@ -20,6 +20,9 @@ public interface IOperations
     float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f);
     float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target);
 
+    float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors);
+    float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors);
+
     #endregion
 
     #region Activations Functions

@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core.Operations;
@@ -17,26 +18,27 @@ public class OperationsSpanParallel : OperationsSpan
 
     #region Loss Functions
 
-    public override float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
-    {
-        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+    // Commented out because of the race condition in the loss accumulation. The method is left here for reference and potential future optimization with thread-local storage or other techniques
+    //public override float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
+    //{
+    //    Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        float loss = 0f;
-        int batchSize = predicted.GetLength(0);
-        int numClasses = predicted.GetLength(1);
+    //    float loss = 0f;
+    //    int batchSize = predicted.GetLength(0);
+    //    int numClasses = predicted.GetLength(1);
 
-        Parallel.For(0, target.Length, i =>
-        {
+    //    Parallel.For(0, target.Length, i =>
+    //    {
 
-            ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0], predicted.Length);
-            ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
+    //        ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0], predicted.Length);
+    //        ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
 
-            float p = Math.Clamp(predictedSpan[i], eps, 1 - eps);
-            loss += targetSpan[i] * MathF.Log(p);
-        });
+    //        float p = Math.Clamp(predictedSpan[i], eps, 1 - eps);
+    //        loss += targetSpan[i] * MathF.Log(p);
+    //    });
 
-        return -loss / (batchSize * numClasses);
-    }
+    //    return -loss / (batchSize * numClasses);
+    //}
 
     public override float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
     {
@@ -57,6 +59,8 @@ public class OperationsSpanParallel : OperationsSpan
 
         return gradient;
     }
+
+    
 
     #endregion
 

@@ -57,6 +57,29 @@ public class OperationsSpan : OperationsArray
         return gradient;
     }
 
+    public override float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
+    {
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = predicted.GetLength(0);
+
+        ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0, 0, 0], predicted.Length);
+        ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0, 0, 0], target.Length);
+
+        errors = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
+
+        Span<float> errorsSpan = MemoryMarshal.CreateSpan(ref errors[0, 0, 0, 0], errors.Length);
+        float loss = 0f;
+        for (int i = 0; i < predictedSpan.Length; i++)
+        {
+            float error = predictedSpan[i] - targetSpan[i];
+            errorsSpan[i] = error;
+            loss += error * error;
+        }
+        loss /= batchSize;
+        return loss;
+    }
+
     #endregion
 
     #region Activations Functions
@@ -576,6 +599,23 @@ public class OperationsSpan : OperationsArray
         int dim2 = targetSize.GetLength(1);
         int dim3 = targetSize.GetLength(2);
         int dim4 = targetSize.GetLength(3);
+
+        Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
+        Debug.Assert(source.GetLength(0) == dim1 && source.GetLength(1) == dim2 * dim3 * dim4, "Source shape does not match target size for unflattening.");
+
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+
+        ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref source[0, 0], source.Length);
+        Span<float> resSpan = MemoryMarshal.CreateSpan(ref res[0, 0, 0, 0], res.Length);
+
+        sourceSpan.CopyTo(resSpan);
+
+        return res;
+    }
+
+    public override float[,,,] Unflatten(float[,] source, int dim2, int dim3, int dim4)
+    {
+        int dim1 = source.GetLength(0);
 
         Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
         Debug.Assert(source.GetLength(0) == dim1 && source.GetLength(1) == dim2 * dim3 * dim4, "Source shape does not match target size for unflattening.");

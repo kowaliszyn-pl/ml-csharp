@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace NeuralNetworks.Core.Operations;
 
 /// <summary>
@@ -71,6 +73,20 @@ public class OperationsArray : IOperations
 
         int batchSize = predicted.GetLength(0);
         return predicted.Subtract(target).Divide(batchSize);
+    }
+
+    public virtual float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
+    {
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        errors = predicted.Subtract(target);
+        return errors.Power(2).Mean();
+    }
+
+    public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
+    {
+        int batchSize = predicted.GetLength(0);
+        return errors.Multiply(2f / batchSize);
     }
 
     #endregion
@@ -951,25 +967,6 @@ public class OperationsArray : IOperations
         int width = targetSize.GetLength(3);
 
         return Unflatten(source, channels, height, width);
-
-        //float[,,,] res = new float[batchSize, channels, height, width];
-
-        //for (int b = 0; b < batchSize; b++)
-        //{
-        //    for (int c = 0; c < channels; c++)
-        //    {
-        //        for (int h = 0; h < height; h++)
-        //        {
-        //            for (int w = 0; w < width; w++)
-        //            {
-        //                int index = c * height * width + h * width + w;
-        //                res[b, c, h, w] = source[b, index];
-        //            }
-        //        }
-        //    }
-        //}
-
-        //return res;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

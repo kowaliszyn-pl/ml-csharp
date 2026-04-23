@@ -173,6 +173,13 @@ public static class OperationBackend
     internal static float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
         => Current.BinaryCrossEntropyLossGradient(predicted, target);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
+        => Current.MeanSquaredErrorLoss(predicted, target, out errors);
+
+    internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
+        => Current.MeanSquaredErrorLossGradient(predicted, errors);
+
     #endregion
 
     #region Activation Functions
@@ -266,26 +273,19 @@ public static class OperationBackend
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
     /// </summary>
     /// <remarks>
-    /// Given the output gradient (dL/dy), the function calculates the source gradient (dL/dx). 
-    /// <para/>
-    /// The derivative of the Tanh function <c>tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))</c> is <c>1 - tanh(x)^2</c>.
-    /// Therefore, the source gradient is computed as: <c>dL/dx = dL/dy * (1 - tanh(x)^2) = dL/dy * (1 - output^2)</c>.
-    /// <list type="bullet">
-    /// <item>
-    /// tanh(x) => output
-    /// </item>
-    /// <item>
-    /// dL/dy => outputGradient
-    /// </item>
-    /// <item>
-    /// dL/dx => inputGradient
-    /// </item>
-    /// </list>
+    /// Given the output gradient (dL/dy), the function calculates the source gradient (dL/dx). <para/> The derivative
+    /// of the Tanh function <c> tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))</c> is <c> 1 - tanh(x)^2</c>.
+    /// Therefore, the source gradient is computed as: <c> dL/dx = dL/dy * (1 - tanh(x)^2) = dL/dy * (1 - output^2)</c>.
+    /// <list type="bullet"> <item> tanh(x) => output </item> <item> dL/dy => outputGradient </item> <item> dL/dx =>
+    /// inputGradient </item> </list>
     /// </remarks>
     /// <param name="output">The output of the Tanh function (<c>tanh(x)</c>).</param>
-    /// <param name="outputGradient">The gradient of the loss with respect to the output of the Tanh function (dL/dy).</param>
+    /// <param name="outputGradient">
+    /// The gradient of the loss with respect to the output of the Tanh function (dL/dy).
+    /// </param>
     /// <returns>
-    /// The gradient of the loss with respect to the input of the Tanh function (dL/dx), having the same shape as <paramref name="outputGradient"/>.
+    /// The gradient of the loss with respect to the input of the Tanh function (dL/dx), having the same shape as
+    /// <paramref name="outputGradient"/>.
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] TanhInputGradient(float[,] outputGradient, float[,] output)
@@ -295,26 +295,19 @@ public static class OperationBackend
     /// Calculates the gradient of the loss with respect to the input of the Tanh activation function.
     /// </summary>
     /// <remarks>
-    /// Given the output gradient (dL/dy), the function calculates the source gradient (dL/dx). 
-    /// <para/>
-    /// The derivative of the Tanh function <c>tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))</c> is <c>1 - tanh(x)^2</c>.
-    /// Therefore, the source gradient is computed as: <c>dL/dx = dL/dy * (1 - tanh(x)^2) = dL/dy * (1 - output^2)</c>.
-    /// <list type="bullet">
-    /// <item>
-    /// tanh(x) => output
-    /// </item>
-    /// <item>
-    /// dL/dy => outputGradient
-    /// </item>
-    /// <item>
-    /// dL/dx => inputGradient
-    /// </item>
-    /// </list>
+    /// Given the output gradient (dL/dy), the function calculates the source gradient (dL/dx). <para/> The derivative
+    /// of the Tanh function <c> tanh(x) = (exp(x) - exp(-x)) / (exp(x) + exp(-x))</c> is <c> 1 - tanh(x)^2</c>.
+    /// Therefore, the source gradient is computed as: <c> dL/dx = dL/dy * (1 - tanh(x)^2) = dL/dy * (1 - output^2)</c>.
+    /// <list type="bullet"> <item> tanh(x) => output </item> <item> dL/dy => outputGradient </item> <item> dL/dx =>
+    /// inputGradient </item> </list>
     /// </remarks>
     /// <param name="output">The output of the Tanh function (<c>tanh(x)</c>).</param>
-    /// <param name="outputGradient">The gradient of the loss with respect to the output of the Tanh function (dL/dy).</param>
+    /// <param name="outputGradient">
+    /// The gradient of the loss with respect to the output of the Tanh function (dL/dy).
+    /// </param>
     /// <returns>
-    /// The gradient of the loss with respect to the input of the Tanh function (dL/dx), having the same shape as <paramref name="outputGradient"/>.
+    /// The gradient of the loss with respect to the input of the Tanh function (dL/dx), having the same shape as
+    /// <paramref name="outputGradient"/>.
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
@@ -371,8 +364,11 @@ public static class OperationBackend
     /// <remarks>
     /// Padding is symmetric and computed as kernelSize / 2. Strides and dilation are not supported yet.
     /// </remarks>
-    /// <param name="input">The input array of shape [batchSize, inputChannels, inputHeight, inputWidth]</param> 
-    /// <param name="weights">The weights array (of the convolution filters) of shape [inputChannels, outputChannels, kernelHeight, kernelWidth]</param>
+    /// <param name="input">The input array of shape [batchSize, inputChannels, inputHeight, inputWidth]</param>
+    /// <param name="weights">
+    /// The weights array (of the convolution filters) of shape [inputChannels, outputChannels, kernelHeight,
+    /// kernelWidth]
+    /// </param>
     /// <returns>The output array of shape [batchSize, outputChannels, outputHeight, outputWidth]</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DOutput(float[,,,] input, float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)
@@ -397,10 +393,20 @@ public static class OperationBackend
     /// <summary>
     /// Computes the gradient of the input array for a 2D convolution operation during backpropagation.
     /// </summary>
-    /// <param name="input">The input array to the convolution layer, represented as a four-dimensional array with shape [batchSize, inputChannels, inputHeight, inputWidth].</param>
-    /// <param name="weights">The weights of the convolution filters, represented as a four-dimensional array with shape [inputChannels, outputChannels, kernelHeight, kernelWidth].</param>
-    /// <param name="outputGradient">The gradient of the loss with respect to the output of the convolution layer, represented as a four-dimensional array with shape [batchSize, outputChannels, outputHeight, outputWidth].</param>
-    /// <returns>The input gradient array of shape [batchSize, inputChannels, inputHeight, inputWidth].
+    /// <param name="input">
+    /// The input array to the convolution layer, represented as a four-dimensional array with shape [batchSize,
+    /// inputChannels, inputHeight, inputWidth].
+    /// </param>
+    /// <param name="weights">
+    /// The weights of the convolution filters, represented as a four-dimensional array with shape [inputChannels,
+    /// outputChannels, kernelHeight, kernelWidth].
+    /// </param>
+    /// <param name="outputGradient">
+    /// The gradient of the loss with respect to the output of the convolution layer, represented as a four-dimensional
+    /// array with shape [batchSize, outputChannels, outputHeight, outputWidth].
+    /// </param>
+    /// <returns>
+    /// The input gradient array of shape [batchSize, inputChannels, inputHeight, inputWidth].
     /// </returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] Convolve2DInputGradient(float[,,,] input, float[,,,] weights, float[,,,] outputGradient, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1)

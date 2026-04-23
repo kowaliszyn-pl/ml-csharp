@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Operations;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;
@@ -108,9 +109,9 @@ internal class Program
 {
     private const int RandomSeed = 260423;
     private const int BottleneckDim = 28;
-    private const int Epochs = 2; // 15;
+    private const int Epochs = 1; // 15;
     private const int BatchSize = 400;
-    private const int EvalEveryEpochs = 2;
+    // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
 
     private const float InitialLearningRate = 0.002f;
@@ -132,8 +133,9 @@ internal class Program
         ILoggerFactory loggerFactory = new LoggerFactory()
             .AddSerilog(serilog);
 
-        bool running = true;
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        //bool running = true;
+        OutputEncoding = System.Text.Encoding.UTF8;
+        OperationBackend.Use(OperationBackendType.CpuSpansParallel);
 
         Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger<AutoencoderModel>();
 
@@ -229,7 +231,6 @@ internal class Program
             dataSource,
             lossFunction: lossFunction,
             epochs: Epochs,
-            evalEveryEpochs: EvalEveryEpochs,
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize,
             saveParamsOnBestLoss: false
