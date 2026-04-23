@@ -109,7 +109,7 @@ internal class Program
 {
     private const int RandomSeed = 260423;
     private const int BottleneckDim = 28;
-    private const int Epochs = 5; // 15;
+    private const int Epochs = 15;
     private const int BatchSize = 400;
     // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
@@ -118,6 +118,10 @@ internal class Program
     private const float FinalLearningRate = 0.0005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
+
+    private const string ModelName = "Autoencoder";
+
+    private static Microsoft.Extensions.Logging.ILogger s_logger = default!;
 
     private static void Main()
     {
@@ -132,13 +136,93 @@ internal class Program
         // Create a LoggerFactory and add Serilog
         ILoggerFactory loggerFactory = new LoggerFactory()
             .AddSerilog(serilog);
+        s_logger = loggerFactory.CreateLogger<AutoencoderModel>();
 
-        //bool running = true;
+        bool running = true;
         OutputEncoding = System.Text.Encoding.UTF8;
-        OperationBackend.Use(OperationBackendType.CpuSpansParallel);
+        OperationBackend.Use(OperationBackendType.CpuArrays);
 
-        Microsoft.Extensions.Logging.ILogger logger = loggerFactory.CreateLogger<AutoencoderModel>();
+        while (running)
+        {
+            bool fromSubmenu = false;
+            WriteLine("Select a routine to run (Autoencoder):");
+            WriteLine("B. Select operation backend");
+            WriteLine("T. Train and save a model");
+            WriteLine("L. Load the last model");
+            WriteLine("Other: Exit");
+            WriteLine();
+            Write("Enter your choice: ");
 
+            string? choice = ReadLine();
+            WriteLine();
+
+            switch (choice?.ToUpper())
+            {
+                case "B":
+                    SelectOperationBackend();
+                    WriteLine();
+                    fromSubmenu = true;
+                    break;
+                case "T":
+                    Train();
+                    break;
+                case "L":
+                    // Load();
+                    break;
+
+                default:
+                    WriteLine("Goodbye!");
+                    running = false;
+                    break;
+            }
+
+            if (running && !fromSubmenu)
+            {
+                WriteLine("\nPress any key to continue...");
+                ReadKey();
+                WriteLine();
+            }
+        }
+    }
+
+    private static void SelectOperationBackend()
+    {
+        WriteLine("Select operation backend:");
+        WriteLine("A. CPU - Arrays");
+        WriteLine("S. CPU - Spans");
+        WriteLine("P. CPU - Spans Parallel");
+        WriteLine("G. GPU");
+        WriteLine("Other: Exit");
+        WriteLine();
+        Write("Enter your choice: ");
+        string? backendChoice = ReadLine();
+        WriteLine();
+        switch (backendChoice?.ToUpper())
+        {
+            case "A":
+                OperationBackend.Use(OperationBackendType.CpuArrays);
+                WriteLine("Using CPU - Arrays backend.");
+                break;
+            case "S":
+                OperationBackend.Use(OperationBackendType.CpuSpans);
+                WriteLine("Using CPU - Spans backend.");
+                break;
+            case "P":
+                OperationBackend.Use(OperationBackendType.CpuSpansParallel);
+                WriteLine("Using CPU - Spans Parallel backend.");
+                break;
+            case "G":
+                OperationBackend.Use(OperationBackendType.Gpu);
+                WriteLine("Using GPU backend.");
+                break;
+            default:
+                WriteLine("No changes made to the operation backend.");
+                break;
+        }
+    }
+
+    private static void Train()
+    {
         WriteLine("Loading and preprocessing data...");
 
         // rows - batch
@@ -219,7 +303,7 @@ internal class Program
             model,
             new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
             random: commonRandom,
-            logger: logger
+            logger: s_logger
         )
         {
             Memo = $"Calling class: {nameof(AutoencoderModel)}."
@@ -234,8 +318,13 @@ internal class Program
             saveParamsOnBestLoss: false
         );
 
-        WriteLine("Training completed. Press ENTER to exit.");
-        ReadLine();
+        // Save the model
+
+        string modelPath = $"{ModelName}.json";
+        model.SaveParams(modelPath, "Final trained model.");
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"Model parameters saved to {modelPath}.");
+        ResetColor();
     }
 
     private static (float[,,,] xData4D, float[,] yData, float[,] xData2D) Split(float[,] source)

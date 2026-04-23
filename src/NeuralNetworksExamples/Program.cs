@@ -10,6 +10,8 @@ using NeuralNetworksExamples;
 
 using Serilog;
 
+using static System.Console;
+
 internal static class Program
 {
     internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
@@ -29,32 +31,32 @@ internal static class Program
             .AddSerilog(serilog);
 
         bool running = true;
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        OutputEncoding = System.Text.Encoding.UTF8;
 
         while (running)
         {
             bool fromSubmenu = false;
-            Console.WriteLine("Select a routine to run (Neural Networks Examples):");
-            Console.WriteLine("B. Select operation backend");
-            Console.WriteLine("S. Sine function approximation");
-            Console.WriteLine("1. Boston Housing data set (custom model)");
-            Console.WriteLine("2. Boston Housing data set (generic model)");
-            Console.WriteLine("D. MNIST data set (dense layers)");
-            Console.WriteLine("C. MNIST data set (CNN 2D)");
-            Console.WriteLine("E. ECG 200 (CNN 1D)");
-            Console.WriteLine("L. Load and evaluate MNIST data set (dense layers)");
-            Console.WriteLine("Other: Exit");
-            Console.WriteLine();
-            Console.Write("Enter your choice: ");
+            WriteLine("Select a routine to run (Neural Networks Examples):");
+            WriteLine("B. Select operation backend");
+            WriteLine("S. Sine function approximation");
+            WriteLine("1. Boston Housing data set (custom model)");
+            WriteLine("2. Boston Housing data set (generic model)");
+            WriteLine("D. MNIST data set (dense layers)");
+            WriteLine("C. MNIST data set (CNN 2D)");
+            WriteLine("E. ECG 200 (CNN 1D)");
+            WriteLine("L. Load and evaluate MNIST data set (dense layers)");
+            WriteLine("Other: Exit");
+            WriteLine();
+            Write("Enter your choice: ");
 
-            string? choice = Console.ReadLine();
-            Console.WriteLine();
+            string? choice = ReadLine();
+            WriteLine();
 
             switch (choice?.ToUpper())
             {
                 case "B":
                     SelectOperationBackend();
-                    Console.WriteLine();
+                    WriteLine();
                     fromSubmenu = true;
                     break;
                 case "S":
@@ -80,52 +82,52 @@ internal static class Program
                     break;
 
                 default:
-                    Console.WriteLine("Goodbye!");
+                    WriteLine("Goodbye!");
                     running = false;
                     break;
             }
 
             if (running && !fromSubmenu)
             {
-                Console.WriteLine("\nPress any key to continue...");
-                Console.ReadKey();
-                Console.WriteLine();
+                WriteLine("\nPress any key to continue...");
+                ReadKey();
+                WriteLine();
             }
         }
     }
 
     private static void SelectOperationBackend()
     {
-        Console.WriteLine("Select operation backend:");
-        Console.WriteLine("A. CPU - Arrays");
-        Console.WriteLine("S. CPU - Spans");
-        Console.WriteLine("P. CPU - Spans Parallel");
-        Console.WriteLine("G. GPU");
-        Console.WriteLine("Other: Exit");
-        Console.WriteLine();
-        Console.Write("Enter your choice: ");
-        string? backendChoice = Console.ReadLine();
-        Console.WriteLine();
+        WriteLine("Select operation backend:");
+        WriteLine("A. CPU - Arrays");
+        WriteLine("S. CPU - Spans");
+        WriteLine("P. CPU - Spans Parallel");
+        WriteLine("G. GPU");
+        WriteLine("Other: Exit");
+        WriteLine();
+        Write("Enter your choice: ");
+        string? backendChoice = ReadLine();
+        WriteLine();
         switch (backendChoice?.ToUpper())
         {
             case "A":
                 OperationBackend.Use(OperationBackendType.CpuArrays);
-                Console.WriteLine("Using CPU - Arrays backend.");
+                WriteLine("Using CPU - Arrays backend.");
                 break;
             case "S":
                 OperationBackend.Use(OperationBackendType.CpuSpans);
-                Console.WriteLine("Using CPU - Spans backend.");
+                WriteLine("Using CPU - Spans backend.");
                 break;
             case "P":
                 OperationBackend.Use(OperationBackendType.CpuSpansParallel);
-                Console.WriteLine("Using CPU - Spans Parallel backend.");
+                WriteLine("Using CPU - Spans Parallel backend.");
                 break;
             case "G":
                 OperationBackend.Use(OperationBackendType.Gpu);
-                Console.WriteLine("Using GPU backend.");
+                WriteLine("Using GPU backend.");
                 break;
             default:
-                Console.WriteLine("No changes made to the operation backend.");
+                WriteLine("No changes made to the operation backend.");
                 break;
         }
     }
