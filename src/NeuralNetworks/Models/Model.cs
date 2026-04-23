@@ -70,8 +70,9 @@ public abstract class Model<TInputData, TPrediction>
         return _layers.Forward(input, inference);
     }
 
-    protected TPrediction InferenceFromLayer<TLayerInputData>(Layer fromLayer, TLayerInputData input)
+    protected TPrediction InferFromLayer<TLayerInputData, TLayerOutputData>(Layer<TLayerInputData, TLayerOutputData> fromLayer, TLayerInputData input)
         where TLayerInputData : notnull
+        where TLayerOutputData : notnull
     {
         object stream = input;
         int indexOfFirstDecoderLayer = _layers.IndexOf(fromLayer);
