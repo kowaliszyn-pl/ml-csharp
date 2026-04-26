@@ -85,8 +85,8 @@ public class OperationsArray : IOperations
 
     public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
     {
-        int batchSize = predicted.GetLength(0);
-        return errors.Multiply(2f / batchSize);
+        int elementCount = predicted.Length;
+        return errors.Multiply(2f / elementCount);
     }
 
     #endregion

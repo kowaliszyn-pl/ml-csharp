@@ -14,18 +14,17 @@ public class MeanSquaredErrorLoss : Loss<float[,]>
 
     protected override float CalculateLoss()
     {
-        int batchSize = Prediction.GetLength(0);
         _errors = Prediction.Subtract(Target);
         // The quadratic function has the property that values further from the minimum have a steeper gradient.
-        return _errors.Power(2).Sum() / batchSize;
+        return _errors.Power(2).Mean();
     }
 
     protected override float[,] CalculateLossGradient()
     {
         Debug.Assert(_errors != null, "_errors should not be null here.");
 
-        int batchSize = Prediction.GetLength(0);
-        return _errors.Multiply(2f / batchSize);
+        int elementCount = Prediction.Length; // GetLength(0);
+        return _errors.Multiply(2f / elementCount);
     }
 
     override public string ToString() => "MeanSquaredError";

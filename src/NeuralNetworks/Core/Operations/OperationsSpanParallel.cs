@@ -62,12 +62,14 @@ public class OperationsSpanParallel : OperationsSpan
 
     public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
     {
-        Debug.Assert(predicted.Length == errors.Length, "Predicted and errors arrays must have the same length.");
+        int elementCount = predicted.Length;
 
-        int batchSize = predicted.GetLength(0);
+        Debug.Assert(elementCount == errors.Length, "Predicted and errors arrays must have the same length.");
+
+        //int batchSize = predicted.GetLength(0);
         float[,,,] gradient = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
 
-        var scaleFactor = 2f / batchSize;
+        var scaleFactor = 2f / elementCount;
         int gradientSpanLength = gradient.Length;
         //Parallel.For, gradient.Length, i =>
         //{

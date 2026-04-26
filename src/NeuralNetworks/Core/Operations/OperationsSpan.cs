@@ -59,9 +59,11 @@ public class OperationsSpan : OperationsArray
 
     public override float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
     {
-        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+        int elementCount = predicted.Length;
 
-        int batchSize = predicted.GetLength(0);
+        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
+
+        //int batchSize = predicted.GetLength(0);
 
         ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0, 0, 0], predicted.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0, 0, 0], target.Length);
@@ -76,21 +78,22 @@ public class OperationsSpan : OperationsArray
             errorsSpan[i] = error;
             loss += error * error;
         }
-        loss /= batchSize;
+        loss /= elementCount;
         return loss;
     }
 
     public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
     {
-        Debug.Assert(predicted.Length == errors.Length, "Predicted and errors arrays must have the same length.");
+        int elementCount = predicted.Length;
 
-        int batchSize = predicted.GetLength(0);
+        Debug.Assert(elementCount == errors.Length, "Predicted and errors arrays must have the same length.");
+        
         float[,,,] gradient = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
 
         ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
         Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradient.Length);
 
-        var scaleFactor = 2f / batchSize;
+        var scaleFactor = 2f / elementCount;
         for (int i = 0; i < gradientSpan.Length; i++)
         {
             gradientSpan[i] = errorsSpan[i] * scaleFactor;
