@@ -17,20 +17,22 @@ public class OperationsSpan : OperationsArray
 
     #region Loss Functions
 
-    public override float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
+    public override float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        softmaxPrediction = predicted.Softmax();
 
         float loss = 0f;
         int batchSize = predicted.GetLength(0);
         int numClasses = predicted.GetLength(1);
 
-        ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0], predicted.Length);
+        ReadOnlySpan<float> softmaxPredictionSpan = MemoryMarshal.CreateReadOnlySpan(ref softmaxPrediction[0, 0], softmaxPrediction.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
 
         for (int i = 0; i < targetSpan.Length; i++)
         {
-            float p = Math.Clamp(predictedSpan[i], eps, 1 - eps);
+            float p = Math.Clamp(softmaxPredictionSpan[i], eps, 1 - eps);
             loss += targetSpan[i] * MathF.Log(p);
         }
 

@@ -14,7 +14,7 @@ public interface IOperations
 
     #region Loss Functions
 
-    public float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f);
+    public float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f);
     public float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target);
 
     float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f);

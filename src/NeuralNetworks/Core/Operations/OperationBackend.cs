@@ -158,8 +158,8 @@ public static class OperationBackend
     #region Loss Functions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
-       => Current.CrossEntropyLoss(predicted, target, eps);
+    internal static float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f)
+       => Current.SoftmaxCrossEntropyLoss(predicted, target, out softmaxPrediction,  eps);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)

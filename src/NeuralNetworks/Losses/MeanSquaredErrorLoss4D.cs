@@ -12,12 +12,8 @@ public class MeanSquaredErrorLoss4D : Loss<float[,,,]>
 {
     private float[,,,]? _errors;
 
-    protected override float CalculateLoss()
-    {
-        float loss = MeanSquaredErrorLoss(Prediction, Target, out float[,,,] errors);
-        _errors = errors;
-        return loss;
-    }
+    protected override float CalculateLoss() 
+        => MeanSquaredErrorLoss(Prediction, Target, out _errors);
 
     protected override float[,,,] CalculateLossGradient()
     {

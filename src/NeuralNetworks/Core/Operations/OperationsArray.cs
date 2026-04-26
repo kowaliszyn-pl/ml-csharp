@@ -29,12 +29,14 @@ public class OperationsArray : IOperations
 
     #region Loss Functions
 
-    public virtual float CrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
+    public virtual float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
+        softmaxPrediction = predicted.Softmax();
+
         // Clip the probabilities to avoid log(0) and log(1).
-        float[,] clippedSoftmax = predicted.Clip(eps, 1 - eps);
+        float[,] clippedSoftmax = softmaxPrediction.Clip(eps, 1 - eps);
         return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
     }
 
