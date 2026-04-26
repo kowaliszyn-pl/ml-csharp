@@ -19,7 +19,9 @@ public class OperationsSpan : OperationsArray
 
     public override float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f)
     {
-        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+        int elementCount = predicted.Length;
+
+        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
 
         softmaxPrediction = predicted.Softmax();
 
@@ -36,12 +38,14 @@ public class OperationsSpan : OperationsArray
             loss += targetSpan[i] * MathF.Log(p);
         }
 
-        return -loss / (batchSize * numClasses);
+        return -loss / elementCount;
     }
 
     public override float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxPrediction, float[,] target)
     {
-        Debug.Assert(softmaxPrediction.Length == target.Length, "Predicted and target arrays must have the same length.");
+        int elementCount = softmaxPrediction.Length;
+
+        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxPrediction.GetLength(0);
         int numClasses = softmaxPrediction.GetLength(1);
@@ -53,7 +57,7 @@ public class OperationsSpan : OperationsArray
 
         for (int i = 0; i < gradientSpan.Length; i++)
         {
-            gradientSpan[i] = (softmaxPredictedSpan[i] - targetSpan[i]) / batchSize;
+            gradientSpan[i] = (softmaxPredictedSpan[i] - targetSpan[i]) / elementCount;
         }
 
         return gradient;

@@ -44,8 +44,8 @@ public class OperationsArray : IOperations
     {
         Debug.Assert(softmaxPrediction.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        int batchSize = softmaxPrediction.GetLength(0);
-        return softmaxPrediction.Subtract(target).Divide(batchSize);
+        int elementCount = softmaxPrediction.Length;
+        return softmaxPrediction.Subtract(target).Divide(elementCount);
     }
 
     public virtual float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1E-07F)
@@ -75,6 +75,25 @@ public class OperationsArray : IOperations
 
         int batchSize = predicted.GetLength(0);
         return predicted.Subtract(target).Divide(batchSize);
+    }
+
+    public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)
+    {
+        int elementCount = predicted.Length;
+
+        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
+        
+        errors = predicted.Subtract(target);
+        return errors.Power(2).Mean();
+    }
+    
+    public virtual float[,] MeanSquaredErrorLossGradient(float[,] errors)
+    {
+        int elementCount = errors.Length;
+        
+        Debug.Assert(elementCount > 0, "Errors array must have at least one element.");
+
+        return errors.Multiply(2f / elementCount);
     }
 
     public virtual float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)

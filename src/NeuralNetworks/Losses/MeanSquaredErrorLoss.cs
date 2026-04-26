@@ -1,31 +1,26 @@
 ﻿// Neural Networks in C♯
-// File name: MeanSquaredError.cs
-// www.kowaliszyn.pl, 2025
+// File name: MeanSquaredErrorLoss.cs
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
-using NeuralNetworks.Core;
+using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Losses;
 
 public class MeanSquaredErrorLoss : Loss<float[,]>
 {
-    float[,]? _errors;
+    private float[,]? _errors;
 
     protected override float CalculateLoss()
-    {
-        _errors = Prediction.Subtract(Target);
-        // The quadratic function has the property that values further from the minimum have a steeper gradient.
-        return _errors.Power(2).Mean();
-    }
+        => MeanSquaredErrorLoss(Prediction, Target, out _errors);
 
     protected override float[,] CalculateLossGradient()
     {
         Debug.Assert(_errors != null, "_errors should not be null here.");
 
-        int elementCount = Prediction.Length; // GetLength(0);
-        return _errors.Multiply(2f / elementCount);
+        return MeanSquaredErrorLossGradient(_errors);
     }
 
-    override public string ToString() => "MeanSquaredError";
+    public override string ToString() => "MeanSquaredError";
 }

@@ -12,6 +12,9 @@ namespace NeuralNetworks.Losses;
 /// Categorical Cross-Entropy Loss combined with Softmax activation function.
 /// </summary>
 /// <param name="eps"></param>
+/// <remarks>
+/// Usually used in MNIST-like classification problems, where the target is a one-hot encoded vector and the prediction is a probability distribution over classes.
+/// </remarks>
 public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
 {
     private float[,]? _softmaxPrediction;

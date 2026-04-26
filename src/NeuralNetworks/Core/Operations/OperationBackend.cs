@@ -174,9 +174,18 @@ public static class OperationBackend
         => Current.BinaryCrossEntropyLossGradient(predicted, target);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)
+        => Current.MeanSquaredErrorLoss(predicted, target, out errors);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] MeanSquaredErrorLossGradient(float[,] errors)
+        => Current.MeanSquaredErrorLossGradient(errors);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
         => Current.MeanSquaredErrorLoss(predicted, target, out errors);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
         => Current.MeanSquaredErrorLossGradient(errors);
 
