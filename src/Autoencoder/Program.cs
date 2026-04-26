@@ -315,7 +315,8 @@ internal class Program
             epochs: Epochs,
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize,
-            saveParamsOnBestLoss: false
+            saveParamsOnBestLoss: false,
+            showLossOnStart: true
         );
 
         // Save the model

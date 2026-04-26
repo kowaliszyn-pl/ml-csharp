@@ -74,7 +74,8 @@ public class Trainer<TInputData, TPrediction>(
         bool displayDescriptionOnStart = true,
         bool operationBackendTimingEnabled = false,
         bool saveParamsOnBestLoss = false,
-        bool showTrainEval = false
+        bool showTrainEval = false,
+        bool showLossOnStart = false
     )
     {
         try
@@ -108,6 +109,14 @@ public class Trainer<TInputData, TPrediction>(
             (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
             int allSteps = ((GetRowCount(xTrain) - 1) / batchSize) + 1;
             long allStepsInTraining = allSteps * epochs;
+
+            if (showLossOnStart && xTest is not null && yTest is not null)
+            {
+                float initialLoss = model.CalculateLoss(model.Forward(xTest, true), yTest, lossFunction);
+                if (consoleOutputMode > ConsoleOutputMode.Disable)
+                    WriteLine($"Initial test loss: {initialLoss}");
+                logger?.LogInformation("Initial test loss: {initialLoss}.", initialLoss);
+            }
 
             for (int epoch = 1; epoch <= epochs; epoch++)
             {
