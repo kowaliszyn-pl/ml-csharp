@@ -64,12 +64,12 @@ public class OperationsSpanParallel : OperationsSpan
     {
         int elementCount = predicted.Length;
 
+        Debug.Assert(elementCount > 0, "Predicted array must have at least one element.");
         Debug.Assert(elementCount == errors.Length, "Predicted and errors arrays must have the same length.");
 
-        //int batchSize = predicted.GetLength(0);
         float[,,,] gradient = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
 
-        var scaleFactor = 2f / elementCount;
+        float scaleFactor = 2f / elementCount;
         int gradientSpanLength = gradient.Length;
         //Parallel.For, gradient.Length, i =>
         //{
