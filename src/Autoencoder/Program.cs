@@ -109,7 +109,7 @@ internal class Program
 {
     private const int RandomSeed = 260423;
     private const int BottleneckDim = 28;
-    private const int Epochs = 15;
+    private const int Epochs = 5;
     private const int BatchSize = 400;
     // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;

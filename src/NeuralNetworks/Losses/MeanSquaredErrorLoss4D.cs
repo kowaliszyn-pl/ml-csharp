@@ -23,7 +23,7 @@ public class MeanSquaredErrorLoss4D : Loss<float[,,,]>
     {
         Debug.Assert(_errors != null, "_errors should not be null here.");
 
-        return MeanSquaredErrorLossGradient(Prediction, _errors);
+        return MeanSquaredErrorLossGradient(_errors);
     }
 
     public override string ToString() => "MeanSquaredError4D";

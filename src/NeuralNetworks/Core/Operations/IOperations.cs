@@ -21,7 +21,7 @@ public interface IOperations
     float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target);
 
     float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors);
-    float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors);
+    float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors);
 
     #endregion
 

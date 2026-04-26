@@ -85,12 +85,11 @@ public class OperationsArray : IOperations
         return errors.Power(2).Mean();
     }
 
-    public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
+    public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
-        int elementCount = predicted.Length;
+        int elementCount = errors.Length;
 
-        Debug.Assert(elementCount > 0, "Predicted array must have at least one element.");
-        Debug.Assert(elementCount == errors.Length, "Predicted and errors arrays must have the same length.");
+        Debug.Assert(elementCount > 0, "Errors array must have at least one element.");
 
         return errors.Multiply(2f / elementCount);
     }

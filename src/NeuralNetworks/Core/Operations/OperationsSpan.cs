@@ -80,14 +80,13 @@ public class OperationsSpan : OperationsArray
         return loss;
     }
 
-    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
+    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
-        int elementCount = predicted.Length;
+        int elementCount = errors.Length;
 
-        Debug.Assert(elementCount > 0, "Predicted array must have at least one element.");
-        Debug.Assert(elementCount == errors.Length, "Predicted and errors arrays must have the same length.");
+        Debug.Assert(elementCount > 0, "Errors array must have at least one element.");
         
-        float[,,,] gradient = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
+        float[,,,] gradient = new float[errors.GetLength(0), errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
 
         ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
         Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradient.Length);

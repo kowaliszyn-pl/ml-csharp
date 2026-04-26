@@ -177,8 +177,8 @@ public static class OperationBackend
     internal static float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
         => Current.MeanSquaredErrorLoss(predicted, target, out errors);
 
-    internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] predicted, float[,,,] errors)
-        => Current.MeanSquaredErrorLossGradient(predicted, errors);
+    internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
+        => Current.MeanSquaredErrorLossGradient(errors);
 
     #endregion
 
