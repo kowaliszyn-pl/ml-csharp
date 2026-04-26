@@ -32,7 +32,7 @@ Test eval: 89,00%
 */
 
 internal class Ecg200Model(SeededRandom? random)
-    : BaseModel<float[,,], float[,]>(new BinaryCrossEntropyLoss(), random)
+    : BaseModel<float[,,], float[,]>(new SigmoidBinaryCrossEntropyLoss(), random)
 {
     protected override LayerListBuilder<float[,,], float[,]> CreateLayerListBuilder()
     {
