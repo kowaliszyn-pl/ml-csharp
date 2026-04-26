@@ -40,12 +40,12 @@ public class OperationsArray : IOperations
         return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
     }
 
-    public virtual float[,] CrossEntropyLossGradient(float[,] predicted, float[,] target)
+    public virtual float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxPrediction, float[,] target)
     {
-        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(softmaxPrediction.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        int batchSize = predicted.GetLength(0);
-        return predicted.Subtract(target).Divide(batchSize);
+        int batchSize = softmaxPrediction.GetLength(0);
+        return softmaxPrediction.Subtract(target).Divide(batchSize);
     }
 
     public virtual float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1E-07F)

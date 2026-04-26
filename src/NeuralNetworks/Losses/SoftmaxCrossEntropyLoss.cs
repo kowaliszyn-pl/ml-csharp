@@ -23,7 +23,7 @@ public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
     {
         Debug.Assert(_softmaxPrediction != null, "_softmaxPrediction should not be null here.");
 
-        return CrossEntropyLossGradient(_softmaxPrediction, Target);
+        return SoftmaxCrossEntropyLossGradient(_softmaxPrediction, Target);
     }
 
     public override string ToString() => $"SoftmaxCrossEntropyLoss (eps={eps})";
