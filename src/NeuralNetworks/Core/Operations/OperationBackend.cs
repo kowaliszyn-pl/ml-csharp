@@ -166,12 +166,12 @@ public static class OperationBackend
         => Current.SoftmaxCrossEntropyLossGradient(softmaxPrediction, target);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f)
-       => Current.SigmoidBinaryCrossEntropyLoss(predicted, target, eps);
+    internal static float SigmoidBinaryCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] sigmoidOutput, float eps = 1e-7f)
+       => Current.SigmoidBinaryCrossEntropyLoss(predicted, target, out sigmoidOutput, eps);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
-        => Current.SigmoidBinaryCrossEntropyLossGradient(predicted, target);
+    internal static float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] sigmoidOutput, float[,] target)
+        => Current.SigmoidBinaryCrossEntropyLossGradient(sigmoidOutput, target);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)

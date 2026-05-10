@@ -48,33 +48,35 @@ public class OperationsArray : IOperations
         return softmaxOutput.Subtract(target).Divide(elementCount);
     }
 
-    public virtual float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, float eps = 1E-07F)
+    public virtual float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, out float[,] sigmoidOutput, float eps = 1E-07F)
     {
         Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        // Clip the predicted probabilities to avoid log(0) and log(1).
-        float[,] clippedPredicted = logits.Clip(eps, 1 - eps);
+        sigmoidOutput = logits.Sigmoid();
 
-        float[,] oneMinusPredicted = clippedPredicted.AsOnes().Subtract(clippedPredicted);
-        float[,] oneMinusPredictedLog = oneMinusPredicted.Log();
+        // Clip the predicted probabilities to avoid log(0) and log(1).
+        float[,] clippedSigmoid = sigmoidOutput.Clip(eps, 1 - eps);
+
+        float[,] oneMinusSigmoid = clippedSigmoid.AsOnes().Subtract(clippedSigmoid);
+        float[,] oneMinusSigmoidLog = oneMinusSigmoid.Log();
         float[,] oneMinusTarget = target.AsOnes().Subtract(target);
-        float[,] predictedLog = clippedPredicted.Log();
+        float[,] sigmoidLog = clippedSigmoid.Log();
 
         float[,] res = target
-            .MultiplyElementwise(predictedLog)
+            .MultiplyElementwise(sigmoidLog)
             .Add(oneMinusTarget
-                .MultiplyElementwise(oneMinusPredictedLog)
+                .MultiplyElementwise(oneMinusSigmoidLog)
             );
 
         return -res.Mean();
     }
 
-    public virtual float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
+    public virtual float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] sigmoidOutput, float[,] target)
     {
-        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(sigmoidOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        int batchSize = predicted.GetLength(0);
-        return predicted.Subtract(target).Divide(batchSize);
+        int elementCount = sigmoidOutput.Length;
+        return sigmoidOutput.Subtract(target).Divide(elementCount);
     }
 
     public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)

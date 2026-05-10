@@ -17,8 +17,8 @@ public interface IOperations
     public float SoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput, float eps = 1e-7f);
     public float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target);
 
-    public float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, float eps = 1e-7f);
-    public float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] predicted, float[,] target);
+    public float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, out float[,] sigmoidOutput, float eps = 1e-7f);
+    public float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] sigmoidOutput, float[,] target);
 
     public float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors);
     public float[,] MeanSquaredErrorLossGradient(float[,] errors);
