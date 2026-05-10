@@ -56,9 +56,7 @@ internal class Ecg200Model(SeededRandom? random)
                 paramInitializer: initializer
             ))
             .AddLayer(new GlobalAveragePooling1DLayer())
-
-            // Probability of being normal (class 1)
-            .AddLayer(new DenseLayer(1, new Sigmoid(), initializer));
+            .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
 }
 
@@ -143,6 +141,7 @@ internal class Ecg200
         // Now let's display some examples of predictions vs actual values for the test set.
 
         float[,] predictions = model.Forward(xTest, true);
+        predictions = predictions.Sigmoid();
         Utils.DisplayClassificationPredictionExamples(yTest, predictions, testImagesForDrawing, "cnn");
     }
 
@@ -157,6 +156,9 @@ internal class Ecg200
         {
             prediction = model.Forward(xEvalTest, true);
         }
+
+        // Probability of being normal (class 1)
+        prediction = prediction.Sigmoid();
 
         int rows = prediction.GetLength(0);
 
