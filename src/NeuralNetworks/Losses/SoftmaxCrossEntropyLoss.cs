@@ -17,16 +17,16 @@ namespace NeuralNetworks.Losses;
 /// </remarks>
 public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
 {
-    private float[,]? _softmaxPrediction;
+    private float[,]? _softmaxOutput;
 
     protected override float CalculateLoss() 
-        => SoftmaxCrossEntropyLoss(Prediction, Target, out _softmaxPrediction, eps);
+        => SoftmaxCrossEntropyLoss(Prediction, Target, out _softmaxOutput, eps);
 
     protected override float[,] CalculateLossGradient()
     {
-        Debug.Assert(_softmaxPrediction != null, "_softmaxPrediction should not be null here.");
+        Debug.Assert(_softmaxOutput != null, "_softmaxPrediction should not be null here.");
 
-        return SoftmaxCrossEntropyLossGradient(_softmaxPrediction, Target);
+        return SoftmaxCrossEntropyLossGradient(_softmaxOutput, Target);
     }
 
     public override string ToString() => $"SoftmaxCrossEntropyLoss (eps={eps})";

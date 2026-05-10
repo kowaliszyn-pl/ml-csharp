@@ -17,19 +17,19 @@ public class OperationsSpan : OperationsArray
 
     #region Loss Functions
 
-    public override float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f)
+    public override float SoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput, float eps = 1e-7f)
     {
-        int elementCount = predicted.Length;
+        int elementCount = logits.Length;
 
         Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
 
-        softmaxPrediction = predicted.Softmax();
+        softmaxOutput = logits.Softmax();
 
         float loss = 0f;
-        int batchSize = predicted.GetLength(0);
-        int numClasses = predicted.GetLength(1);
+        //int batchSize = logits.GetLength(0);
+        //int numClasses = logits.GetLength(1);
 
-        ReadOnlySpan<float> softmaxPredictionSpan = MemoryMarshal.CreateReadOnlySpan(ref softmaxPrediction[0, 0], softmaxPrediction.Length);
+        ReadOnlySpan<float> softmaxPredictionSpan = MemoryMarshal.CreateReadOnlySpan(ref softmaxOutput[0, 0], softmaxOutput.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
 
         for (int i = 0; i < targetSpan.Length; i++)
@@ -41,17 +41,17 @@ public class OperationsSpan : OperationsArray
         return -loss / elementCount;
     }
 
-    public override float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxPrediction, float[,] target)
+    public override float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
     {
-        int elementCount = softmaxPrediction.Length;
+        int elementCount = softmaxOutput.Length;
 
         Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
 
-        int batchSize = softmaxPrediction.GetLength(0);
-        int numClasses = softmaxPrediction.GetLength(1);
+        int batchSize = softmaxOutput.GetLength(0);
+        int numClasses = softmaxOutput.GetLength(1);
         float[,] gradient = new float[batchSize, numClasses];
 
-        ReadOnlySpan<float> softmaxPredictedSpan = MemoryMarshal.CreateReadOnlySpan(ref softmaxPrediction[0, 0], softmaxPrediction.Length);
+        ReadOnlySpan<float> softmaxPredictedSpan = MemoryMarshal.CreateReadOnlySpan(ref softmaxOutput[0, 0], softmaxOutput.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
         Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0], gradient.Length);
 

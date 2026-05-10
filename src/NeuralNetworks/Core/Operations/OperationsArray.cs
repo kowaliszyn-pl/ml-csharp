@@ -29,31 +29,31 @@ public class OperationsArray : IOperations
 
     #region Loss Functions
 
-    public virtual float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f)
+    public virtual float SoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput, float eps = 1e-7f)
     {
-        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        softmaxPrediction = predicted.Softmax();
+        softmaxOutput = logits.Softmax();
 
         // Clip the probabilities to avoid log(0) and log(1).
-        float[,] clippedSoftmax = softmaxPrediction.Clip(eps, 1 - eps);
+        float[,] clippedSoftmax = softmaxOutput.Clip(eps, 1 - eps);
         return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
     }
 
-    public virtual float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxPrediction, float[,] target)
+    public virtual float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
     {
-        Debug.Assert(softmaxPrediction.Length == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        int elementCount = softmaxPrediction.Length;
-        return softmaxPrediction.Subtract(target).Divide(elementCount);
+        int elementCount = softmaxOutput.Length;
+        return softmaxOutput.Subtract(target).Divide(elementCount);
     }
 
-    public virtual float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1E-07F)
+    public virtual float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, float eps = 1E-07F)
     {
-        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         // Clip the predicted probabilities to avoid log(0) and log(1).
-        float[,] clippedPredicted = predicted.Clip(eps, 1 - eps);
+        float[,] clippedPredicted = logits.Clip(eps, 1 - eps);
 
         float[,] oneMinusPredicted = clippedPredicted.AsOnes().Subtract(clippedPredicted);
         float[,] oneMinusPredictedLog = oneMinusPredicted.Log();
@@ -69,7 +69,7 @@ public class OperationsArray : IOperations
         return -res.Mean();
     }
 
-    public virtual float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
+    public virtual float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] predicted, float[,] target)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 

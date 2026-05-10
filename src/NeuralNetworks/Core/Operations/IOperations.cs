@@ -14,17 +14,17 @@ public interface IOperations
 
     #region Loss Functions
 
-    public float SoftmaxCrossEntropyLoss(float[,] predicted, float[,] target, out float[,] softmaxPrediction, float eps = 1e-7f);
-    public float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxPrediction, float[,] target);
+    public float SoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput, float eps = 1e-7f);
+    public float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target);
 
-    float BinaryCrossEntropyLoss(float[,] predicted, float[,] target, float eps = 1e-7f);
-    float[,] BinaryCrossEntropyLossGradient(float[,] predicted, float[,] target);
+    public float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, float eps = 1e-7f);
+    public float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] predicted, float[,] target);
 
-    float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors);
-    float[,] MeanSquaredErrorLossGradient(float[,] errors);
+    public float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors);
+    public float[,] MeanSquaredErrorLossGradient(float[,] errors);
 
-    float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors);
-    float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors);
+    public float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors);
+    public float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors);
 
     #endregion
 
@@ -176,11 +176,11 @@ public interface IOperations
     public float[,,,] Unflatten(float[,] source, float[,,,] targetSize);
     public float[,,,] Unflatten(float[,] source, int dim2, int dim3, int dim4);
 
-    float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices);
-    float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices);
+    public float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices);
+    public float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices);
 
-    float[,] GlobalAveragePooling1DOutput(float[,,] input);
-    float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient);
+    public float[,] GlobalAveragePooling1DOutput(float[,,] input);
+    public float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient);
 
     #endregion
 
