@@ -25,10 +25,10 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace NeuralNetworksExamples;
 
 /*
-Train loss (average): 0,16014086
-Test loss: 0,3037759
+Train loss (average): 0,1553159
+Test loss: 0,29658565
 Train eval: 96,00%
-Test eval: 89,00%
+Test eval: 90,00%
 */
 
 internal class Ecg200Model(SeededRandom? random)
