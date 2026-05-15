@@ -13,5 +13,5 @@ public class UnflattenLayer(int channels, int height, int width) : Layer<float[,
         => AddOperation(new Unflatten(channels, height, width));
 
     public override string ToString()
-        => "UnflattenLayer";
+        => $"UnflattenLayer (channels={channels}, height={height}, width={width})";
 }

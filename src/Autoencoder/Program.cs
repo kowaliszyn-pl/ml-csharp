@@ -26,7 +26,8 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace Autoencoder;
 
-internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null) : BaseModel<float[,,,], float[,,,]>(null, random, modelFilePath)
+internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null) 
+    : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(), random, modelFilePath)
 {
 
     private const int InnerChannels = 7;
@@ -42,6 +43,7 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string?
         _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Linear(), initializer);
 
         return
+            // 1. Encoder
             AddLayer(new Conv2DLayer(
                 kernels: 14,
                 kernelHeight: 5,
@@ -57,7 +59,11 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string?
                 paramInitializer: initializer
             ))
             .AddLayer(new FlattenLayer())
+
+            // 2. Bottleneck
             .AddLayer(_bottleneckLayer)
+
+            // 3. Decoder
             .AddLayer(_firstDecoderLayer)
             .AddLayer(new UnflattenLayer(InnerChannels, ImageInnerSize, ImageInnerSize))
             .AddLayer(new Conv2DLayer(
@@ -297,7 +303,7 @@ internal class Program
         SeededRandom commonRandom = new(RandomSeed);
         AutoencoderModel model = new(BottleneckDim, commonRandom);
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
-        MeanSquaredErrorLoss4D lossFunction = new();
+        // MeanSquaredErrorLoss4D lossFunction = new();
 
         Trainer<float[,,,], float[,,,]> trainer = new(
             model,
@@ -311,12 +317,12 @@ internal class Program
 
         trainer.Fit(
             dataSource,
-            lossFunction: lossFunction,
+            //lossFunction: lossFunction,
             epochs: Epochs,
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize,
             saveParamsOnBestLoss: false,
-            showLossOnStart: true
+            showLossOnStart: false
         );
 
         // Save the model
