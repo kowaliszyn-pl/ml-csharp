@@ -19,14 +19,14 @@ public class OperationsSpan : OperationsArray
 
     public override float SoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput, float eps = 1e-7f)
     {
-        int elementCount = logits.Length;
+        //int elementCount = logits.Length;
 
-        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         softmaxOutput = logits.Softmax();
 
         float loss = 0f;
-        //int batchSize = logits.GetLength(0);
+        int batchSize = logits.GetLength(0);
         //int numClasses = logits.GetLength(1);
 
         ReadOnlySpan<float> softmaxPredictionSpan = MemoryMarshal.CreateReadOnlySpan(ref softmaxOutput[0, 0], softmaxOutput.Length);
@@ -38,14 +38,14 @@ public class OperationsSpan : OperationsArray
             loss += targetSpan[i] * MathF.Log(p);
         }
 
-        return -loss / elementCount;
+        return -loss / batchSize;
     }
 
     public override float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
     {
-        int elementCount = softmaxOutput.Length;
+        //int elementCount = softmaxOutput.Length;
 
-        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxOutput.GetLength(0);
         int numClasses = softmaxOutput.GetLength(1);
@@ -57,7 +57,7 @@ public class OperationsSpan : OperationsArray
 
         for (int i = 0; i < gradientSpan.Length; i++)
         {
-            gradientSpan[i] = (softmaxPredictedSpan[i] - targetSpan[i]) / elementCount;
+            gradientSpan[i] = (softmaxPredictedSpan[i] - targetSpan[i]) / batchSize;
         }
 
         return gradient;

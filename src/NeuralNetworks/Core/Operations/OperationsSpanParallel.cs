@@ -20,9 +20,9 @@ public class OperationsSpanParallel : OperationsSpan
 
     public override float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
     {
-        int elementCount = softmaxOutput.Length;
+        //int elementCount = softmaxOutput.Length;
 
-        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxOutput.GetLength(0);
         int numClasses = softmaxOutput.GetLength(1);
@@ -34,7 +34,7 @@ public class OperationsSpanParallel : OperationsSpan
             ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
             Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0], gradient.Length);
 
-            gradientSpan[i] = (predictedSpan[i] - targetSpan[i]) / elementCount;
+            gradientSpan[i] = (predictedSpan[i] - targetSpan[i]) / batchSize;
         });
 
         return gradient;

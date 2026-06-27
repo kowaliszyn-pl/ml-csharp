@@ -38,19 +38,16 @@ public class OperationsArray : IOperations
         // Clip the probabilities to avoid log(0) and log(1).
         float[,] clippedSoftmax = softmaxOutput.Clip(eps, 1 - eps);
 
-        // TODO: check whether the mean is the right thing to do here, or if we should sum over the batch dimension instead:
-        // int batchSize = logits.GetLength(0);
-        return -clippedSoftmax.Log().MultiplyElementwise(target).Mean();
+        int batchSize = logits.GetLength(0);
+        return -clippedSoftmax.Log().MultiplyElementwise(target).Sum() / batchSize;
     }
 
     public virtual float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
     {
         Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        // TODO: check whether the mean is the right thing to do here, or if we should sum over the batch dimension instead:
-        // int batchSize = softmaxOutput.GetLength(0);
-        int elementCount = softmaxOutput.Length;
-        return softmaxOutput.Subtract(target).Divide(elementCount);
+        int batchSize = softmaxOutput.GetLength(0);
+        return softmaxOutput.Subtract(target).Divide(batchSize);
     }
 
     public virtual float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, out float[,] sigmoidOutput, float eps = 1E-07F)
@@ -73,17 +70,16 @@ public class OperationsArray : IOperations
                 .MultiplyElementwise(oneMinusSigmoidLog)
             );
 
-        // TODO: check whether the mean is the right thing to do here, or if we should sum over the batch dimension instead
-        return -res.Mean();
+        int batchSize = logits.GetLength(0);
+        return -res.Sum() / batchSize;
     }
 
     public virtual float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] sigmoidOutput, float[,] target)
     {
         Debug.Assert(sigmoidOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        // TODO: check whether the mean is the right thing to do here, or if we should sum over the batch dimension instead:
-        int elementCount = sigmoidOutput.Length;
-        return sigmoidOutput.Subtract(target).Divide(elementCount);
+        int batchSize = sigmoidOutput.GetLength(0);
+        return sigmoidOutput.Subtract(target).Divide(batchSize);
     }
 
     public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)
