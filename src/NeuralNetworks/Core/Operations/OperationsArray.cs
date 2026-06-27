@@ -75,8 +75,8 @@ public class OperationsArray : IOperations
     {
         Debug.Assert(sigmoidOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        int elementCount = sigmoidOutput.Length;
-        return sigmoidOutput.Subtract(target).Divide(elementCount);
+        int batchSize = sigmoidOutput.GetLength(0);
+        return sigmoidOutput.Subtract(target).Divide(batchSize);
     }
 
     public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)
