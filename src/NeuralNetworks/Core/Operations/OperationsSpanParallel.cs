@@ -20,8 +20,6 @@ public class OperationsSpanParallel : OperationsSpan
 
     public override float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
     {
-        //int elementCount = softmaxOutput.Length;
-
         Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxOutput.GetLength(0);
@@ -42,13 +40,10 @@ public class OperationsSpanParallel : OperationsSpan
 
     public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
-        int elementCount = errors.Length;
-
-        Debug.Assert(elementCount > 0, "Errors array must have at least one element.");
-
-        float[,,,] gradient = new float[errors.GetLength(0), errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
-
-        float scaleFactor = 2f / elementCount;
+        int batchSize = errors.GetLength(0);
+        float[,,,] gradient = new float[batchSize, errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
+        
+        float scaleFactor = 2f / batchSize;
         int gradientSpanLength = gradient.Length;
         //Parallel.For, gradient.Length, i =>
         //{

@@ -19,8 +19,6 @@ public class OperationsSpan : OperationsArray
 
     public override float SoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput, float eps = 1e-7f)
     {
-        //int elementCount = logits.Length;
-
         Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         softmaxOutput = logits.Softmax();
@@ -43,8 +41,6 @@ public class OperationsSpan : OperationsArray
 
     public override float[,] SoftmaxCrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
     {
-        //int elementCount = softmaxOutput.Length;
-
         Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxOutput.GetLength(0);
@@ -65,9 +61,7 @@ public class OperationsSpan : OperationsArray
 
     public override float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
     {
-        int elementCount = predicted.Length;
-
-        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0, 0, 0], predicted.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0, 0, 0], target.Length);
@@ -82,22 +76,20 @@ public class OperationsSpan : OperationsArray
             errorsSpan[i] = error;
             loss += error * error;
         }
-        loss /= elementCount;
+        int batchSize = predicted.GetLength(0);
+        loss /= batchSize;
         return loss;
     }
 
     public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
-        int elementCount = errors.Length;
-
-        Debug.Assert(elementCount > 0, "Errors array must have at least one element.");
-        
         float[,,,] gradient = new float[errors.GetLength(0), errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
 
         ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
         Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradient.Length);
 
-        float scaleFactor = 2f / elementCount;
+        int batchSize = errors.GetLength(0);
+        float scaleFactor = 2f / batchSize;
         for (int i = 0; i < gradientSpan.Length; i++)
         {
             gradientSpan[i] = errorsSpan[i] * scaleFactor;

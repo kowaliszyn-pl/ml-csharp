@@ -84,40 +84,32 @@ public class OperationsArray : IOperations
 
     public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)
     {
-        int elementCount = predicted.Length;
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
-        
+        int batchSize = predicted.GetLength(0);
         errors = predicted.Subtract(target);
-        return errors.Power(2).Mean();
+        return errors.Power(2).Sum() / batchSize;
     }
     
     public virtual float[,] MeanSquaredErrorLossGradient(float[,] errors)
     {
-        int elementCount = errors.Length;
-        
-        Debug.Assert(elementCount > 0, "Errors array must have at least one element.");
-
-        return errors.Multiply(2f / elementCount);
+        int batchSize = errors.GetLength(0);
+        return errors.Multiply(2f / batchSize);
     }
 
     public virtual float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
     {
-        int elementCount = predicted.Length;
+        Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        Debug.Assert(elementCount == target.Length, "Predicted and target arrays must have the same length.");
-
+        int batchSize = predicted.GetLength(0);
         errors = predicted.Subtract(target);
-        return errors.Power(2).Mean();
+        return errors.Power(2).Sum() / batchSize;
     }
 
     public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
-        int elementCount = errors.Length;
-
-        Debug.Assert(elementCount > 0, "Errors array must have at least one element.");
-
-        return errors.Multiply(2f / elementCount);
+        int batchSize = errors.GetLength(0);
+        return errors.Multiply(2f / batchSize);
     }
 
     #endregion
