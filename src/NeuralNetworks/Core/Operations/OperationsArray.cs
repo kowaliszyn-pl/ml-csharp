@@ -33,12 +33,14 @@ public class OperationsArray : IOperations
     {
         Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 
+        int batchSize = logits.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         softmaxOutput = logits.Softmax();
 
         // Clip the probabilities to avoid log(0) and log(1).
         float[,] clippedSoftmax = softmaxOutput.Clip(eps, 1 - eps);
-
-        int batchSize = logits.GetLength(0);
         return -clippedSoftmax.Log().MultiplyElementwise(target).Sum() / batchSize;
     }
 
@@ -47,12 +49,19 @@ public class OperationsArray : IOperations
         Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxOutput.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         return softmaxOutput.Subtract(target).Divide(batchSize);
     }
 
     public virtual float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, out float[,] sigmoidOutput, float eps = 1E-07F)
     {
         Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = logits.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
 
         sigmoidOutput = logits.Sigmoid();
 
@@ -69,8 +78,7 @@ public class OperationsArray : IOperations
             .Add(oneMinusTarget
                 .MultiplyElementwise(oneMinusSigmoidLog)
             );
-
-        int batchSize = logits.GetLength(0);
+        
         return -res.Sum() / batchSize;
     }
 
@@ -79,6 +87,9 @@ public class OperationsArray : IOperations
         Debug.Assert(sigmoidOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = sigmoidOutput.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         return sigmoidOutput.Subtract(target).Divide(batchSize);
     }
 
@@ -87,6 +98,9 @@ public class OperationsArray : IOperations
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = predicted.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         errors = predicted.Subtract(target);
         return errors.Power(2).Sum() / batchSize;
     }
@@ -94,6 +108,9 @@ public class OperationsArray : IOperations
     public virtual float[,] MeanSquaredErrorLossGradient(float[,] errors)
     {
         int batchSize = errors.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         return errors.Multiply(2f / batchSize);
     }
 
@@ -102,6 +119,9 @@ public class OperationsArray : IOperations
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = predicted.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         errors = predicted.Subtract(target);
         return errors.Power(2).Sum() / batchSize;
     }
@@ -109,6 +129,9 @@ public class OperationsArray : IOperations
     public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
         int batchSize = errors.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         return errors.Multiply(2f / batchSize);
     }
 

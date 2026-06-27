@@ -25,7 +25,8 @@ public class OperationsSpan : OperationsArray
 
         float loss = 0f;
         int batchSize = logits.GetLength(0);
-        //int numClasses = logits.GetLength(1);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
 
         ReadOnlySpan<float> softmaxPredictionSpan = MemoryMarshal.CreateReadOnlySpan(ref softmaxOutput[0, 0], softmaxOutput.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0], target.Length);
@@ -44,6 +45,9 @@ public class OperationsSpan : OperationsArray
         Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxOutput.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         int numClasses = softmaxOutput.GetLength(1);
         float[,] gradient = new float[batchSize, numClasses];
 
@@ -63,10 +67,14 @@ public class OperationsSpan : OperationsArray
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
+        int batchSize = predicted.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         ReadOnlySpan<float> predictedSpan = MemoryMarshal.CreateReadOnlySpan(ref predicted[0, 0, 0, 0], predicted.Length);
         ReadOnlySpan<float> targetSpan = MemoryMarshal.CreateReadOnlySpan(ref target[0, 0, 0, 0], target.Length);
 
-        errors = new float[predicted.GetLength(0), predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
+        errors = new float[batchSize, predicted.GetLength(1), predicted.GetLength(2), predicted.GetLength(3)];
 
         Span<float> errorsSpan = MemoryMarshal.CreateSpan(ref errors[0, 0, 0, 0], errors.Length);
         float loss = 0f;
@@ -76,19 +84,23 @@ public class OperationsSpan : OperationsArray
             errorsSpan[i] = error;
             loss += error * error;
         }
-        int batchSize = predicted.GetLength(0);
+
         loss /= batchSize;
         return loss;
     }
 
     public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
-        float[,,,] gradient = new float[errors.GetLength(0), errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
+        int batchSize = errors.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
+        float[,,,] gradient = new float[batchSize, errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
 
         ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
         Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradient.Length);
 
-        int batchSize = errors.GetLength(0);
+        
         float scaleFactor = 2f / batchSize;
         for (int i = 0; i < gradientSpan.Length; i++)
         {

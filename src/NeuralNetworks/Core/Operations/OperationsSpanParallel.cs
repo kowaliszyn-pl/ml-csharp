@@ -23,6 +23,9 @@ public class OperationsSpanParallel : OperationsSpan
         Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         int batchSize = softmaxOutput.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         int numClasses = softmaxOutput.GetLength(1);
         float[,] gradient = new float[batchSize, numClasses];
 
@@ -41,6 +44,9 @@ public class OperationsSpanParallel : OperationsSpan
     public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
     {
         int batchSize = errors.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
         float[,,,] gradient = new float[batchSize, errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
         
         float scaleFactor = 2f / batchSize;
