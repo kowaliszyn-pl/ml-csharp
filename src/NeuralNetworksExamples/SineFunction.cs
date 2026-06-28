@@ -19,6 +19,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
+using static Utils.Drawing;
 
 namespace NeuralNetworksExamples;
 
@@ -46,6 +47,10 @@ internal class SineFunction
     private const int RandomSeed = 260221;
     private const int FunctionRange = 2; // We will train the model to learn the function in the range from -2π to 2π
     private const int ChartRange = 3; // We will create a chart in the range from -3π to 3π to see how the model extrapolates outside the training range
+
+    private const int SineChartWidth = 550;
+    private const int SineChartHeight = 230;
+    private const int SineChartMargin = 15;
 
     public static void Run()
     {
@@ -187,7 +192,7 @@ internal class SineFunction
             chartData.Add((xChart[i, 0], yActualChart[i, 0], yPredicted));
         }
         
-        Utils.SaveSineChart(Utils.SineChartWidth, Utils.SineChartHeight, Utils.SineChartMargin, chartData, 2 * ChartRange + 1, "main");
+        SaveSineChart(SineChartWidth, SineChartHeight, SineChartMargin, chartData, 2 * ChartRange + 1, "main");
         WriteLine("\nChart with actual and predicted values saved as a JPG file.");
     }
 }

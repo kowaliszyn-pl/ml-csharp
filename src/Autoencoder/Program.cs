@@ -113,8 +113,12 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string?
 
 internal class Program
 {
+    const int BottleneckDim1 = 24;
+    const int BottleneckDim2 = 28;
+    const int BottleneckDim3 = 32;
+
     private const int RandomSeed = 260423;
-    private const int BottleneckDim = 28;
+    //private const int BottleneckDim = 28;
     private const int Epochs = 5;
     private const int BatchSize = 400;
     // private const int EvalEveryEpochs = 2;
@@ -170,10 +174,10 @@ internal class Program
                     fromSubmenu = true;
                     break;
                 case "T":
-                    Train();
+                    SelectTrain();
                     break;
                 case "L":
-                    // Load();
+                    SelectLoad();
                     break;
 
                 default:
@@ -227,7 +231,63 @@ internal class Program
         }
     }
 
-    private static void Train()
+    private static void SelectTrain()
+    {
+        WriteLine("Select the bottleneck dim to train:");
+        WriteLine($"1. {BottleneckDim1}");
+        WriteLine($"2. {BottleneckDim2}");
+        WriteLine($"3. {BottleneckDim3}");
+        WriteLine("Other: Exit");
+        WriteLine();
+        Write("Enter your choice: ");
+        string? trainChoice = ReadLine();
+        WriteLine();
+        switch (trainChoice?.ToUpper())
+        {
+            case "1":
+                Train(BottleneckDim1);
+                break;
+            case "2":
+                Train(BottleneckDim2);
+                break;
+            case "3":
+                Train(BottleneckDim3);
+                break;
+            default:
+                WriteLine("Back to menu");
+                break;
+        }
+    }
+
+    private static void SelectLoad()
+    {
+        WriteLine("Select the bottleneck dim to load:");
+        WriteLine($"1. {BottleneckDim1}");
+        WriteLine($"2. {BottleneckDim2}");
+        WriteLine($"3. {BottleneckDim3}");
+        WriteLine("Other: Exit");
+        WriteLine();
+        Write("Enter your choice: ");
+        string? loadChoice = ReadLine();
+        WriteLine();
+        switch (loadChoice?.ToUpper())
+        {
+            case "1":
+                Load(BottleneckDim1);
+                break;
+            case "2":
+                Load(BottleneckDim2);
+                break;
+            case "3":
+                Load(BottleneckDim3);
+                break;
+            default:
+                WriteLine("Back to menu");
+                break;
+        }
+    }
+
+    private static void Train(int bottleneckDim)
     {
         WriteLine("Loading and preprocessing data...");
 
@@ -301,7 +361,7 @@ internal class Program
 
         SimpleDataSource<float[,,,], float[,,,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);
-        AutoencoderModel model = new(BottleneckDim, commonRandom);
+        AutoencoderModel model = new(bottleneckDim, commonRandom);
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
         // MeanSquaredErrorLoss4D lossFunction = new();
 
@@ -332,6 +392,17 @@ internal class Program
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
         ResetColor();
+    }
+
+    private static void Load(int bottleneckDim)
+    {
+        string modelPath = $"{ModelName}.json";
+        AutoencoderModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"Model parameters loaded from {modelPath}.");
+        ResetColor();
+
+
     }
 
     private static (float[,,,] xData4D, float[,] yData, float[,] xData2D) Split(float[,] source)
