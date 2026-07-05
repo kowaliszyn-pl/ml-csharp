@@ -27,7 +27,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace Autoencoder;
 
-internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
+internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
     : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
 {
 
@@ -40,8 +40,8 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string?
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
 
-        _bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer);
-        _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Linear(), initializer);
+        _bottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer);
+        _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Tanh2D(), initializer);
 
         return
             // 1. Encoder
@@ -53,19 +53,19 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string?
                 paramInitializer: initializer
             ))
             .AddLayer(new Conv2DLayer(
-                kernels: 7,
+                kernels: InnerChannels,
                 kernelHeight: 5,
                 kernelWidth: 5,
                 activationFunction: new Tanh4D(),
                 paramInitializer: initializer
             ))
-            .AddLayer(new FlattenLayer())
+            .AddLayer(new FlattenLayer()) // dense1 in encoder
 
             // 2. Bottleneck
             .AddLayer(_bottleneckLayer)
 
             // 3. Decoder
-            .AddLayer(_firstDecoderLayer)
+            .AddLayer(_firstDecoderLayer)  // dense1 in decoder
             .AddLayer(new UnflattenLayer(InnerChannels, ImageInnerSize, ImageInnerSize))
             .AddLayer(new Conv2DLayer(
                 kernels: 14,
@@ -112,19 +112,69 @@ internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string?
     }
 }
 
+internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
+    : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(MseReduction.ElementMean), random, modelFilePath)
+{
+    private const int InnerChannels = 7;
+    private const int ImageInnerSize = 28;
+    private Layer<float[,], float[,]>? _bottleneckLayer;
+    private Layer<float[,], float[,]>? _firstDecoderLayer;
+
+    protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
+    {
+        ParamInitializer initializer = new GlorotInitializer(Random);
+
+        _bottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer);
+        _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Tanh2D(), initializer);
+
+        return AddLayer(new DenseLayer(InnerChannels * ImageInnerSize * ImageInnerSize, new Tanh2D(), initializer))
+            .AddLayer(_bottleneckLayer)
+            .AddLayer(_firstDecoderLayer)
+            .AddLayer(new DenseLayer(ImageInnerSize * ImageInnerSize, new Tanh2D(), initializer));
+    }
+
+    /// <summary>
+    /// Gets the encoded representation (latent data) produced by the bottleneck layer of the model.
+    /// </summary>
+    /// <returns>
+    /// A two-dimensional array of floating-point values representing the output of the bottleneck layer.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">Thrown if the bottleneck layer output is not available.</exception>
+    public float[,] GetEncodedRepresentation()
+    {
+        return _bottleneckLayer?.Output
+            ?? throw new InvalidOperationException("Bottleneck layer output is not available.");
+    }
+
+    /// <summary>
+    /// Forward encoded representation and return the decoded output. This can be used to visualize the output of the
+    /// decoder part of the autoencoder based on randomly generated encoded data or to see how the decoder reconstructs
+    /// the input data from the encoded (bottleneck) representation.
+    /// </summary>
+    public float[,] Decode(float[,] encoded)
+    {
+        // We need to pass the encoded data through the first decoder layer and then through the remaining layers of the model.
+
+        if (_firstDecoderLayer is null)
+            throw new InvalidOperationException("Decoder layer is not initialized.");
+
+        return InferFromLayer(_firstDecoderLayer, encoded);
+    }
+}
+
 internal class Program
 {
     private const int BottleneckDim1 = 24;
     private const int BottleneckDim2 = 28;
-    private const int BottleneckDim3 = 32;
+    private const int BottleneckDim3 = 56;
 
     private const int RandomSeed = 260423;
-    private const int Epochs = 5;
-    private const int BatchSize = 400;
+    private const int Epochs = 6;
+    private const int BatchSize = 100;
     // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
 
-    private const float InitialLearningRate = 0.002f;
+    private const float InitialLearningRate = 0.01f;
     private const float FinalLearningRate = 0.0005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
@@ -146,7 +196,7 @@ internal class Program
         // Create a LoggerFactory and add Serilog
         ILoggerFactory loggerFactory = new LoggerFactory()
             .AddSerilog(serilog);
-        s_logger = loggerFactory.CreateLogger<AutoencoderModel>();
+        s_logger = loggerFactory.CreateLogger<AutoencoderConvModel>();
 
         bool running = true;
         OutputEncoding = System.Text.Encoding.UTF8;
@@ -310,7 +360,7 @@ internal class Program
 
         SimpleDataSource<float[,,,], float[,,,]> dataSource = new(xTrain, yTrain);
         SeededRandom commonRandom = new(RandomSeed);
-        AutoencoderModel model = new(bottleneckDim, commonRandom);
+        AutoencoderConvModel model = new(bottleneckDim, commonRandom);
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
         // MeanSquaredErrorLoss4D lossFunction = new();
 
@@ -321,7 +371,7 @@ internal class Program
             logger: s_logger
         )
         {
-            Memo = $"Calling class: {nameof(AutoencoderModel)}."
+            Memo = $"Calling class: {nameof(AutoencoderConvModel)}."
         };
 
         trainer.Fit(
@@ -343,12 +393,13 @@ internal class Program
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
         ResetColor();
+        WriteLine();
     }
 
     private static void Load(int bottleneckDim)
     {
         string modelPath = GetFileName(bottleneckDim);
-        AutoencoderModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters loaded from {modelPath}.");
         ResetColor();
@@ -390,13 +441,15 @@ internal class Program
 
         WriteLine("Saving original and reconstructed images...");
 
-        int[] selectedImages = [0, 1, 2, 3];
+        int[] selectedImages = [0, 1, 2, 3, 10];
 
         foreach (int index in selectedImages)
         {
-            Utils.Drawing.SaveMnistPicture(28, index, xTrain2D, $"model{bottleneckDim}_original_{index}.jpg");
-            Utils.Drawing.SaveMnistPicture(28, index, yTrain2D, $"model{bottleneckDim}_reconstructed_{index}.jpg");
+            Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"model{bottleneckDim}_original_{index}.jpg");
+            Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"model{bottleneckDim}_reconstructed_{index}.jpg");
         }
+
+        WriteLine();
     }
 
     private static (float[,,,] xMerged, float[,] xMerged2D) LoadAndNormalizeImages()
