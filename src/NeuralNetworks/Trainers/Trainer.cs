@@ -206,10 +206,10 @@ public class Trainer<TInputData, TPrediction>(
                     logger?.LogInformation("Train loss (average): {trainLoss} for epoch {epoch}.", trainLoss.Value / allSteps, epoch);
                 }
 
-                if (eval)
+                if (eval && xTest is not null && yTest is not null)
                 {
-                    TPrediction testPredictions = model.Forward(xTest!, true);
-                    float testLoss = model.CalculateLoss(testPredictions, yTest!, lossFunction);
+                    TPrediction testPredictions = model.Forward(xTest, true);
+                    float testLoss = model.CalculateLoss(testPredictions, yTest, lossFunction);
 
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
                         WriteLine($"Test loss: {testLoss}");
@@ -226,7 +226,7 @@ public class Trainer<TInputData, TPrediction>(
                             logger?.LogInformation("Train eval: {evalValue:P2} for epoch {epoch}.", evalValue, epoch);
                         }
 
-                        evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
+                        evalValue = evalFunction(model, xTest, yTest, testPredictions);
 
                         if (consoleOutputMode > ConsoleOutputMode.Disable)
                             WriteLine($"Test eval: {evalValue:P2}");
@@ -272,16 +272,20 @@ public class Trainer<TInputData, TPrediction>(
                 ForegroundColor = ConsoleColor.Cyan;
                 WriteLine($"\nFit finished in {elapsedSeconds:F2} s. using {OperationBackend.CurrentType}.");
                 WriteLine($"{paramCount:n0} parameters trained.");
-                ForegroundColor = ConsoleColor.Yellow;
-                TPrediction testPredictions = model.Forward(xTest!, true);
-                float testLoss = model.CalculateLoss(testPredictions, yTest!, lossFunction);
-                WriteLine($"\nLoss on test data: {testLoss:F5}");
-                if (evalFunction is not null)
+
+                if (xTest is not null && yTest is not null)
                 {
-                    float evalValue = evalFunction(model, xTest!, yTest!, testPredictions);
-                    WriteLine($"Eval on test data: {evalValue:P2}");
+                    ForegroundColor = ConsoleColor.Yellow;
+                    TPrediction testPredictions = model.Forward(xTest, true);
+                    float testLoss = model.CalculateLoss(testPredictions, yTest, lossFunction);
+                    WriteLine($"\nLoss on test data: {testLoss:F5}");
+                    if (evalFunction is not null)
+                    {
+                        float evalValue = evalFunction(model, xTest, yTest, testPredictions);
+                        WriteLine($"Eval on test data: {evalValue:P2}");
+                    }
+                    ResetColor();
                 }
-                ResetColor();
                 WriteLine();
             }
 

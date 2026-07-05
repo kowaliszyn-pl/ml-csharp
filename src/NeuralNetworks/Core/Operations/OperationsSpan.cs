@@ -63,7 +63,7 @@ public class OperationsSpan : OperationsArray
         return gradient;
     }
 
-    public override float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
+    public override float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors, bool overAllElements)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
@@ -85,11 +85,18 @@ public class OperationsSpan : OperationsArray
             loss += error * error;
         }
 
-        loss /= batchSize;
+        if (overAllElements)
+        {
+            loss /= errors.Length;
+        }
+        else
+        {
+            loss /= batchSize;
+        }   
         return loss;
     }
 
-    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
+    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors, bool overAllElements)
     {
         int batchSize = errors.GetLength(0);
 
@@ -100,8 +107,7 @@ public class OperationsSpan : OperationsArray
         ReadOnlySpan<float> errorsSpan = MemoryMarshal.CreateReadOnlySpan(ref errors[0, 0, 0, 0], errors.Length);
         Span<float> gradientSpan = MemoryMarshal.CreateSpan(ref gradient[0, 0, 0, 0], gradient.Length);
 
-        
-        float scaleFactor = 2f / batchSize;
+        float scaleFactor = overAllElements ? 2f / errors.Length : 2f / batchSize;
         for (int i = 0; i < gradientSpan.Length; i++)
         {
             gradientSpan[i] = errorsSpan[i] * scaleFactor;

@@ -41,7 +41,7 @@ public class OperationsSpanParallel : OperationsSpan
         return gradient;
     }
 
-    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
+    public override float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors, bool overAllElements)
     {
         int batchSize = errors.GetLength(0);
 
@@ -49,7 +49,7 @@ public class OperationsSpanParallel : OperationsSpan
 
         float[,,,] gradient = new float[batchSize, errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
         
-        float scaleFactor = 2f / batchSize;
+        float scaleFactor = overAllElements ? 2f / errors.Length : 2f / batchSize;
         int gradientSpanLength = gradient.Length;
         //Parallel.For, gradient.Length, i =>
         //{

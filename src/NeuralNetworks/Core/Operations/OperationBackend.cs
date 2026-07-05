@@ -174,20 +174,20 @@ public static class OperationBackend
         => Current.SigmoidBinaryCrossEntropyLossGradient(sigmoidOutput, target);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors)
-        => Current.MeanSquaredErrorLoss(predicted, target, out errors);
+    internal static float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, bool overAllElements)
+        => Current.MeanSquaredErrorLoss(predicted, target, out errors, overAllElements);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] MeanSquaredErrorLossGradient(float[,] errors)
-        => Current.MeanSquaredErrorLossGradient(errors);
+    internal static float[,] MeanSquaredErrorLossGradient(float[,] errors, bool overAllElements)
+        => Current.MeanSquaredErrorLossGradient(errors, overAllElements);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors)
-        => Current.MeanSquaredErrorLoss(predicted, target, out errors);
+    internal static float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors, bool overAllElements)
+        => Current.MeanSquaredErrorLoss(predicted, target, out errors, overAllElements);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors)
-        => Current.MeanSquaredErrorLossGradient(errors);
+    internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors, bool overAllElements)
+        => Current.MeanSquaredErrorLossGradient(errors, overAllElements);
 
     #endregion
 
