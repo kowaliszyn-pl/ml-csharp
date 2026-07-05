@@ -28,7 +28,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 namespace Autoencoder;
 
 internal class AutoencoderModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
-    : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(), random, modelFilePath)
+    : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
 {
 
     private const int InnerChannels = 7;

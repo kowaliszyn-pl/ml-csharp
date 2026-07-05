@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+using NeuralNetworks.Core.Operations;
+
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Losses;
@@ -14,19 +16,19 @@ namespace NeuralNetworks.Losses;
 /// <remarks>This class is typically used in regression tasks (for example, Boston Housing dataset, Sine wave prediction) to measure the average squared difference between
 /// predicted and actual values. It can be used as a loss function in training neural networks or other predictive
 /// models where minimizing the mean squared error is desired.</remarks>
-public class MeanSquaredErrorLoss(bool overAllElements = true) : Loss<float[,]>
+public class MeanSquaredErrorLoss(MseReduction mseReduction = MseReduction.ElementMean) : Loss<float[,]>
 {
     private float[,]? _errors;
 
     protected override float CalculateLoss()
-        => MeanSquaredErrorLoss(Prediction, Target, out _errors, overAllElements);
+        => MeanSquaredErrorLoss(Prediction, Target, out _errors, mseReduction);
 
     protected override float[,] CalculateLossGradient()
     {
         Debug.Assert(_errors != null, "_errors should not be null here.");
 
-        return MeanSquaredErrorLossGradient(_errors, overAllElements);
+        return MeanSquaredErrorLossGradient(_errors, mseReduction);
     }
 
-    public override string ToString() => "MeanSquaredError";
+    public override string ToString() => $"MeanSquaredError (mseReduction={mseReduction})";
 }

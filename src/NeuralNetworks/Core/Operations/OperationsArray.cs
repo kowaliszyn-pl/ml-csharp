@@ -93,7 +93,7 @@ public class OperationsArray : IOperations
         return sigmoidOutput.Subtract(target).Divide(batchSize);
     }
 
-    public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, bool overAllElements)
+    public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, MseReduction mseReduction)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
@@ -103,24 +103,21 @@ public class OperationsArray : IOperations
 
         errors = predicted.Subtract(target);
         
-        if (overAllElements)
-        {
-            return errors.Power(2).Sum() / errors.Length;
-        }
-        return errors.Power(2).Sum() / batchSize;
+        int reductionDivisor = mseReduction == MseReduction.ElementMean ? errors.Length : batchSize;
+        return errors.Power(2).Sum() / reductionDivisor;
     }
     
-    public virtual float[,] MeanSquaredErrorLossGradient(float[,] errors, bool overAllElements)
+    public virtual float[,] MeanSquaredErrorLossGradient(float[,] errors, MseReduction mseReduction)
     {
         int batchSize = errors.GetLength(0);
 
         Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
 
-        float scaleFactor = overAllElements ? 2f / errors.Length : 2f / batchSize;
+        float scaleFactor = (mseReduction == MseReduction.ElementMean) ? 2f / errors.Length : 2f / batchSize;
         return errors.Multiply(scaleFactor);
     }
 
-    public virtual float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors, bool overAllElements)
+    public virtual float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors, MseReduction mseReduction)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
@@ -129,20 +126,17 @@ public class OperationsArray : IOperations
         Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
 
         errors = predicted.Subtract(target);
-        if (overAllElements)
-        {
-            return errors.Power(2).Sum() / errors.Length;
-        }
-        return errors.Power(2).Sum() / batchSize;
+        int reductionDivisor = mseReduction == MseReduction.ElementMean ? errors.Length : batchSize;
+        return errors.Power(2).Sum() / reductionDivisor;
     }
 
-    public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors, bool overAllElements)
+    public virtual float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors, MseReduction mseReduction)
     {
         int batchSize = errors.GetLength(0);
 
         Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
 
-        float scaleFactor = overAllElements ? 2f / errors.Length : 2f / batchSize;
+        float scaleFactor = (mseReduction == MseReduction.ElementMean) ? 2f / errors.Length : 2f / batchSize;
         return errors.Multiply(scaleFactor);
     }
 

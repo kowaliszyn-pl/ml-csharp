@@ -174,20 +174,20 @@ public static class OperationBackend
         => Current.SigmoidBinaryCrossEntropyLossGradient(sigmoidOutput, target);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, bool overAllElements)
-        => Current.MeanSquaredErrorLoss(predicted, target, out errors, overAllElements);
+    internal static float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, MseReduction mseReduction)
+        => Current.MeanSquaredErrorLoss(predicted, target, out errors, mseReduction);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] MeanSquaredErrorLossGradient(float[,] errors, bool overAllElements)
-        => Current.MeanSquaredErrorLossGradient(errors, overAllElements);
+    internal static float[,] MeanSquaredErrorLossGradient(float[,] errors, MseReduction mseReduction)
+        => Current.MeanSquaredErrorLossGradient(errors, mseReduction);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors, bool overAllElements)
-        => Current.MeanSquaredErrorLoss(predicted, target, out errors, overAllElements);
+    internal static float MeanSquaredErrorLoss(float[,,,] predicted, float[,,,] target, out float[,,,] errors, MseReduction mseReduction)
+        => Current.MeanSquaredErrorLoss(predicted, target, out errors, mseReduction);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors, bool overAllElements)
-        => Current.MeanSquaredErrorLossGradient(errors, overAllElements);
+    internal static float[,,,] MeanSquaredErrorLossGradient(float[,,,] errors, MseReduction mseReduction)
+        => Current.MeanSquaredErrorLossGradient(errors, mseReduction);
 
     #endregion
 
