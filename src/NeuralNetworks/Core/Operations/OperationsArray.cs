@@ -1026,22 +1026,22 @@ public class OperationsArray : IOperations
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public virtual float[,,,] Unflatten(float[,] source, int dim2, int dim3, int dim4)
+    public virtual float[,,,] Unflatten(float[,] source, int channels, int height, int width)
     {
-        int dim1 = source.GetLength(0);
+        int batchSize = source.GetLength(0);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[batchSize, channels, height, width];
 
-        for (int d1 = 0; d1 < dim1; d1++) // batch
+        for (int b = 0; b < batchSize; b++) // batch
         {
-            for (int d2 = 0; d2 < dim2; d2++) // channels
+            for (int c = 0; c < channels; c++) // channels
             {
-                for (int d3 = 0; d3 < dim3; d3++) // height
+                for (int h = 0; h < height; h++) // height
                 {
-                    for (int d4 = 0; d4 < dim4; d4++) // width
+                    for (int w = 0; w < width; w++) // width
                     {
-                        int index = d2 * dim3 * dim4 + d3 * dim4 + d4;
-                        res[d1, d2, d3, d4] = source[d1, index];
+                        int index = c * height * width + h * width + w;
+                        res[b, c, h, w] = source[b, index];
                     }
                 }
             }

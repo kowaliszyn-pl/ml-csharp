@@ -31,7 +31,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
     : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
 {
 
-    private const int InnerChannels = 7;
+    private const int InnerChannels = 3; // 7;
     private const int ImageInnerSize = 28;
     private Layer<float[,], float[,]>? _bottleneckLayer;
     private Layer<float[,], float[,]>? _firstDecoderLayer;
@@ -45,14 +45,14 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
 
         return
             // 1. Encoder
+            //AddLayer(new Conv2DLayer(
+            //    kernels: 14,
+            //    kernelHeight: 5,
+            //    kernelWidth: 5,
+            //    activationFunction: new Tanh4D(),
+            //    paramInitializer: initializer
+            //))
             AddLayer(new Conv2DLayer(
-                kernels: 14,
-                kernelHeight: 5,
-                kernelWidth: 5,
-                activationFunction: new Tanh4D(),
-                paramInitializer: initializer
-            ))
-            .AddLayer(new Conv2DLayer(
                 kernels: InnerChannels,
                 kernelHeight: 5,
                 kernelWidth: 5,
@@ -67,13 +67,13 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
             // 3. Decoder
             .AddLayer(_firstDecoderLayer)  // dense1 in decoder
             .AddLayer(new UnflattenLayer(InnerChannels, ImageInnerSize, ImageInnerSize))
-            .AddLayer(new Conv2DLayer(
-                kernels: 14,
-                kernelHeight: 5,
-                kernelWidth: 5,
-                activationFunction: new Tanh4D(),
-                paramInitializer: initializer
-            ))
+            //.AddLayer(new Conv2DLayer(
+            //    kernels: 14,
+            //    kernelHeight: 5,
+            //    kernelWidth: 5,
+            //    activationFunction: new Tanh4D(),
+            //    paramInitializer: initializer
+            //))
             .AddLayer(new Conv2DLayer(
                 kernels: 1,
                 kernelHeight: 5,
@@ -439,14 +439,14 @@ internal class Program
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-        WriteLine("Saving original and reconstructed images...");
+        WriteLine($"Saving original and reconstructed images from {xTrain2D.Length} xTrain points and {yTrain2D.Length} yTrain points.");
 
-        int[] selectedImages = [0, 1, 2, 3, 10];
+        int[] selectedImages = [20, 21, 22, 23, 30];
 
         foreach (int index in selectedImages)
         {
-            Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"model{bottleneckDim}_original_{index}.jpg");
-            Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"model{bottleneckDim}_reconstructed_{index}.jpg");
+            Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"model{bottleneckDim}_original_{index}");
+            Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"model{bottleneckDim}_reconstructed_{index}");
         }
 
         WriteLine();
