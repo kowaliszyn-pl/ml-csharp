@@ -27,25 +27,60 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace Autoencoder;
 
-internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
-    : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(MseReduction.ElementMean), random, modelFilePath)
+internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
+    : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
 {
-    private const int InnerChannels = 7;
+
+    private const int InnerChannels = 3; // 7;
     private const int ImageInnerSize = 28;
     private Layer<float[,], float[,]>? _bottleneckLayer;
     private Layer<float[,], float[,]>? _firstDecoderLayer;
 
-    protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
+    protected override LayerListBuilder<float[,,,], float[,,,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
 
         _bottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer);
         _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Tanh2D(), initializer);
 
-        return AddLayer(new DenseLayer(InnerChannels * ImageInnerSize * ImageInnerSize, new Tanh2D(), initializer))
+        return
+            // 1. Encoder
+            //AddLayer(new Conv2DLayer(
+            //    kernels: 14,
+            //    kernelHeight: 5,
+            //    kernelWidth: 5,
+            //    activationFunction: new Tanh4D(),
+            //    paramInitializer: initializer
+            //))
+            AddLayer(new Conv2DLayer(
+                kernels: InnerChannels,
+                kernelHeight: 5,
+                kernelWidth: 5,
+                activationFunction: new Tanh4D(),
+                paramInitializer: initializer
+            ))
+            .AddLayer(new FlattenLayer()) // dense1 in encoder
+
+            // 2. Bottleneck
             .AddLayer(_bottleneckLayer)
-            .AddLayer(_firstDecoderLayer)
-            .AddLayer(new DenseLayer(ImageInnerSize * ImageInnerSize, new Tanh2D(), initializer));
+
+            // 3. Decoder
+            .AddLayer(_firstDecoderLayer)  // dense1 in decoder
+            .AddLayer(new UnflattenLayer(InnerChannels, ImageInnerSize, ImageInnerSize))
+            //.AddLayer(new Conv2DLayer(
+            //    kernels: 14,
+            //    kernelHeight: 5,
+            //    kernelWidth: 5,
+            //    activationFunction: new Tanh4D(),
+            //    paramInitializer: initializer
+            //))
+            .AddLayer(new Conv2DLayer(
+                kernels: 1,
+                kernelHeight: 5,
+                kernelWidth: 5,
+                activationFunction: new Tanh4D(),
+                paramInitializer: initializer
+            ));
     }
 
     /// <summary>
@@ -66,7 +101,7 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
     /// decoder part of the autoencoder based on randomly generated encoded data or to see how the decoder reconstructs
     /// the input data from the encoded (bottleneck) representation.
     /// </summary>
-    public float[,] Decode(float[,] encoded)
+    public float[,,,] Decode(float[,] encoded)
     {
         // We need to pass the encoded data through the first decoder layer and then through the remaining layers of the model.
 
@@ -77,13 +112,13 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
     }
 }
 
-internal class Program
+internal class ProgramConv
 {
     private const int BottleneckDim1 = 24;
     private const int BottleneckDim2 = 28;
-    private const int BottleneckDim3 = 32;
+    private const int BottleneckDim3 = 56;
 
-    private const int RandomSeed = 260710;
+    private const int RandomSeed = 260423;
     private const int Epochs = 6;
     private const int BatchSize = 100;
     // private const int EvalEveryEpochs = 2;
@@ -94,7 +129,7 @@ internal class Program
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
 
-    private const string ModelName = "AutoencoderDense";
+    private const string ModelName = "AutoencoderConv";
 
     private static Microsoft.Extensions.Logging.ILogger s_logger = default!;
 
@@ -111,7 +146,7 @@ internal class Program
         // Create a LoggerFactory and add Serilog
         ILoggerFactory loggerFactory = new LoggerFactory()
             .AddSerilog(serilog);
-        s_logger = loggerFactory.CreateLogger<Program>();
+        s_logger = loggerFactory.CreateLogger<AutoencoderConvModel>();
 
         bool running = true;
         OutputEncoding = System.Text.Encoding.UTF8;
