@@ -2,9 +2,6 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
@@ -91,9 +88,8 @@ internal class Program
     private const int BottleneckDim3 = 32;
 
     private const int RandomSeed = 260710;
-    private const int Epochs = 6;
-    private const int BatchSize = 100;
-    // private const int EvalEveryEpochs = 2;
+    private const int Epochs = 10;
+    private const int BatchSize = 400;
     private const int LogEveryEpochs = 1;
 
     private const float InitialLearningRate = 0.01f;
@@ -265,36 +261,19 @@ internal class Program
     {
         WriteLine("Loading and preprocessing data...");
 
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
-        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
+        float[,] xTrain = LoadTrainingData();
+        float[,] xTest = LoadTestData();
 
-        (float[,] xTrain, _) = Split(train);
-        (float[,] xTest, _) = Split(test);
+        // Save a copy of the training images for drawing purposes before normalization.
+
         float[,] trainingImagesForDrawing = (float[,])xTrain.Clone();
 
         // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
-        const float min = 0;
-        const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
-
-        for(int row = 0; row < xTrain.GetLength(0); row++)
-        {
-            for (int col = 0; col < xTrain.GetLength(1); col++)
-            {
-                xTrain[row, col] = (xTrain[row, col] - min) * scale - 1f;
-            }
-        }
+        NormalizeToTanhRange(xTrain);
+        NormalizeToTanhRange(xTest);
 
         float[,] yTrain = (float[,])xTrain.Clone();
-
-        for(int row = 0; row < xTest.GetLength(0); row++)
-        {
-            for (int col = 0; col < xTest.GetLength(1); col++)
-            {
-                xTest[row, col] = (xTest[row, col] - min) * scale - 1f;
-            }
-        }
 
         // It's not quite necessary to clone the test data, but we do it for consistency.
         float[,] yTest = (float[,])xTest.Clone();
@@ -347,40 +326,21 @@ internal class Program
 
         WriteLine("Loading and preprocessing data...");
 
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
+        float[,] xTrain = LoadTrainingData();
 
-        (float[,] xTrain, _) = Split(train);
         WriteLine($"Loaded {xTrain.GetLength(0)} training samples with {xTrain.GetLength(1)} features each.");
 
         float[,] trainingImagesForDrawing = (float[,])xTrain.Clone();
 
         // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
-        const float min = 0;
-        const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
-
-        for (int row = 0; row < xTrain.GetLength(0); row++)
-        {
-            for (int col = 0; col < xTrain.GetLength(1); col++)
-            {
-                xTrain[row, col] = (xTrain[row, col] - min) * scale - 1f;
-            }
-        }
+        NormalizeToTanhRange(xTrain);
 
         float[,] yTrain = model.Forward(xTrain, true);
 
         // Rescale the pixel values back to [0, 255] for visualization purposes.
 
-        const float scaleUp = 255f / 2f;
-
-        for(int row = 0; row < yTrain.GetLength(0); row++)
-        {
-            for (int col = 0; col < yTrain.GetLength(1); col++)
-            {
-                yTrain[row, col] = (yTrain[row, col] + 1f) * scaleUp;
-            }
-        }
+        RescaleToPixelValues(yTrain);
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
@@ -395,6 +355,48 @@ internal class Program
         }
 
         WriteLine();
+    }
+
+    private static float[,] LoadTrainingData()
+    {
+        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
+        (float[,] xTrain, _) = Split(train);
+        return xTrain;
+    }
+
+    private static float[,] LoadTestData()
+    {
+        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
+        (float[,] xTest, _) = Split(test);
+        return xTest;
+    }
+
+    private static void NormalizeToTanhRange(float[,] xTrain)
+    {
+        const float min = 0;
+        const float max = 255f;
+        const float scale = 2f / (max - min); // Scale to range [-1, 1]
+
+        for (int row = 0; row < xTrain.GetLength(0); row++)
+        {
+            for (int col = 0; col < xTrain.GetLength(1); col++)
+            {
+                xTrain[row, col] = (xTrain[row, col] - min) * scale - 1f;
+            }
+        }
+    }
+
+    private static void RescaleToPixelValues(float[,] yTrain)
+    {
+        const float scale = 255f / 2f;
+
+        for (int row = 0; row < yTrain.GetLength(0); row++)
+        {
+            for (int col = 0; col < yTrain.GetLength(1); col++)
+            {
+                yTrain[row, col] = (yTrain[row, col] + 1f) * scale;
+            }
+        }
     }
 
     private static (float[,] xData, float[,] yData) Split(float[,] source)
