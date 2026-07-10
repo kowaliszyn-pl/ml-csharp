@@ -16,6 +16,7 @@ using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
+using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
@@ -30,8 +31,6 @@ namespace Autoencoder;
 internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
     : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(MseReduction.ElementMean), random, modelFilePath)
 {
-    private const int InnerChannels = 7;
-    private const int ImageInnerSize = 28;
     private Layer<float[,], float[,]>? _bottleneckLayer;
     private Layer<float[,], float[,]>? _firstDecoderLayer;
 
@@ -39,13 +38,21 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
 
-        _bottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer);
-        _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Tanh2D(), initializer);
+        _bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer);
+        _firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random));
 
-        return AddLayer(new DenseLayer(InnerChannels * ImageInnerSize * ImageInnerSize, new Tanh2D(), initializer))
+        return 
+            // Encoder
+            AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
+            .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
+            
+            // Bottleneck
             .AddLayer(_bottleneckLayer)
+            
+            // Decoder
             .AddLayer(_firstDecoderLayer)
-            .AddLayer(new DenseLayer(ImageInnerSize * ImageInnerSize, new Tanh2D(), initializer));
+            .AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
+            .AddLayer(new DenseLayer(784, new Tanh2D(), initializer));
     }
 
     /// <summary>
@@ -258,40 +265,59 @@ internal class Program
     {
         WriteLine("Loading and preprocessing data...");
 
-        (float[,,,] xTrain, _) = LoadAndNormalizeImages();
+        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
+        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
 
-        // Create another identical pair of xTrain, xTest called yTrain, yTest which will be used as the target output for the autoencoder. The autoencoder will learn to reconstruct the input data, so the target output is the same as the input data.
-        // We need them separated because the Trainer shuffles the data and creates batches - in case of having the same array pointers for input and target output, shuffling would break the correspondence between input and target output.
+        (float[,] xTrain, _) = Split(train);
+        (float[,] xTest, _) = Split(test);
+        float[,] trainingImagesForDrawing = (float[,])xTrain.Clone();
 
-        float[,,,] yTrain = new float[xTrain.GetLength(0), xTrain.GetLength(1), xTrain.GetLength(2), xTrain.GetLength(3)];
+        // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
-        ReadOnlySpan<float> xTrainSpan = MemoryMarshal.CreateReadOnlySpan(ref xTrain[0, 0, 0, 0], xTrain.Length);
-        Span<float> yTrainSpan = MemoryMarshal.CreateSpan(ref yTrain[0, 0, 0, 0], yTrain.Length);
+        const float min = 0;
+        const float max = 255f;
+        const float scale = 2f / (max - min); // Scale to range [-1, 1]
 
-        // Copy using Span.CopyTo for better performance
-        xTrainSpan.CopyTo(yTrainSpan);
+        for(int row = 0; row < xTrain.GetLength(0); row++)
+        {
+            for (int col = 0; col < xTrain.GetLength(1); col++)
+            {
+                xTrain[row, col] = (xTrain[row, col] - min) * scale - 1f;
+            }
+        }
+
+        float[,] yTrain = (float[,])xTrain.Clone();
+
+        for(int row = 0; row < xTest.GetLength(0); row++)
+        {
+            for (int col = 0; col < xTest.GetLength(1); col++)
+            {
+                xTest[row, col] = (xTest[row, col] - min) * scale - 1f;
+            }
+        }
+
+        // It's not quite necessary to clone the test data, but we do it for consistency.
+        float[,] yTest = (float[,])xTest.Clone();
 
         WriteLine("Creating the model...");
 
-        SimpleDataSource<float[,,,], float[,,,]> dataSource = new(xTrain, yTrain);
+        SimpleDataSource<float[,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);
-        AutoencoderConvModel model = new(bottleneckDim, commonRandom);
+        AutoencoderDenseModel model = new(bottleneckDim, commonRandom);
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
-        // MeanSquaredErrorLoss4D lossFunction = new();
 
-        Trainer<float[,,,], float[,,,]> trainer = new(
+        Trainer<float[,], float[,]> trainer = new(
             model,
             new AdamOptimizer(learningRate, AdamBeta1, AdamBeta2),
             random: commonRandom,
             logger: s_logger
         )
         {
-            Memo = $"Calling class: {nameof(AutoencoderConvModel)}."
+            Memo = $"Calling class: {nameof(AutoencoderDenseModel)}."
         };
 
         trainer.Fit(
             dataSource,
-            //lossFunction: lossFunction,
             epochs: Epochs,
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize,
@@ -314,158 +340,79 @@ internal class Program
     private static void Load(int bottleneckDim)
     {
         string modelPath = GetFileName(bottleneckDim);
-        AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        AutoencoderDenseModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters loaded from {modelPath}.");
         ResetColor();
 
         WriteLine("Loading and preprocessing data...");
 
-        (float[,,,] xTrain, float[,] xTrain2D) = LoadAndNormalizeImages();
+        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
 
-        float[,,,] yTrain = model.Forward(xTrain, true);
+        (float[,] xTrain, _) = Split(train);
+        WriteLine($"Loaded {xTrain.GetLength(0)} training samples with {xTrain.GetLength(1)} features each.");
 
-        // Denormalize the output from [-1, 1] back to [0, 255] and convert it to float[row, pixelIndex] for visualization using SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
+        float[,] trainingImagesForDrawing = (float[,])xTrain.Clone();
 
-        const float scale = 255f / 2f;
-
-        int rows = yTrain.GetLength(0);
-        int channels = yTrain.GetLength(1);
-        int imageHeight = yTrain.GetLength(2);
-        int imageWidth = yTrain.GetLength(3);
-
-        float[,] yTrain2D = new float[rows, channels * imageHeight * imageWidth];
-
-        for (int row = 0; row < rows; row++)
-        {
-            for (int channel = 0; channel < channels; channel++)
-            {
-                for (int height = 0; height < imageHeight; height++)
-                {
-                    for (int width = 0; width < imageWidth; width++)
-                    {
-                        float normalizedValue = yTrain[row, channel, height, width]; // -1..1
-                        float denormalizedValue = (normalizedValue + 1f) * scale; // 0..255
-                        yTrain2D[row, channel * imageHeight * imageWidth + height * imageWidth + width] = denormalizedValue;
-                    }
-                }
-            }
-        }
-
-        // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
-
-        WriteLine($"Saving original and reconstructed images from {xTrain2D.Length} xTrain points and {yTrain2D.Length} yTrain points.");
-
-        int[] selectedImages = [20, 21, 22, 23, 30];
-
-        foreach (int index in selectedImages)
-        {
-            Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"model{bottleneckDim}_original_{index}");
-            Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"model{bottleneckDim}_reconstructed_{index}");
-        }
-
-        WriteLine();
-    }
-
-    private static (float[,,,] xMerged, float[,] xMerged2D) LoadAndNormalizeImages()
-    {
-        // Get both (train and test) datasets and merge them into one array.
-
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_train_small.csv");
-        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_test.csv");
-
-        int trainRows = train.GetLength(0);
-        int testRows = test.GetLength(0);
-        int features = train.GetLength(1);
-
-        float[,] merged = new float[trainRows + testRows, features];
-
-        for (int row = 0; row < trainRows; row++)
-        {
-            for (int col = 0; col < features; col++)
-            {
-                merged[row, col] = train[row, col];
-            }
-        }
-
-        for (int row = 0; row < testRows; row++)
-        {
-            for (int col = 0; col < features; col++)
-            {
-                merged[trainRows + row, col] = test[row, col];
-            }
-        }
-
-        // Split the merged data into xMerged and yMerged arrays. The first column of the merged array is used to create a one-hot encoded yMerged array, while the remaining columns are used to create the xMerged array. The xMerged array is then reshaped into a 4D array (xMerged) with dimensions corresponding to the number of samples, channels, height, and width.
-
-        (float[,,,] xMerged, float[,] yMerged, float[,] xMerged2D) = Split(merged);
-
-        // Convert pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
+        // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
         const float min = 0;
         const float max = 255f;
         const float scale = 2f / (max - min); // Scale to range [-1, 1]
 
-        int rows = xMerged.GetLength(0);
-        int channels = xMerged.GetLength(1);
-        int imageHeight = xMerged.GetLength(2);
-        int imageWidth = xMerged.GetLength(3);
-
-        for (int row = 0; row < rows; row++)
+        for (int row = 0; row < xTrain.GetLength(0); row++)
         {
-            for (int channel = 0; channel < channels; channel++)
+            for (int col = 0; col < xTrain.GetLength(1); col++)
             {
-                for (int height = 0; height < imageHeight; height++)
-                {
-                    for (int width = 0; width < imageWidth; width++)
-                    {
-                        xMerged[row, channel, height, width] = (xMerged[row, channel, height, width] - min) * scale - 1f;
-                    }
-                }
+                xTrain[row, col] = (xTrain[row, col] - min) * scale - 1f;
             }
         }
 
-        return (xMerged, xMerged2D);
+        float[,] yTrain = model.Forward(xTrain, true);
+
+        // Rescale the pixel values back to [0, 255] for visualization purposes.
+
+        const float scaleUp = 255f / 2f;
+
+        for(int row = 0; row < yTrain.GetLength(0); row++)
+        {
+            for (int col = 0; col < yTrain.GetLength(1); col++)
+            {
+                yTrain[row, col] = (yTrain[row, col] + 1f) * scaleUp;
+            }
+        }
+
+        // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
+
+        WriteLine($"Saving original and reconstructed images from {xTrain.Length} xTrain points and {yTrain.Length} yTrain points.");
+
+        int[] selectedImages = [20, 21, 22, 23, 30];
+
+        foreach (int index in selectedImages)
+        {
+            Utils.Drawing.SaveMnistPicture(100, index, trainingImagesForDrawing, $"{ModelName}_{bottleneckDim}_original_{index}");
+            Utils.Drawing.SaveMnistPicture(100, index, yTrain, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
+        }
+
+        WriteLine();
     }
 
-    /// <summary>
-    /// Splits the input 2D array into xData4D, yData, and xData2D arrays. The first column of the input array is used to create a one-hot encoded yData array, while the remaining columns are used to create the xData2D array. The xData2D array is then reshaped into a 4D array (xData4D) with dimensions corresponding to the number of samples, channels, height, and width.
-    /// </summary>
-    /// <param name="source"></param>
-    /// <returns></returns>
-    private static (float[,,,] xData4D, float[,] yData, float[,] xData2D) Split(float[,] source)
+    private static (float[,] xData, float[,] yData) Split(float[,] source)
     {
-        // Split into xTest (all columns except the first one) and yTest (a one-hot table from the first column with values from 0 to 9).
+        // Split into xData (all columns except the first one) and yData (a one-hot table from the first column with values from 0 to 9).
 
-        float[,] xData2D = source.GetColumns(1..source.GetLength(1));
+        float[,] xData = source.GetColumns(1..source.GetLength(1));
         float[,] yData = source.GetColumn(0);
 
-        Debug.Assert(xData2D.GetLength(1) == 28 * 28);
-
-        // Convert yTest to a one-hot table.
-        int yTestRows = yData.GetLength(0);
-        float[,] oneHot = new float[yTestRows, 10];
-        for (int row = 0; row < yTestRows; row++)
+        // Convert yData to a one-hot table.
+        float[,] oneHot = new float[yData.GetLength(0), 10];
+        for (int row = 0; row < yData.GetLength(0); row++)
         {
             int value = Convert.ToInt32(yData[row, 0]);
             oneHot[row, value] = 1f;
         }
 
-        int xDataRows = xData2D.GetLength(0);
-        int xDataCols = xData2D.GetLength(1);
-        float[,,,] xData4D = new float[xDataRows, 1, 28, 28];
-
-        for (int row = 0; row < xDataRows; row++)
-        {
-            for (int col = 0; col < xDataCols; col++)
-            {
-                //int x = col % 28;
-                //int y = col / 28;
-                xData4D[row, 0 /* one input channel */, col / 28, col % 28] = xData2D[row, col];
-            }
-        }
-
-        return (xData4D, oneHot, xData2D);
+        return (xData, oneHot);
     }
 
     private static string GetFileName(int bottleneckDim)
