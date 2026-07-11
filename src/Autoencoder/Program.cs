@@ -124,6 +124,7 @@ internal class Program
             WriteLine("B. Select operation backend");
             WriteLine("T. Train and save a model");
             WriteLine("L. Load the last model");
+            WriteLine("V. Visualize latent space with t-SNE");
             WriteLine("Other: Exit");
             WriteLine();
             Write("Enter your choice: ");
@@ -146,7 +147,10 @@ internal class Program
                     SelectLoad();
                     fromSubmenu = true;
                     break;
-
+                case "V":
+                    SelectVisualize();
+                    fromSubmenu = true;
+                    break;
                 default:
                     WriteLine("Goodbye!");
                     running = false;
@@ -352,6 +356,206 @@ internal class Program
         }
 
         WriteLine();
+    }
+
+    private static void VisualizeLatentSpace(int bottleneckDim)
+    {
+        WriteLine("Loading model and data...");
+
+        string modelPath = GetFileName(bottleneckDim);
+        AutoencoderDenseModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+
+        // Load data and labels
+        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
+
+        // Restrict to 10000 samples for t-SNE visualization to reduce computation time
+        int maxSamples = 15000;
+        if (train.GetLength(0) > maxSamples)
+        {
+            train = train.GetRows(0..maxSamples);
+        }
+
+        float[,] labels = train.GetColumn(0);
+        float[,] xTrain = train.GetColumns(1..train.GetLength(1));
+
+        // Normalize
+        NormalizeToTanhRange(xTrain);
+
+        // Get latent representation
+        WriteLine("Encoding data to latent space...");
+        _ = model.Forward(xTrain, false);
+        float[,] encoded = model.GetEncodedRepresentation();
+
+        // Convert to double[][] for Accord.NET
+        int n = encoded.GetLength(0);
+        int dim = encoded.GetLength(1);
+        double[][] encodedDouble = new double[n][];
+        for (int i = 0; i < n; i++)
+        {
+            encodedDouble[i] = new double[dim];
+            for (int j = 0; j < dim; j++)
+            {
+                encodedDouble[i][j] = encoded[i, j];
+            }
+        }
+
+        // Apply t-SNE
+        WriteLine("Applying t-SNE reduction...");
+        var tsne = new Accord.MachineLearning.Clustering.TSNE()
+        {
+            NumberOfOutputs = 2,
+            Perplexity = 30,
+            //Iterations = 1000
+        };
+
+        double[][] reduced = tsne.Transform(encodedDouble);
+
+        // Create plot
+        WriteLine("Creating visualization...");
+        var plt = new ScottPlot.Plot();
+
+        // Group points by digit
+        for (int digit = 0; digit <= 9; digit++)
+        {
+            List<double> xPoints = new();
+            List<double> yPoints = new();
+
+            for (int i = 0; i < n; i++)
+            {
+                if ((int)labels[i, 0] == digit)
+                {
+                    xPoints.Add(reduced[i][0]);
+                    yPoints.Add(reduced[i][1]);
+                }
+            }
+
+            var scatter = plt.Add.ScatterPoints(xPoints, yPoints);
+            scatter.Label = $"Digit {digit}";
+            scatter.MarkerSize = 5;
+        }
+
+        plt.ShowLegend();
+        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={bottleneckDim})");
+        plt.XLabel("t-SNE Component 1");
+        plt.YLabel("t-SNE Component 2");
+
+        string outputPath = $"..\\..\\..\\{ModelName}_{bottleneckDim}_tsne.png";
+        plt.SavePng(outputPath, 1200, 900);
+
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"t-SNE plot saved to {outputPath}");
+        ResetColor();
+        WriteLine();
+    }
+
+    private static void VisualizeLatentSpaceOwn(int bottleneckDim)
+    {
+        WriteLine("Loading model and data...");
+
+        string modelPath = GetFileName(bottleneckDim);
+        AutoencoderDenseModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+
+        // Load data and labels
+        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
+
+        // Restrict to 5000 samples for t-SNE visualization to reduce computation time
+        int maxSamples = 5000;
+        if (train.GetLength(0) > maxSamples)
+        {
+            train = train.GetRows(0..maxSamples);
+        }
+
+        float[,] labels = train.GetColumn(0);
+        float[,] xTrain = train.GetColumns(1..train.GetLength(1));
+
+        // Normalize
+        NormalizeToTanhRange(xTrain);
+
+        // Get latent representation
+        WriteLine("Encoding data to latent space...");
+        _ = model.Forward(xTrain, false);
+        float[,] encoded = model.GetEncodedRepresentation();
+
+        WriteLine($"Latent space shape: {encoded.GetLength(0)} samples × {encoded.GetLength(1)} dimensions");
+
+        // Apply custom t-SNE
+        WriteLine("\n=== Running custom t-SNE implementation ===");
+        Tsne tsne = new(
+            outputDimensions: 2,
+            perplexity: 30.0,
+            maxIterations: 600,
+            learningRate: 90.0,
+            randomSeed: RandomSeed
+        );
+
+        double[,] reduced = tsne.FitTransform(encoded);
+
+        // Create plot
+        WriteLine("\nCreating visualization...");
+        var plt = new ScottPlot.Plot();
+
+        int n = labels.GetLength(0);
+
+        // Group points by digit
+        for (int digit = 0; digit <= 9; digit++)
+        {
+            List<double> xPoints = [];
+            List<double> yPoints = [];
+
+            for (int i = 0; i < n; i++)
+            {
+                if ((int)labels[i, 0] == digit)
+                {
+                    xPoints.Add(reduced[i, 0]);
+                    yPoints.Add(reduced[i, 1]);
+                }
+            }
+
+            var scatter = plt.Add.ScatterPoints(xPoints, yPoints);
+            scatter.Label = $"Digit {digit}";
+            scatter.MarkerSize = 5;
+        }
+
+        plt.ShowLegend();
+        plt.Title($"t-SNE Visualization of Autoencoder Latent Space (bottleneck={bottleneckDim})");
+        plt.XLabel("t-SNE Component 1");
+        plt.YLabel("t-SNE Component 2");
+
+        string outputPath = $"..\\..\\..\\{ModelName}_{bottleneckDim}_tsne.png";
+        plt.SavePng(outputPath, 1200, 900);
+
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"\nt-SNE plot saved to {outputPath}");
+        ResetColor();
+        WriteLine();
+    }
+
+    private static void SelectVisualize()
+    {
+        WriteLine("Select the bottleneck dim to visualize:");
+        WriteLine($"1. {BottleneckDim1}");
+        WriteLine($"2. {BottleneckDim2}");
+        WriteLine($"3. {BottleneckDim3}");
+        WriteLine("Other: Exit");
+        WriteLine();
+        Write("Enter your choice: ");
+        string? choice = ReadLine();
+        WriteLine();
+        switch (choice?.ToUpper())
+        {
+            case "1":
+                VisualizeLatentSpace(BottleneckDim1);
+                break;
+            case "2":
+                VisualizeLatentSpace(BottleneckDim2);
+                break;
+            case "3":
+                VisualizeLatentSpace(BottleneckDim3);
+                break;
+            default:
+                WriteLine("Back to menu");
+                break;
+        }
     }
 
     private static float[,] LoadTrainingData()

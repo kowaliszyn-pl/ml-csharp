@@ -66,7 +66,8 @@ public class Tsne
                         gains[i, j] = 0.01;
 
                     // Momentum and update
-                    double momentum = iter < 250 ? 0.5 : 0.8;
+                    // double momentum = iter < 300 ? 0.5 : 0.8;
+                    const double momentum = 0.5; // Fixed momentum for simplicity
                     yIncs[i, j] = momentum * yIncs[i, j] - _learningRate * gains[i, j] * gradient[i, j];
                     Y[i, j] += yIncs[i, j];
                 }
@@ -75,7 +76,7 @@ public class Tsne
             // Zero-mean the solution
             ZeroMean(Y);
 
-            if ((iter + 1) % 50 == 0)
+            if ((iter + 1) % 10 == 0)
             {
                 double error = ComputeKLDivergence(P, Q);
                 Console.WriteLine($"Iteration {iter + 1}/{_maxIterations}, KL divergence = {error:F4}");
