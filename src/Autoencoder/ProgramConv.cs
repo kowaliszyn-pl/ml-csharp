@@ -47,7 +47,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 kernels: 16,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new ReLU4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer
             ))
             // 16 * 28 * 28
@@ -57,7 +57,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 kernels: 32,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new ReLU4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer
             ))
             // 32 * 14 * 14
@@ -67,7 +67,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 kernels: InnerChannels,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new ReLU4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer
             ))
             // 64 * 7 * 7
@@ -79,7 +79,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
 
             // 3. Decoder
             // bottleneckDim
-            .AddLayer(_firstDecoderLayer = new DenseLayer(InnerChannels * 7 * 7, new ReLU2D(), initializer))
+            .AddLayer(_firstDecoderLayer = new DenseLayer(InnerChannels * 7 * 7, new LeakyReLU2D(), initializer))
             // InnerChannels (64) * 7 * 7 = 3136 as a flattened representation
             .AddLayer(new UnflattenLayer(InnerChannels, 7, 7))
             // 64 * 7 * 7
@@ -89,7 +89,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 kernels: 32,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new ReLU4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer
             ))
             // 32 * 14 * 14
@@ -99,7 +99,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 kernels: 16,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new ReLU4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer
             ))
             // 16 * 28 * 28
@@ -150,7 +150,7 @@ internal class ProgramConv
     private const int BottleneckDim3 = 56;
 
     private const int RandomSeed = 260423;
-    private const int Epochs = 5;
+    private const int Epochs = 2;
     private const int BatchSize = 200;
     // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
