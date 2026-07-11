@@ -31,56 +31,84 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
     : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
 {
 
-    private const int InnerChannels = 3; // 7;
-    private const int ImageInnerSize = 28;
+    private const int InnerChannels = 64;
+    //private const int ImageInnerSize = 28;
     private Layer<float[,], float[,]>? _bottleneckLayer;
-    private Layer<float[,], float[,]>? _firstDecoderLayer;
+    private Layer<float[,], float[,,,]>? _firstDecoderLayer;
 
     protected override LayerListBuilder<float[,,,], float[,,,]> CreateLayerListBuilder()
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
 
-        _bottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer);
-        _firstDecoderLayer = new DenseLayer(ImageInnerSize * ImageInnerSize * InnerChannels, new Tanh2D(), initializer);
-
         return
             // 1. Encoder
-            //AddLayer(new Conv2DLayer(
-            //    kernels: 14,
-            //    kernelHeight: 5,
-            //    kernelWidth: 5,
-            //    activationFunction: new Tanh4D(),
-            //    paramInitializer: initializer
-            //))
+            // 1 * 28 * 28
             AddLayer(new Conv2DLayer(
-                kernels: InnerChannels,
-                kernelHeight: 5,
-                kernelWidth: 5,
-                activationFunction: new Tanh4D(),
+                kernels: 16,
+                kernelHeight: 3,
+                kernelWidth: 3,
+                activationFunction: new ReLU4D(),
                 paramInitializer: initializer
             ))
-            .AddLayer(new FlattenLayer()) // dense1 in encoder
+            // 16 * 28 * 28
+            .AddLayer(new MaxPooling2DLayer(2, 2))
+            // 16 * 14 * 14
+            .AddLayer(new Conv2DLayer(
+                kernels: 32,
+                kernelHeight: 3,
+                kernelWidth: 3,
+                activationFunction: new ReLU4D(),
+                paramInitializer: initializer
+            ))
+            // 32 * 14 * 14
+            .AddLayer(new MaxPooling2DLayer(2, 2))
+            // 32 * 7 * 7
+            .AddLayer(new Conv2DLayer(
+                kernels: InnerChannels,
+                kernelHeight: 3,
+                kernelWidth: 3,
+                activationFunction: new ReLU4D(),
+                paramInitializer: initializer
+            ))
+            // 64 * 7 * 7
+            .AddLayer(new FlattenLayer())
 
             // 2. Bottleneck
-            .AddLayer(_bottleneckLayer)
+            // 64 * 7 * 7 = 3136
+            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer))
 
             // 3. Decoder
-            .AddLayer(_firstDecoderLayer)  // dense1 in decoder
-            .AddLayer(new UnflattenLayer(InnerChannels, ImageInnerSize, ImageInnerSize))
-            //.AddLayer(new Conv2DLayer(
-            //    kernels: 14,
-            //    kernelHeight: 5,
-            //    kernelWidth: 5,
-            //    activationFunction: new Tanh4D(),
-            //    paramInitializer: initializer
-            //))
+            .AddLayer(_firstDecoderLayer = new UnflattenLayer(InnerChannels, 7, 7))
+            // 64 * 7 * 7
+            .AddLayer(new Upsample2DLayer(2, 2))
+            // 64 * 14 * 14
+            .AddLayer(new Conv2DLayer(
+                kernels: 32,
+                kernelHeight: 3,
+                kernelWidth: 3,
+                activationFunction: new ReLU4D(),
+                paramInitializer: initializer
+            ))
+            // 32 * 14 * 14
+            .AddLayer(new Upsample2DLayer(2, 2))
+            // 32 * 28 * 28
+            .AddLayer(new Conv2DLayer(
+                kernels: 16,
+                kernelHeight: 3,
+                kernelWidth: 3,
+                activationFunction: new ReLU4D(),
+                paramInitializer: initializer
+            ))
+            // 16 * 28 * 28
             .AddLayer(new Conv2DLayer(
                 kernels: 1,
-                kernelHeight: 5,
-                kernelWidth: 5,
+                kernelHeight: 3,
+                kernelWidth: 3,
                 activationFunction: new Tanh4D(),
                 paramInitializer: initializer
             ));
+            // 1 * 28 * 28
+
     }
 
     /// <summary>

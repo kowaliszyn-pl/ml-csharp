@@ -1164,6 +1164,11 @@ public class OperationsArray : IOperations
         return inputGradient;
     }
 
+    public float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices) => throw new NotImplementedException();
+    public float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int sizeHeight, int sizeWidth, int[,,,] maxIndices) => throw new NotImplementedException();
+    public float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth) => throw new NotImplementedException();
+    public float[,,,] Upsample2DInputGradient(float[,,,] outputGradient, int scaleHeight, int scaleWidth) => throw new NotImplementedException();
+
     #endregion
 
 }

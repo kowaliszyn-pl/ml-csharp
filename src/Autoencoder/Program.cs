@@ -35,19 +35,16 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
     {
         ParamInitializer initializer = new GlorotInitializer(Random);
 
-        _bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer);
-        _firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random));
-
         return 
             // Encoder
             AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
             .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
             
             // Bottleneck
-            .AddLayer(_bottleneckLayer)
+            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer))
             
             // Decoder
-            .AddLayer(_firstDecoderLayer)
+            .AddLayer(_firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
             .AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
             .AddLayer(new DenseLayer(784, new Tanh2D(), initializer));
     }

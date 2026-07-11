@@ -181,6 +181,10 @@ public interface IOperations
 
     public float[,] GlobalAveragePooling1DOutput(float[,,] input);
     public float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient);
+    float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices);
+    float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int sizeHeight, int sizeWidth, int[,,,] maxIndices);
+    float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth);
+    float[,,,] Upsample2DInputGradient(float[,,,] outputGradient, int scaleHeight, int scaleWidth);
 
     #endregion
 
