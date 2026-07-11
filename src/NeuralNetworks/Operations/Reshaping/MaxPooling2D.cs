@@ -19,7 +19,7 @@ internal class MaxPooling2D(int sizeHeight, int sizeWidth) : Operation<float[,,,
     {
         Debug.Assert(_maxIndices != null, "Expected _maxIndices to be set during CalcOutput, but it was null. This likely means that CalcInputGradient was called before CalcOutput, which is not the intended usage of this operation.");
 
-        return MaxPooling2DInputGradient(Input, outputGradient, sizeHeight, sizeWidth, _maxIndices);
+        return MaxPooling2DInputGradient(Input, outputGradient, _maxIndices);
     }
 
 }

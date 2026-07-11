@@ -1056,6 +1056,8 @@ public class OperationsArray : IOperations
         int channels = input.GetLength(1);
         int length = input.GetLength(2);
 
+        Debug.Assert(length % size == 0, "Input length must be divisible by pooling size.");
+
         int outputLength = length / size;
 
         float[,,] output = new float[batchSize, channels, outputLength];
@@ -1090,7 +1092,7 @@ public class OperationsArray : IOperations
         return output;
     }
 
-    public virtual float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices)
+    public virtual float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int[,,] maxIndices)
     {
         int inputLength = input.GetLength(2);
         int batchSize = outputGradient.GetLength(0);
@@ -1108,6 +1110,96 @@ public class OperationsArray : IOperations
                     if (maxIdx >= 0 && maxIdx < inputLength)
                     {
                         inputGradient[b, c, maxIdx] += outputGradient[b, c, ol];
+                    }
+                }
+            }
+        }
+        return inputGradient;
+    }
+
+    public virtual float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        Debug.Assert(inputHeight % sizeHeight == 0, "Input height must be divisible by pooling size height.");
+        Debug.Assert(inputWidth % sizeWidth == 0, "Input width must be divisible by pooling size width.");
+
+        int outputHeight = inputHeight / sizeHeight;
+        int outputWidth = inputWidth / sizeWidth;
+
+        float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
+        maxIndices = new int[batchSize, channels, outputHeight, outputWidth];
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int oh = 0; oh < outputHeight; oh++)
+                {
+                    for (int ow = 0; ow < outputWidth; ow++)
+                    {
+                        float maxVal = float.NegativeInfinity;
+                        int maxIdxH = -1;
+                        int maxIdxW = -1;
+                        for (int kh = 0; kh < sizeHeight; kh++)
+                        {
+                            for (int kw = 0; kw < sizeWidth; kw++)
+                            {
+                                int ih = oh * sizeHeight + kh;
+                                int iw = ow * sizeWidth + kw;
+                                if (ih < inputHeight && iw < inputWidth)
+                                {
+                                    float val = input[b, c, ih, iw];
+                                    if (val > maxVal)
+                                    {
+                                        maxVal = val;
+                                        maxIdxH = ih;
+                                        maxIdxW = iw;
+                                    }
+                                }
+                            }
+                        }
+                        output[b, c, oh, ow] = maxVal;
+                        maxIndices[b, c, oh, ow] = maxIdxH * inputWidth + maxIdxW; // Store as a single index
+                    }
+                }
+            }
+        }
+        return output;
+    }
+
+    public virtual float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int[,,,] maxIndices)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int outputHeight = outputGradient.GetLength(2);
+        int outputWidth = outputGradient.GetLength(3);
+
+        float[,,,] inputGradient = new float[batchSize, channels, inputHeight, inputWidth];
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int oh = 0; oh < outputHeight; oh++)
+                {
+                    for (int ow = 0; ow < outputWidth; ow++)
+                    {
+                        int maxIdx = maxIndices[b, c, oh, ow];
+                        if (maxIdx >= 0)
+                        {
+                            int ih = maxIdx / inputWidth;
+                            int iw = maxIdx % inputWidth;
+                            if (ih < inputHeight && iw < inputWidth)
+                            {
+                                inputGradient[b, c, ih, iw] += outputGradient[b, c, oh, ow];
+                            }
+                        }
                     }
                 }
             }
@@ -1164,10 +1256,81 @@ public class OperationsArray : IOperations
         return inputGradient;
     }
 
-    public float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices) => throw new NotImplementedException();
-    public float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int sizeHeight, int sizeWidth, int[,,,] maxIndices) => throw new NotImplementedException();
-    public float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth) => throw new NotImplementedException();
-    public float[,,,] Upsample2DInputGradient(float[,,,] outputGradient, int scaleHeight, int scaleWidth) => throw new NotImplementedException();
+    public virtual float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int outputHeight = inputHeight * scaleHeight;
+        int outputWidth = inputWidth * scaleWidth;
+
+        float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < inputHeight; h++)
+                {
+                    for (int w = 0; w < inputWidth; w++)
+                    {
+                        float value = input[b, c, h, w];
+                        for (int sh = 0; sh < scaleHeight; sh++)
+                        {
+                            for (int sw = 0; sw < scaleWidth; sw++)
+                            {
+                                output[b, c, h * scaleHeight + sh, w * scaleWidth + sw] = value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return output;
+    }
+
+
+    public virtual float[,,,] Upsample2DInputGradient(float[,,,] input, float[,,,] outputGradient)
+    {
+        int batchSize = outputGradient.GetLength(0);
+        int channels = outputGradient.GetLength(1);
+        int outputHeight = outputGradient.GetLength(2);
+        int outputWidth = outputGradient.GetLength(3);
+
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        Debug.Assert(outputHeight % inputHeight == 0, "Output height must be divisible by input height.");
+        Debug.Assert(outputWidth % inputWidth == 0, "Output width must be divisible by input width.");
+
+        int scaleHeight = outputHeight / inputHeight;
+        int scaleWidth = outputWidth / inputWidth;
+
+        float[,,,] inputGradient = new float[batchSize, channels, inputHeight, inputWidth];
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < inputHeight; h++)
+                {
+                    for (int w = 0; w < inputWidth; w++)
+                    {
+                        float sum = 0.0f;
+                        for (int sh = 0; sh < scaleHeight; sh++)
+                        {
+                            for (int sw = 0; sw < scaleWidth; sw++)
+                            {
+                                sum += outputGradient[b, c, h * scaleHeight + sh, w * scaleWidth + sw];
+                            }
+                        }
+                        inputGradient[b, c, h, w] = sum;
+                    }
+                }
+            }
+        }
+        return inputGradient;
+    }
 
     #endregion
 

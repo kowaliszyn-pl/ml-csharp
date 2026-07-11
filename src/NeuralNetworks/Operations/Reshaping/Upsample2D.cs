@@ -12,6 +12,6 @@ public class Upsample2D(int scaleHeight, int scaleWidth) : Operation<float[,,,],
        => Upsample2DOutput(Input, scaleHeight, scaleWidth);
 
     protected override float[,,,] CalcInputGradient(float[,,,] outputGradient)
-        => Upsample2DInputGradient(outputGradient, scaleHeight, scaleWidth);
+        => Upsample2DInputGradient(Input, outputGradient);
 
 }

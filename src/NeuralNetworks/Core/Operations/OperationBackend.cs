@@ -591,16 +591,16 @@ public static class OperationBackend
             => Current.MaxPooling1DOutput(input, size, out maxIndices);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices)
-        => Current.MaxPooling1DInputGradient(input, outputGradient, size, maxIndices);
+    internal static float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int[,,] maxIndices)
+        => Current.MaxPooling1DInputGradient(input, outputGradient, maxIndices);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices)
             => Current.MaxPooling2DOutput(input, sizeHeight, sizeWidth, out maxIndices);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int sizeHeight, int sizeWidth, int[,,,] maxIndices)
-        => Current.MaxPooling2DInputGradient(input, outputGradient, sizeHeight, sizeWidth, maxIndices);
+    internal static float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int[,,,] maxIndices)
+        => Current.MaxPooling2DInputGradient(input, outputGradient, maxIndices);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] GlobalAveragePooling1DOutput(float[,,] input)
@@ -615,8 +615,8 @@ public static class OperationBackend
         => Current.Upsample2DOutput(input, scaleHeight, scaleWidth);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] Upsample2DInputGradient(float[,,,] outputGradient, int scaleHeight, int scaleWidth)
-        => Current.Upsample2DInputGradient(outputGradient, scaleHeight, scaleWidth);
+    internal static float[,,,] Upsample2DInputGradient(float[,,,] input, float[,,,] outputGradient)
+        => Current.Upsample2DInputGradient(input, outputGradient);
 
     #endregion
 }

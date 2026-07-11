@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: MaxPooling3DLayer.cs
+// File name: MaxPooling1DLayer.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using NeuralNetworks.Layers.OperationList;

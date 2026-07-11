@@ -177,14 +177,15 @@ public interface IOperations
     public float[,,,] Unflatten(float[,] source, int dim2, int dim3, int dim4);
 
     public float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices);
-    public float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int size, int[,,] maxIndices);
+    public float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int[,,] maxIndices);
+    public float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices);
+    public float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int[,,,] maxIndices);
 
     public float[,] GlobalAveragePooling1DOutput(float[,,] input);
     public float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient);
-    float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices);
-    float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int sizeHeight, int sizeWidth, int[,,,] maxIndices);
-    float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth);
-    float[,,,] Upsample2DInputGradient(float[,,,] outputGradient, int scaleHeight, int scaleWidth);
+
+    public float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth);
+    public float[,,,] Upsample2DInputGradient(float[,,,] input, float[,,,] outputGradient);
 
     #endregion
 
