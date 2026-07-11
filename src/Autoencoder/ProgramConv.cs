@@ -34,7 +34,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
     private const int InnerChannels = 64;
     //private const int ImageInnerSize = 28;
     private Layer<float[,], float[,]>? _bottleneckLayer;
-    private Layer<float[,], float[,,,]>? _firstDecoderLayer;
+    private Layer<float[,], float[,]>? _firstDecoderLayer;
 
     protected override LayerListBuilder<float[,,,], float[,,,]> CreateLayerListBuilder()
     {
@@ -78,7 +78,10 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
             .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer))
 
             // 3. Decoder
-            .AddLayer(_firstDecoderLayer = new UnflattenLayer(InnerChannels, 7, 7))
+            // bottleneckDim
+            .AddLayer(_firstDecoderLayer = new DenseLayer(InnerChannels * 7 * 7, new ReLU2D(), initializer))
+            // InnerChannels (64) * 7 * 7 = 3136 as a flattened representation
+            .AddLayer(new UnflattenLayer(InnerChannels, 7, 7))
             // 64 * 7 * 7
             .AddLayer(new Upsample2DLayer(2, 2))
             // 64 * 14 * 14
@@ -147,8 +150,8 @@ internal class ProgramConv
     private const int BottleneckDim3 = 56;
 
     private const int RandomSeed = 260423;
-    private const int Epochs = 6;
-    private const int BatchSize = 100;
+    private const int Epochs = 5;
+    private const int BatchSize = 200;
     // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
 
@@ -423,8 +426,8 @@ internal class ProgramConv
 
         foreach (int index in selectedImages)
         {
-            Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"model{bottleneckDim}_original_{index}");
-            Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"model{bottleneckDim}_reconstructed_{index}");
+            Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"{ModelName}_{bottleneckDim}_original_{index}");
+            Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
         }
 
         WriteLine();
