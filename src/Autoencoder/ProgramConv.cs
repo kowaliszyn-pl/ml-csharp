@@ -44,65 +44,74 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
             // 1. Encoder
             // 1 * 28 * 28
             AddLayer(new Conv2DLayer(
-                kernels: 16,
+                kernels: 32,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new LeakyReLU4D(),
+                activationFunction: new Tanh4D(),
                 paramInitializer: initializer
             ))
             // 16 * 28 * 28
             .AddLayer(new MaxPooling2DLayer(2, 2))
-            // 16 * 14 * 14
-            .AddLayer(new Conv2DLayer(
-                kernels: 32,
-                kernelHeight: 3,
-                kernelWidth: 3,
-                activationFunction: new LeakyReLU4D(),
-                paramInitializer: initializer
-            ))
-            // 32 * 14 * 14
-            .AddLayer(new MaxPooling2DLayer(2, 2))
-            // 32 * 7 * 7
-            .AddLayer(new Conv2DLayer(
-                kernels: InnerChannels,
-                kernelHeight: 3,
-                kernelWidth: 3,
-                activationFunction: new LeakyReLU4D(),
-                paramInitializer: initializer
-            ))
+            //// 16 * 14 * 14
+            //.AddLayer(new Conv2DLayer(
+            //    kernels: 32,
+            //    kernelHeight: 3,
+            //    kernelWidth: 3,
+            //    activationFunction: new LeakyReLU4D(),
+            //    paramInitializer: initializer
+            //))
+            //// 32 * 14 * 14
+            //.AddLayer(new MaxPooling2DLayer(2, 2))
+            //// 32 * 7 * 7
+            //.AddLayer(new Conv2DLayer(
+            //    kernels: InnerChannels,
+            //    kernelHeight: 3,
+            //    kernelWidth: 3,
+            //    activationFunction: new LeakyReLU4D(),
+            //    paramInitializer: initializer
+            //))
             // 64 * 7 * 7
             .AddLayer(new FlattenLayer())
 
             // 2. Bottleneck
             // 64 * 7 * 7 = 3136
-            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer))
+            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new LeakyReLU2D(), initializer))
 
             // 3. Decoder
             // bottleneckDim
-            .AddLayer(_firstDecoderLayer = new DenseLayer(InnerChannels * 7 * 7, new LeakyReLU2D(), initializer))
+            .AddLayer(_firstDecoderLayer = new DenseLayer(32 * 14 * 14, new LeakyReLU2D(), initializer))
+            
             // InnerChannels (64) * 7 * 7 = 3136 as a flattened representation
-            .AddLayer(new UnflattenLayer(InnerChannels, 7, 7))
+            .AddLayer(new UnflattenLayer(32, 14, 14))
+            .AddLayer(new Upsample2DLayer(2, 2))
             // 64 * 7 * 7
-            .AddLayer(new Upsample2DLayer(2, 2))
-            // 64 * 14 * 14
-            .AddLayer(new Conv2DLayer(
-                kernels: 32,
-                kernelHeight: 3,
-                kernelWidth: 3,
-                activationFunction: new LeakyReLU4D(),
-                paramInitializer: initializer
-            ))
-            // 32 * 14 * 14
-            .AddLayer(new Upsample2DLayer(2, 2))
-            // 32 * 28 * 28
-            .AddLayer(new Conv2DLayer(
-                kernels: 16,
-                kernelHeight: 3,
-                kernelWidth: 3,
-                activationFunction: new LeakyReLU4D(),
-                paramInitializer: initializer
-            ))
+            //.AddLayer(new Upsample2DLayer(2, 2))
+            //// 64 * 14 * 14
+            //.AddLayer(new Conv2DLayer(
+            //    kernels: 32,
+            //    kernelHeight: 3,
+            //    kernelWidth: 3,
+            //    activationFunction: new LeakyReLU4D(),
+            //    paramInitializer: initializer
+            //))
+            //// 32 * 14 * 14
+            //.AddLayer(new Upsample2DLayer(2, 2))
+            //// 32 * 28 * 28
+            //.AddLayer(new Conv2DLayer(
+            //    kernels: 16,
+            //    kernelHeight: 3,
+            //    kernelWidth: 3,
+            //    activationFunction: new LeakyReLU4D(),
+            //    paramInitializer: initializer
+            //))
             // 16 * 28 * 28
+            //.AddLayer(new Conv2DLayer(
+            //    kernels: 32,
+            //    kernelHeight: 3,
+            //    kernelWidth: 3,
+            //    activationFunction: new LeakyReLU4D(),
+            //    paramInitializer: initializer
+            //))
             .AddLayer(new Conv2DLayer(
                 kernels: 1,
                 kernelHeight: 3,
@@ -145,17 +154,17 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
 
 internal class ProgramConv
 {
-    private const int BottleneckDim1 = 24;
+    private const int BottleneckDim1 = 20;
     private const int BottleneckDim2 = 28;
-    private const int BottleneckDim3 = 56;
+    private const int BottleneckDim3 = 36;
 
     private const int RandomSeed = 260423;
-    private const int Epochs = 2;
+    private const int Epochs = 10;
     private const int BatchSize = 200;
     // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
 
-    private const float InitialLearningRate = 0.01f;
+    private const float InitialLearningRate = 0.002f;
     private const float FinalLearningRate = 0.0005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
@@ -422,12 +431,15 @@ internal class ProgramConv
 
         WriteLine($"Saving original and reconstructed images from {xTrain2D.Length} xTrain points and {yTrain2D.Length} yTrain points.");
 
-        int[] selectedImages = [20, 21, 22, 23, 30];
+        int[] selectedImages = [31, 32, 33, 34, 35];
 
         foreach (int index in selectedImages)
         {
-            Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"{ModelName}_{bottleneckDim}_original_{index}");
-            Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
+            string filePath = Utils.Drawing.SaveMnistPicture(100, index, xTrain2D, $"{ModelName}_{bottleneckDim}_original_{index}");
+            WriteLine($"Original image saved to {filePath}.");
+
+            filePath = Utils.Drawing.SaveMnistPicture(100, index, yTrain2D, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
+            WriteLine($"Reconstructed image saved to {filePath}.");
         }
 
         WriteLine();

@@ -616,8 +616,6 @@ public class OperationsSpan : OperationsArray
         int dim3 = source.GetLength(2);
         int dim4 = source.GetLength(3);
 
-        Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
-
         float[,] res = new float[dim1, dim2 * dim3 * dim4];
 
         ReadOnlySpan<float> sourceSpan = MemoryMarshal.CreateReadOnlySpan(ref source[0, 0, 0, 0], source.Length);
@@ -635,7 +633,6 @@ public class OperationsSpan : OperationsArray
         int dim3 = targetSize.GetLength(2);
         int dim4 = targetSize.GetLength(3);
 
-        Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
         Debug.Assert(source.GetLength(0) == dim1 && source.GetLength(1) == dim2 * dim3 * dim4, "Source shape does not match target size for unflattening.");
 
         float[,,,] res = new float[dim1, dim2, dim3, dim4];
