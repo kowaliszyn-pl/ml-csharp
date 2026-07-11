@@ -1117,7 +1117,7 @@ public class OperationsArray : IOperations
         return inputGradient;
     }
 
-    public virtual float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices)
+    public virtual float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out (int MaxIndexH, int MaxIndexW)[,,,] maxIndices)
     {
         int batchSize = input.GetLength(0);
         int channels = input.GetLength(1);
@@ -1131,7 +1131,7 @@ public class OperationsArray : IOperations
         int outputWidth = inputWidth / sizeWidth;
 
         float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
-        maxIndices = new int[batchSize, channels, outputHeight, outputWidth];
+        maxIndices = new (int MaxIndexH, int MaxIndexW)[batchSize, channels, outputHeight, outputWidth];
 
         for (int b = 0; b < batchSize; b++)
         {
@@ -1163,7 +1163,7 @@ public class OperationsArray : IOperations
                             }
                         }
                         output[b, c, oh, ow] = maxVal;
-                        maxIndices[b, c, oh, ow] = maxIdxH * inputWidth + maxIdxW; // Store as a single index
+                        maxIndices[b, c, oh, ow] = (maxIdxH, maxIdxW); // Store as a tuple
                     }
                 }
             }
@@ -1171,7 +1171,7 @@ public class OperationsArray : IOperations
         return output;
     }
 
-    public virtual float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int[,,,] maxIndices)
+    public virtual float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, (int MaxIndexH, int MaxIndexW)[,,,] maxIndices)
     {
         int batchSize = input.GetLength(0);
         int channels = input.GetLength(1);
@@ -1190,11 +1190,9 @@ public class OperationsArray : IOperations
                 {
                     for (int ow = 0; ow < outputWidth; ow++)
                     {
-                        int maxIdx = maxIndices[b, c, oh, ow];
-                        if (maxIdx >= 0)
+                        var (ih, iw) = maxIndices[b, c, oh, ow];
+                        if (ih >= 0 && iw >= 0)
                         {
-                            int ih = maxIdx / inputWidth;
-                            int iw = maxIdx % inputWidth;
                             if (ih < inputHeight && iw < inputWidth)
                             {
                                 inputGradient[b, c, ih, iw] += outputGradient[b, c, oh, ow];

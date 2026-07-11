@@ -178,8 +178,8 @@ public interface IOperations
 
     public float[,,] MaxPooling1DOutput(float[,,] input, int size, out int[,,] maxIndices);
     public float[,,] MaxPooling1DInputGradient(float[,,] input, float[,,] outputGradient, int[,,] maxIndices);
-    public float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices);
-    public float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int[,,,] maxIndices);
+    public float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out (int MaxIndexH, int MaxIndexW)[,,,] maxIndices);
+    public float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, (int MaxIndexH, int MaxIndexW)[,,,] maxIndices);
 
     public float[,] GlobalAveragePooling1DOutput(float[,,] input);
     public float[,,] GlobalAveragePooling1DInputGradient(float[,,] input, float[,] outputGradient);

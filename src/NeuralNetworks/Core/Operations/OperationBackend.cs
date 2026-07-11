@@ -595,11 +595,11 @@ public static class OperationBackend
         => Current.MaxPooling1DInputGradient(input, outputGradient, maxIndices);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out int[,,,] maxIndices)
+    internal static float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out (int MaxIndexH, int MaxIndexW)[,,,] maxIndices)
             => Current.MaxPooling2DOutput(input, sizeHeight, sizeWidth, out maxIndices);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, int[,,,] maxIndices)
+    internal static float[,,,] MaxPooling2DInputGradient(float[,,,] input, float[,,,] outputGradient, (int MaxIndexH, int MaxIndexW)[,,,] maxIndices)
         => Current.MaxPooling2DInputGradient(input, outputGradient, maxIndices);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
