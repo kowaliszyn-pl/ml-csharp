@@ -154,16 +154,8 @@ internal class MnistDense
 
     private static readonly EvalFunction<float[,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
     {
-        float[,] prediction;
-        if (predictionLogits != null)
-        {
-            prediction = predictionLogits;
-        }
-        else
-        {
-            prediction = model.Forward(xEvalTest, true);
-        }
-
+        float[,] prediction = predictionLogits ?? model.Forward(xEvalTest, true);
+        
         // predictionArgmax is an array of predicted digits for each sample.
         int[] predictionArgmax = prediction.Argmax();
 
