@@ -20,7 +20,8 @@ namespace NeuralNetworksExamples;
 
 internal static class Program
 {
-    internal const string MnistDataPath = "..\\..\\..\\..\\..\\..\\data\\MNIST";
+    internal const string MnistDataFolderPath = "..\\..\\..\\..\\..\\..\\data\\MNIST";
+    internal const string BostonHousingDataFilePath = "..\\..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv";
     internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
     internal static int LatentSpaceDimensions { get; private set; } = 28;
 

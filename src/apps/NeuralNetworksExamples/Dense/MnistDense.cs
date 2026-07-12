@@ -21,6 +21,7 @@ using NeuralNetworks.Trainers;
 
 using static System.Console;
 using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Dense;
 
@@ -75,8 +76,8 @@ internal class MnistDense
 
         // rows - batch
         // cols - features
-        float[,] train = LoadCsv(Path.Combine(Program.MnistDataPath, "mnist_train_small.csv"));
-        float[,] test = LoadCsv(Path.Combine(Program.MnistDataPath, "mnist_test.csv"));
+        float[,] train = GetMnistTrainData();
+        float[,] test = GetMnistTestData();
 
         (float[,] xTrain, float[,] yTrain) = Split(train);
         (float[,] xTest, float[,] yTest) = Split(test);

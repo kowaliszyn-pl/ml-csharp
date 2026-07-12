@@ -154,7 +154,7 @@ internal class BostonHousing
 
     private static (float[,] TrainData, float[,] TestData) GetData()
     {
-        float[,] bostonData = LoadCsv("..\\..\\..\\..\\..\\data\\Boston\\BostonHousing.csv", 1);
+        float[,] bostonData = LoadCsv(Program.BostonHousingDataFilePath, 1);
 
         // Number of independent variables
         int inputFeatureCount = bostonData.GetLength(1) - 1;

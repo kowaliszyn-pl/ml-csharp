@@ -20,7 +20,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Cnn;
 
@@ -71,8 +71,8 @@ internal class MnistCnn
 
         // rows - batch
         // cols - features
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_train_small.csv");
-        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\mnist\\mnist_test.csv");
+        float[,] train = GetMnistTrainData();
+        float[,] test = GetMnistTestData();
 
         (float[,,,] xTrain, float[,] yTrain, _) = Split(train);
         (float[,,,] xTest, float[,] yTest, float[,] testImagesForDrawing) = Split(test);

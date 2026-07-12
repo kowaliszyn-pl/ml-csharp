@@ -6,13 +6,16 @@ using NeuralNetworks.Core;
 
 using static System.Console;
 using static Utils.Drawing;
+using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples;
 
 internal static class Utils
 {
+    // MNIST
+    private const int DigitImageSize = 100; // Size of a saved image in pixels
 
-    private const int DigitImageSize = 100; // Size of the saved image in pixels
+    // EGC
     private const int EcgChartWidth = 500;
     private const int EcgChartHeight = 210;
     private const int EcgChartMargin = 15;
@@ -195,4 +198,9 @@ internal static class Utils
         throw new Exception("No 1 found in the row.");
     }
 
+    internal static float[,] GetMnistTrainData()
+        => LoadCsv(Path.Combine(Program.MnistDataFolderPath, "mnist_train_small.csv"));
+
+    internal static float[,] GetMnistTestData()
+        => LoadCsv(Path.Combine(Program.MnistDataFolderPath, "mnist_test.csv"));
 }
