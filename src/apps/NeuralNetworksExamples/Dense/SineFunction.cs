@@ -21,7 +21,7 @@ using NeuralNetworks.Trainers;
 using static System.Console;
 using static Utils.Drawing;
 
-namespace NeuralNetworksExamples;
+namespace NeuralNetworksExamples.Dense;
 
 /*
 Train loss (average): 0,00031

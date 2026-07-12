@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core.Operations;
 
+using NeuralNetworksExamples.Cnn;
+using NeuralNetworksExamples.Dense;
 using NeuralNetworksExamples.UI;
 
 using Serilog;
@@ -18,7 +20,7 @@ namespace NeuralNetworksExamples;
 
 internal static class Program
 {
-
+    internal const string MnistDataPath = "..\\..\\..\\..\\..\\..\\data\\MNIST";
     internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
     internal static int LatentSpaceDimensions { get; private set; } = 28;
 
@@ -162,5 +164,6 @@ internal static class Program
         choice.PerformAction();
     }
 
-    private static void DisplayOptions() => AnsiConsole.MarkupLine($"Current settings: backend: [green]{OperationBackend.CurrentType}[/], latent space dimensions: [green]{LatentSpaceDimensions}[/].\n");
+    private static void DisplayOptions() 
+        => AnsiConsole.MarkupLine($"Current settings: backend: [green]{OperationBackend.CurrentType}[/], latent space dimensions: [green]{LatentSpaceDimensions}[/].\n");
 }

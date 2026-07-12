@@ -22,7 +22,7 @@ using NeuralNetworks.Trainers;
 using static System.Console;
 using static NeuralNetworks.Core.ArrayUtils;
 
-namespace NeuralNetworksExamples;
+namespace NeuralNetworksExamples.Cnn;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
 // 97,83% - CpuSpansParallel

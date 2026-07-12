@@ -19,7 +19,7 @@ using NeuralNetworks.Trainers;
 using static System.Console;
 using static NeuralNetworks.Core.ArrayUtils;
 
-namespace NeuralNetworksExamples;
+namespace NeuralNetworksExamples.Dense;
 
 class BostonHousingModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(), random)

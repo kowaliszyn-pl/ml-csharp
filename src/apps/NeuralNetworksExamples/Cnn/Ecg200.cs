@@ -22,7 +22,7 @@ using NeuralNetworks.Trainers;
 using static System.Console;
 using static NeuralNetworks.Core.ArrayUtils;
 
-namespace NeuralNetworksExamples;
+namespace NeuralNetworksExamples.Cnn;
 
 /*
 Train loss (average): 0,1553159

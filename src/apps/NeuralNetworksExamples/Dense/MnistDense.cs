@@ -22,7 +22,7 @@ using NeuralNetworks.Trainers;
 using static System.Console;
 using static NeuralNetworks.Core.ArrayUtils;
 
-namespace NeuralNetworksExamples;
+namespace NeuralNetworksExamples.Dense;
 
 // For the current configuration and hyperparameters, the model achieves the accuracy:
 // 97,14% - CpuSpansParallel
@@ -75,8 +75,8 @@ internal class MnistDense
 
         // rows - batch
         // cols - features
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
-        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
+        float[,] train = LoadCsv(Path.Combine(Program.MnistDataPath, "mnist_train_small.csv"));
+        float[,] test = LoadCsv(Path.Combine(Program.MnistDataPath, "mnist_test.csv"));
 
         (float[,] xTrain, float[,] yTrain) = Split(train);
         (float[,] xTest, float[,] yTest) = Split(test);
