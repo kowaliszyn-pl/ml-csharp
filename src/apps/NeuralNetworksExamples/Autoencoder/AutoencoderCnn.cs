@@ -35,8 +35,6 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
     : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
 {
 
-    private const int InnerChannels = 64;
-    //private const int ImageInnerSize = 28;
     private Layer<float[,], float[,]>? _bottleneckLayer;
     private Layer<float[,], float[,]>? _firstDecoderLayer;
 
@@ -54,68 +52,23 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 activationFunction: new Tanh4D(),
                 paramInitializer: initializer
             ))
-            // 16 * 28 * 28
+            // 32 * 28 * 28
             .AddLayer(new MaxPooling2DLayer(2, 2))
-            //// 16 * 14 * 14
-            //.AddLayer(new Conv2DLayer(
-            //    kernels: 32,
-            //    kernelHeight: 3,
-            //    kernelWidth: 3,
-            //    activationFunction: new LeakyReLU4D(),
-            //    paramInitializer: initializer
-            //))
-            //// 32 * 14 * 14
-            //.AddLayer(new MaxPooling2DLayer(2, 2))
-            //// 32 * 7 * 7
-            //.AddLayer(new Conv2DLayer(
-            //    kernels: InnerChannels,
-            //    kernelHeight: 3,
-            //    kernelWidth: 3,
-            //    activationFunction: new LeakyReLU4D(),
-            //    paramInitializer: initializer
-            //))
-            // 64 * 7 * 7
+            // 32 * 14 * 14
             .AddLayer(new FlattenLayer())
 
             // 2. Bottleneck
-            // 64 * 7 * 7 = 3136
-            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new LeakyReLU2D(), initializer))
+            // 32 * 14 * 14 = 6272
+            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer))
 
             // 3. Decoder
             // bottleneckDim
             .AddLayer(_firstDecoderLayer = new DenseLayer(32 * 14 * 14, new LeakyReLU2D(), initializer))
-
-            // InnerChannels (64) * 7 * 7 = 3136 as a flattened representation
+            // 32 * 14 * 14 = 6272 as a flattened representation
             .AddLayer(new UnflattenLayer(32, 14, 14))
+            // 32 * 14 * 14
             .AddLayer(new Upsample2DLayer(2, 2))
-            // 64 * 7 * 7
-            //.AddLayer(new Upsample2DLayer(2, 2))
-            //// 64 * 14 * 14
-            //.AddLayer(new Conv2DLayer(
-            //    kernels: 32,
-            //    kernelHeight: 3,
-            //    kernelWidth: 3,
-            //    activationFunction: new LeakyReLU4D(),
-            //    paramInitializer: initializer
-            //))
-            //// 32 * 14 * 14
-            //.AddLayer(new Upsample2DLayer(2, 2))
-            //// 32 * 28 * 28
-            //.AddLayer(new Conv2DLayer(
-            //    kernels: 16,
-            //    kernelHeight: 3,
-            //    kernelWidth: 3,
-            //    activationFunction: new LeakyReLU4D(),
-            //    paramInitializer: initializer
-            //))
-            // 16 * 28 * 28
-            //.AddLayer(new Conv2DLayer(
-            //    kernels: 32,
-            //    kernelHeight: 3,
-            //    kernelWidth: 3,
-            //    activationFunction: new LeakyReLU4D(),
-            //    paramInitializer: initializer
-            //))
+            // 32 * 28 * 28
             .AddLayer(new Conv2DLayer(
                 kernels: 1,
                 kernelHeight: 3,
@@ -123,8 +76,8 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 activationFunction: new Tanh4D(),
                 paramInitializer: initializer
             ));
-        // 1 * 28 * 28
-
+        
+        // 1 * 28 * 28 as output
     }
 
     /// <summary>
@@ -161,7 +114,6 @@ internal class AutoencoderCnn
     private const int RandomSeed = 260423;
     private const int Epochs = 10;
     private const int BatchSize = 200;
-    // private const int EvalEveryEpochs = 2;
     private const int LogEveryEpochs = 1;
 
     private const float InitialLearningRate = 0.002f;
@@ -178,22 +130,20 @@ internal class AutoencoderCnn
 
         WriteLine("Loading and preprocessing data...");
 
-        (float[,,,] xTrain, _) = LoadAndNormalizeImages();
+        float[,] train = GetMnistTrainData();
+        float[,,,] xTrain = ExtractFeaturesAndNormalizeToTanhRange(train);
 
-        // Create another identical pair of xTrain, xTest called yTrain, yTest which will be used as the target output for the autoencoder. The autoencoder will learn to reconstruct the input data, so the target output is the same as the input data.
-        // We need them separated because the Trainer shuffles the data and creates batches - in case of having the same array pointers for input and target output, shuffling would break the correspondence between input and target output.
+        float[,,,] yTrain = (float[,,,])xTrain.Clone();
 
-        float[,,,] yTrain = new float[xTrain.GetLength(0), xTrain.GetLength(1), xTrain.GetLength(2), xTrain.GetLength(3)];
+        float[,] test = GetMnistTestData();
+        float[,,,] xTest = ExtractFeaturesAndNormalizeToTanhRange(test);
 
-        ReadOnlySpan<float> xTrainSpan = MemoryMarshal.CreateReadOnlySpan(ref xTrain[0, 0, 0, 0], xTrain.Length);
-        Span<float> yTrainSpan = MemoryMarshal.CreateSpan(ref yTrain[0, 0, 0, 0], yTrain.Length);
-
-        // Copy using Span.CopyTo for better performance
-        xTrainSpan.CopyTo(yTrainSpan);
+        // It's not quite necessary to clone the test data, but we do it for consistency.
+        float[,,,] yTest = (float[,,,])xTest.Clone();
 
         WriteLine("Creating the model...");
 
-        SimpleDataSource<float[,,,], float[,,,]> dataSource = new(xTrain, yTrain);
+        SimpleDataSource<float[,,,], float[,,,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);
         AutoencoderConvModel model = new(bottleneckDim, commonRandom);
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
