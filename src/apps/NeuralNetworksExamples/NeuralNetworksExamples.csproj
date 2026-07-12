@@ -9,15 +9,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\apps\NeuralNetworkApps.Utils\Utils.csproj" />
-		<ProjectReference Include="..\NeuralNetworks\NeuralNetworks.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Serilog" Version="4.2.0" />
 		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="Spectre.Console" Version="0.57.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\NeuralNetworks\NeuralNetworks.csproj" />
+	  <ProjectReference Include="..\NeuralNetworkApps.Utils\Utils.csproj" />
 	</ItemGroup>
 
 </Project>
