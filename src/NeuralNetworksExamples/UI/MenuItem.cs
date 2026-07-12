@@ -10,6 +10,10 @@ internal record MenuItem(string Display, Action Action, bool WaitForAnyKey = fal
 {
     public void PerformAction()
     {
+        if (WaitForAnyKey)
+        {
+            AnsiConsole.MarkupLine($"Running [cyan]{Display}[/]...\n");
+        }
         Action();
         if (WaitForAnyKey)
         {

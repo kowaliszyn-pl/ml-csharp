@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: ProgramNew.cs
+// File name: Program.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using Microsoft.Extensions.Logging;
@@ -24,6 +24,11 @@ internal static class Program
 
     private static void Main()
     {
+        AnsiConsole.Write(
+           new FigletText("Neural Networks Examples")
+               .Centered()
+               .Color(Color.Cyan1));
+
         // Create ILogger using Serilog
         Serilog.Core.Logger serilog = new LoggerConfiguration()
             .WriteTo.File("..\\..\\..\\Logs\\log-.txt", rollingInterval: RollingInterval.Day)
@@ -157,8 +162,5 @@ internal static class Program
         choice.PerformAction();
     }
 
-    private static void DisplayOptions()
-    {
-        AnsiConsole.MarkupLine($"\nCurrent settings: backend: [green]{OperationBackend.CurrentType}[/], latent space dimensions: [green]{LatentSpaceDimensions}[/].\n");
-    }
+    private static void DisplayOptions() => AnsiConsole.MarkupLine($"Current settings: backend: [green]{OperationBackend.CurrentType}[/], latent space dimensions: [green]{LatentSpaceDimensions}[/].\n");
 }
