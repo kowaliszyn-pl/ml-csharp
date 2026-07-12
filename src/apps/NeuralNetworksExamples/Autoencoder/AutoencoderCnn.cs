@@ -305,7 +305,9 @@ internal class AutoencoderCnn
             train = train.GetRows(0..maxSamples);
         }
 
-        (float[,,,] xTrain, float[,] labels, _) = Split(train);
+        float[,] labels = train.GetColumn(0);
+        
+        (float[,,,] xTrain, _, _) = Split(train);
 
         // Normalize
         const float min = 0;
