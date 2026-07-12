@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using Accord.MachineLearning.Clustering;
+
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
@@ -19,6 +21,10 @@ using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
+
+using ScottPlot;
+
+using ScottPlot.Plottables;
 
 using static System.Console;
 using static NeuralNetworksExamples.Utils;
@@ -191,7 +197,6 @@ internal class AutoencoderCnn
         SeededRandom commonRandom = new(RandomSeed);
         AutoencoderConvModel model = new(bottleneckDim, commonRandom);
         LearningRate learningRate = new ExponentialDecayLearningRate(InitialLearningRate, FinalLearningRate, 10);
-        // MeanSquaredErrorLoss4D lossFunction = new();
 
         Trainer<float[,,,], float[,,,]> trainer = new(
             model,
@@ -205,7 +210,6 @@ internal class AutoencoderCnn
 
         trainer.Fit(
             dataSource,
-            //lossFunction: lossFunction,
             epochs: Epochs,
             logEveryEpochs: LogEveryEpochs,
             batchSize: BatchSize,
@@ -222,7 +226,6 @@ internal class AutoencoderCnn
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
         ResetColor();
-        WriteLine();
     }
 
     internal static void Load()
@@ -281,13 +284,117 @@ internal class AutoencoderCnn
             filePath = Drawing.SaveMnistPicture(100, index, yTrain2D, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
             //WriteLine($"Reconstructed image saved to {filePath}.");
         }
-
-        // WriteLine();
     }
 
     internal static void VisualizeLatentSpace()
     {
-        // TODO
+        int bottleneckDim = Program.LatentSpaceDimensions;
+
+        WriteLine("Loading model and data...");
+
+        string modelPath = GetFileName(bottleneckDim);
+        AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        
+        // Load data and labels
+        float[,] train = GetMnistTrainData();
+
+        // Restrict to 10000 samples for t-SNE visualization to reduce computation time
+        int maxSamples = 15000;
+        if (train.GetLength(0) > maxSamples)
+        {
+            train = train.GetRows(0..maxSamples);
+        }
+
+        (float[,,,] xTrain, float[,] labels, _) = Split(train);
+
+        // Normalize
+        const float min = 0;
+        const float max = 255f;
+        const float scale = 2f / (max - min); // Scale to range [-1, 1]
+
+        int rows = xTrain.GetLength(0);
+        int channels = xTrain.GetLength(1);
+        int imageHeight = xTrain.GetLength(2);
+        int imageWidth = xTrain.GetLength(3);
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int channel = 0; channel < channels; channel++)
+            {
+                for (int height = 0; height < imageHeight; height++)
+                {
+                    for (int width = 0; width < imageWidth; width++)
+                    {
+                        xTrain[row, channel, height, width] = (xTrain[row, channel, height, width] - min) * scale - 1f;
+                    }
+                }
+            }
+        }
+
+        // Get latent representation
+        WriteLine("Encoding data to latent space...");
+        _ = model.Forward(xTrain, false);
+        float[,] encoded = model.GetEncodedRepresentation();
+
+        // Convert to double[][] for Accord.NET
+        int n = encoded.GetLength(0);
+        int dim = encoded.GetLength(1);
+        double[][] encodedDouble = new double[n][];
+        for (int i = 0; i < n; i++)
+        {
+            encodedDouble[i] = new double[dim];
+            for (int j = 0; j < dim; j++)
+            {
+                encodedDouble[i][j] = encoded[i, j];
+            }
+        }
+
+        // Apply t-SNE
+        WriteLine("Applying t-SNE reduction...");
+        TSNE tsne = new()
+        {
+            NumberOfOutputs = 2,
+            Perplexity = 30,
+            //Iterations = 1000
+        };
+
+        double[][] reduced = tsne.Transform(encodedDouble);
+
+        // Create plot
+        WriteLine("Creating visualization...");
+        Plot plt = new();
+
+        // Group points by digit
+        for (int digit = 0; digit <= 9; digit++)
+        {
+            List<double> xPoints = [];
+            List<double> yPoints = [];
+
+            for (int i = 0; i < n; i++)
+            {
+                if ((int)labels[i, 0] == digit)
+                {
+                    xPoints.Add(reduced[i][0]);
+                    yPoints.Add(reduced[i][1]);
+                }
+            }
+
+            Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
+            scatter.LegendText = $"Digit {digit}";
+            scatter.MarkerSize = 5;
+        }
+
+        plt.ShowLegend();
+        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={bottleneckDim})");
+        plt.XLabel("t-SNE Component 1");
+        plt.YLabel("t-SNE Component 2");
+
+        string outputPath = $"{ModelName}_{bottleneckDim}_tsne.png";
+        plt.SavePng(outputPath, 1200, 900);
+
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"t-SNE plot saved to {outputPath}");
+        ResetColor();
     }
 
     private static (float[,,,] xMerged, float[,] xMerged2D) LoadAndNormalizeImages()

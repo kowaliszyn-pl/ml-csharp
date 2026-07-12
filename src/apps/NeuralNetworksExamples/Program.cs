@@ -2,6 +2,8 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using System.Text.Json;
+
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core.Operations;
@@ -25,12 +27,15 @@ internal static class Program
     internal const string MnistDataFolderPath = DataFolder + "\\MNIST";
     internal const string BostonHousingDataFilePath = DataFolder + "\\Boston\\BostonHousing.csv";
     internal const string Ecg200DataFolderPath = DataFolder + "\\ecg200";
+    private const string OptionsFileName = "options.json";
 
     internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
     internal static int LatentSpaceDimensions { get; private set; } = 28;
 
     private static void Main()
     {
+        OutputEncoding = System.Text.Encoding.UTF8;
+
         AnsiConsole.Write(
            new FigletText("Neural Networks Examples")
                .Centered()
@@ -49,28 +54,23 @@ internal static class Program
             .AddSerilog(serilog);
 
         bool running = true;
-        OutputEncoding = System.Text.Encoding.UTF8;
-
+        
         List<MenuItem> menuItems =
         [
-            new("Show settings menu", ShowSettingsMenu),
-            new("Dense layer models", SelectDenseLayerModel),
-            new("Convolutional models (CNN)", SelectConvolutionalModel),
-            new("Autoencoders", SelectAutoencoderModel),
-            new("Exit", () => running = false)
+            new("⚙️ Settings", ShowSettingsMenu),
+            new("🧠 Dense layer models", SelectDenseLayerModel),
+            new("🖼️ Convolutional models (CNN)", SelectConvolutionalModel),
+            new("🔧 Autoencoders", SelectAutoencoderModel),
+            new("🔚 Exit", () => running = false)
         ];
+
+        LoadOptions();
 
         DisplayOptions();
 
         while (running)
         {
-            MenuItem choice = AnsiConsole.Prompt(
-            new SelectionPrompt<MenuItem>()
-                .Title("Select a [bold]routine[/] to run:")
-                .AddChoices(menuItems)
-                .UseConverter(item => item.Display));
-
-            choice.PerformAction();
+            MenuItem choice = ExecuteMenu(menuItems, "Select a [bold]routine[/] to run:");
 
             if (choice.Display == "Exit")
             {
@@ -78,24 +78,31 @@ internal static class Program
                 running = false;
             }
         }
+
+        SaveOptions();
+    }
+
+    private static MenuItem ExecuteMenu(List<MenuItem> menuItems, string title)
+    {
+        MenuItem choice = AnsiConsole.Prompt(
+            new SelectionPrompt<MenuItem>()
+                .Title(title)
+                .WrapAround()
+                .HighlightStyle(new Style(decoration: Decoration.Invert))
+                .AddChoices(menuItems)
+                .UseConverter(item => item.Display));
+
+        choice.PerformAction();
+        return choice;
     }
 
     private static void ShowSettingsMenu()
     {
-        List<MenuItem> optionsMenuItems =
-        [
-            new("Select operation backend", SelectOperationBackend),
-            new("Enter latent space dimensions", EnterLatentSpaceDimensions),
-            new("Back", () => { })
-        ];
-
-        MenuItem choice = AnsiConsole.Prompt(
-            new SelectionPrompt<MenuItem>()
-                .Title("Select an option:")
-                .AddChoices(optionsMenuItems)
-                .UseConverter(item => item.Display));
-
-        choice.PerformAction();
+        ExecuteMenu([
+            new("⚙️ Select operation backend", SelectOperationBackend),
+            new("🧠 Enter latent space dimensions", EnterLatentSpaceDimensions),
+            new("🔙 Back", () => { })
+        ], "Select an option:");
     }
 
     private static void EnterLatentSpaceDimensions()
@@ -113,82 +120,76 @@ internal static class Program
 
     private static void SelectOperationBackend()
     {
-        List<MenuItem> backendMenuItems =
-        [
-            new("CPU - Arrays", () => OperationBackend.Use(OperationBackendType.CpuArrays)),
-            new("CPU - Spans", () => OperationBackend.Use(OperationBackendType.CpuSpans)),
-            new("CPU - Spans Parallel", () => OperationBackend.Use(OperationBackendType.CpuSpansParallel)),
-            new("GPU", () => OperationBackend.Use(OperationBackendType.Gpu)),
-            new("Back", () => { })
-        ];
-        MenuItem choice = AnsiConsole.Prompt(
-            new SelectionPrompt<MenuItem>()
-                .Title("Select an [bold]operation backend[/]:")
-                .AddChoices(backendMenuItems)
-                .UseConverter(item => item.Display));
-
-        choice.PerformAction();
+        ExecuteMenu([
+            new("🖥️ CPU - Arrays", () => OperationBackend.Use(OperationBackendType.CpuArrays)),
+            new("🖥️ CPU - Spans", () => OperationBackend.Use(OperationBackendType.CpuSpans)),
+            new("🖥️ CPU - Spans Parallel", () => OperationBackend.Use(OperationBackendType.CpuSpansParallel)),
+            new("🖥️ GPU", () => OperationBackend.Use(OperationBackendType.Gpu)),
+            new("🔙 Back", () => { })
+        ], "Select an [bold]operation backend[/]:");
 
         DisplayOptions();
     }
 
     private static void SelectDenseLayerModel()
     {
-        List<MenuItem> denseLayerMenuItems =
-        [
-            new("Sine function approximation", SineFunction.Run, true),
-            new("Boston Housing data set (custom model)", () => BostonHousing.Run(true), true),
-            new("Boston Housing data set (generic model)", () => BostonHousing.Run(false), true),
-            new("MNIST data set (dense layers)", MnistDense.Run, true),
-            new("Load and evaluate MNIST data set (dense layers)", MnistDense.LoadAndEvaluate, true),
-            new("Back", () => { })
-        ];
-        MenuItem choice = AnsiConsole.Prompt(
-            new SelectionPrompt<MenuItem>()
-                .Title("Select a [bold]dense layer[/] model:")
-                .AddChoices(denseLayerMenuItems)
-                .UseConverter(item => item.Display));
-
-        choice.PerformAction();
+        ExecuteMenu([
+            new("🎵 Sine function approximation", SineFunction.Run, true),
+            new("🏠 Boston Housing data set (custom model)", () => BostonHousing.Run(true), true),
+            new("🏠 Boston Housing data set (generic model)", () => BostonHousing.Run(false), true),
+            new("🖼️ MNIST data set (dense layers)", MnistDense.Run, true),
+            new("🖼️ Load and evaluate MNIST data set (dense layers)", MnistDense.LoadAndEvaluate, true),
+            new("🔙 Back", () => { })
+        ], "Select a [bold]dense layer[/] model:");
     }
 
     private static void SelectConvolutionalModel()
     {
-        List<MenuItem> convolutionalMenuItems =
-        [
-            new("MNIST data set (CNN 2D)", MnistCnn.Run, true),
-            new("ECG 200 (CNN 1D)", Ecg200.Run, true),
-            new("Back", () => { })
-        ];
-        MenuItem choice = AnsiConsole.Prompt(
-            new SelectionPrompt<MenuItem>()
-                .Title("Select a [bold]convolutional[/] model:")
-                .AddChoices(convolutionalMenuItems)
-                .UseConverter(item => item.Display));
-
-        choice.PerformAction();
+        ExecuteMenu([
+            new("🖼️ MNIST data set (CNN 2D)", MnistCnn.Run, true),
+            new("📈 ECG 200 (CNN 1D)", Ecg200.Run, true),
+            new("🔙 Back", () => { })
+        ], "Select a [bold]convolutional[/] model:");
     }
 
     private static void SelectAutoencoderModel()
     {
-        List<MenuItem> autoencoderMenuItems =
-        [
-            new("Train MNIST data set (dense layer autoencoder)", AutoencoderDense.Train, true),
-            new("Train MNIST data set (CNN autoencoder)", AutoencoderCnn.Train, true),
-            new("Load and run MNIST data set (dense layer autoencoder)", AutoencoderDense.Load, true),
-            new("Load and run MNIST data set (CNN autoencoder)", AutoencoderCnn.Load, true),
-            new("Visualize latent space with t-SNE (dense layer autoencoder)", AutoencoderDense.VisualizeLatentSpace, true),
-            new("Visualize latent space with t-SNE (CNN autoencoder)", AutoencoderCnn.VisualizeLatentSpace, true),
-            new("Back", () => { })
-        ];
-        MenuItem choice = AnsiConsole.Prompt(
-            new SelectionPrompt<MenuItem>()
-                .Title("Select an [bold]autoencoder[/] model:")
-                .AddChoices(autoencoderMenuItems)
-                .UseConverter(item => item.Display));
-        choice.PerformAction();
+        ExecuteMenu([
+            new("🖼️ Train MNIST data set (dense layer autoencoder)", AutoencoderDense.Train, true),
+            new("🖼️ Train MNIST data set (CNN autoencoder)", AutoencoderCnn.Train, true),
+            new("🖼️ Load and run MNIST data set (dense layer autoencoder)", AutoencoderDense.Load, true),
+            new("🖼️ Load and run MNIST data set (CNN autoencoder)", AutoencoderCnn.Load, true),
+            new("📊 Visualize latent space with t-SNE (dense layer autoencoder)", AutoencoderDense.VisualizeLatentSpace, true),
+            new("📊 Visualize latent space with t-SNE (CNN autoencoder)", AutoencoderCnn.VisualizeLatentSpace, true),
+            new("🔙 Back", () => { })
+        ], "Select an [bold]autoencoder[/] model:");
     }
 
     private static void DisplayOptions()
         => AnsiConsole.MarkupLine($"Current settings: backend: [green]{OperationBackend.CurrentType}[/], latent space dimensions: [green]{LatentSpaceDimensions}[/].\n");
+
+    /// <summary>
+    /// Saves options as JSON to a file.
+    /// </summary>
+    private static void SaveOptions()
+    {
+        Options options = new(OperationBackend.CurrentType.ToString(), LatentSpaceDimensions);
+        string json = JsonSerializer.Serialize(options);
+        File.WriteAllText(OptionsFileName, json);
+    }
+
+    private static void LoadOptions()
+    {
+        if (File.Exists(OptionsFileName))
+        {
+            string json = File.ReadAllText(OptionsFileName);
+            Options? options = JsonSerializer.Deserialize<Options>(json);
+            if (options is not null)
+            {
+                LatentSpaceDimensions = options.LatentSpaceDimensions;
+                OperationBackendType backendType = Enum.Parse<OperationBackendType>(options.OperationBackendType);
+                OperationBackend.Use(backendType);
+            }
+        }
+    }
 }
