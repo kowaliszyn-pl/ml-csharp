@@ -23,7 +23,6 @@ using NeuralNetworks.Trainers;
 using ScottPlot;
 
 using static System.Console;
-using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Autoencoder;
@@ -154,7 +153,6 @@ internal class AutoencoderDense
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
         ResetColor();
-        WriteLine();
     }
 
     internal static void Load()
@@ -195,8 +193,6 @@ internal class AutoencoderDense
             Drawing.SaveMnistPicture(100, index, trainingImagesForDrawing, $"{ModelName}_{bottleneckDim}_original_{index}");
             Drawing.SaveMnistPicture(100, index, yTrain, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
         }
-
-        WriteLine();
     }
 
     internal static void VisualizeLatentSpace()
@@ -209,7 +205,7 @@ internal class AutoencoderDense
         AutoencoderDenseModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
 
         // Load data and labels
-        float[,] train = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_train_small.csv");
+        float[,] train = GetMnistTrainData();
 
         // Restrict to 10000 samples for t-SNE visualization to reduce computation time
         int maxSamples = 15000;
@@ -273,7 +269,7 @@ internal class AutoencoderDense
             }
 
             var scatter = plt.Add.ScatterPoints(xPoints, yPoints);
-            scatter.Label = $"Digit {digit}";
+            scatter.LegendText = $"Digit {digit}";
             scatter.MarkerSize = 5;
         }
 
@@ -282,13 +278,12 @@ internal class AutoencoderDense
         plt.XLabel("t-SNE Component 1");
         plt.YLabel("t-SNE Component 2");
 
-        string outputPath = $"..\\..\\..\\{ModelName}_{bottleneckDim}_tsne.png";
+        string outputPath = $"{ModelName}_{bottleneckDim}_tsne.png";
         plt.SavePng(outputPath, 1200, 900);
 
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"t-SNE plot saved to {outputPath}");
         ResetColor();
-        WriteLine();
     }
 
     private static float[,] LoadTrainingData()
