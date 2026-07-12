@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Data;
+using System.Xml.Linq;
 
 using NeuralNetworks.Core;
 
@@ -240,9 +241,7 @@ internal static class Utils
     {
         // Split into xData (all columns except the first one)
 
-        float[,] xData = source.GetColumns(1..source.GetLength(1));
-
-        return xData;
+        return source.GetColumns(1..source.GetLength(1));
     }
 
     internal static float[,,,] ExtractFeaturesAndNormalizeToTanhRange(float[,] source)
@@ -251,30 +250,7 @@ internal static class Utils
 
         float[,] xData = source.GetColumns(1..source.GetLength(1));
 
-        // Convert to 4D array with shape (batch, channels, height, width)
-
-        // Convert pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
-
-        const float min = 0;
-        const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
-
-        int rows = xData.GetLength(0);
-        int cols = xData.GetLength(1);
-        
-        float[,,,] xData4D = new float[rows, 1, 28, 28];
-
-        for (int row = 0; row < rows; row++)
-        {
-            for (int col = 0; col < cols; col++)
-            {
-                //int x = col % 28;
-                //int y = col / 28;
-                xData4D[row, 0 /* one input channel */, col / 28, col % 28] = xData[row, col] * scale - 1f;
-            }
-        }
-
-        return xData4D;
+        return NormalizeToTanhRangeAs4D(xData);
     }
 
     internal static void NormalizeToTanhRange(float[,] source)
@@ -294,6 +270,34 @@ internal static class Utils
         }
     }
 
+    internal static float[,,,] NormalizeToTanhRangeAs4D(float[,] source)
+    {
+        // Convert to 4D array with shape (batch, channels, height, width)
+
+        // Convert pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
+
+        const float min = 0;
+        const float max = 255f;
+        const float scale = 2f / (max - min); // Scale to range [-1, 1]
+
+        int rows = source.GetLength(0);
+        int cols = source.GetLength(1);
+
+        float[,,,] res = new float[rows, 1, 28, 28];
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                //int x = col % 28;
+                //int y = col / 28;
+                res[row, 0 /* one input channel */, col / 28, col % 28] = source[row, col] * scale - 1f;
+            }
+        }
+
+        return res;
+    }
+
     internal static void RescaleToPixelValues(float[,] source)
     {
         const float scale = 255f / 2f;
@@ -307,5 +311,32 @@ internal static class Utils
                 source[row, col] = (source[row, col] + 1f) * scale;
             }
         }
+    }
+
+    internal static float[,] RescaleToPixelValuesAs2D(float[,,,] source)
+    {
+        const float scale = 255f / 2f;
+        int batch = source.GetLength(0);
+        int channels = source.GetLength(1);
+        int height = source.GetLength(2);
+        int width = source.GetLength(3);
+
+        float[,] res = new float[batch, height * width];
+
+        for (int b = 0; b < batch; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < height; h++)
+                {
+                    for (int w = 0; w < width; w++)
+                    {
+                        res[b, h * width + w] = (source[b, c, h, w] + 1f) * scale;
+                    }
+                }
+            }
+        }
+
+        return res;
     }
 }

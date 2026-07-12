@@ -189,50 +189,25 @@ internal class AutoencoderCnn
 
         WriteLine("Loading and preprocessing data...");
 
-        (float[,,,] xTrain, float[,] xTrain2D) = LoadAndNormalizeImages();
+        float[,] train = GetMnistTrainData();
+        float[,] originalPictures = ExtractFeatures(train);
+
+        float[,,,] xTrain = NormalizeToTanhRangeAs4D(originalPictures);
 
         float[,,,] yTrain = model.Forward(xTrain, true);
 
-        // Denormalize the output from [-1, 1] back to [0, 255] and convert it to float[row, pixelIndex] for visualization using SaveMnistPicture(int size, int index, float[,] mnistData, string fileName)
-
-        const float scale = 255f / 2f;
-
-        int rows = yTrain.GetLength(0);
-        int channels = yTrain.GetLength(1);
-        int imageHeight = yTrain.GetLength(2);
-        int imageWidth = yTrain.GetLength(3);
-
-        float[,] yTrain2D = new float[rows, channels * imageHeight * imageWidth];
-
-        for (int row = 0; row < rows; row++)
-        {
-            for (int channel = 0; channel < channels; channel++)
-            {
-                for (int height = 0; height < imageHeight; height++)
-                {
-                    for (int width = 0; width < imageWidth; width++)
-                    {
-                        float normalizedValue = yTrain[row, channel, height, width]; // -1..1
-                        float denormalizedValue = (normalizedValue + 1f) * scale; // 0..255
-                        yTrain2D[row, channel * imageHeight * imageWidth + height * imageWidth + width] = denormalizedValue;
-                    }
-                }
-            }
-        }
+        float[,] reconstructedPictures = RescaleToPixelValuesAs2D(yTrain);
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-        WriteLine($"Saving original and reconstructed images from {xTrain2D.Length} xTrain points and {yTrain2D.Length} yTrain points.");
+        WriteLine($"Saving original and reconstructed images.");
 
         int[] selectedImages = [31, 32, 33, 34, 35];
 
         foreach (int index in selectedImages)
         {
-            string filePath = Drawing.SaveMnistPicture(100, index, xTrain2D, $"{ModelName}_{bottleneckDim}_original_{index}");
-            //WriteLine($"Original image saved to {filePath}.");
-
-            filePath = Drawing.SaveMnistPicture(100, index, yTrain2D, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
-            //WriteLine($"Reconstructed image saved to {filePath}.");
+            Drawing.SaveMnistPicture(100, index, originalPictures, $"{ModelName}_{bottleneckDim}_original_{index}");
+            Drawing.SaveMnistPicture(100, index, reconstructedPictures, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
         }
     }
 
@@ -248,12 +223,8 @@ internal class AutoencoderCnn
         // Load data and labels
         float[,] train = GetMnistTrainData();
 
-        // Restrict to 10000 samples for t-SNE visualization to reduce computation time
-        int maxSamples = 15000;
-        if (train.GetLength(0) > maxSamples)
-        {
-            train = train.GetRows(0..maxSamples);
-        }
+        // Restrict to MaxSamplesToVisualize samples for t-SNE visualization to reduce computation time
+        train = train.GetRows(0..Program.MaxSamplesToVisualize);
 
         float[,] labels = train.GetColumn(0);
         
