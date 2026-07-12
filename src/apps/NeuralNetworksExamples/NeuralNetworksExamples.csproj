@@ -13,15 +13,13 @@
 		<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="Spectre.Console" Version="0.57.2" />
+		<PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
+		<PackageReference Include="ScottPlot" Version="5.1.59" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\NeuralNetworks\NeuralNetworks.csproj" />
-	  <ProjectReference Include="..\NeuralNetworkApps.Utils\Utils.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Autoencoder\" />
 	</ItemGroup>
 
 </Project>

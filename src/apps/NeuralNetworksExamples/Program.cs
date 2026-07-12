@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core.Operations;
 
+using NeuralNetworksExamples.Autoencoder;
 using NeuralNetworksExamples.Cnn;
 using NeuralNetworksExamples.Dense;
 using NeuralNetworksExamples.UI;
@@ -55,7 +56,7 @@ internal static class Program
             new("Show settings menu", ShowSettingsMenu),
             new("Dense layer models", SelectDenseLayerModel),
             new("Convolutional models (CNN)", SelectConvolutionalModel),
-            new("Autoencoders", () => { }),
+            new("Autoencoders", SelectAutoencoderModel),
             new("Exit", () => running = false)
         ];
 
@@ -122,7 +123,7 @@ internal static class Program
         ];
         MenuItem choice = AnsiConsole.Prompt(
             new SelectionPrompt<MenuItem>()
-                .Title("Select an operation backend:")
+                .Title("Select an [bold]operation backend[/]:")
                 .AddChoices(backendMenuItems)
                 .UseConverter(item => item.Display));
 
@@ -144,7 +145,7 @@ internal static class Program
         ];
         MenuItem choice = AnsiConsole.Prompt(
             new SelectionPrompt<MenuItem>()
-                .Title("Select a dense layer model:")
+                .Title("Select a [bold]dense layer[/] model:")
                 .AddChoices(denseLayerMenuItems)
                 .UseConverter(item => item.Display));
 
@@ -161,10 +162,30 @@ internal static class Program
         ];
         MenuItem choice = AnsiConsole.Prompt(
             new SelectionPrompt<MenuItem>()
-                .Title("Select a convolutional model:")
+                .Title("Select a [bold]convolutional[/] model:")
                 .AddChoices(convolutionalMenuItems)
                 .UseConverter(item => item.Display));
 
+        choice.PerformAction();
+    }
+
+    private static void SelectAutoencoderModel()
+    {
+        List<MenuItem> autoencoderMenuItems =
+        [
+            new("Train MNIST data set (dense layer autoencoder)", AutoencoderDense.Train, true),
+            new("Train MNIST data set (CNN autoencoder)", AutoencoderCnn.Train, true),
+            new("Load and run MNIST data set (dense layer autoencoder)", AutoencoderDense.Load, true),
+            new("Load and run MNIST data set (CNN autoencoder)", AutoencoderCnn.Load, true),
+            new("Visualize latent space with t-SNE (dense layer autoencoder)", AutoencoderDense.VisualizeLatentSpace, true),
+            new("Visualize latent space with t-SNE (CNN autoencoder)", AutoencoderCnn.VisualizeLatentSpace, true),
+            new("Back", () => { })
+        ];
+        MenuItem choice = AnsiConsole.Prompt(
+            new SelectionPrompt<MenuItem>()
+                .Title("Select an [bold]autoencoder[/] model:")
+                .AddChoices(autoencoderMenuItems)
+                .UseConverter(item => item.Display));
         choice.PerformAction();
     }
 
