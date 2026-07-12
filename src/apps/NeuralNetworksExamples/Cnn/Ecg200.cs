@@ -21,6 +21,7 @@ using NeuralNetworks.Trainers;
 
 using static System.Console;
 using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Cnn;
 
@@ -79,8 +80,8 @@ internal class Ecg200
 
         // rows - batch
         // cols - features
-        float[,] train = LoadTsv("..\\..\\..\\..\\..\\data\\ecg200\\ECG200_TRAIN.tsv");
-        float[,] test = LoadTsv("..\\..\\..\\..\\..\\data\\ecg200\\ECG200_TEST.tsv");
+        float[,] train = GetEcg200TrainData();
+        float[,] test = GetEcg200TestData();
 
         // float[,] y = [batch, 0] = class 1 probability
 

@@ -178,7 +178,6 @@ internal static class Utils
         WriteLine($"4. Abnormal case incorrectly predicted as normal. {FormatPredictionDetails(incorrectlyPredictedAsNormalIndex, incorrectlyPredictedAsNormalCount)}");
 
         WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
-        WriteLine();
 
         string FormatPredictionDetails(int index, int count)
         {
@@ -203,4 +202,10 @@ internal static class Utils
 
     internal static float[,] GetMnistTestData()
         => LoadCsv(Path.Combine(Program.MnistDataFolderPath, "mnist_test.csv"));
+
+    internal static float[,] GetEcg200TrainData()
+        => LoadTsv(Path.Combine(Program.Ecg200DataFolderPath, "ECG200_TRAIN.tsv"));
+
+    internal static float[,] GetEcg200TestData()
+        => LoadTsv(Path.Combine(Program.Ecg200DataFolderPath, "ECG200_TEST.tsv"));
 }
