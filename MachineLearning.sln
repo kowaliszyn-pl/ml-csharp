@@ -3,16 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11111.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleLinearRegression", "src\SimpleLinearRegression\SimpleLinearRegression.csproj", "{2F1C2D20-5ECA-413C-B08E-68785A29B460}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F2B3171E-5931-44ED-A282-BE9E7F223D56}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{A18AB45F-739E-43ED-9C62-68DA8F3CE0E5}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultipleLinearRegression", "src\MultipleLinearRegression\MultipleLinearRegression.csproj", "{42A08578-C890-4AB8-A97C-48F113E54381}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BostonHousingML", "src\BostonHousingML\BostonHousingML.csproj", "{E5805173-335B-4984-9238-F304FE4F3188}"
 EndProject
@@ -44,20 +40,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gpt2Inference", "src\apps\g
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gpt2Tokenization", "src\apps\gpt\Gpt2Tokenization\Gpt2Tokenization.csproj", "{BC0F2183-2470-16BD-9927-65B06C729309}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultipleLinearRegression", "src\apps\regression\MultipleLinearRegression\MultipleLinearRegression.csproj", "{2851DC12-8E51-8F4B-D530-E045193BC12D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleLinearRegression", "src\apps\regression\SimpleLinearRegression\SimpleLinearRegression.csproj", "{A20D5318-7776-1EDF-C848-AE3B3A379197}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2F1C2D20-5ECA-413C-B08E-68785A29B460}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F1C2D20-5ECA-413C-B08E-68785A29B460}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F1C2D20-5ECA-413C-B08E-68785A29B460}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2F1C2D20-5ECA-413C-B08E-68785A29B460}.Release|Any CPU.Build.0 = Release|Any CPU
-		{42A08578-C890-4AB8-A97C-48F113E54381}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42A08578-C890-4AB8-A97C-48F113E54381}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{42A08578-C890-4AB8-A97C-48F113E54381}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{42A08578-C890-4AB8-A97C-48F113E54381}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E5805173-335B-4984-9238-F304FE4F3188}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E5805173-335B-4984-9238-F304FE4F3188}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5805173-335B-4984-9238-F304FE4F3188}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -98,13 +90,19 @@ Global
 		{BC0F2183-2470-16BD-9927-65B06C729309}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC0F2183-2470-16BD-9927-65B06C729309}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC0F2183-2470-16BD-9927-65B06C729309}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2851DC12-8E51-8F4B-D530-E045193BC12D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2851DC12-8E51-8F4B-D530-E045193BC12D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2851DC12-8E51-8F4B-D530-E045193BC12D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2851DC12-8E51-8F4B-D530-E045193BC12D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A20D5318-7776-1EDF-C848-AE3B3A379197}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A20D5318-7776-1EDF-C848-AE3B3A379197}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A20D5318-7776-1EDF-C848-AE3B3A379197}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A20D5318-7776-1EDF-C848-AE3B3A379197}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{2F1C2D20-5ECA-413C-B08E-68785A29B460} = {68AC4D6B-D939-4855-851F-5A173EE8FCCA}
-		{42A08578-C890-4AB8-A97C-48F113E54381} = {68AC4D6B-D939-4855-851F-5A173EE8FCCA}
 		{E5805173-335B-4984-9238-F304FE4F3188} = {E99F45B3-C5BB-45FC-9BC5-596751A765A7}
 		{2789DB8C-B747-44DF-8FCD-8137817BF27A} = {F2B3171E-5931-44ED-A282-BE9E7F223D56}
 		{E99F45B3-C5BB-45FC-9BC5-596751A765A7} = {F2B3171E-5931-44ED-A282-BE9E7F223D56}
@@ -118,6 +116,8 @@ Global
 		{A5C6AFE7-CB02-461D-B1FE-7211449665B1} = {E99F45B3-C5BB-45FC-9BC5-596751A765A7}
 		{E8C758EB-B642-72B7-31F0-852D972CF96B} = {A5C6AFE7-CB02-461D-B1FE-7211449665B1}
 		{BC0F2183-2470-16BD-9927-65B06C729309} = {A5C6AFE7-CB02-461D-B1FE-7211449665B1}
+		{2851DC12-8E51-8F4B-D530-E045193BC12D} = {68AC4D6B-D939-4855-851F-5A173EE8FCCA}
+		{A20D5318-7776-1EDF-C848-AE3B3A379197} = {68AC4D6B-D939-4855-851F-5A173EE8FCCA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F1BDE2A5-2774-4AEF-A5CF-1D9513B84564}
