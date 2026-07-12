@@ -2,9 +2,6 @@
 // File name: Utils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System.Data;
-using System.Xml.Linq;
-
 using NeuralNetworks.Core;
 
 using static System.Console;
@@ -209,55 +206,79 @@ internal static class Utils
     internal static float[,] GetEcg200TestData()
         => LoadTsv(Path.Combine(Program.Ecg200DataFolderPath, "ECG200_TEST.tsv"));
 
-    internal static (float[,] xData, float[,] yData) SplitDataAndOneHotEncode(float[,] source)
+    /// <summary>
+    /// Split the 2D array into features (all columns except the first one) and labels (the first column), and convert the labels to a one-hot table.
+    /// </summary>
+    /// <param name="source">The source 2D array.</param>
+    /// <returns>A tuple containing the features and one-hot encoded labels.</returns>
+    internal static (float[,] Features, float[,] OneHotLabels) SplitFeaturesAndEncodeLabels(float[,] source)
     {
-        // Split into xData (all columns except the first one) and yData (a one-hot table from the first column with values from 0 to 9).
+        // Split into features (all columns except the first one) and labels (the first column)
 
-        float[,] xData = source.GetColumns(1..source.GetLength(1));
-        float[,] yData = source.GetColumn(0);
+        (float[,] features, float[,] labels) = SplitFeaturesAndLabels(source);
 
-        // Convert yData to a one-hot table.
-        float[,] oneHot = new float[yData.GetLength(0), 10];
-        for (int row = 0; row < yData.GetLength(0); row++)
+        // Convert labels to a one-hot table
+
+        float[,] oneHot = new float[labels.GetLength(0), 10];
+        for (int row = 0; row < labels.GetLength(0); row++)
         {
-            int value = Convert.ToInt32(yData[row, 0]);
+            int value = Convert.ToInt32(labels[row, 0]);
             oneHot[row, value] = 1f;
         }
 
-        return (xData, oneHot);
+        return (features, oneHot);
     }
 
-    internal static (float[,] xData, float[,] yData) SplitDataAndLabels(float[,] source)
+    /// <summary>
+    /// Split the 2D array into features (all columns except the first one) and labels (the first column).
+    /// </summary>
+    /// <param name="source">The source 2D array.</param>
+    /// <returns>A tuple containing the features and labels.</returns>
+    internal static (float[,] Features, float[,] Labels) SplitFeaturesAndLabels(float[,] source)
     {
-        // Split into xData (all columns except the first one) and yData (the first column).
+        // Split into features (all columns except the first one) and labels (the first column)
 
-        float[,] xData = source.GetColumns(1..source.GetLength(1));
-        float[,] yData = source.GetColumn(0);
+        float[,] features = ExtractFeatureColumns(source);
+        float[,] labels = source.GetColumn(0);
 
-        return (xData, yData);
+        return (features, labels);
     }
 
-    internal static float[,] ExtractFeatures(float[,] source)
-    {
-        // Split into xData (all columns except the first one)
+    /// <summary>
+    /// Extract the feature columns from the 2D array (all columns except the first one).
+    /// </summary>
+    /// <param name="source">The source 2D array.</param>
+    /// <returns>The extracted feature columns.</returns>
+    internal static float[,] ExtractFeatureColumns(float[,] source) 
+        => source.GetColumns(1..source.GetLength(1));
 
-        return source.GetColumns(1..source.GetLength(1));
+    /// <summary>
+    /// Extract the feature columns from the 2D array and normalize the pixel values to the range [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1], and reshape to a 4D array with shape (batch, channels, height, width).
+    /// </summary>
+    /// <param name="source">The source 2D array.</param>
+    /// <returns>The extracted and normalized feature columns as a 4D array.</returns>
+    internal static float[,,,] ExtractFeaturesAsTanhNormalized4D(float[,] source)
+    {
+        // Extract the feature columns from the 2D array (all columns except the first one)
+
+        float[,] features = ExtractFeatureColumns(source);
+
+        // Normalize the pixel values to the range [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1], and reshape to a 4D array with shape (batch, channels, height, width)
+
+        return TanhNormalizeAndReshapeTo4D(features);
     }
 
-    internal static float[,,,] ExtractFeaturesAndNormalizeToTanhRange(float[,] source)
+    /// <summary>
+    /// Normalize the pixel values in the 2D array to the range [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
+    /// </summary>
+    /// <param name="source"></param>
+    internal static void TanhNormalizeInPlace(float[,] source)
     {
-        // Split into xData (all columns except the first one)
-
-        float[,] xData = source.GetColumns(1..source.GetLength(1));
-
-        return NormalizeToTanhRangeAs4D(xData);
-    }
-
-    internal static void NormalizeToTanhRange(float[,] source)
-    {
+        // Scale to range [-1, 1]
+        
         const float min = 0;
         const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
+        const float scale = 2f / (max - min); 
         int rows = source.GetLength(0);
         int cols = source.GetLength(1);
 
@@ -270,15 +291,18 @@ internal static class Utils
         }
     }
 
-    internal static float[,,,] NormalizeToTanhRangeAs4D(float[,] source)
+    /// <summary>
+    /// Convert a 2D array of pixel values to a 4D array with shape (batch, channels, height, width) and normalize the pixel values to the range [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    internal static float[,,,] TanhNormalizeAndReshapeTo4D(float[,] source)
     {
-        // Convert to 4D array with shape (batch, channels, height, width)
-
-        // Convert pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
+        // Scale to range [-1, 1]
 
         const float min = 0;
         const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
+        const float scale = 2f / (max - min); 
 
         int rows = source.GetLength(0);
         int cols = source.GetLength(1);
@@ -289,16 +313,18 @@ internal static class Utils
         {
             for (int col = 0; col < cols; col++)
             {
-                //int x = col % 28;
-                //int y = col / 28;
-                res[row, 0 /* one input channel */, col / 28, col % 28] = source[row, col] * scale - 1f;
+                res[row, 0 /* one input channel */, col / 28 /* h */, col % 28 /* w */] = source[row, col] * scale - 1f;
             }
         }
 
         return res;
     }
 
-    internal static void RescaleToPixelValues(float[,] source)
+    /// <summary>
+    /// Denormalize the pixel values in the 2D array from the range [-1, 1] back to the original range [0, 255].
+    /// </summary>
+    /// <param name="source"></param>
+    internal static void DenormalizeToPixelValuesInPlace(float[,] source)
     {
         const float scale = 255f / 2f;
         int rows = source.GetLength(0);
@@ -313,7 +339,13 @@ internal static class Utils
         }
     }
 
-    internal static float[,] RescaleToPixelValuesAs2D(float[,,,] source)
+
+    /// <summary>
+    /// Denormalize the pixel values in the 4D array from the range [-1, 1] back to the original range [0, 255] and reshape to a 2D array with shape (batch, height * width).
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    internal static float[,] DenormalizeAndReshapeTo2D(float[,,,] source)
     {
         const float scale = 255f / 2f;
         int batch = source.GetLength(0);
@@ -338,5 +370,61 @@ internal static class Utils
         }
 
         return res;
+    }
+
+    /// <summary>
+    /// Standardize the 2D array in place by subtracting the mean and dividing by the standard deviation, and return the mean and standard deviation used for standardization.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    internal static (float Mean, float StdDev) StandardizeInPlace(float[,] source)
+    {
+        float mean = source.Mean();
+        source.AddInPlace(-mean);
+
+        float stdDev = source.StdDev();
+        source.DivideInPlace(stdDev);
+
+        return (mean, stdDev);
+    }
+
+    /// <summary>
+    /// Standardize the 2D array in place by subtracting the given mean and dividing by the given standard deviation.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="mean"></param>
+    /// <param name="stdDev"></param>
+    internal static void ApplyStandardizationInPlace(float[,] source, float mean, float stdDev)
+    {
+        source.AddInPlace(-mean);
+        source.DivideInPlace(stdDev);
+    }
+
+    /// <summary>
+    /// Standardize the 4D array in place by subtracting the mean and dividing by the standard deviation, and return the mean and standard deviation used for standardization.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    internal static (float Mean, float StdDev) StandardizeInPlace(float[,,,] source)
+    {
+        float mean = source.Mean();
+        source.AddInPlace(-mean);
+
+        float stdDev = source.StdDev();
+        source.DivideInPlace(stdDev);
+
+        return (mean, stdDev);
+    }
+
+    /// <summary>
+    /// Apply standardization to the 4D array in place by subtracting the given mean and dividing by the given standard deviation.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <param name="mean"></param>
+    /// <param name="stdDev"></param>
+    internal static void ApplyStandardizationInPlace(float[,,,] source, float mean, float stdDev)
+    {
+        source.AddInPlace(-mean);
+        source.DivideInPlace(stdDev);
     }
 }

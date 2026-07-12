@@ -18,6 +18,7 @@ using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
+using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
@@ -131,12 +132,12 @@ internal class AutoencoderCnn
         WriteLine("Loading and preprocessing data...");
 
         float[,] train = GetMnistTrainData();
-        float[,,,] xTrain = ExtractFeaturesAndNormalizeToTanhRange(train);
+        float[,,,] xTrain = ExtractFeaturesAsTanhNormalized4D(train);
 
         float[,,,] yTrain = (float[,,,])xTrain.Clone();
 
         float[,] test = GetMnistTestData();
-        float[,,,] xTest = ExtractFeaturesAndNormalizeToTanhRange(test);
+        float[,,,] xTest = ExtractFeaturesAsTanhNormalized4D(test);
 
         // It's not quite necessary to clone the test data, but we do it for consistency.
         float[,,,] yTest = (float[,,,])xTest.Clone();
@@ -190,13 +191,15 @@ internal class AutoencoderCnn
         WriteLine("Loading and preprocessing data...");
 
         float[,] train = GetMnistTrainData();
-        float[,] originalPictures = ExtractFeatures(train);
+        float[,] originalImages = ExtractFeatureColumns(train);
 
-        float[,,,] xTrain = NormalizeToTanhRangeAs4D(originalPictures);
+        float[,,,] xTrain = TanhNormalizeAndReshapeTo4D(originalImages);
+
+        WriteLine("Reconstructing images using the loaded model...");
 
         float[,,,] yTrain = model.Forward(xTrain, true);
 
-        float[,] reconstructedPictures = RescaleToPixelValuesAs2D(yTrain);
+        float[,] reconstructedImages = DenormalizeAndReshapeTo2D(yTrain);
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
@@ -206,8 +209,8 @@ internal class AutoencoderCnn
 
         foreach (int index in selectedImages)
         {
-            Drawing.SaveMnistPicture(100, index, originalPictures, $"{ModelName}_{bottleneckDim}_original_{index}");
-            Drawing.SaveMnistPicture(100, index, reconstructedPictures, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
+            Drawing.SaveMnistPicture(100, index, originalImages, $"{ModelName}_{bottleneckDim}_original_{index}");
+            Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
         }
     }
 
@@ -278,7 +281,6 @@ internal class AutoencoderCnn
         {
             NumberOfOutputs = 2,
             Perplexity = 30,
-            //Iterations = 1000
         };
 
         double[][] reduced = tsne.Transform(encodedDouble);

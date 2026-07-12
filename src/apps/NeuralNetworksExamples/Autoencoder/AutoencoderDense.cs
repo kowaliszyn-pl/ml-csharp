@@ -40,15 +40,15 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
 
         return
             // Encoder
-            AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
-            .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
+            AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer))
+            .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer))
 
             // Bottleneck
             .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer))
 
             // Decoder
-            .AddLayer(_firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
-            .AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, new Dropout2D(0.8f, Random)))
+            .AddLayer(_firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer))
+            .AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer))
             .AddLayer(new DenseLayer(784, new Tanh2D(), initializer));
     }
 
@@ -111,8 +111,8 @@ internal class AutoencoderDense
 
         // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
-        NormalizeToTanhRange(xTrain);
-        NormalizeToTanhRange(xTest);
+        TanhNormalizeInPlace(xTrain);
+        TanhNormalizeInPlace(xTest);
 
         float[,] yTrain = (float[,])xTrain.Clone();
 
@@ -169,30 +169,30 @@ internal class AutoencoderDense
 
         float[,] xTrain = LoadTrainingData();
 
-        WriteLine($"Loaded {xTrain.GetLength(0)} training samples with {xTrain.GetLength(1)} features each.");
-
-        float[,] trainingImagesForDrawing = (float[,])xTrain.Clone();
+        float[,] originalImages = (float[,])xTrain.Clone();
 
         // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
-        NormalizeToTanhRange(xTrain);
+        TanhNormalizeInPlace(xTrain);
 
-        float[,] yTrain = model.Forward(xTrain, true);
+        WriteLine("Reconstructing images using the loaded model...");
+
+        float[,] reconstructedImages = model.Forward(xTrain, true);
 
         // Rescale the pixel values back to [0, 255] for visualization purposes.
 
-        RescaleToPixelValues(yTrain);
+        DenormalizeToPixelValuesInPlace(reconstructedImages);
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-        WriteLine($"Saving original and reconstructed images from {xTrain.Length} xTrain points and {yTrain.Length} yTrain points.");
+        WriteLine($"Saving original and reconstructed images.");
 
         int[] selectedImages = [20, 21, 22, 23, 30];
 
         foreach (int index in selectedImages)
         {
-            Drawing.SaveMnistPicture(100, index, trainingImagesForDrawing, $"{ModelName}_{bottleneckDim}_original_{index}");
-            Drawing.SaveMnistPicture(100, index, yTrain, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
+            Drawing.SaveMnistPicture(100, index, originalImages, $"{ModelName}_{bottleneckDim}_original_{index}");
+            Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
         }
     }
 
@@ -211,10 +211,10 @@ internal class AutoencoderDense
         // Restrict to MaxSamplesToVisualize samples for t-SNE visualization to reduce computation time
         train = train.GetRows(0..Program.MaxSamplesToVisualize);
 
-        (float[,] xTrain, float[,] labels) = SplitDataAndLabels(train);
+        (float[,] xTrain, float[,] labels) = SplitFeaturesAndLabels(train);
 
         // Normalize
-        NormalizeToTanhRange(xTrain);
+        TanhNormalizeInPlace(xTrain);
 
         // Get latent representation
         WriteLine("Encoding data to latent space...");
@@ -239,8 +239,7 @@ internal class AutoencoderDense
         TSNE tsne = new()
         {
             NumberOfOutputs = 2,
-            Perplexity = 30,
-            //Iterations = 1000
+            Perplexity = 30
         };
 
         double[][] reduced = tsne.Transform(encodedDouble);
@@ -285,14 +284,14 @@ internal class AutoencoderDense
     private static float[,] LoadTrainingData()
     {
         float[,] train = GetMnistTrainData();
-        float[,] xTrain = ExtractFeatures(train);
+        float[,] xTrain = ExtractFeatureColumns(train);
         return xTrain;
     }
 
     private static float[,] LoadTestData()
     {
         float[,] test = GetMnistTestData();
-        float[,] xTest = ExtractFeatures(test);
+        float[,] xTest = ExtractFeatureColumns(test);
         return xTest;
     }
 

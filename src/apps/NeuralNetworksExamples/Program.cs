@@ -158,14 +158,14 @@ internal static class Program
     private static void SelectAutoencoderModel()
     {
         ExecuteMenu([
-            new("🖼️ Train MNIST data set (dense layer autoencoder)", AutoencoderDense.Train, true),
-            new("🖼️ Train MNIST data set (CNN autoencoder)", AutoencoderCnn.Train, true),
-            new("🖼️ Load and run MNIST data set (dense layer autoencoder)", AutoencoderDense.Load, true),
-            new("🖼️ Load and run MNIST data set (CNN autoencoder)", AutoencoderCnn.Load, true),
+            new("🖼️ Train (dense layer autoencoder)", AutoencoderDense.Train, true),
+            new("🖼️ Train (CNN autoencoder)", AutoencoderCnn.Train, true),
+            new("🖼️ Load and run (dense layer autoencoder)", AutoencoderDense.Load, true),
+            new("🖼️ Load and run (CNN autoencoder)", AutoencoderCnn.Load, true),
             new("📊 Visualize latent space with t-SNE (dense layer autoencoder)", AutoencoderDense.VisualizeLatentSpace, true),
             new("📊 Visualize latent space with t-SNE (CNN autoencoder)", AutoencoderCnn.VisualizeLatentSpace, true),
             new("🔙 Back", () => { })
-        ], "Select an [bold]autoencoder[/] model:");
+        ], "Select [bold]MNIST autoencoder[/] operation:");
     }
 
     private static void DisplayOptions()

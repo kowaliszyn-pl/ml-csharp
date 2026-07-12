@@ -82,24 +82,8 @@ internal class MnistCnn
         // This means that before inference, we need to apply the same standardization to new data as we did to the training data.
         WriteLine("Standardize to mean 0 and variance 1 for all features together...");
 
-        float mean = xTrain.Mean();
-        WriteLine($"Current mean: {mean}. Scale data to mean 0...");
-        xTrain.AddInPlace(-mean);
-        xTest.AddInPlace(-mean);
-
-        WriteLine($"xTrain min: {xTrain.Min()}");
-        WriteLine($"xTest min: {xTest.Min()}");
-        WriteLine($"xTrain max: {xTrain.Max()}");
-        WriteLine($"xTest max: {xTest.Max()}");
-
-        float stdDev = xTrain.StdDev();
-        WriteLine($"\nCurrent stdDev: {stdDev}. Scale data to variance 1...");
-        xTrain.DivideInPlace(stdDev);
-        xTest.DivideInPlace(stdDev);
-        WriteLine($"xTrain min: {xTrain.Min()}");
-        WriteLine($"xTest min: {xTest.Min()}");
-        WriteLine($"xTrain max: {xTrain.Max()}");
-        WriteLine($"xTest max: {xTest.Max()}");
+        (float mean, float stdDev) = StandardizeInPlace(xTrain);
+        ApplyStandardizationInPlace(xTest, mean, stdDev);
 
         SimpleDataSource<float[,,,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);

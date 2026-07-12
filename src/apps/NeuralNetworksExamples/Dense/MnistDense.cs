@@ -20,7 +20,6 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Dense;
@@ -79,34 +78,18 @@ internal class MnistDense
         float[,] train = GetMnistTrainData();
         float[,] test = GetMnistTestData();
 
-        (float[,] xTrain, float[,] yTrain) = SplitDataAndOneHotEncode(train);
-        (float[,] xTest, float[,] yTest) = SplitDataAndOneHotEncode(test);
+        (float[,] xTrain, float[,] yTrain) = SplitFeaturesAndEncodeLabels(train);
+        (float[,] xTest, float[,] yTest) = SplitFeaturesAndEncodeLabels(test);
 
-        float[,] testImagesForDrawing = (float[,])xTest.Clone();
+        float[,] testImages = (float[,])xTest.Clone();
 
         // Standardize data
         // We can standardize all features (columns) together because they are all in the same scale (pixel values from 0 to 255) and have similar meaning (brightness). We calculate mean and stdDev on the training set only, because in a real-world scenario we would not have access to the test set during training.
         // This means that before inference, we need to apply the same standardization to new data as we did to the training data.
         WriteLine("Standardize to mean 0 and variance 1 for all features together...");
 
-        float mean = xTrain.Mean();
-        WriteLine($"Current mean: {mean}. Scale data to mean 0...");
-        xTrain.AddInPlace(-mean);
-        xTest.AddInPlace(-mean);
-
-        WriteLine($"xTrain min: {xTrain.Min()}");
-        WriteLine($"xTest min: {xTest.Min()}");
-        WriteLine($"xTrain max: {xTrain.Max()}");
-        WriteLine($"xTest max: {xTest.Max()}");
-
-        float stdDev = xTrain.StdDev();
-        WriteLine($"\nCurrent stdDev: {stdDev}. Scale data to variance 1...");
-        xTrain.DivideInPlace(stdDev);
-        xTest.DivideInPlace(stdDev);
-        WriteLine($"xTrain min: {xTrain.Min()}");
-        WriteLine($"xTest min: {xTest.Min()}");
-        WriteLine($"xTrain max: {xTrain.Max()}");
-        WriteLine($"xTest max: {xTest.Max()}");
+        (float mean, float stdDev) = StandardizeInPlace(xTrain);
+        ApplyStandardizationInPlace(xTest, mean, stdDev);
 
         SimpleDataSource<float[,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);
@@ -142,7 +125,7 @@ internal class MnistDense
         // Display some examples of predictions vs actual values for the test set for the digit "3", which is the most difficult digit to classify in the MNIST dataset (as Copilot says, I don't know if it's true 😉)
 
         float[,] logits = model.Forward(xTest, true);
-        Utils.DisplayDigit3PredictionExamples(yTest, logits, testImagesForDrawing, "dense");
+        DisplayDigit3PredictionExamples(yTest, logits, testImages, "dense");
 
         // Save the model
 
@@ -182,16 +165,15 @@ internal class MnistDense
     internal static void LoadAndEvaluate()
     {
         // Load test data
-        float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
-        (float[,] xTest, float[,] yTest) = SplitDataAndOneHotEncode(test);
+        float[,] test = GetMnistTestData();
+        (float[,] xTest, float[,] yTest) = SplitFeaturesAndEncodeLabels(test);
 
         // Load standardization stats
         // Note: We have to use the same mean and stdDev as used during training.
         string[] stats = File.ReadAllText($"{ModelName}.stats").Split(';');
         float mean = float.Parse(stats[0]);
         float stdDev = float.Parse(stats[1]);
-        xTest.AddInPlace(-mean);
-        xTest.DivideInPlace(stdDev);
+        ApplyStandardizationInPlace(xTest, mean, stdDev);
 
         // Load the model
         MnistDenseModel model = new($"{ModelName}.json");
