@@ -30,7 +30,7 @@ namespace NeuralNetworksExamples.Dense;
 // 97,12% - Gpu
 // 97,14% - CpuSpans, CpuArrays
 
-internal class MnistDenseModel: BaseModel<float[,], float[,]>
+internal class MnistDenseModel : BaseModel<float[,], float[,]>
 {
     public MnistDenseModel(SeededRandom? random) : this(null, random)
     {
@@ -156,7 +156,7 @@ internal class MnistDense
     private static readonly EvalFunction<float[,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>
     {
         float[,] prediction = predictionLogits ?? model.Forward(xEvalTest, true);
-        
+
         // predictionArgmax is an array of predicted digits for each sample.
         int[] predictionArgmax = prediction.Argmax();
 
@@ -204,7 +204,7 @@ internal class MnistDense
 
         // Load standardization stats
         // Note: We have to use the same mean and stdDev as used during training.
-        var stats = File.ReadAllText($"{ModelName}.stats").Split(';');
+        string[] stats = File.ReadAllText($"{ModelName}.stats").Split(';');
         float mean = float.Parse(stats[0]);
         float stdDev = float.Parse(stats[1]);
         xTest.AddInPlace(-mean);

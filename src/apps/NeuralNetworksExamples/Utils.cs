@@ -5,8 +5,8 @@
 using NeuralNetworks.Core;
 
 using static System.Console;
-using static NeuralNetworksExamples.Drawing;
 using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworksExamples.Drawing;
 
 namespace NeuralNetworksExamples;
 
@@ -179,10 +179,7 @@ internal static class Utils
 
         WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
 
-        string FormatPredictionDetails(int index, int count)
-        {
-            return $"Index: {index}, predicted probability of being normal: {predictions[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}, count: {count}";
-        }
+        string FormatPredictionDetails(int index, int count) => $"Index: {index}, predicted probability of being normal: {predictions[index, 0]:P2}, actual class: {(yTest[index, 0] == 1f ? "\'Normal\'" : "\'Abnormal\'")}, count: {count}";
     }
 
     private static int FindDigit(float[,] yTest, int row)

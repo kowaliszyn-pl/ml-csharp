@@ -1,6 +1,6 @@
 ﻿// Neural Networks in C♯
 // File name: BostonHousing.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using Microsoft.Extensions.Logging;
 
@@ -21,7 +21,7 @@ using static NeuralNetworks.Core.ArrayUtils;
 
 namespace NeuralNetworksExamples.Dense;
 
-class BostonHousingModel(SeededRandom? random)
+internal class BostonHousingModel(SeededRandom? random)
     : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(), random)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()

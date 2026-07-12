@@ -21,6 +21,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using ScottPlot;
+using ScottPlot.Plottables;
 
 using static System.Console;
 using static NeuralNetworksExamples.Utils;
@@ -268,7 +269,7 @@ internal class AutoencoderDense
                 }
             }
 
-            var scatter = plt.Add.ScatterPoints(xPoints, yPoints);
+            Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
             scatter.LegendText = $"Digit {digit}";
             scatter.MarkerSize = 5;
         }

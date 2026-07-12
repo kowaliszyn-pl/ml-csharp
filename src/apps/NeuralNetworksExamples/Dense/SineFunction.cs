@@ -191,7 +191,7 @@ internal class SineFunction
             float yPredicted = yPredictedChart[i, 0] * yStdDev + yMean; // Un-standardize the predicted values
             chartData.Add((xChart[i, 0], yActualChart[i, 0], yPredicted));
         }
-        
+
         SaveSineChart(SineChartWidth, SineChartHeight, SineChartMargin, chartData, 2 * ChartRange + 1, "main");
         WriteLine("\nChart with actual and predicted values saved as a JPG file.");
     }

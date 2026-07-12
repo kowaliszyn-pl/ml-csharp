@@ -189,6 +189,6 @@ internal static class Program
         choice.PerformAction();
     }
 
-    private static void DisplayOptions() 
+    private static void DisplayOptions()
         => AnsiConsole.MarkupLine($"Current settings: backend: [green]{OperationBackend.CurrentType}[/], latent space dimensions: [green]{LatentSpaceDimensions}[/].\n");
 }

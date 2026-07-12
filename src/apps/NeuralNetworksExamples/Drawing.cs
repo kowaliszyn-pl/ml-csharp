@@ -102,7 +102,7 @@ public class Drawing
         // Draw the ECG line
         using Pen redPen = new(Color.Red, 2);
 
-        if(chartData.Length < 2)
+        if (chartData.Length < 2)
         {
             throw new ArgumentException("Chart data must contain at least two points to draw a line.");
         }

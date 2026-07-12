@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: 
+// File name: Ecg200.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
@@ -20,7 +20,6 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworks.Core.ArrayUtils;
 using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Cnn;
@@ -169,12 +168,12 @@ internal class Ecg200
         for (int row = 0; row < rows; row++)
         {
             // yEvalTest is [batch, 0] = 100%, if normal (class 1), or 0%, if abnormal (class 0). So we check if the predicted class (normal or abnormal) matches the actual class.
-            
+
             float predictedProbabilityOfNormal = prediction[row, 0];
             float actualClass = yEvalTest[row, 0]; // 1 for normal, 0 for abnormal
             bool actualNormalClass = actualClass == 1f;
 
-            if ((predictedProbabilityOfNormal >= 0.5f && actualNormalClass) 
+            if ((predictedProbabilityOfNormal >= 0.5f && actualNormalClass)
                 || (predictedProbabilityOfNormal < 0.5f && !actualNormalClass))
                 hits++;
         }
