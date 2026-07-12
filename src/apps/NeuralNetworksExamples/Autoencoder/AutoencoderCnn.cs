@@ -2,9 +2,6 @@
 // File name: AutoencoderCnn.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-
 using Accord.MachineLearning.Clustering;
 
 using Microsoft.Extensions.Logging;
@@ -18,7 +15,6 @@ using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
-using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
@@ -77,7 +73,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 activationFunction: new Tanh4D(),
                 paramInitializer: initializer
             ));
-        
+
         // 1 * 28 * 28 as output
     }
 
@@ -222,7 +218,7 @@ internal class AutoencoderCnn
 
         string modelPath = GetFileName(bottleneckDim);
         AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
-        
+
         // Load data and labels
         float[,] train = GetMnistTrainData();
 
@@ -230,32 +226,8 @@ internal class AutoencoderCnn
         train = train.GetRows(0..Program.MaxSamplesToVisualize);
 
         float[,] labels = train.GetColumn(0);
-        
-        (float[,,,] xTrain, _, _) = Split(train);
 
-        // Normalize
-        const float min = 0;
-        const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
-
-        int rows = xTrain.GetLength(0);
-        int channels = xTrain.GetLength(1);
-        int imageHeight = xTrain.GetLength(2);
-        int imageWidth = xTrain.GetLength(3);
-
-        for (int row = 0; row < rows; row++)
-        {
-            for (int channel = 0; channel < channels; channel++)
-            {
-                for (int height = 0; height < imageHeight; height++)
-                {
-                    for (int width = 0; width < imageWidth; width++)
-                    {
-                        xTrain[row, channel, height, width] = (xTrain[row, channel, height, width] - min) * scale - 1f;
-                    }
-                }
-            }
-        }
+        float[,,,] xTrain = TanhNormalizeAndReshapeTo4D(train);
 
         // Get latent representation
         WriteLine("Encoding data to latent space...");
@@ -320,107 +292,6 @@ internal class AutoencoderCnn
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"t-SNE plot saved to {outputPath}");
         ResetColor();
-    }
-
-    private static (float[,,,] xMerged, float[,] xMerged2D) LoadAndNormalizeImages()
-    {
-        // Get both (train and test) datasets and merge them into one array.
-
-        float[,] train = GetMnistTrainData();
-        float[,] test = GetMnistTestData();
-
-        int trainRows = train.GetLength(0);
-        int testRows = test.GetLength(0);
-        int features = train.GetLength(1);
-
-        float[,] merged = new float[trainRows + testRows, features];
-
-        for (int row = 0; row < trainRows; row++)
-        {
-            for (int col = 0; col < features; col++)
-            {
-                merged[row, col] = train[row, col];
-            }
-        }
-
-        for (int row = 0; row < testRows; row++)
-        {
-            for (int col = 0; col < features; col++)
-            {
-                merged[trainRows + row, col] = test[row, col];
-            }
-        }
-
-        // Split the merged data into xMerged and yMerged arrays. The first column of the merged array is used to create a one-hot encoded yMerged array, while the remaining columns are used to create the xMerged array. The xMerged array is then reshaped into a 4D array (xMerged) with dimensions corresponding to the number of samples, channels, height, and width.
-
-        (float[,,,] xMerged, float[,] yMerged, float[,] xMerged2D) = Split(merged);
-
-        // Convert pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
-
-        const float min = 0;
-        const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
-
-        int rows = xMerged.GetLength(0);
-        int channels = xMerged.GetLength(1);
-        int imageHeight = xMerged.GetLength(2);
-        int imageWidth = xMerged.GetLength(3);
-
-        for (int row = 0; row < rows; row++)
-        {
-            for (int channel = 0; channel < channels; channel++)
-            {
-                for (int height = 0; height < imageHeight; height++)
-                {
-                    for (int width = 0; width < imageWidth; width++)
-                    {
-                        xMerged[row, channel, height, width] = (xMerged[row, channel, height, width] - min) * scale - 1f;
-                    }
-                }
-            }
-        }
-
-        return (xMerged, xMerged2D);
-    }
-
-    /// <summary>
-    /// Splits the input 2D array into xData4D, yData, and xData2D arrays. The first column of the input array is used to create a one-hot encoded yData array, while the remaining columns are used to create the xData2D array. The xData2D array is then reshaped into a 4D array (xData4D) with dimensions corresponding to the number of samples, channels, height, and width.
-    /// </summary>
-    /// <param name="source"></param>
-    /// <returns></returns>
-    private static (float[,,,] xData4D, float[,] yData, float[,] xData2D) Split(float[,] source)
-    {
-        // Split into xTest (all columns except the first one) and yTest (a one-hot table from the first column with values from 0 to 9).
-
-        float[,] xData2D = source.GetColumns(1..source.GetLength(1));
-        float[,] yData = source.GetColumn(0);
-
-        Debug.Assert(xData2D.GetLength(1) == 28 * 28);
-
-        // Convert yTest to a one-hot table.
-        int yTestRows = yData.GetLength(0);
-        float[,] oneHot = new float[yTestRows, 10];
-        for (int row = 0; row < yTestRows; row++)
-        {
-            int value = Convert.ToInt32(yData[row, 0]);
-            oneHot[row, value] = 1f;
-        }
-
-        int xDataRows = xData2D.GetLength(0);
-        int xDataCols = xData2D.GetLength(1);
-        float[,,,] xData4D = new float[xDataRows, 1, 28, 28];
-
-        for (int row = 0; row < xDataRows; row++)
-        {
-            for (int col = 0; col < xDataCols; col++)
-            {
-                //int x = col % 28;
-                //int y = col / 28;
-                xData4D[row, 0 /* one input channel */, col / 28, col % 28] = xData2D[row, col];
-            }
-        }
-
-        return (xData4D, oneHot, xData2D);
     }
 
     private static string GetFileName(int bottleneckDim)

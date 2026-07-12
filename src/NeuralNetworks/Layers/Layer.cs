@@ -46,6 +46,13 @@ public abstract class Layer<TIn, TOut> : Layer
     private OperationList<TIn, TOut>? _operations;
 
     protected TIn? Input => _input;
+
+    /// <summary>
+    /// Gets the output of the layer after a forward pass.
+    /// </summary>
+    /// <remarks>
+    /// This value can also be used when retrieving an output from a given layer (for example, latent layer in an autoencoder). 
+    /// </remarks>
     public TOut? Output => _output;
 
     /// <summary>
@@ -69,6 +76,7 @@ public abstract class Layer<TIn, TOut> : Layer
         Debug.Assert(_operations != null, "Operations were not set up.");
 
         // As above, we store the pointer to the output array so we can check the shape of the output gradient in the backward pass.
+        // This value can also be used when retrieving an output from a given layer (for example, latent layer in an autoencoder).
         _output = _operations.Forward(input, inference);
 
         return _output;

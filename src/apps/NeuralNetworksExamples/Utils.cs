@@ -427,4 +427,24 @@ internal static class Utils
         source.AddInPlace(-mean);
         source.DivideInPlace(stdDev);
     }
+
+    /// <summary>
+    /// Reshape the 2D array to a 4D array with shape (batch, channels, height, width) where channels = 1, height = cols / 28, width = 28.
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    internal static float[,,,] ReshapeTo4D(float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int cols = source.GetLength(1);
+        float[,,,] res = new float[rows, 1, cols / 28, 28];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                res[row, 0 /* one input channel */, col / 28 /* h */, col % 28 /* w */] = source[row, col];
+            }
+        }
+        return res;
+    }
 }

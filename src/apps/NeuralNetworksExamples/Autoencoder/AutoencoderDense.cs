@@ -15,7 +15,6 @@ using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
-using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
@@ -282,18 +281,10 @@ internal class AutoencoderDense
     }
 
     private static float[,] LoadTrainingData()
-    {
-        float[,] train = GetMnistTrainData();
-        float[,] xTrain = ExtractFeatureColumns(train);
-        return xTrain;
-    }
+        => ExtractFeatureColumns(GetMnistTrainData());
 
     private static float[,] LoadTestData()
-    {
-        float[,] test = GetMnistTestData();
-        float[,] xTest = ExtractFeatureColumns(test);
-        return xTest;
-    }
+        => ExtractFeatureColumns(GetMnistTestData());
 
     private static string GetFileName(int bottleneckDim)
         => $"{ModelName}_{bottleneckDim}.json";
