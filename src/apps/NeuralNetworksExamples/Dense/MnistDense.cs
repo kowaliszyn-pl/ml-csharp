@@ -79,8 +79,9 @@ internal class MnistDense
         float[,] train = GetMnistTrainData();
         float[,] test = GetMnistTestData();
 
-        (float[,] xTrain, float[,] yTrain) = Split(train);
-        (float[,] xTest, float[,] yTest) = Split(test);
+        (float[,] xTrain, float[,] yTrain) = SplitDataAndOneHotEncode(train);
+        (float[,] xTest, float[,] yTest) = SplitDataAndOneHotEncode(test);
+
         float[,] testImagesForDrawing = (float[,])xTest.Clone();
 
         // Standardize data
@@ -178,29 +179,11 @@ internal class MnistDense
         return accuracy;
     };
 
-    private static (float[,] xData, float[,] yData) Split(float[,] source)
-    {
-        // Split into xData (all columns except the first one) and yData (a one-hot table from the first column with values from 0 to 9).
-
-        float[,] xData = source.GetColumns(1..source.GetLength(1));
-        float[,] yData = source.GetColumn(0);
-
-        // Convert yData to a one-hot table.
-        float[,] oneHot = new float[yData.GetLength(0), 10];
-        for (int row = 0; row < yData.GetLength(0); row++)
-        {
-            int value = Convert.ToInt32(yData[row, 0]);
-            oneHot[row, value] = 1f;
-        }
-
-        return (xData, oneHot);
-    }
-
     internal static void LoadAndEvaluate()
     {
         // Load test data
         float[,] test = LoadCsv("..\\..\\..\\..\\..\\data\\MNIST\\mnist_test.csv");
-        (float[,] xTest, float[,] yTest) = Split(test);
+        (float[,] xTest, float[,] yTest) = SplitDataAndOneHotEncode(test);
 
         // Load standardization stats
         // Note: We have to use the same mean and stdDev as used during training.

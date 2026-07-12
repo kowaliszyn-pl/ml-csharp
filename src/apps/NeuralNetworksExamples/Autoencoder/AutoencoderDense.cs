@@ -208,15 +208,10 @@ internal class AutoencoderDense
         // Load data and labels
         float[,] train = GetMnistTrainData();
 
-        // Restrict to 10000 samples for t-SNE visualization to reduce computation time
-        int maxSamples = 15000;
-        if (train.GetLength(0) > maxSamples)
-        {
-            train = train.GetRows(0..maxSamples);
-        }
+        // Restrict to MaxSamplesToVisualize samples for t-SNE visualization to reduce computation time
+        train = train.GetRows(0..Program.MaxSamplesToVisualize);
 
-        float[,] labels = train.GetColumn(0);
-        float[,] xTrain = train.GetColumns(1..train.GetLength(1));
+        (float[,] xTrain, float[,] labels) = SplitDataAndLabels(train);
 
         // Normalize
         NormalizeToTanhRange(xTrain);
@@ -290,61 +285,15 @@ internal class AutoencoderDense
     private static float[,] LoadTrainingData()
     {
         float[,] train = GetMnistTrainData();
-        (float[,] xTrain, _) = Split(train);
+        float[,] xTrain = ExtractFeatures(train);
         return xTrain;
     }
 
     private static float[,] LoadTestData()
     {
         float[,] test = GetMnistTestData();
-        (float[,] xTest, _) = Split(test);
+        float[,] xTest = ExtractFeatures(test);
         return xTest;
-    }
-
-    private static void NormalizeToTanhRange(float[,] xTrain)
-    {
-        const float min = 0;
-        const float max = 255f;
-        const float scale = 2f / (max - min); // Scale to range [-1, 1]
-
-        for (int row = 0; row < xTrain.GetLength(0); row++)
-        {
-            for (int col = 0; col < xTrain.GetLength(1); col++)
-            {
-                xTrain[row, col] = (xTrain[row, col] - min) * scale - 1f;
-            }
-        }
-    }
-
-    private static void RescaleToPixelValues(float[,] yTrain)
-    {
-        const float scale = 255f / 2f;
-
-        for (int row = 0; row < yTrain.GetLength(0); row++)
-        {
-            for (int col = 0; col < yTrain.GetLength(1); col++)
-            {
-                yTrain[row, col] = (yTrain[row, col] + 1f) * scale;
-            }
-        }
-    }
-
-    private static (float[,] xData, float[,] yData) Split(float[,] source)
-    {
-        // Split into xData (all columns except the first one) and yData (a one-hot table from the first column with values from 0 to 9).
-
-        float[,] xData = source.GetColumns(1..source.GetLength(1));
-        float[,] yData = source.GetColumn(0);
-
-        // Convert yData to a one-hot table.
-        float[,] oneHot = new float[yData.GetLength(0), 10];
-        for (int row = 0; row < yData.GetLength(0); row++)
-        {
-            int value = Convert.ToInt32(yData[row, 0]);
-            oneHot[row, value] = 1f;
-        }
-
-        return (xData, oneHot);
     }
 
     private static string GetFileName(int bottleneckDim)

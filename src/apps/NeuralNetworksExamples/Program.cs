@@ -4,6 +4,8 @@
 
 using System.Text.Json;
 
+using ILGPU.Frontend;
+
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core.Operations;
@@ -31,6 +33,7 @@ internal static class Program
 
     internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
     internal static int LatentSpaceDimensions { get; private set; } = 28;
+    internal const int MaxSamplesToVisualize = 1_500;
 
     private static void Main()
     {

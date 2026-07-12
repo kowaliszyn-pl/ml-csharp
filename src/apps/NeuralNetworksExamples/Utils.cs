@@ -205,4 +205,69 @@ internal static class Utils
 
     internal static float[,] GetEcg200TestData()
         => LoadTsv(Path.Combine(Program.Ecg200DataFolderPath, "ECG200_TEST.tsv"));
+
+    internal static (float[,] xData, float[,] yData) SplitDataAndOneHotEncode(float[,] source)
+    {
+        // Split into xData (all columns except the first one) and yData (a one-hot table from the first column with values from 0 to 9).
+
+        float[,] xData = source.GetColumns(1..source.GetLength(1));
+        float[,] yData = source.GetColumn(0);
+
+        // Convert yData to a one-hot table.
+        float[,] oneHot = new float[yData.GetLength(0), 10];
+        for (int row = 0; row < yData.GetLength(0); row++)
+        {
+            int value = Convert.ToInt32(yData[row, 0]);
+            oneHot[row, value] = 1f;
+        }
+
+        return (xData, oneHot);
+    }
+
+    internal static (float[,] xData, float[,] yData) SplitDataAndLabels(float[,] source)
+    {
+        // Split into xData (all columns except the first one) and yData (the first column).
+
+        float[,] xData = source.GetColumns(1..source.GetLength(1));
+        float[,] yData = source.GetColumn(0);
+
+        return (xData, yData);
+    }
+
+    internal static float[,] ExtractFeatures(float[,] source)
+    {
+        // Split into xData (all columns except the first one)
+
+        float[,] xData = source.GetColumns(1..source.GetLength(1));
+
+        return xData;
+    }
+
+    internal static void NormalizeToTanhRange(float[,] xTrain)
+    {
+        const float min = 0;
+        const float max = 255f;
+        const float scale = 2f / (max - min); // Scale to range [-1, 1]
+
+        for (int row = 0; row < xTrain.GetLength(0); row++)
+        {
+            for (int col = 0; col < xTrain.GetLength(1); col++)
+            {
+                xTrain[row, col] = (xTrain[row, col] - min) * scale - 1f;
+            }
+        }
+    }
+
+    internal static void RescaleToPixelValues(float[,] yTrain)
+    {
+        const float scale = 255f / 2f;
+
+        for (int row = 0; row < yTrain.GetLength(0); row++)
+        {
+            for (int col = 0; col < yTrain.GetLength(1); col++)
+            {
+                yTrain[row, col] = (yTrain[row, col] + 1f) * scale;
+            }
+        }
+    }
 }
