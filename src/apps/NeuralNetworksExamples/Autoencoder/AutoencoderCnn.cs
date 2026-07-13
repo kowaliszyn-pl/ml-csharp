@@ -46,7 +46,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 kernels: 32,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new Tanh4D(),
+                activationFunction: new LeakyReLU4D(),
                 paramInitializer: initializer
             ))
             // 32 * 28 * 28
