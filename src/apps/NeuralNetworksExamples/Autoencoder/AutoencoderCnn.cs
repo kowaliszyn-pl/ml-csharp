@@ -113,8 +113,8 @@ internal class AutoencoderCnn
     private const int BatchSize = 200;
     private const int LogEveryEpochs = 1;
 
-    private const float InitialLearningRate = 0.01f;
-    private const float FinalLearningRate = 0.0005f;
+    private const float InitialLearningRate = 1e-2f; //0.01f;
+    private const float FinalLearningRate = 5e-4f; // 0.0005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
 
