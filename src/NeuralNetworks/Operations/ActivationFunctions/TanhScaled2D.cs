@@ -10,14 +10,14 @@ public class TanhScaled2D(float scale) : ActivationFunction<float[,], float[,]>
 {
 
     protected override float[,] CalcOutput(bool inference)
-        => Input.Multiply(1.0f / scale).Tanh();
+        => Input.Multiply(1.0f / scale).Tanh(); // Multiple by (1 / scale) is quicker than Divide by scale
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
     {
         float[,] deriv = Output
             .AsOnes()
             .Subtract(Output.MultiplyElementwise(Output))
-            .Multiply(1.0f / scale);
+            .Multiply(1.0f / scale); // Multiple by (1 / scale) is quicker than Divide by scale
 
         return outputGradient.MultiplyElementwise(deriv);
     }
