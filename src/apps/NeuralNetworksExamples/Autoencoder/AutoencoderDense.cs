@@ -43,7 +43,7 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
             .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer))
 
             // Bottleneck
-            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Linear(), initializer))
+            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new TanhScaled2D(200), initializer))
 
             // Decoder
             .AddLayer(_firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer))
@@ -83,12 +83,12 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
 internal class AutoencoderDense
 {
     private const int RandomSeed = 260710;
-    private const int Epochs = 10;
+    private const int Epochs = 15;
     private const int BatchSize = 400;
     private const int LogEveryEpochs = 1;
 
     private const float InitialLearningRate = 0.01f;
-    private const float FinalLearningRate = 0.0005f;
+    private const float FinalLearningRate = 0.005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
 
@@ -217,7 +217,7 @@ internal class AutoencoderDense
 
         // Get latent representation
         WriteLine("Encoding data to latent space...");
-        _ = model.Forward(xTrain, false);
+        float[,] debugOutput = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();
 
         // Convert to double[][] for Accord.NET
@@ -268,11 +268,11 @@ internal class AutoencoderDense
         }
 
         plt.ShowLegend();
-        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={bottleneckDim})");
+        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={dim}, points={n})");
         plt.XLabel("t-SNE Component 1");
         plt.YLabel("t-SNE Component 2");
 
-        string outputPath = $"{ModelName}_{bottleneckDim}_tsne.png";
+        string outputPath = $"{ModelName}_{dim}_{n}_tsne.png";
         plt.SavePng(outputPath, 1200, 900);
 
         ForegroundColor = ConsoleColor.Green;

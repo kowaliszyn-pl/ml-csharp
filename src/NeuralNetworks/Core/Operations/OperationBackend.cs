@@ -268,6 +268,14 @@ public static class OperationBackend
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float[,] TanhOutput(float[,] input)
         => Current.TanhOutput(input);
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] SoftsignOutput(float[,] input)
+        => Current.SoftsignOutput(input);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] SoftsignInputGradient(float[,] outputGradient, float[,] input)
+        => Current.SoftsignInputGradient(outputGradient, input);
 
     /// <summary>
     /// Applies the hyperbolic tangent function element-wise to the input.

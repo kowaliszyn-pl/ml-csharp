@@ -21,6 +21,22 @@ namespace NeuralNetworks.Core;
 /// </remarks>
 public static class ArrayExtensions
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Abs(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                res[row, col] = MathF.Abs(source[row, col]);
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Adds a scalar value to each element of the source.
     /// </summary>
@@ -503,6 +519,30 @@ public static class ArrayExtensions
             for (int col = 0; col < columns; col++)
             {
                 res[row, col] = source[row, col] / scalar;
+            }
+        }
+
+        return res;
+    }
+
+    /// <summary>
+    /// Divides each element of the two-dimensional array by the corresponding element of another array elementwise.
+    /// </summary>
+    /// <param name="source">The array whose elements will be divided.</param>
+    /// <param name="divisor">The array containing the divisors.</param>
+    /// <returns>A new array containing the division results.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] DivideElementwise(this float[,] source, float[,] divisor)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                res[row, col] = source[row, col] / divisor[row, col];
             }
         }
 

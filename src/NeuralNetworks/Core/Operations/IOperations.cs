@@ -66,6 +66,9 @@ public interface IOperations
     public float[,] SoftplusOutput(float[,] input);
     public float[,] SoftplusInputGradient(float[,] outputGradient, float[,] output);
 
+    public float[,] SoftsignOutput(float[,] input);
+    public float[,] SoftsignInputGradient(float[,] outputGradient, float[,] input);
+
     public float[,] TanhOutput(float[,] source);
 
     /// <summary>

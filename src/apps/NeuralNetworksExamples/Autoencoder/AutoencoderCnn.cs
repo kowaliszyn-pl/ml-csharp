@@ -46,7 +46,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
                 kernels: 32,
                 kernelHeight: 3,
                 kernelWidth: 3,
-                activationFunction: new LeakyReLU4D(),
+                activationFunction: new Tanh4D(),
                 paramInitializer: initializer
             ))
             // 32 * 28 * 28
@@ -113,7 +113,7 @@ internal class AutoencoderCnn
     private const int BatchSize = 200;
     private const int LogEveryEpochs = 1;
 
-    private const float InitialLearningRate = 0.002f;
+    private const float InitialLearningRate = 0.01f;
     private const float FinalLearningRate = 0.0005f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
@@ -226,6 +226,7 @@ internal class AutoencoderCnn
         train = train.GetRows(0..Program.MaxSamplesToVisualize);
 
         float[,] labels = train.GetColumn(0);
+        train = ExtractFeatureColumns(train);
 
         float[,,,] xTrain = TanhNormalizeAndReshapeTo4D(train);
 
@@ -282,11 +283,11 @@ internal class AutoencoderCnn
         }
 
         plt.ShowLegend();
-        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={bottleneckDim})");
+        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={dim}, points={n})");
         plt.XLabel("t-SNE Component 1");
         plt.YLabel("t-SNE Component 2");
 
-        string outputPath = $"{ModelName}_{bottleneckDim}_tsne.png";
+        string outputPath = $"{ModelName}_{dim}_{n}_tsne.png";
         plt.SavePng(outputPath, 1200, 900);
 
         ForegroundColor = ConsoleColor.Green;

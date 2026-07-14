@@ -435,6 +435,18 @@ public class OperationsArray : IOperations
         return outputGradient.MultiplyElementwise(sigmoidBackward);
     }
 
+    public virtual float[,] SoftsignOutput(float[,] input)
+    {
+        return input.DivideElementwise(input.Abs().Add(1f));
+    }
+
+    public virtual float[,] SoftsignInputGradient(float[,] outputGradient, float[,] input)
+    {
+        float[,] onePlusAbs = input.Abs().Add(1f);
+        float[,] onePlusAbsSquared = onePlusAbs.MultiplyElementwise(onePlusAbs);
+        return outputGradient.DivideElementwise(onePlusAbsSquared);
+    }
+
     public virtual float[,] TanhOutput(float[,] input)
         => input.Tanh();
 
