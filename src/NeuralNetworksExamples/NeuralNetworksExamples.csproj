@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\NeuralNetworks\NeuralNetworks.csproj" />
+	  <ProjectReference Include="..\NeuralNetworks\NeuralNetworks.csproj" />
 	</ItemGroup>
 
 </Project>
