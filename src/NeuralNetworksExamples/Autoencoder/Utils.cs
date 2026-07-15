@@ -2,10 +2,6 @@
 // File name: Utils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 using Accord.MachineLearning.Clustering;
 
 using ScottPlot;
@@ -21,7 +17,7 @@ internal static class Utils
     {
         WriteLine($"Saving original and reconstructed images.");
 
-        int[] selectedImages = [20, 21, 22, 23, 30];
+        int[] selectedImages = [22, 23, 31, 32, 33, 35];
 
         foreach (int index in selectedImages)
         {

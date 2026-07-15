@@ -2,8 +2,6 @@
 // File name: AutoencoderDense.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using Accord.MachineLearning.Clustering;
-
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
@@ -19,12 +17,9 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
-using ScottPlot;
-using ScottPlot.Plottables;
-
 using static System.Console;
-using static NeuralNetworksExamples.Utils;
 using static NeuralNetworksExamples.Autoencoder.Utils;
+using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
