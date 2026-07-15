@@ -24,6 +24,7 @@ using ScottPlot.Plottables;
 
 using static System.Console;
 using static NeuralNetworksExamples.Utils;
+using static NeuralNetworksExamples.Autoencoder.Utils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
@@ -184,15 +185,7 @@ internal class AutoencoderDense
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-        WriteLine($"Saving original and reconstructed images.");
-
-        int[] selectedImages = [20, 21, 22, 23, 30];
-
-        foreach (int index in selectedImages)
-        {
-            Drawing.SaveMnistPicture(100, index, originalImages, $"{ModelName}_{bottleneckDim}_original_{index}");
-            Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{ModelName}_{bottleneckDim}_reconstructed_{index}");
-        }
+        SaveReconstructionComparison(ModelName, bottleneckDim, originalImages, reconstructedImages);
     }
 
     internal static void VisualizeLatentSpace()
@@ -217,7 +210,7 @@ internal class AutoencoderDense
 
         // Get latent representation
         WriteLine("Encoding data to latent space...");
-        float[,] debugOutput = model.Forward(xTrain, false);
+        _ = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();
 
         // Convert to double[][] for Accord.NET
