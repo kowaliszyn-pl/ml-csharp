@@ -169,7 +169,7 @@ internal class AutoencoderCnn
 
         // Save the model
 
-        string modelPath = GetFileName(bottleneckDim);
+        string modelPath = GetFileName(ModelName, bottleneckDim);
         model.SaveParams(modelPath, "Final trained model.");
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
@@ -179,7 +179,7 @@ internal class AutoencoderCnn
     internal static void Load()
     {
         int bottleneckDim = Program.LatentSpaceDimensions;
-        string modelPath = GetFileName(bottleneckDim);
+        string modelPath = GetFileName(ModelName, bottleneckDim);
         AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters loaded from {modelPath}.");
@@ -209,7 +209,7 @@ internal class AutoencoderCnn
 
         WriteLine("Loading model and data...");
 
-        string modelPath = GetFileName(bottleneckDim);
+        string modelPath = GetFileName(ModelName, bottleneckDim);
         AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
 
         // Load data and labels
@@ -228,66 +228,8 @@ internal class AutoencoderCnn
         _ = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();
 
-        // Convert to double[][] for Accord.NET
-        int n = encoded.GetLength(0);
-        int dim = encoded.GetLength(1);
-        double[][] encodedDouble = new double[n][];
-        for (int i = 0; i < n; i++)
-        {
-            encodedDouble[i] = new double[dim];
-            for (int j = 0; j < dim; j++)
-            {
-                encodedDouble[i][j] = encoded[i, j];
-            }
-        }
-
-        // Apply t-SNE
-        WriteLine("Applying t-SNE reduction...");
-        TSNE tsne = new()
-        {
-            NumberOfOutputs = 2,
-            Perplexity = 30,
-        };
-
-        double[][] reduced = tsne.Transform(encodedDouble);
-
-        // Create plot
-        WriteLine("Creating visualization...");
-        Plot plt = new();
-
-        // Group points by digit
-        for (int digit = 0; digit <= 9; digit++)
-        {
-            List<double> xPoints = [];
-            List<double> yPoints = [];
-
-            for (int i = 0; i < n; i++)
-            {
-                if ((int)labels[i, 0] == digit)
-                {
-                    xPoints.Add(reduced[i][0]);
-                    yPoints.Add(reduced[i][1]);
-                }
-            }
-
-            Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
-            scatter.LegendText = $"Digit {digit}";
-            scatter.MarkerSize = 5;
-        }
-
-        plt.ShowLegend();
-        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={dim}, points={n})");
-        plt.XLabel("t-SNE Component 1");
-        plt.YLabel("t-SNE Component 2");
-
-        string outputPath = $"{ModelName}_{dim}_{n}_tsne.png";
-        plt.SavePng(outputPath, 1200, 900);
-
-        ForegroundColor = ConsoleColor.Green;
-        WriteLine($"t-SNE plot saved to {outputPath}");
-        ResetColor();
+        VisualizeWithTSNE(ModelName, labels, encoded);
     }
 
-    private static string GetFileName(int bottleneckDim)
-        => $"{ModelName}_{bottleneckDim}.json";
+    
 }
