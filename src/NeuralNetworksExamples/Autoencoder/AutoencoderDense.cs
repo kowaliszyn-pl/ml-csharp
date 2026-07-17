@@ -39,7 +39,7 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
             .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer))
 
             // Bottleneck
-            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new TanhScaled2D(200), initializer))
+            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new TanhInputScaled2D(200), initializer))
 
             // Decoder
             .AddLayer(_firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer))
