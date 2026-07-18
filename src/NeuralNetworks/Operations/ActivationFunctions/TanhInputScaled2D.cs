@@ -31,7 +31,7 @@ public class TanhInputScaled2D(float scale) : ActivationFunction<float[,], float
         => TanhInputScaledOutput(Input, scale);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
-        => TanhInputScaledInputGradient(Output, outputGradient, scale);
+        => TanhInputScaledInputGradient(outputGradient, Output, scale);
 
     public override string ToString()
         => $"TanhScaled2D (scale={scale})";
