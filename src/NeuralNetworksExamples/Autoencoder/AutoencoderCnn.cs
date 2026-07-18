@@ -104,7 +104,7 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
 internal class AutoencoderCnn
 {
     private const int RandomSeed = 260423;
-    private const int Epochs = 10;
+    private const int Epochs = 1; // 10;
     private const int BatchSize = 200;
     private const int LogEveryEpochs = 1;
 

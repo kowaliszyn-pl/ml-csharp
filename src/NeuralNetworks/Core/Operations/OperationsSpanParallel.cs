@@ -691,4 +691,90 @@ public class OperationsSpanParallel : OperationsSpan
     #endregion
 
     #endregion
+
+    #region Transformations
+
+    public override float[,,,] MaxPooling2DOutput(float[,,,] input, int sizeHeight, int sizeWidth, out (int MaxIndexH, int MaxIndexW)[,,,] maxIndices)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        Debug.Assert(inputHeight % sizeHeight == 0, "Input height must be divisible by pooling size height.");
+        Debug.Assert(inputWidth % sizeWidth == 0, "Input width must be divisible by pooling size width.");
+
+        int outputHeight = inputHeight / sizeHeight;
+        int outputWidth = inputWidth / sizeWidth;
+
+        float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
+        (int MaxIndexH, int MaxIndexW)[,,,] maxIndicesArray = new (int MaxIndexH, int MaxIndexW)[batchSize, channels, outputHeight, outputWidth];
+
+        //ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+        //Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+
+        // pre-compute sizes for offsets
+        int inputCSize = inputHeight * inputWidth;
+        int inputBSize = channels * inputCSize;
+        int outputCSize = outputHeight * outputWidth;
+        int outputBSize = channels * outputCSize;
+
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+            //maxIndices = new (int MaxIndexH, int MaxIndexW)[batchSize, channels, outputHeight, outputWidth];
+
+            for (int b = range.Item1; b < range.Item2; b++)
+            {
+                int inputBIndex = b * inputBSize;
+                int outputBIndex = b * outputBSize;
+                for (int c = 0; c < channels; c++)
+                {
+                    int inputCIndex = c * inputCSize;
+                    int outputCIndex = c * outputCSize;
+                    for (int oh = 0; oh < outputHeight; oh++)
+                    {
+                        int outputHIndex = oh * outputWidth;
+                        for (int ow = 0; ow < outputWidth; ow++)
+                        {
+                            float maxVal = float.NegativeInfinity;
+                            int maxIdxH = -1;
+                            int maxIdxW = -1;
+                            for (int kh = 0; kh < sizeHeight; kh++)
+                            {
+                                int ih = oh * sizeHeight + kh;
+                                if (ih < inputHeight)
+                                {
+                                    int inputHIndex = ih * inputWidth;
+                                    for (int kw = 0; kw < sizeWidth; kw++)
+                                    {
+                                        int iw = ow * sizeWidth + kw;
+                                        if (iw < inputWidth)
+                                        {
+                                            // val = input[b, c, ih, iw]
+                                            float val = inputSpan[inputBIndex + inputCIndex + inputHIndex + iw];
+                                            if (val > maxVal)
+                                            {
+                                                maxVal = val;
+                                                maxIdxH = ih;
+                                                maxIdxW = iw;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            // output[b, c, oh, ow] = maxVal;
+                            outputSpan[outputBIndex + outputCIndex + outputHIndex + ow] = maxVal;
+                            maxIndicesArray[b, c, oh, ow] = (maxIdxH, maxIdxW);
+                        }
+                    }
+                }
+            }
+        });
+        maxIndices = maxIndicesArray;
+        return output;
+    }
+
+    #endregion
 }

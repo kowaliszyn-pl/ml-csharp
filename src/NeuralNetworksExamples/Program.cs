@@ -25,7 +25,7 @@ namespace NeuralNetworksExamples;
 
 internal static class Program
 {
-    private const string DataFolder = "..\\..\\..\\..\\..\\..\\data";
+    private const string DataFolder = "..\\..\\..\\..\\..\\data";
     internal const string MnistDataFolderPath = DataFolder + "\\MNIST";
     internal const string BostonHousingDataFilePath = DataFolder + "\\Boston\\BostonHousing.csv";
     internal const string Ecg200DataFolderPath = DataFolder + "\\ecg200";
