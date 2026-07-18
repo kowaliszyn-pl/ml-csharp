@@ -7,15 +7,20 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
 /// <summary>
-/// Represents a bipolar sigmoid activation operation that applies a scaled sigmoid function shifted to the range [-0.5,
-/// 0.5].
+/// Bipolar (Symmetric) Sigmoid activation function.
 /// </summary>
-/// <remarks>The bipolar sigmoid function is commonly used in neural networks to introduce non-linearity while
-/// centering the output around zero. This operation computes output as scale × (σ(x) – 0.5), where σ(x) is the standard
-/// sigmoid function. Setting an appropriate scale can affect the gradient flow and the range of activations.
-/// <para>
-/// With scale = 2: y = 2σ(x) − 1, which is exactly the bipolar (a.k.a. symmetric/zero-centered) sigmoid. It’s mathematically identical to tanh(x/2). For general scale s: y = (s/2) · tanh(x/2), i.e., a scaled tanh.Range is [−s/2, s/2].
-/// </para>
+/// <remarks>
+/// <para><b>Formula:</b> f(x) = scale · (σ(x) - 0.5) = scale · (1/(1 + e^(-x)) - 0.5)</para>
+/// <para><b>Special case (scale=2):</b> f(x) = 2σ(x) - 1, which is mathematically equivalent to tanh(x/2)</para>
+/// <para><b>Input Gradient Formula:</b> ∂L/∂x = ∂L/∂y · scale · σ(x) · (1 - σ(x))</para>
+/// <para><b>Output Range:</b> (-scale/2, scale/2)</para>
+/// <para><b>Description:</b> A variant of the <see cref="Sigmoid"/> function that centers the output around zero by subtracting 0.5 and applying a scale factor. 
+/// This creates a zero-centered activation function, which can improve gradient flow compared to the standard sigmoid. 
+/// The scale parameter allows control over the output range, enabling flexibility in network design.</para>
+/// <para><b>Remarks:</b> With scale = 2, this produces the classic bipolar sigmoid f(x) = 2σ(x) - 1, ranging from (-1, 1), 
+/// which is mathematically identical to tanh(x/2). For general scale s, it produces a scaled tanh: f(x) = (s/2) · tanh(x/2). 
+/// The zero-centered nature helps mitigate the zigzag gradient updates that can occur with non-zero-centered activations like standard sigmoid. 
+/// However, it still inherits the vanishing gradient problem from the sigmoid function.</para>
 /// </remarks>
 /// <param name="scale">The scaling factor applied to the output of the sigmoid function. Must be non-zero.</param>
 public class BipolarSigmoid(float scale = 1f) : ActivationFunction<float[,], float[,]>

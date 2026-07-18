@@ -24,6 +24,18 @@ public abstract class Operation
     public abstract Type GetInputType();
     public abstract object Forward(object input, bool inference);
     public abstract object Backward(object outputGradient);
+
+    /// <summary>
+    /// Returns a string that represents the current operation.
+    /// </summary>
+    /// <returns>
+    /// A string that represents the current operation.
+    /// </returns>
+    /// <remarks>
+    /// It is used in a layer/model description.
+    /// </remarks>
+    public override string? ToString() 
+        => "Operation " + GetType().Name;
 }
 
 /// <summary>
