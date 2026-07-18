@@ -708,10 +708,9 @@ public class OperationsSpanParallel : OperationsSpan
         int outputWidth = inputWidth / sizeWidth;
 
         float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
-        (int MaxIndexH, int MaxIndexW)[,,,] maxIndicesArray = new (int MaxIndexH, int MaxIndexW)[batchSize, channels, outputHeight, outputWidth];
 
-        //ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
-        //Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+        // Create a new array, as we can't work with the out parameter directly in a parallel loop
+        (int MaxIndexH, int MaxIndexW)[,,,] maxIndicesArray = new (int MaxIndexH, int MaxIndexW)[batchSize, channels, outputHeight, outputWidth];
 
         // pre-compute sizes for offsets
         int inputCSize = inputHeight * inputWidth;
@@ -723,7 +722,6 @@ public class OperationsSpanParallel : OperationsSpan
         {
             ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
             Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
-            //maxIndices = new (int MaxIndexH, int MaxIndexW)[batchSize, channels, outputHeight, outputWidth];
 
             for (int b = range.Item1; b < range.Item2; b++)
             {
