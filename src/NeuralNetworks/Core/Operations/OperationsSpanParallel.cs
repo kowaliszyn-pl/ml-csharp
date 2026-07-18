@@ -353,15 +353,14 @@ public class OperationsSpanParallel : OperationsSpan
 
         Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
         {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+
             for (int b = range.Item1; b < range.Item2; b++)
             {
-
                 int inputBIndex = b * inputBSize;
                 int outputBIndex = b * outputBSize;
-
-                ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
-                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
-                Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
 
                 //Parallel.For(0, outputChannels, oc =>
                 for (int oc = 0; oc < outputChannels; oc++)
@@ -441,59 +440,65 @@ public class OperationsSpanParallel : OperationsSpan
         int inputGradientCSize = inputHeight * inputWidth;
         int inputGradientBSize = inputChannels * inputGradientCSize;
 
-        Parallel.For(0, batchSize, b =>
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
         {
-            int outputGradientBIndex = b * outputGradientBSize;
-            int inputGradientBIndex = b * inputGradientBSize;
+            ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
 
-            Parallel.For(0, inputChannels, ic =>
+            for (int b = range.Item1; b < range.Item2; b++)
             {
-                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0, 0, 0], weights.Length);
-                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
-                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
+                int outputGradientBIndex = b * outputGradientBSize;
+                int inputGradientBIndex = b * inputGradientBSize;
 
-                int weightsInputCIndex = ic * weightsInputCSize;
-                int inputGradientCIndex = ic * inputGradientCSize;
-                for (int ih = 0; ih < inputHeight; ih++)
+                //Parallel.For(0, inputChannels, ic =>
+                for (int ic = 0; ic < inputChannels; ic++)
                 {
-                    int inputGradientHIndex = ih * inputWidth;
-                    int ihPlusPad = ih + paddingHeight;
-                    for (int iw = 0; iw < inputWidth; iw++)
                     {
-                        float sum = 0f;
-
-                        int iwPlusPad = iw + paddingWidth;
-                        for (int oc = 0; oc < outputGradientChannels; oc++)
+                        int weightsInputCIndex = ic * weightsInputCSize;
+                        int inputGradientCIndex = ic * inputGradientCSize;
+                        for (int ih = 0; ih < inputHeight; ih++)
                         {
-                            int outputGradientCIndex = oc * outputGradientCSize;
-                            int weightsOutputCIndex = oc * weightsOutputCSize;
-                            for (int kh = 0; kh < kernelHeight; kh++)
+                            int inputGradientHIndex = ih * inputWidth;
+                            int ihPlusPad = ih + paddingHeight;
+                            for (int iw = 0; iw < inputWidth; iw++)
                             {
-                                int oh = Math.DivRem(ihPlusPad - kh * dilatationHeight, strideHeight, out int remH);
-                                // int oh = ihPlusPad - kh;
-                                if (oh >= 0 && oh < outputGradientHeight && remH == 0)
+                                float sum = 0f;
+
+                                int iwPlusPad = iw + paddingWidth;
+                                for (int oc = 0; oc < outputGradientChannels; oc++)
                                 {
-                                    int weightsKernelHIndex = kh * kernelWidth;
-                                    int outputHIndex = oh * outputGradientWidth;
-                                    for (int kw = 0; kw < kernelWidth; kw++)
+                                    int outputGradientCIndex = oc * outputGradientCSize;
+                                    int weightsOutputCIndex = oc * weightsOutputCSize;
+                                    for (int kh = 0; kh < kernelHeight; kh++)
                                     {
-                                        int ow = Math.DivRem(iwPlusPad - kw * dilatationWidth, strideWidth, out int remW);
-                                        // int ow = iwPlusPad - kw;
-                                        if (ow >= 0 && ow < outputGradientWidth && remW == 0)
+                                        int oh = Math.DivRem(ihPlusPad - kh * dilatationHeight, strideHeight, out int remH);
+                                        // int oh = ihPlusPad - kh;
+                                        if (oh >= 0 && oh < outputGradientHeight && remH == 0)
                                         {
-                                            // sum += outputGradient[b, oc, oh, ow] * weights[ic, oc, kh, kw];
-                                            sum += outputGradientSpan[outputGradientBIndex + outputGradientCIndex + outputHIndex + ow]
-                                                * weightsSpan[weightsInputCIndex + weightsOutputCIndex + weightsKernelHIndex + kw];
+                                            int weightsKernelHIndex = kh * kernelWidth;
+                                            int outputHIndex = oh * outputGradientWidth;
+                                            for (int kw = 0; kw < kernelWidth; kw++)
+                                            {
+                                                int ow = Math.DivRem(iwPlusPad - kw * dilatationWidth, strideWidth, out int remW);
+                                                // int ow = iwPlusPad - kw;
+                                                if (ow >= 0 && ow < outputGradientWidth && remW == 0)
+                                                {
+                                                    // sum += outputGradient[b, oc, oh, ow] * weights[ic, oc, kh, kw];
+                                                    sum += outputGradientSpan[outputGradientBIndex + outputGradientCIndex + outputHIndex + ow]
+                                                        * weightsSpan[weightsInputCIndex + weightsOutputCIndex + weightsKernelHIndex + kw];
+                                                }
+                                            }
                                         }
                                     }
                                 }
+                                // inputGradient[b, ic, ih, iw] = sum;
+                                inputGradientSpan[inputGradientBIndex + inputGradientCIndex + inputGradientHIndex + iw] = sum;
                             }
                         }
-                        // inputGradient[b, ic, ih, iw] = sum;
-                        inputGradientSpan[inputGradientBIndex + inputGradientCIndex + inputGradientHIndex + iw] = sum;
                     }
                 }
-            });
+            }
         });
 
         return inputGradient;
@@ -521,59 +526,63 @@ public class OperationsSpanParallel : OperationsSpan
         int paramGradientOutputCSize = kernelHeight * kernelWidth;
         int paramGradientInputCSize = outputGradientChannels * paramGradientOutputCSize;
 
-        Parallel.For(0, batchSize, b =>
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
         {
-            int outputGradientBIndex = b * outputGradientBSize;
-            int inputBIndex = b * inputBSize;
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+            Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0, 0, 0], paramGradient.Length);
 
-            Parallel.For(0, inputChannels, ic =>
+            for (int b = range.Item1; b < range.Item2; b++)
             {
-                ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
-                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
-                Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0, 0, 0], paramGradient.Length);
+                int outputGradientBIndex = b * outputGradientBSize;
+                int inputBIndex = b * inputBSize;
 
-                int inputCIndex = ic * inputCSize;
-                int paramGradientInputCIndex = ic * paramGradientInputCSize;
-
-                for (int oc = 0; oc < outputGradientChannels; oc++)
+                // Parallel.For(0, inputChannels, ic =>
+                for (int ic = 0; ic < inputChannels; ic++)
                 {
-                    int outputGradientOutputCIndex = oc * outputGradientOutputCSize;
-                    int paramGradientOutputCIndex = oc * paramGradientOutputCSize;
-                    for (int kh = 0; kh < kernelHeight; kh++)
+                    int inputCIndex = ic * inputCSize;
+                    int paramGradientInputCIndex = ic * paramGradientInputCSize;
+
+                    for (int oc = 0; oc < outputGradientChannels; oc++)
                     {
-                        int paramGradientKernelHIndex = kh * kernelWidth;
-                        int khMinusPad = kh * dilatationHeight - paddingHeight;
-                        for (int kw = 0; kw < kernelWidth; kw++)
+                        int outputGradientOutputCIndex = oc * outputGradientOutputCSize;
+                        int paramGradientOutputCIndex = oc * paramGradientOutputCSize;
+                        for (int kh = 0; kh < kernelHeight; kh++)
                         {
-                            int kwMinusPad = kw * dilatationWidth - paddingWidth;
-                            float sum = 0f;
-                            for (int oh = 0; oh < outputGradientHeight; oh++)
+                            int paramGradientKernelHIndex = kh * kernelWidth;
+                            int khMinusPad = kh * dilatationHeight - paddingHeight;
+                            for (int kw = 0; kw < kernelWidth; kw++)
                             {
-                                // int ih = oh * strideHeight + kh * dilatationHeight - paddingHeight;
-                                int ih = oh * strideHeight + khMinusPad;
-                                if (ih >= 0 && ih < inputHeight)
+                                int kwMinusPad = kw * dilatationWidth - paddingWidth;
+                                float sum = 0f;
+                                for (int oh = 0; oh < outputGradientHeight; oh++)
                                 {
-                                    int inputHIndex = ih * inputWidth;
-                                    int outputGradientHIndex = oh * outputGradientWidth;
-                                    for (int ow = 0; ow < outputGradientWidth; ow++)
+                                    // int ih = oh * strideHeight + kh * dilatationHeight - paddingHeight;
+                                    int ih = oh * strideHeight + khMinusPad;
+                                    if (ih >= 0 && ih < inputHeight)
                                     {
-                                        // int iw = ow * strideWidth + kw * dilatationWidth - paddingWidth;
-                                        int iw = ow * strideWidth + kwMinusPad;
-                                        if (iw >= 0 && iw < inputWidth)
+                                        int inputHIndex = ih * inputWidth;
+                                        int outputGradientHIndex = oh * outputGradientWidth;
+                                        for (int ow = 0; ow < outputGradientWidth; ow++)
                                         {
-                                            // sum += outputGradient[b, oc, oh, ow] * input[b, ic, ih, iw]
-                                            sum += outputGradientSpan[outputGradientBIndex + outputGradientOutputCIndex + outputGradientHIndex + ow] *
-                                                   inputSpan[inputBIndex + inputCIndex + inputHIndex + iw];
+                                            // int iw = ow * strideWidth + kw * dilatationWidth - paddingWidth;
+                                            int iw = ow * strideWidth + kwMinusPad;
+                                            if (iw >= 0 && iw < inputWidth)
+                                            {
+                                                // sum += outputGradient[b, oc, oh, ow] * input[b, ic, ih, iw]
+                                                sum += outputGradientSpan[outputGradientBIndex + outputGradientOutputCIndex + outputGradientHIndex + ow] *
+                                                       inputSpan[inputBIndex + inputCIndex + inputHIndex + iw];
+                                            }
                                         }
                                     }
                                 }
+                                // paramGradient[ic, oc, kh, kw] += sum;
+                                paramGradientSpan[paramGradientInputCIndex + paramGradientOutputCIndex + paramGradientKernelHIndex + kw] += sum;
                             }
-                            // paramGradient[ic, oc, kh, kw] += sum;
-                            paramGradientSpan[paramGradientInputCIndex + paramGradientOutputCIndex + paramGradientKernelHIndex + kw] += sum;
                         }
                     }
                 }
-            });
+            }
         });
 
         return paramGradient;
@@ -783,6 +792,95 @@ public class OperationsSpanParallel : OperationsSpan
         });
         maxIndices = maxIndicesArray;
         return output;
+    }
+
+    public override float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int outputHeight = inputHeight * scaleHeight;
+        int outputWidth = inputWidth * scaleWidth;
+
+        float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
+
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+
+            for (int b = range.Item1; b < range.Item2; b++)
+            {
+                for (int c = 0; c < channels; c++)
+                {
+                    for (int h = 0; h < inputHeight; h++)
+                    {
+                        for (int w = 0; w < inputWidth; w++)
+                        {
+                            float value = inputSpan[b * channels * inputHeight * inputWidth + c * inputHeight * inputWidth + h * inputWidth + w];
+                            for (int sh = 0; sh < scaleHeight; sh++)
+                            {
+                                for (int sw = 0; sw < scaleWidth; sw++)
+                                {
+                                    outputSpan[b * channels * outputHeight * outputWidth + c * outputHeight * outputWidth + (h * scaleHeight + sh) * outputWidth + (w * scaleWidth + sw)] = value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        return output;
+    }
+
+    public override float[,,,] Upsample2DInputGradient(float[,,,] input, float[,,,] outputGradient)
+    {
+        int batchSize = outputGradient.GetLength(0);
+        int channels = outputGradient.GetLength(1);
+        int outputHeight = outputGradient.GetLength(2);
+        int outputWidth = outputGradient.GetLength(3);
+
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        Debug.Assert(outputHeight % inputHeight == 0, "Output height must be divisible by input height.");
+        Debug.Assert(outputWidth % inputWidth == 0, "Output width must be divisible by input width.");
+
+        int scaleHeight = outputHeight / inputHeight;
+        int scaleWidth = outputWidth / inputWidth;
+
+        float[,,,] inputGradient = new float[batchSize, channels, inputHeight, inputWidth];
+
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
+        {
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
+
+            for (int b = range.Item1; b < range.Item2; b++)
+            {
+                for (int c = 0; c < channels; c++)
+                {
+                    for (int h = 0; h < inputHeight; h++)
+                    {
+                        for (int w = 0; w < inputWidth; w++)
+                        {
+                            float sum = 0.0f;
+                            for (int sh = 0; sh < scaleHeight; sh++)
+                            {
+                                for (int sw = 0; sw < scaleWidth; sw++)
+                                {
+                                    sum += outputGradientSpan[b * channels * outputHeight * outputWidth + c * outputHeight * outputWidth + (h * scaleHeight + sh) * outputWidth + (w * scaleWidth + sw)];
+                                }
+                            }
+                            inputGradientSpan[b * channels * inputHeight * inputWidth + c * inputHeight * inputWidth + h * inputWidth + w] = sum;
+                        }
+                    }
+                }
+            }
+        });
+        return inputGradient;
     }
 
     #endregion
