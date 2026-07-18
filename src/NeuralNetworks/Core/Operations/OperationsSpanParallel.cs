@@ -48,7 +48,7 @@ public class OperationsSpanParallel : OperationsSpan
         Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
 
         float[,,,] gradient = new float[batchSize, errors.GetLength(1), errors.GetLength(2), errors.GetLength(3)];
-        
+
         float scaleFactor = (mseReduction == MseReduction.ElementMean) ? 2f / errors.Length : 2f / batchSize;
         int gradientSpanLength = gradient.Length;
         //Parallel.For, gradient.Length, i =>
@@ -160,7 +160,7 @@ public class OperationsSpanParallel : OperationsSpan
             Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
             inputGradientSpan[i] = inputSpan[i] > 0 ? outputGradientSpan[i] * beta : 0f;
         });
-        
+
         return inputGradient;
     }
 
@@ -276,14 +276,14 @@ public class OperationsSpanParallel : OperationsSpan
             ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
             ReadOnlySpan<float> biasSpan = MemoryMarshal.CreateReadOnlySpan(ref bias[0], bias.Length);
             Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
-            
+
             int channelIndex = (i / spatialSize) % channels;
             outputSpan[i] = inputSpan[i] + biasSpan[channelIndex];
         });
 
         return output;
     }
-    
+
     public override float[] BiasAddConv2DParamGradient(float[,,,] outputGradient)
     {
         int batchSize = outputGradient.GetLength(0);
@@ -593,24 +593,27 @@ public class OperationsSpanParallel : OperationsSpan
 
         float[,] output = new float[batchSize, outputFeatures];
 
-        Parallel.For(0, batchSize, b =>
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
         {
             ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
             ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
             Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
 
-            int inputBIndex = b * inputFeatures;
-            int outputBIndex = b * outputFeatures;
-            for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            for (int b = range.Item1; b < range.Item2; b++)
             {
-                float sum = 0f;
-                for (int ifeature = 0; ifeature < inputFeatures; ifeature++)
+                int inputBIndex = b * inputFeatures;
+                int outputBIndex = b * outputFeatures;
+                for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
                 {
-                    // sum += input[b, inputFeature] * weights[inputFeature, outputFeature];
-                    sum += inputSpan[inputBIndex + ifeature] * weightsSpan[ifeature * outputFeatures + ofeature];
+                    float sum = 0f;
+                    for (int ifeature = 0; ifeature < inputFeatures; ifeature++)
+                    {
+                        // sum += input[b, inputFeature] * weights[inputFeature, outputFeature];
+                        sum += inputSpan[inputBIndex + ifeature] * weightsSpan[ifeature * outputFeatures + ofeature];
+                    }
+                    // output[b, outputFeature] = sum;
+                    outputSpan[outputBIndex + ofeature] = sum;
                 }
-                // output[b, outputFeature] = sum;
-                outputSpan[outputBIndex + ofeature] = sum;
             }
         });
 
@@ -628,27 +631,33 @@ public class OperationsSpanParallel : OperationsSpan
 
         float[,] inputGradient = new float[batchSize, inputFeatures];
 
-        Parallel.For(0, batchSize, b =>
+        Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
         {
-            int outputGradientBIndex = b * outputFeatures;
-            int inputGradientBIndex = b * inputFeatures;
-
-            Parallel.For(0, inputFeatures, inputFeature =>
-            //for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+            ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+            for (int b = range.Item1; b < range.Item2; b++)
             {
-                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-                ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
-                Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
-                int inputFeatureIndex = inputFeature * outputFeatures;
-                float sum = 0f;
-                for (int outputFeature = 0; outputFeature < outputFeatures; outputFeature++)
+                int outputGradientBIndex = b * outputFeatures;
+                int inputGradientBIndex = b * inputFeatures;
+
+                //Parallel.For(0, inputFeatures, inputFeature =>
+                for (int inputFeature = 0; inputFeature < inputFeatures; inputFeature++)
                 {
-                    // sum += outputGradient[b, outputFeature] * weights[inputFeature, outputFeature];
-                    sum += outputGradientSpan[outputGradientBIndex + outputFeature] * weightsSpan[inputFeatureIndex + outputFeature];
-                }
-                // inputGradient[b, inputFeature] = sum;
-                inputGradientSpan[inputGradientBIndex + inputFeature] = sum;
-            });
+                    //ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+                    //ReadOnlySpan<float> weightsSpan = MemoryMarshal.CreateReadOnlySpan(ref weights[0, 0], weights.Length);
+                    //Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+                    int inputFeatureIndex = inputFeature * outputFeatures;
+                    float sum = 0f;
+                    for (int outputFeature = 0; outputFeature < outputFeatures; outputFeature++)
+                    {
+                        // sum += outputGradient[b, outputFeature] * weights[inputFeature, outputFeature];
+                        sum += outputGradientSpan[outputGradientBIndex + outputFeature] * weightsSpan[inputFeatureIndex + outputFeature];
+                    }
+                    // inputGradient[b, inputFeature] = sum;
+                    inputGradientSpan[inputGradientBIndex + inputFeature] = sum;
+                } //);
+            }
         });
 
         return inputGradient;
@@ -664,26 +673,28 @@ public class OperationsSpanParallel : OperationsSpan
 
         float[,] paramGradient = new float[inputFeatures, outputFeatures];
 
-        Parallel.For(0, inputFeatures, ifeature =>
+        Parallel.ForEach(Partitioner.Create(0, inputFeatures), range =>
         {
-            int paramGradientInputFeatureIndex = ifeature * outputFeatures;
-
-            Parallel.For(0, outputFeatures, ofeature =>
-            //for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+            Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0], paramGradient.Length);
+            for (int ifeature = range.Item1; ifeature < range.Item2; ifeature++)
             {
-                ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
-                ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
-                Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0], paramGradient.Length);
+                int paramGradientInputFeatureIndex = ifeature * outputFeatures;
 
-                float sum = 0f;
-                for (int b = 0; b < batchSize; b++)
+                // Parallel.For(0, outputFeatures, ofeature =>
+                for (int ofeature = 0; ofeature < outputFeatures; ofeature++)
                 {
-                    // sum += input[b, inputFeature] * outputGradient[b, outputFeature];
-                    sum += inputSpan[b * inputFeatures + ifeature] * outputGradientSpan[b * outputFeatures + ofeature];
+                    float sum = 0f;
+                    for (int b = 0; b < batchSize; b++)
+                    {
+                        // sum += input[b, inputFeature] * outputGradient[b, outputFeature];
+                        sum += inputSpan[b * inputFeatures + ifeature] * outputGradientSpan[b * outputFeatures + ofeature];
+                    }
+                    // paramGradient[inputFeature, outputFeature] = sum;
+                    paramGradientSpan[paramGradientInputFeatureIndex + ofeature] = sum;
                 }
-                // paramGradient[inputFeature, outputFeature] = sum;
-                paramGradientSpan[paramGradientInputFeatureIndex + ofeature] = sum;
-            });
+            }
         });
         return paramGradient;
     }
