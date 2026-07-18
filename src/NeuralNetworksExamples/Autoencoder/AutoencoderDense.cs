@@ -79,7 +79,7 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
 internal class AutoencoderDense
 {
     private const int RandomSeed = 260710;
-    private const int Epochs = 15;
+    private const int Epochs = 1;
     private const int BatchSize = 400;
     private const int LogEveryEpochs = 1;
 

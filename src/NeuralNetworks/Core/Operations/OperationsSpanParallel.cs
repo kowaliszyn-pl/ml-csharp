@@ -171,8 +171,6 @@ public class OperationsSpanParallel : OperationsSpan
         int dim3 = input.GetLength(2);
         int dim4 = input.GetLength(3);
 
-        Debug.Assert(dim1 > 0 && dim2 > 0 && dim3 > 0 && dim4 > 0, "All dimensions must be greater than zero.");
-
         float[,,,] output = new float[dim1, dim2, dim3, dim4];
 
         Parallel.For(0, output.Length, i =>
@@ -193,7 +191,6 @@ public class OperationsSpanParallel : OperationsSpan
         int dim2 = outputGradient.GetLength(2);
         int dim3 = outputGradient.GetLength(3);
 
-        Debug.Assert(dim0 > 0 && dim1 > 0 && dim2 > 0 && dim3 > 0, "All dimensions must be greater than zero.");
         Debug.Assert(output.GetLength(0) == dim0 && output.GetLength(1) == dim1 && output.GetLength(2) == dim2 && output.GetLength(3) == dim3, "Shapes of outputGradient and output must match for elementwise operations.");
 
         float[,,,] inputGradient = new float[dim0, dim1, dim2, dim3];
@@ -203,6 +200,46 @@ public class OperationsSpanParallel : OperationsSpan
             ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
             ReadOnlySpan<float> outputSpan = MemoryMarshal.CreateReadOnlySpan(ref output[0, 0, 0, 0], output.Length);
             Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
+
+            float y = outputSpan[i];
+            inputGradientSpan[i] = outputGradientSpan[i] * (1f - (y * y));
+        });
+
+        return inputGradient;
+    }
+
+    public override float[,] TanhOutput(float[,] input)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+
+        float[,] output = new float[dim1, dim2];
+
+        Parallel.For(0, output.Length, i =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
+
+            outputSpan[i] = MathF.Tanh(inputSpan[i]);
+        });
+
+        return output;
+    }
+
+    public override float[,] TanhInputGradient(float[,] outputGradient, float[,] output)
+    {
+        int dim0 = outputGradient.GetLength(0);
+        int dim1 = outputGradient.GetLength(1);
+
+        Debug.Assert(output.GetLength(0) == dim0 && output.GetLength(1) == dim1, "Shapes of outputGradient and output must match for elementwise operations.");
+
+        float[,] inputGradient = new float[dim0, dim1];
+
+        Parallel.For(0, inputGradient.Length, i =>
+        {
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+            ReadOnlySpan<float> outputSpan = MemoryMarshal.CreateReadOnlySpan(ref output[0, 0], output.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
 
             float y = outputSpan[i];
             inputGradientSpan[i] = outputGradientSpan[i] * (1f - (y * y));
