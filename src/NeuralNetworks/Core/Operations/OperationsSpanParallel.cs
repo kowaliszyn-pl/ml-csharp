@@ -248,6 +248,48 @@ public class OperationsSpanParallel : OperationsSpan
         return inputGradient;
     }
 
+    public override float[,] TanhInputScaledOutput(float[,] input, float scale)
+    {
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+
+        float[,] output = new float[dim1, dim2];
+        float reciprocalScale = 1f / scale;
+
+        Parallel.For(0, output.Length, i =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
+
+            outputSpan[i] = MathF.Tanh(inputSpan[i] * reciprocalScale);
+        });
+
+        return output;
+    }
+
+    public override float[,] TanhInputScaledInputGradient(float[,] outputGradient, float[,] output, float scale)
+    {
+        int dim0 = outputGradient.GetLength(0);
+        int dim1 = outputGradient.GetLength(1);
+
+        Debug.Assert(output.GetLength(0) == dim0 && output.GetLength(1) == dim1, "Shapes of outputGradient and output must match for elementwise operations.");
+
+        float[,] inputGradient = new float[dim0, dim1];
+        float reciprocalScale = 1f / scale;
+
+        Parallel.For(0, inputGradient.Length, i =>
+        {
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+            ReadOnlySpan<float> outputSpan = MemoryMarshal.CreateReadOnlySpan(ref output[0, 0], output.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+
+            float y = outputSpan[i];
+            inputGradientSpan[i] = outputGradientSpan[i] * (1f - (y * y)) * reciprocalScale;
+        });
+
+        return inputGradient;
+    }
+
     #endregion
 
     #region Parametric Operations

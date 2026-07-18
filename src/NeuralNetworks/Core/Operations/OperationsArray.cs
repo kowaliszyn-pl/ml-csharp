@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+using ILGPU.Runtime.Cuda;
+
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace NeuralNetworks.Core.Operations;
@@ -480,6 +482,19 @@ public class OperationsArray : IOperations
         float[,,,] tanhBackward = output.AsOnes().Subtract(output.MultiplyElementwise(output));
         return outputGradient.MultiplyElementwise(tanhBackward);
     }
+
+    public virtual float[,] TanhInputScaledInputGradient(float[,] outputGradient, float[,] output, float scale)
+    {
+        float[,] deriv = output
+           .AsOnes()
+           .Subtract(output.MultiplyElementwise(output))
+           .Multiply(1f / scale); // Multiple by a reciprocal scale is quicker than Divide by scale
+
+        return outputGradient.MultiplyElementwise(deriv);
+    }
+
+    public virtual float[,] TanhInputScaledOutput(float[,] input, float scale)
+        => input.Multiply(1f / scale).Tanh();  // Multiple by a reciprocal scale is quicker than Divide by scale
 
     #endregion
 

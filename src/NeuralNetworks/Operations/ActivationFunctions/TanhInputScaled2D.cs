@@ -4,6 +4,8 @@
 
 using NeuralNetworks.Core;
 
+using static NeuralNetworks.Core.Operations.OperationBackend;
+
 namespace NeuralNetworks.Operations.ActivationFunctions;
 
 /// <summary>
@@ -25,20 +27,11 @@ namespace NeuralNetworks.Operations.ActivationFunctions;
 public class TanhInputScaled2D(float scale) : ActivationFunction<float[,], float[,]>
 {
 
-    readonly float _reciprocalScale = 1.0f / scale; // Precompute the inverse of scale for efficiency
-
     protected override float[,] CalcOutput(bool inference)
-        => Input.Multiply(_reciprocalScale).Tanh(); // Multiple by _reciprocalScale is quicker than Divide by scale
+        => TanhInputScaledOutput(Input, scale);
 
     protected override float[,] CalcInputGradient(float[,] outputGradient)
-    {
-        float[,] deriv = Output
-            .AsOnes()
-            .Subtract(Output.MultiplyElementwise(Output))
-            .Multiply(_reciprocalScale); // Multiple by _reciprocalScale is quicker than Divide by scale
-
-        return outputGradient.MultiplyElementwise(deriv);
-    }
+        => TanhInputScaledInputGradient(Output, outputGradient, scale);
 
     public override string ToString()
         => $"TanhScaled2D (scale={scale})";

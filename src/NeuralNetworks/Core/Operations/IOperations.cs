@@ -127,6 +127,10 @@ public interface IOperations
     /// </returns>
     public float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output);
 
+    public float[,] TanhInputScaledInputGradient(float[,] outputGradient, float[,] output, float scale);
+
+    public float[,] TanhInputScaledOutput(float[,] input, float scale);
+
     #endregion
 
     #region Parametric Operations
@@ -191,5 +195,4 @@ public interface IOperations
     public float[,,,] Upsample2DInputGradient(float[,,,] input, float[,,,] outputGradient);
 
     #endregion
-
 }

@@ -330,6 +330,16 @@ public static class OperationBackend
     internal static float[,,,] TanhInputGradient(float[,,,] outputGradient, float[,,,] output)
        => Current.TanhInputGradient(outputGradient, output);
 
+    //==
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] TanhInputScaledOutput(float[,] input, float scale)
+        => Current.TanhInputScaledOutput(input, scale);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static float[,] TanhInputScaledInputGradient(float[,] outputGradient, float[,] output, float scale)
+       => Current.TanhInputScaledInputGradient(outputGradient, output, scale);
+
     #endregion
 
     #region Parametric Operations
