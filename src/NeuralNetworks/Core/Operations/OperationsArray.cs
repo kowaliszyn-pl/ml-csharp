@@ -5,10 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ILGPU.Runtime.Cuda;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace NeuralNetworks.Core.Operations;
 
 /// <summary>
@@ -80,7 +76,7 @@ public class OperationsArray : IOperations
             .Add(oneMinusTarget
                 .MultiplyElementwise(oneMinusSigmoidLog)
             );
-        
+
         return -res.Sum() / batchSize;
     }
 
@@ -109,7 +105,7 @@ public class OperationsArray : IOperations
 
         return errors.Power(2).Sum() / reductionDivisor;
     }
-    
+
     public virtual float[,] MeanSquaredErrorLossGradient(float[,] errors, MseReduction mseReduction)
     {
         int reductionDivisor = mseReduction == MseReduction.ElementMean
@@ -126,8 +122,8 @@ public class OperationsArray : IOperations
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
 
         errors = predicted.Subtract(target);
-        
-        int reductionDivisor = mseReduction == MseReduction.ElementMean 
+
+        int reductionDivisor = mseReduction == MseReduction.ElementMean
             ? errors.Length // all elements 
             : errors.GetLength(0); // batch size (first dimension)
 
@@ -437,10 +433,7 @@ public class OperationsArray : IOperations
         return outputGradient.MultiplyElementwise(sigmoidBackward);
     }
 
-    public virtual float[,] SoftsignOutput(float[,] input)
-    {
-        return input.DivideElementwise(input.Abs().Add(1f));
-    }
+    public virtual float[,] SoftsignOutput(float[,] input) => input.DivideElementwise(input.Abs().Add(1f));
 
     public virtual float[,] SoftsignInputGradient(float[,] outputGradient, float[,] input)
     {
@@ -1217,7 +1210,7 @@ public class OperationsArray : IOperations
                 {
                     for (int ow = 0; ow < outputWidth; ow++)
                     {
-                        var (ih, iw) = maxIndices[b, c, oh, ow];
+                        (int ih, int iw) = maxIndices[b, c, oh, ow];
                         if (ih >= 0 && iw >= 0)
                         {
                             if (ih < inputHeight && iw < inputWidth)
@@ -1314,7 +1307,6 @@ public class OperationsArray : IOperations
         }
         return output;
     }
-
 
     public virtual float[,,,] Upsample2DInputGradient(float[,,,] input, float[,,,] outputGradient)
     {

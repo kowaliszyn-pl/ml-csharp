@@ -1,6 +1,6 @@
 ﻿// Neural Networks in C♯
 // File name: OperationsSpan.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -92,7 +92,7 @@ public class OperationsSpan : OperationsArray
         else
         {
             loss /= batchSize;
-        }   
+        }
         return loss;
     }
 
@@ -734,6 +734,89 @@ public class OperationsSpan : OperationsArray
             }
         }
         return output;
+    }
+
+    public override float[,,,] Upsample2DOutput(float[,,,] input, int scaleHeight, int scaleWidth)
+    {
+        int batchSize = input.GetLength(0);
+        int channels = input.GetLength(1);
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        int outputHeight = inputHeight * scaleHeight;
+        int outputWidth = inputWidth * scaleWidth;
+
+        float[,,,] output = new float[batchSize, channels, outputHeight, outputWidth];
+
+        ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
+        Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0, 0, 0], output.Length);
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < inputHeight; h++)
+                {
+                    for (int w = 0; w < inputWidth; w++)
+                    {
+                        float value = inputSpan[b * channels * inputHeight * inputWidth + c * inputHeight * inputWidth + h * inputWidth + w];
+                        for (int sh = 0; sh < scaleHeight; sh++)
+                        {
+                            for (int sw = 0; sw < scaleWidth; sw++)
+                            {
+                                outputSpan[b * channels * outputHeight * outputWidth + c * outputHeight * outputWidth + (h * scaleHeight + sh) * outputWidth + (w * scaleWidth + sw)] = value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return output;
+    }
+
+    public override float[,,,] Upsample2DInputGradient(float[,,,] input, float[,,,] outputGradient)
+    {
+        int batchSize = outputGradient.GetLength(0);
+        int channels = outputGradient.GetLength(1);
+        int outputHeight = outputGradient.GetLength(2);
+        int outputWidth = outputGradient.GetLength(3);
+
+        int inputHeight = input.GetLength(2);
+        int inputWidth = input.GetLength(3);
+
+        Debug.Assert(outputHeight % inputHeight == 0, "Output height must be divisible by input height.");
+        Debug.Assert(outputWidth % inputWidth == 0, "Output width must be divisible by input width.");
+
+        int scaleHeight = outputHeight / inputHeight;
+        int scaleWidth = outputWidth / inputWidth;
+
+        float[,,,] inputGradient = new float[batchSize, channels, inputHeight, inputWidth];
+
+        ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
+        Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
+
+        for (int b = 0; b < batchSize; b++)
+        {
+            for (int c = 0; c < channels; c++)
+            {
+                for (int h = 0; h < inputHeight; h++)
+                {
+                    for (int w = 0; w < inputWidth; w++)
+                    {
+                        float sum = 0.0f;
+                        for (int sh = 0; sh < scaleHeight; sh++)
+                        {
+                            for (int sw = 0; sw < scaleWidth; sw++)
+                            {
+                                sum += outputGradientSpan[b * channels * outputHeight * outputWidth + c * outputHeight * outputWidth + (h * scaleHeight + sh) * outputWidth + (w * scaleWidth + sw)];
+                            }
+                        }
+                        inputGradientSpan[b * channels * inputHeight * inputWidth + c * inputHeight * inputWidth + h * inputWidth + w] = sum;
+                    }
+                }
+            }
+        }
+        return inputGradient;
     }
 
     #endregion

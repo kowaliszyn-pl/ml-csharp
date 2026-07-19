@@ -128,7 +128,7 @@ internal class AutoencoderDense
             logger: logger
         )
         {
-            Memo = $"Calling class: {nameof(AutoencoderDenseModel)}."
+            Memo = $"Calling class: {nameof(AutoencoderDense)}."
         };
 
         trainer.Fit(

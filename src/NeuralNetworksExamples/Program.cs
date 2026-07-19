@@ -2,9 +2,8 @@
 // File name: Program.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using System.Reflection;
 using System.Text.Json;
-
-using ILGPU.Frontend;
 
 using Microsoft.Extensions.Logging;
 
@@ -50,14 +49,17 @@ internal static class Program
             .CreateLogger();
 
         Log.Logger = serilog;
-        Log.Information("Logging started...");
+
+        AssemblyInformationalVersionAttribute? metadata = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        Log.Information("Logging started... ");
+        Log.Information($"Version: {metadata?.InformationalVersion}.");
 
         // Create a LoggerFactory and add Serilog
         LoggerFactory = new LoggerFactory()
             .AddSerilog(serilog);
 
         bool running = true;
-        
+
         List<MenuItem> menuItems =
         [
             new("🔚 Exit", () => running = false),
@@ -165,7 +167,7 @@ internal static class Program
             new("🖼️ Train (CNN autoencoder)", AutoencoderCnn.Train, true),
             new("🖼️ Load and run (CNN autoencoder)", AutoencoderCnn.Load, true),
             new("📊 Visualize latent space with t-SNE (CNN autoencoder)", AutoencoderCnn.VisualizeLatentSpace, true),
-            
+
             new("🔙 Back", () => { })
         ], "Select [bold]MNIST autoencoder[/] operation:");
     }

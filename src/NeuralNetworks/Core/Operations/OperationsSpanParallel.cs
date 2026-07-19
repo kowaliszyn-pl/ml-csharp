@@ -1,12 +1,10 @@
 ﻿// Neural Networks in C♯
 // File name: OperationsSpanParallel.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-
-using ILGPU.Runtime.Cuda;
 
 namespace NeuralNetworks.Core.Operations;
 

@@ -1,6 +1,6 @@
 ﻿// Neural Networks in C♯
 // File name: OperationsGpu.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
@@ -154,8 +154,8 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
             weightsOutputChannelSize,
             outputBatchSize,
             outputChannelSize,
-            paddingHeight, 
-            paddingWidth, 
+            paddingHeight,
+            paddingWidth,
             strideHeight,
             strideWidth,
             dilatationHeight,
@@ -172,7 +172,7 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
         outputDev.View.CopyToCPU(ref output[0, 0, 0, 0], output.Length);
         return output;
     }
-    
+
     private static void Convolve2DOutputKernel(Index3D index, FloatDense1DView input, FloatDense1DView weights, FloatDense1DView output, Convolve2DOutputMeta meta)
     {
         int paddingHeight = meta.PaddingHeight;
@@ -449,7 +449,6 @@ public class OperationsGpu : OperationsSpanParallel, IDisposable
     // Encoded as: batchOutputChannelIndex = index.X = b * outputChannels + oc
     // oc = batchOutputChannelIndex % outputChannels; b = batchOutputChannelIndex / outputChannels
     // oh = index.Y; ow = index.Z
-
 
     /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

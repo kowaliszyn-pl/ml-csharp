@@ -147,7 +147,7 @@ internal class AutoencoderCnn
             logger: logger
         )
         {
-            Memo = $"Calling class: {nameof(AutoencoderConvModel)}."
+            Memo = $"Calling class: {nameof(AutoencoderCnn)}."
         };
 
         trainer.Fit(
