@@ -168,8 +168,6 @@ public class OperationsSpanParallel : OperationsSpan
 
     public override float[,] SoftsignOutput(float[,] input)
     {
-        // return input.DivideElementwise(input.Abs().Add(1f));
-
         int dim1 = input.GetLength(0);
         int dim2 = input.GetLength(1);
 
@@ -188,10 +186,6 @@ public class OperationsSpanParallel : OperationsSpan
 
     public override float[,] SoftsignInputGradient(float[,] outputGradient, float[,] input)
     {
-        //float[,] onePlusAbs = input.Abs().Add(1f);
-        //float[,] onePlusAbsSquared = onePlusAbs.MultiplyElementwise(onePlusAbs);
-        //return outputGradient.DivideElementwise(onePlusAbsSquared);
-
         int dim0 = outputGradient.GetLength(0);
         int dim1 = outputGradient.GetLength(1);
 

@@ -159,11 +159,13 @@ internal static class Program
     {
         ExecuteMenu([
             new("🖼️ Train (dense layer autoencoder)", AutoencoderDense.Train, true),
-            new("🖼️ Train (CNN autoencoder)", AutoencoderCnn.Train, true),
             new("🖼️ Load and run (dense layer autoencoder)", AutoencoderDense.Load, true),
-            new("🖼️ Load and run (CNN autoencoder)", AutoencoderCnn.Load, true),
             new("📊 Visualize latent space with t-SNE (dense layer autoencoder)", AutoencoderDense.VisualizeLatentSpace, true),
+
+            new("🖼️ Train (CNN autoencoder)", AutoencoderCnn.Train, true),
+            new("🖼️ Load and run (CNN autoencoder)", AutoencoderCnn.Load, true),
             new("📊 Visualize latent space with t-SNE (CNN autoencoder)", AutoencoderCnn.VisualizeLatentSpace, true),
+            
             new("🔙 Back", () => { })
         ], "Select [bold]MNIST autoencoder[/] operation:");
     }
