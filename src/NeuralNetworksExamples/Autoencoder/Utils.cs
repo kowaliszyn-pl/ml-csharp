@@ -123,11 +123,11 @@ internal static class Utils
 
         pltHistogram.Add.Bars(bars);
 
-        pltHistogram.Title("Histogram of Encoded Values");
+        pltHistogram.Title($"Histogram of Encoded Values (bottleneck={dim})");
         pltHistogram.XLabel("Encoded Value");
         pltHistogram.YLabel("Frequency");
 
-        string histogramPath = $"{modelName}_{encoded.GetLength(1)}_{encoded.GetLength(0)}_histogram.png";
+        string histogramPath = $"{modelName}_{dim}_{n}_histogram.png";
         pltHistogram.SavePng(histogramPath, 1200, 900);
 
         ForegroundColor = ConsoleColor.Green;

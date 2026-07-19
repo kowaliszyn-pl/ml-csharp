@@ -39,7 +39,7 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
             .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer))
 
             // Bottleneck
-            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new TanhInputScaled2D(200), initializer))
+            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Softsign(), initializer))
 
             // Decoder
             .AddLayer(_firstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer))
@@ -79,12 +79,12 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
 internal class AutoencoderDense
 {
     private const int RandomSeed = 260710;
-    private const int Epochs = 15;
+    private const int Epochs = 25;
     private const int BatchSize = 400;
     private const int LogEveryEpochs = 1;
 
-    private const float InitialLearningRate = 1e-2f; //0.01f;
-    private const float FinalLearningRate = 5e-3f; //0.005f;
+    private const float InitialLearningRate = 1e-2f;
+    private const float FinalLearningRate = 7e-3f;
     private const float AdamBeta1 = 0.89f;
     private const float AdamBeta2 = 0.99f;
 

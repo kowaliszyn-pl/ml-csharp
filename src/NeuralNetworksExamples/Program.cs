@@ -60,11 +60,11 @@ internal static class Program
         
         List<MenuItem> menuItems =
         [
-            new("⚙️ Settings", ShowSettingsMenu),
+            new("🔚 Exit", () => running = false),
             new("🧠 Dense layer models", SelectDenseLayerModel),
             new("🖼️ Convolutional models (CNN)", SelectConvolutionalModel),
             new("🔧 Autoencoders", SelectAutoencoderModel),
-            new("🔚 Exit", () => running = false)
+            new("⚙️ Settings", ShowSettingsMenu),
         ];
 
         LoadOptions();
