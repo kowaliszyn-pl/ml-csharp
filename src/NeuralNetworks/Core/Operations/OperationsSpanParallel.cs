@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using ILGPU.Runtime.Cuda;
+
 namespace NeuralNetworks.Core.Operations;
 
 public class OperationsSpanParallel : OperationsSpan
@@ -159,6 +161,51 @@ public class OperationsSpanParallel : OperationsSpan
             ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
             Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0, 0, 0], inputGradient.Length);
             inputGradientSpan[i] = inputSpan[i] > 0 ? outputGradientSpan[i] * beta : 0f;
+        });
+
+        return inputGradient;
+    }
+
+    public override float[,] SoftsignOutput(float[,] input)
+    {
+        // return input.DivideElementwise(input.Abs().Add(1f));
+
+        int dim1 = input.GetLength(0);
+        int dim2 = input.GetLength(1);
+
+        float[,] output = new float[dim1, dim2];
+
+        Parallel.For(0, output.Length, i =>
+        {
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            Span<float> outputSpan = MemoryMarshal.CreateSpan(ref output[0, 0], output.Length);
+
+            outputSpan[i] = inputSpan[i] / (MathF.Abs(inputSpan[i]) + 1f);
+        });
+
+        return output;
+    }
+
+    public override float[,] SoftsignInputGradient(float[,] outputGradient, float[,] input)
+    {
+        //float[,] onePlusAbs = input.Abs().Add(1f);
+        //float[,] onePlusAbsSquared = onePlusAbs.MultiplyElementwise(onePlusAbs);
+        //return outputGradient.DivideElementwise(onePlusAbsSquared);
+
+        int dim0 = outputGradient.GetLength(0);
+        int dim1 = outputGradient.GetLength(1);
+
+        Debug.Assert(input.GetLength(0) == dim0 && input.GetLength(1) == dim1, "Shapes of outputGradient and input must match for elementwise operations.");
+
+        float[,] inputGradient = new float[dim0, dim1];
+        Parallel.For(0, inputGradient.Length, i =>
+        {
+            ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0], outputGradient.Length);
+            ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0], input.Length);
+            Span<float> inputGradientSpan = MemoryMarshal.CreateSpan(ref inputGradient[0, 0], inputGradient.Length);
+
+            float onePlusAbs = MathF.Abs(inputSpan[i]) + 1f;
+            inputGradientSpan[i] = outputGradientSpan[i] / (onePlusAbs * onePlusAbs);
         });
 
         return inputGradient;

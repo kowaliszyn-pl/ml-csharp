@@ -83,7 +83,7 @@ internal static class Utils
         }
 
         plt.ShowLegend();
-        plt.Title($"t-SNE Visualization of Latent Space (bottleneck={dim}, points={n})");
+        plt.Title($"t-SNE Visualization of Latent Space ({modelName}, bottleneck={dim}, points={n})");
         plt.XLabel("t-SNE Component 1");
         plt.YLabel("t-SNE Component 2");
 
@@ -123,7 +123,7 @@ internal static class Utils
 
         pltHistogram.Add.Bars(bars);
 
-        pltHistogram.Title($"Histogram of Encoded Values (bottleneck={dim})");
+        pltHistogram.Title($"Histogram of Encoded Values ({modelName}, bottleneck={dim})");
         pltHistogram.XLabel("Encoded Value");
         pltHistogram.YLabel("Frequency");
 
