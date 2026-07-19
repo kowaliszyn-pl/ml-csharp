@@ -192,9 +192,14 @@ internal class AutoencoderCnn
 
         float[,] reconstructedImages = DenormalizeAndReshapeTo2D(yTrain);
 
-        // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
+        // Generate random encoded data for visualization of the decoder's output
+        float[,] randomEncoded = GenerateRandomEncodedData(bottleneckDim, 5, RandomSeed);
+        float[,,,] randomDecoded = model.Decode(randomEncoded);
+        float[,] randomlyGeneratedImages = DenormalizeAndReshapeTo2D(randomDecoded);
 
-        SaveReconstructionComparison(ModelName, bottleneckDim, originalImages, reconstructedImages);
+       // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
+
+       SaveReconstructionComparison(ModelName, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
     }
 
     internal static void VisualizeLatentSpace()

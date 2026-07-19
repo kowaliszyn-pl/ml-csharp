@@ -13,7 +13,7 @@ namespace NeuralNetworksExamples.Autoencoder;
 
 internal static class Utils
 {
-    internal static void SaveReconstructionComparison(string modelName, int bottleneckDim, float[,] originalImages, float[,] reconstructedImages)
+    internal static void SaveReconstructionComparison(string modelName, int bottleneckDim, float[,] originalImages, float[,] reconstructedImages, float[,] randomlyGeneratedImages)
     {
         WriteLine($"Saving original and reconstructed images.");
 
@@ -23,6 +23,12 @@ internal static class Utils
         {
             Drawing.SaveMnistPicture(100, index, originalImages, $"{modelName}_{bottleneckDim}_original_{index}");
             Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckDim}_reconstructed_{index}");
+            
+        }
+
+        for(int i = 0; i < randomlyGeneratedImages.GetLength(0); i++ )
+        {
+            Drawing.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckDim}_random_{i}");
         }
     }
 
@@ -90,4 +96,18 @@ internal static class Utils
 
     internal static string GetFileName(string modelName, int bottleneckDim)
         => $"{modelName}_{bottleneckDim}.json";
+
+    internal static float[,] GenerateRandomEncodedData(int bottleneckDim, int imageCount, int randomSeed)
+    {
+        Random random = new(randomSeed);
+        float[,] randomEncoded = new float[imageCount, bottleneckDim];
+        for (int i = 0; i < imageCount; i++)
+        {
+            for (int j = 0; j < bottleneckDim; j++)
+            {
+                randomEncoded[i, j] = (float)(random.NextDouble() * 2 - 1); // Random values in [-1, 1]
+            }
+        }
+        return randomEncoded;
+    }
 }

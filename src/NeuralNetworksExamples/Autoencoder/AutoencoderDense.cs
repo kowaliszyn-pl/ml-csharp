@@ -178,9 +178,14 @@ internal class AutoencoderDense
 
         DenormalizeToPixelValuesInPlace(reconstructedImages);
 
+        // Generate random encoded data for visualization of the decoder's output
+        float[,] randomEncoded = GenerateRandomEncodedData(bottleneckDim, 5, RandomSeed);
+        float[,] randomlyGeneratedImages = model.Decode(randomEncoded);
+        DenormalizeToPixelValuesInPlace(randomlyGeneratedImages);
+
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-        SaveReconstructionComparison(ModelName, bottleneckDim, originalImages, reconstructedImages);
+        SaveReconstructionComparison(ModelName, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
     }
 
     internal static void VisualizeLatentSpace()
