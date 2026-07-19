@@ -227,7 +227,7 @@ internal class AutoencoderCnn
         _ = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();
 
-        VisualizeWithTSNE(ModelName, labels, encoded);
+        VisualizeWithHistogramAndTSNE(ModelName, labels, encoded);
     }
 
 

@@ -6,6 +6,7 @@ using Accord.MachineLearning.Clustering;
 
 using ScottPlot;
 using ScottPlot.Plottables;
+using ScottPlot.Statistics;
 
 using static System.Console;
 
@@ -32,7 +33,7 @@ internal static class Utils
         }
     }
 
-    internal static void VisualizeWithTSNE(string modelName, float[,] labels, float[,] encoded)
+    internal static void VisualizeWithHistogramAndTSNE(string modelName, float[,] labels, float[,] encoded)
     {
         // Convert to double[][] for Accord.NET
         int n = encoded.GetLength(0);
@@ -91,6 +92,46 @@ internal static class Utils
 
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"t-SNE plot saved to {outputPath}");
+        ResetColor();
+
+        // Generate a chart with a histogram of the encoded values (float[,] encoded) within the range [-1, 1] and 20 bins
+
+        WriteLine("Creating histogram of encoded values...");
+
+        int binCount = 20;
+        double[] allValues = new double[encoded.Length];
+        int index = 0;
+        for (int i = 0; i < encoded.GetLength(0); i++)
+        {
+            for (int j = 0; j < encoded.GetLength(1); j++)
+            {
+                allValues[index++] = encoded[i, j];
+            }
+        }
+
+        var histogram = Histogram.WithBinCount(binCount, allValues);
+        var pltHistogram = new Plot();
+
+        // add histogram to the plot
+        Bar[] bars = [.. Enumerable.Range(0, histogram.Counts.Length)
+            .Select(i => new Bar
+            {
+                Position = histogram.Bins[i] + histogram.FirstBinSize / 2, // center of bin
+                Value = histogram.Counts[i],
+                Size = histogram.FirstBinSize
+            })];
+
+        pltHistogram.Add.Bars(bars);
+
+        pltHistogram.Title("Histogram of Encoded Values");
+        pltHistogram.XLabel("Encoded Value");
+        pltHistogram.YLabel("Frequency");
+
+        string histogramPath = $"{modelName}_{encoded.GetLength(1)}_{encoded.GetLength(0)}_histogram.png";
+        pltHistogram.SavePng(histogramPath, 1200, 900);
+
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"Histogram saved to {histogramPath}");
         ResetColor();
     }
 
