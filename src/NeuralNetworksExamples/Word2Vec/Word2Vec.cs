@@ -26,7 +26,7 @@ namespace NeuralNetworksExamples.Word2Vec;
 /// Maps center words to context words.
 /// </summary>
 internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? random = null) 
-    : BaseModel<int[,], float[,]>(new SigmoidBinaryCrossEntropyLoss(), random)
+    : BaseModel<int[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
     // TODO: Consider using a different loss function and activation for Skip-gram with one-hot targets. The current setup uses SigmoidBinaryCrossEntropyLoss with a Linear output, which may not align with the one-hot encoded labels. For a full softmax multiclass objective, consider using Softmax + categorical cross-entropy. If using independent sigmoid targets / negative sampling, adjust the output activation and label construction accordingly.
 
@@ -34,37 +34,46 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
      * The loss/activation/labeling combination looks inconsistent for Skip-gram with one-hot targets: you’re using `SigmoidBinaryCrossEntropyLoss` with a `Linear` output while `yTrain` is one-hot over the vocabulary. If this is intended to be a full softmax multiclass objective, it should typically be Softmax + categorical cross-entropy; if it’s intended to be independent sigmoid targets / negative sampling, the output activation and label construction should reflect that. Align the final activation + loss with the training labels to avoid training an unintended objective.
      * */
 
+    EmbeddingLayer? _embeddingLayer;
+
     protected override LayerListBuilder<int[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
 
+
         return
-            AddLayer(new EmbeddingLayer(vocabSize, embeddingDim, initializer))
-            .AddLayer(new DenseLayer(vocabSize, /*new Sigmoid()*/ new Linear(), initializer));
+            AddLayer(_embeddingLayer = new EmbeddingLayer(vocabSize, embeddingDim, initializer))
+            .AddLayer(new DenseLayer(vocabSize, new Linear(), initializer));
     }
 
     /// <summary>
     /// Gets the learned word embeddings.
     /// </summary>
     /// <returns>Embedding matrix [vocabSize x embeddingDim].</returns>
-    public float[,] GetEmbeddings() =>
+    public float[,] GetEmbeddings()
+    {
         // The embeddings are stored in the first layer (EmbeddingLayer)
         // We need to access them through the saved parameters
-        throw new NotImplementedException("Use SaveParams and extract embeddings from the saved file.");
+        if (_embeddingLayer?.Output == null)
+        {
+            throw new InvalidOperationException("Embedding layer output is not available. Ensure the model has been trained or the embedding layer has been initialized.");
+        }
+        return _embeddingLayer.Output;
+    }
 }
 
 internal class Word2Vec
 {
     private const int RandomSeed = 42;
-    private const int Epochs = 100;
+    private const int Epochs = 250;
     private const int BatchSize = 32;
     private const int EvalEveryEpochs = 10;
     private const int LogEveryEpochs = 5;
-    private const int EmbeddingDim = 20;
+    private const int EmbeddingDim = 10;
     private const int WindowSize = 2; // Context window size
 
-    private const float InitialLearningRate = 0.025f;
-    private const float FinalLearningRate = 0.001f;
+    private const float InitialLearningRate = 1e-2f;
+    private const float FinalLearningRate = 9e-5f;
 
     public static void Run()
     {
@@ -89,12 +98,27 @@ internal class Word2Vec
             "brown cat sits on the tree",
             "dog and fox are animals",
             "the sun sets in the west",
-            "cat and dog have four legs"
+            "cat and dog have four legs",
+            "roman eats pizza",
+            "bogna likes to read books",
+            "roman family goes to the park",
+            "the cat and the dog are friends",
+            "roman loves his brown dog",
+            "bogna has a black cat",
+            "roman and bogna have a happy family",
+            "every family has a pet",
+            "east and west are directions",
+            "dog and cat are common pets",
+            "cat eats fish and dog eats meat",
+            "fish are found in water",
+            "pizza is a popular food",
+            "pizza and meat are enjoyed by roman",
+            "bogna and roman are friends",
         ];
 
         // Build vocabulary
-        Dictionary<string, int> wordToIndex = new();
-        List<string> indexToWord = new();
+        Dictionary<string, int> wordToIndex = [];
+        List<string> indexToWord = [];
 
         foreach (string sentence in corpus)
         {
@@ -110,7 +134,7 @@ internal class Word2Vec
 
         int vocabSize = indexToWord.Count;
         AnsiConsole.MarkupLine($"[green]✓ Vocabulary size: {vocabSize}[/]");
-        AnsiConsole.MarkupLine($"[dim]Words: {string.Join(", ", indexToWord)}[/]\n");
+        AnsiConsole.MarkupLine($"[dim]Words: {string.Join(", ", indexToWord.Order())}[/]\n");
 
         // Generate training pairs (center word, context word) using Skip-gram
         List<(int center, int context)> trainingPairs = new();
@@ -195,6 +219,36 @@ internal class Word2Vec
 
         // Demonstrate word similarity
         DemonstrateWordSimilarity(model, indexToWord, wordToIndex);
+
+        DisplayAllWordsWithEmbeddings(model, indexToWord, wordToIndex);
+    }
+
+    private static void DisplayAllWordsWithEmbeddings(Word2VecModel model, List<string> indexToWord, Dictionary<string, int> wordToIndex)
+    {
+        int[,] xWords = new int[indexToWord.Count, 1];
+        for(int i = 0; i < indexToWord.Count; i++)
+        {
+            xWords[i, 0] = i;
+        }
+
+        _ = model.Forward(xWords, inference: true);
+
+        float[,] embeddings = model.GetEmbeddings();
+
+        Table table = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Cyan1)
+            .AddColumn(new TableColumn("[bold]Word[/]").Centered())
+            .AddColumn(new TableColumn("[bold]Embedding Vector[/]").LeftAligned());
+
+        for (int i = 0; i < indexToWord.Count; i++)
+        {
+            string word = indexToWord[i];
+            string embeddingVector = string.Join(", ", Enumerable.Range(0, EmbeddingDim).Select(j => embeddings[i, j].ToString("F4")));
+            table.AddRow($"[yellow]{word}[/]", embeddingVector);
+        }
+
+        AnsiConsole.Write(table);
     }
 
     private static void DemonstrateWordSimilarity(Word2VecModel model, List<string> indexToWord, Dictionary<string, int> wordToIndex)
@@ -204,7 +258,7 @@ internal class Word2Vec
         AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
 
         // Test some word similarities
-        string[] testWords = ["dog", "cat", "fox", "quick", "lazy", "brown"];
+        string[] testWords = ["dog", "cat", "fox", "quick", "lazy", "brown", "roman", "bogna", "family", "pet"];
 
         Table table = new Table()
             .Border(TableBorder.Rounded)
@@ -231,10 +285,11 @@ internal class Word2Vec
 
                  */
 
-                float[,] embedding = model.Forward(input, inference: true);
+                float[,] logits = model.Forward(input, inference: true);
+                float[,] embeddings = model.GetEmbeddings();
 
                 // Find most similar words
-                List<string> similarWords = FindSimilarWords(embedding, model, indexToWord, wordToIndex, wordIdx, topK: 3);
+                List<string> similarWords = FindSimilarWords(embeddings, model, indexToWord, wordToIndex, wordIdx, topK: 3);
 
                 table.AddRow($"[yellow]{word}[/]", string.Join(", ", similarWords));
             }
@@ -243,11 +298,11 @@ internal class Word2Vec
         AnsiConsole.Write(table);
     }
 
-    private static List<string> FindSimilarWords(float[,] queryEmbedding, Word2VecModel model,
+    private static List<string> FindSimilarWords(float[,] queryEmbeddings, Word2VecModel model,
         List<string> indexToWord, Dictionary<string, int> wordToIndex, int queryIdx, int topK)
     {
         // Compute cosine similarity with all words
-        List<(string word, float similarity)> similarities = new();
+        List<(string word, float similarity)> similarities = [];
 
         /*This performs a full forward pass per vocabulary entry (`O(vocabSize)` forwards) for each query word, which will become a bottleneck once vocab grows. Prefer pulling the embedding matrix once (or caching all embeddings) and computing cosine similarity directly against vectors, avoiding repeated model forwards.
          * */
@@ -258,9 +313,10 @@ internal class Word2Vec
 
             int[,] input = new int[1, 1];
             input[0, 0] = i;
-            float[,] embedding = model.Forward(input, inference: true);
+            float[,] logits = model.Forward(input, inference: true);
+            float[,] embeddings = model.GetEmbeddings();
 
-            float similarity = CosineSimilarity(queryEmbedding, embedding);
+            float similarity = CosineSimilarity(queryEmbeddings, embeddings);
             similarities.Add((indexToWord[i], similarity));
         }
 
