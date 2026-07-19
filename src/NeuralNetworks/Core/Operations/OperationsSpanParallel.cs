@@ -644,11 +644,17 @@ public class OperationsSpanParallel : OperationsSpan
         int paramGradientOutputCSize = kernelHeight * kernelWidth;
         int paramGradientInputCSize = outputGradientChannels * paramGradientOutputCSize;
 
+        // Thread-local storage for accumulating gradients per batch range
+        ConcurrentBag<float[,,,]> threadLocalGradients = [];
+
         Parallel.ForEach(Partitioner.Create(0, batchSize), range =>
         {
             ReadOnlySpan<float> inputSpan = MemoryMarshal.CreateReadOnlySpan(ref input[0, 0, 0, 0], input.Length);
             ReadOnlySpan<float> outputGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref outputGradient[0, 0, 0, 0], outputGradient.Length);
-            Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0, 0, 0], paramGradient.Length);
+
+            // Create thread-local gradient array for this batch range
+            float[,,,] localParamGradient = new float[inputChannels, outputGradientChannels, kernelHeight, kernelWidth];
+            Span<float> localParamGradientSpan = MemoryMarshal.CreateSpan(ref localParamGradient[0, 0, 0, 0], localParamGradient.Length);
 
             for (int b = range.Item1; b < range.Item2; b++)
             {
@@ -694,14 +700,28 @@ public class OperationsSpanParallel : OperationsSpan
                                         }
                                     }
                                 }
-                                // paramGradient[ic, oc, kh, kw] += sum;
-                                paramGradientSpan[paramGradientInputCIndex + paramGradientOutputCIndex + paramGradientKernelHIndex + kw] += sum;
+                                // Accumulate in thread-local array (no race condition)
+                                localParamGradientSpan[paramGradientInputCIndex + paramGradientOutputCIndex + paramGradientKernelHIndex + kw] += sum;
                             }
                         }
                     }
                 }
             }
+
+            // Store thread-local gradient for sequential summation
+            threadLocalGradients.Add(localParamGradient);
         });
+
+        // Sequential summation of all thread-local gradients into final result
+        Span<float> paramGradientSpan = MemoryMarshal.CreateSpan(ref paramGradient[0, 0, 0, 0], paramGradient.Length);
+        foreach (float[,,,] localGradient in threadLocalGradients)
+        {
+            ReadOnlySpan<float> localGradientSpan = MemoryMarshal.CreateReadOnlySpan(ref localGradient[0, 0, 0, 0], localGradient.Length);
+            for (int i = 0; i < paramGradientSpan.Length; i++)
+            {
+                paramGradientSpan[i] += localGradientSpan[i];
+            }
+        }
 
         return paramGradient;
     }
