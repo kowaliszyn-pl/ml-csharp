@@ -47,6 +47,10 @@ public static class GenericArrayUtils
                 x4.PermuteInPlaceTogetherWith(y2, random);
                 return;
 
+            case (int[,] x5, float[,] y2): // embedding indices and labels
+                x5.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
             default:
                 throw new NotSupportedException($"Unsupported permutation pair: x={matrix1.GetType().Name}, y={matrix2.GetType().Name}. Please override this method in the Trainer subclass or add here a permutation method for these data types.");
         }
@@ -70,6 +74,7 @@ public static class GenericArrayUtils
             float[,] a => (T)(object)a.GetRows(range),
             float[,,] a => (T)(object)a.GetRows(range),
             float[,,,] a => (T)(object)a.GetRows(range),
+            int[,] a => (T)(object)a.GetRows(range),
             _ => throw new NotSupportedException($"Slicing not supported for array type: {source.GetType().Name}.")
         };
     }

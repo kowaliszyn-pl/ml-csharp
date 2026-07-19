@@ -811,6 +811,25 @@ public static class ArrayExtensions
         return res;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int[,] GetRows(this int[,] source, Range range)
+    {
+        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(0));
+
+        int columns = source.GetLength(1);
+        int[,] res = new int[length, columns];
+
+        for (int i = 0; i < length; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                res[i, j] = source[i + offset, j];
+            }
+        }
+
+        return res;
+    }
+
     /// <summary>
     /// Gets a contiguous range of dim1 (dimension 0) from a three-dimensional array.
     /// </summary>
@@ -1590,6 +1609,35 @@ public static class ArrayExtensions
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this float[,] source, float[,] secondMatrix, Random? random)
+    {
+        random ??= new();
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        int secondColumns = secondMatrix.GetLength(1);
+
+        Debug.Assert(rows == secondMatrix.GetLength(0), "Both matrices must have the same number of dim1 to permute them together.");
+
+        for (int i = rows - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            if (i != j)
+            {
+                // Swap row i with row j
+                for (int col = 0; col < columns; col++)
+                {
+                    (source[j, col], source[i, col]) = (source[i, col], source[j, col]);
+                }
+
+                for (int col = 0; col < secondColumns; col++)
+                {
+                    (secondMatrix[j, col], secondMatrix[i, col]) = (secondMatrix[i, col], secondMatrix[j, col]);
+                }
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith(this int[,] source, float[,] secondMatrix, Random? random)
     {
         random ??= new();
         int rows = source.GetLength(0);

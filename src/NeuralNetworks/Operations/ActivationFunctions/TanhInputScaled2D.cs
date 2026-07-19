@@ -1,8 +1,6 @@
 ﻿// Neural Networks in C♯
-// File name: TanhScaled2D.cs
+// File name: TanhInputScaled2D.cs
 // www.kowaliszyn.pl, 2025 - 2026
-
-using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.Operations.OperationBackend;
 

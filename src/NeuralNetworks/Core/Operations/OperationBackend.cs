@@ -5,8 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ILGPU.Runtime.Cuda;
-
 namespace NeuralNetworks.Core.Operations;
 
 public static class OperationBackend

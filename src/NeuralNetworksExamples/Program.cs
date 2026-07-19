@@ -66,6 +66,7 @@ internal static class Program
             new("🧠 Dense layer models", SelectDenseLayerModel),
             new("🖼️ Convolutional models (CNN)", SelectConvolutionalModel),
             new("🔧 Autoencoders", SelectAutoencoderModel),
+            new("📝 Word Embeddings (Word2Vec)", Word2Vec.Word2Vec.Run, true),
             new("⚙️ Settings", ShowSettingsMenu),
         ];
 

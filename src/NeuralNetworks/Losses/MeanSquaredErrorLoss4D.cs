@@ -27,5 +27,6 @@ public class MeanSquaredErrorLoss4D(MseReduction mseReduction = MseReduction.Ele
         return MeanSquaredErrorLossGradient(_errors, mseReduction);
     }
 
-    public override string ToString() => $"MeanSquaredError4D (mseReduction={mseReduction})";
+    public override string ToString() 
+        => $"MeanSquaredError4D (mseReduction={mseReduction})";
 }
