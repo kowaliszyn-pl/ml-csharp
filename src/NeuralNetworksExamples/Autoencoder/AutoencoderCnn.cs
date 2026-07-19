@@ -150,7 +150,7 @@ internal class AutoencoderCnn
             Memo = $"Calling class: {nameof(AutoencoderCnn)}."
         };
 
-        trainer.Fit(
+        float? finalLoss = trainer.Fit(
             dataSource,
             epochs: Epochs,
             logEveryEpochs: LogEveryEpochs,
@@ -164,7 +164,7 @@ internal class AutoencoderCnn
         // Save the model
 
         string modelPath = GetFileName(ModelName, bottleneckDim);
-        model.SaveParams(modelPath, "Final trained model.");
+        model.SaveParams(modelPath, $"Final trained model with loss {finalLoss:F5}. Date time: {DateTime.Now}.");
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
         ResetColor();

@@ -59,9 +59,12 @@ public class Trainer<TInputData, TPrediction>(
     /// <param name="restart">A flag indicating whether to restart the training or continue from the last state.</param>
     /// <param name="displayDescriptionOnStart">A flag indicating whether to display the fit+model description on start.</param>
     /// <param name="operationBackendTimingEnabled">A flag indicating whether to enable operation backend timing. If true, the backend operations timing report will be displayed after training.</param>
+    /// <returns>
+    /// The last loss value after training, or null if no loss was calculated.
+    /// </returns>
     [SuppressMessage("Usage", "CA2254:Template should be a static expression", Justification = "<Pending>")]
     [SuppressMessage("Performance", "CA1873:Avoid potentially expensive logging", Justification = "<Pending>")]
-    public void Fit(
+    public float? Fit(
         DataSource<TInputData, TPrediction> dataSource,
         EvalFunction<TInputData, TPrediction>? evalFunction = null,
         Loss<TPrediction>? lossFunction = null,
@@ -78,6 +81,7 @@ public class Trainer<TInputData, TPrediction>(
         bool showLossOnStart = false
     )
     {
+        float? lastLoss = null;
         try
         {
             Stopwatch trainWatch = Stopwatch.StartNew();
@@ -199,11 +203,13 @@ public class Trainer<TInputData, TPrediction>(
                 if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                     Write(new string(' ', 80) + "\r");
 
-                if (trainLoss is not null && logEpoch)
+                lastLoss = trainLoss / allSteps;
+
+                if (lastLoss is not null && logEpoch)
                 {
                     if (consoleOutputMode > ConsoleOutputMode.Disable)
-                        WriteLine($"Train loss (average): {trainLoss.Value / allSteps}");
-                    logger?.LogInformation("Train loss (average): {trainLoss} for epoch {epoch}.", trainLoss.Value / allSteps, epoch);
+                        WriteLine($"Train loss (average): {lastLoss.Value}");
+                    logger?.LogInformation("Train loss (average): {trainLoss} for epoch {epoch}.", lastLoss.Value, epoch);
                 }
 
                 if (eval && xTest is not null && yTest is not null)
@@ -313,6 +319,8 @@ public class Trainer<TInputData, TPrediction>(
             logger?.LogError(ex, "An error occurred during training: {message}", ex.Message);
             throw;
         }
+
+        return lastLoss;
 
         List<string> DescribeFit()
         {

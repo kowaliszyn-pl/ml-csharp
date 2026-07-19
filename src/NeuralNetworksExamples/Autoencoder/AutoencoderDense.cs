@@ -131,7 +131,7 @@ internal class AutoencoderDense
             Memo = $"Calling class: {nameof(AutoencoderDense)}."
         };
 
-        trainer.Fit(
+        float? finalLoss = trainer.Fit(
             dataSource,
             epochs: Epochs,
             logEveryEpochs: LogEveryEpochs,
@@ -145,7 +145,7 @@ internal class AutoencoderDense
         // Save the model
 
         string modelPath = GetFileName(ModelName, bottleneckDim);
-        model.SaveParams(modelPath, "Final trained model.");
+        model.SaveParams(modelPath, $"Final trained model with loss {finalLoss:F5}. Date time: {DateTime.Now}.");
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
         ResetColor();
