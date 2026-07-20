@@ -1,0 +1,74 @@
+a king is a queen's husband
+a king is a male ruler of a kingdom
+a king is a male monarch who rules a kingdom
+a queen is a king's wife
+a queen is a female ruler of a kingdom
+a queen is a female monarch who rules a kingdom
+a king is a man
+a queen is a woman
+a young man is a boy
+a young woman is a girl
+an old boy is a man
+an old girl is a woman
+a boy is a male child
+a girl is a female child
+a man and a woman create a family
+a woman and a man create a family
+a king and a queen create a royal family
+a queen and a king create a royal family
+a young king was a boy
+a young queen was a girl
+england is a kingdom
+poland is not a kingdom
+poland is a republic
+the king of england is the head of state
+charles III is the current king of england
+charles III is a man
+young charles III was a boy
+elizabeth II was the previous queen of england
+elizabeth II was a woman
+elizabeth II was a mother of charles III
+young elizabeth II was a girl
+charles III is a son of elizabeth II
+margrethe II is the current queen of denmark
+margrethe II is a woman
+young margrethe II was a girl
+frederik IX was the previous king of denmark
+frederik IX was a man
+frederik IX was a father of margrethe II
+young frederik IX was a boy
+margrethe II is a daughter of frederik IX
+charles is a male name
+elizabeth is a female name
+margrethe is a female name
+frederik is a male name
+the capital of england is london
+london is a city in england
+the capital of sweden is stockholm
+stockholm is a city in sweden
+the capital of denmark is copenhagen
+copenhagen is a city in denmark
+the capital of poland is warsaw
+warsaw is a city in poland
+england is a country in europe
+sweden is a country in europe
+denmark is a country in europe
+poland is a country in europe
+europe is a continent
+asia is a continent
+africa is a continent
+north america is a continent
+south america is a continent
+australia is a continent
+antarctica is a continent
+man is a male human
+woman is a female human
+III is roman numeral for 3
+II is roman numeral for 2
+IX is roman numeral for 9
+daughter is a female child of parents
+young daughter is a girl
+old daughter is a woman
+son is a male child of parents
+young son is a boy
+old son is a man

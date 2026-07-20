@@ -61,11 +61,11 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
 internal class Word2Vec
 {
     private const int RandomSeed = 260720;
-    private const int Epochs = 1500;
-    private const int BatchSize = 10;
+    private const int Epochs = 1600;
+    private const int BatchSize = 16;
     private const int EvalEveryEpochs = 40;
     private const int LogEveryEpochs = 20;
-    private const int EmbeddingDim = 7;
+    private const int EmbeddingDim = 6;
     private const int WindowSize = 2; // Context window size
 
     private const float InitialLearningRate = 1e-2f;
@@ -80,107 +80,71 @@ internal class Word2Vec
         AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
 
         // Sample corpus for demonstration
-        string[] corpus =
-        [
-            "the quick brown fox jumps over the lazy dog",
-            "the dog sleeps in the sun",
-            "the cat climbs the tree",
-            "a quick fox runs fast",
-            "the brown dog barks loud",
-            "lazy cat sleeps all day",
-            "the sun shines bright",
-            "quick brown animals run fast",
-            "the fox and the dog play together",
-            "brown cat sits on the tree",
-            "dog and fox are animals",
-            "the sun sets in the west",
-            "cat and dog have four legs",
-            "roman eats pizza",
-            "bogna likes to read books",
-            "roman family goes to the park",
-            "the cat and the dog are friends",
-            "roman loves his brown dog",
-            "bogna has a black cat",
-            "roman and bogna have a happy family",
-            "every family has a pet",
-            "east and west are directions",
-            "dog and cat are common pets",
-            "cat eats fish and dog eats meat",
-            "fish are found in water",
-            "pizza is a popular food",
-            "pizza and meat are enjoyed by roman",
-            "bogna and roman are friends",
-            "the sun and the moon are celestial bodies",
-            "the fox is clever and quick",
-            "the brown dog and the black cat are neighbors",
-            "the sun rises in the east and sets in the west",
-            "the family enjoys spending time together in the park",
-            "the cat and the dog are both part of the family",
-            "dog likes cat",
-            "cat likes dog",
-            "fox hates fish",
-            "fish hates fox",
-            "roman hates to read books",
-            "the moon is bright",
-            "the sun is hot",
-            "the cat is lazy",
-            "the dog is playful",
-            "the fox is cunning",
-            "the brown dog and the black cat are friends",
-            "my family has a pet dog and a pet cat"
-        ];
+        string[] corpus = File.ReadAllLines(Path.Combine(Program.Word2VecDataFolderPath, "data1.txt"))
+            .Where(line => !string.IsNullOrWhiteSpace(line))
+            .Select(line => line.Trim().ToLower())
+            .ToArray();
+
 
         // Build vocabulary
-        Dictionary<string, int> wordToIndex = [];
-        List<string> indexToWord = [];
+        Dictionary<string, int> wordToTokenId = [];
+        List<string> tokenIdToWord = [];
 
         // Remove 'the', 'a', 'and', 'in', 'on', 'to', 'is', 'are', 'has', 'have', 'of', 'for', 'with' from corpus
-        HashSet<string> stopWords = new() { "the", "a", "and", "in", "on", "to", "is", "are", "has", "have", "of", "for", "with" };
+        HashSet<string> stopWords = ["the", "a", "an", "and", "in", "on", "to", "is", "are", "has", "have", "of", "for", "with", "s", "be", "was"];
+        char[] separators = [' ', '.', ',', '!', '?', ';', ':', '"', '\'', '(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', '-', '_', '+', '=', '*', '&', '^', '%', '$', '#', '@', '!', '~', '`', '\''];
 
-        corpus = [.. corpus.Select(sentence =>
-            string.Join(' ', sentence.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Where(word => !stopWords.Contains(word))))];
+        string[][] words = new string[corpus.Length][];
 
-        foreach (string sentence in corpus)
+        for (int i = 0; i < corpus.Length; i++)
         {
-            foreach (string word in sentence.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            words[i] = [.. corpus[i]
+                .Split(separators, StringSplitOptions.RemoveEmptyEntries)
+                .Where(word => !stopWords.Contains(word))];
+        }
+
+        foreach (string[] sentence in words)
+        {
+            foreach (string word in sentence)
             {
-                if (!wordToIndex.ContainsKey(word))
+                if (!wordToTokenId.ContainsKey(word))
                 {
-                    wordToIndex[word] = indexToWord.Count;
-                    indexToWord.Add(word);
+                    wordToTokenId[word] = tokenIdToWord.Count;
+                    tokenIdToWord.Add(word);
                 }
             }
         }
 
-        int vocabSize = indexToWord.Count;
+        int vocabSize = tokenIdToWord.Count;
+
         AnsiConsole.MarkupLine($"[green]✓ Vocabulary size: {vocabSize}[/]");
-        AnsiConsole.MarkupLine($"[dim]Words: {string.Join(", ", indexToWord.Order())}[/]\n");
+        AnsiConsole.MarkupLine($"[dim]Words: {string.Join(", ", tokenIdToWord.Order())}[/]\n");
 
         // Generate training pairs (center word, context word) using Skip-gram
         List<(int center, int context)> trainingPairs = [];
 
-        foreach (string sentence in corpus)
+        foreach (string[] sentence in words)
         {
-            string[] words = sentence.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            int[] indices = words.Select(w => wordToIndex[w]).ToArray();
+            int[] tokenIdsInSentence = sentence.Select(w => wordToTokenId[w]).ToArray();
+            int sentenceLength = tokenIdsInSentence.Length;
 
-            for (int i = 0; i < indices.Length; i++)
+            for (int i = 0; i < sentenceLength; i++)
             {
-                int centerWord = indices[i];
+                int centerWord = tokenIdsInSentence[i];
 
                 // Get context words within window
-                for (int j = Math.Max(0, i - WindowSize); j <= Math.Min(indices.Length - 1, i + WindowSize); j++)
+                for (int j = Math.Max(0, i - WindowSize); j <= Math.Min(sentenceLength - 1, i + WindowSize); j++)
                 {
                     if (i != j)
                     {
-                        trainingPairs.Add((centerWord, indices[j]));
+                        trainingPairs.Add((centerWord, tokenIdsInSentence[j]));
                     }
                 }
             }
         }
 
         AnsiConsole.MarkupLine($"[green]✓ Training pairs generated: {trainingPairs.Count}[/]\n");
+        AnsiConsole.MarkupLine($"[dim]First 5 training pairs: {string.Join(", ", trainingPairs.Take(5).Select(p => $"({tokenIdToWord[p.center]}, {tokenIdToWord[p.context]})"))}[/]\n");
 
         // Prepare training data
         int numSamples = trainingPairs.Count;
@@ -238,23 +202,23 @@ internal class Word2Vec
 
         AnsiConsole.MarkupLine("\n[bold green]✓ Training completed![/]\n");
 
-        // Demonstrate word similarity
-        DemonstrateWordSimilarity(model, indexToWord, wordToIndex);
+        float[,] learnedEmbeddings = model.GetEmbeddings();
 
-        DisplayAllWordsWithEmbeddings(model, indexToWord, wordToIndex);
+        // Display all words with their embeddings
+        DisplayAllWordsWithEmbeddings(learnedEmbeddings, tokenIdToWord);
+
+        // Demonstrate word similarity
+        DemonstrateWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
     }
 
-    private static void DisplayAllWordsWithEmbeddings(Word2VecModel model, List<string> indexToWord, Dictionary<string, int> wordToIndex)
+    private static void DisplayAllWordsWithEmbeddings(float[,] embeddings, List<string> tokenIdToWord)
     {
-        int[,] xWords = new int[indexToWord.Count, 1];
-        for (int i = 0; i < indexToWord.Count; i++)
+        int vocabSize = tokenIdToWord.Count;
+        int[,] xWords = new int[vocabSize, 1];
+        for (int i = 0; i < vocabSize; i++)
         {
             xWords[i, 0] = i;
         }
-
-        _ = model.Forward(xWords, inference: true);
-
-        float[,] embeddings = model.GetEmbeddingOutput();
 
         Table table = new Table()
             .Border(TableBorder.Rounded)
@@ -262,25 +226,24 @@ internal class Word2Vec
             .AddColumn(new TableColumn("[bold]Word[/]").Centered())
             .AddColumn(new TableColumn("[bold]Embedding Vector[/]").LeftAligned());
 
-        for (int i = 0; i < indexToWord.Count; i++)
+        for (int tokenId = 0; tokenId < vocabSize; tokenId++)
         {
-            string word = indexToWord[i];
-            string embeddingVector = string.Join(", ", Enumerable.Range(0, EmbeddingDim).Select(j => embeddings[i, j].ToString("F4")));
+            string word = tokenIdToWord[tokenId];
+            string embeddingVector = string.Join(", ", Enumerable.Range(0, EmbeddingDim).Select(j => embeddings[tokenId, j].ToString("F4")));
             table.AddRow($"[yellow]{word}[/]", embeddingVector);
         }
 
         AnsiConsole.Write(table);
     }
 
-    private static void DemonstrateWordSimilarity(Word2VecModel model, List<string> indexToWord, Dictionary<string, int> wordToIndex)
+    private static void DemonstrateWordSimilarity(float[,] embeddings, List<string> tokenIdToWord, Dictionary<string, int> wordToTokenId)
     {
         AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]");
         AnsiConsole.MarkupLine("[bold cyan]   Word Similarity Demo[/]");
         AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
 
         // Test some word similarities
-        string[] testWords = ["dog", "cat", "fox", "quick", "lazy", "brown", "roman", "bogna", "family", "pet", "sun"];
-        //string[] testWords = ["dog", "cat"];
+        string[] testWords = ["king", "queen", "man", "woman", "boy", "girl"];
 
         Table table = new Table()
             .Border(TableBorder.Rounded)
@@ -290,65 +253,122 @@ internal class Word2Vec
 
         foreach (string word in testWords)
         {
-            if (wordToIndex.TryGetValue(word, out int wordIdx))
+            if (wordToTokenId.TryGetValue(word, out int tokenId))
             {
-                // Get embedding for the test word
-                int[,] input = new int[1, 1];
-                input[0, 0] = wordIdx;
-
-                _ = model.Forward(input, inference: true);
-                float[,] embeddings = model.GetEmbeddingOutput();
-
                 // Find most similar words
-                List<string> similarWords = FindSimilarWords(embeddings, model, indexToWord, wordToIndex, wordIdx, topK: 3);
+                List<string> similarWords = FindSimilarWords(embeddings, tokenIdToWord, tokenId, topK: 4);
 
                 table.AddRow($"[yellow]{word}[/]", string.Join(", ", similarWords));
             }
         }
 
         AnsiConsole.Write(table);
+
+        // Test the following analogies:
+        // king - man + woman = ?
+        // queen - woman + man = ?
+        // man - boy + girl = ?
+        // woman - girl + boy = ?
+        // sweden - stockholm + copenhagen  = ?
+
+        AnsiConsole.MarkupLine("\n[bold cyan]Word Analogies[/]");
+
+        List<(string wordA, string wordB, string wordC)> analogies = [
+            ("king", "man", "woman"),
+            ("queen", "woman", "man"),
+            ("man", "boy", "girl"),
+            ("woman", "girl", "boy"),
+            ("sweden", "stockholm", "copenhagen")
+        ];
+
+        foreach (var (wordA, wordB, wordC) in analogies)
+        {
+            if (wordToTokenId.TryGetValue(wordA, out int tokenIdA) &&
+                wordToTokenId.TryGetValue(wordB, out int tokenIdB) &&
+                wordToTokenId.TryGetValue(wordC, out int tokenIdC))
+            {
+                float[] embeddingA = new float[EmbeddingDim];
+                float[] embeddingB = new float[EmbeddingDim];
+                float[] embeddingC = new float[EmbeddingDim];
+                for (int i = 0; i < EmbeddingDim; i++)
+                {
+                    embeddingA[i] = embeddings[tokenIdA, i];
+                    embeddingB[i] = embeddings[tokenIdB, i];
+                    embeddingC[i] = embeddings[tokenIdC, i];
+                }
+                // Compute the analogy vector: A - B + C
+                float[] analogyVector = new float[EmbeddingDim];
+                for (int i = 0; i < EmbeddingDim; i++)
+                {
+                    analogyVector[i] = embeddingA[i] - embeddingB[i] + embeddingC[i];
+                }
+                // Find the most similar word to the analogy vector
+                string? bestMatchWord = null;
+                float bestSimilarity = float.NegativeInfinity;
+                for (int tokenId = 0; tokenId < tokenIdToWord.Count; tokenId++)
+                {
+                    if (tokenId == tokenIdA || tokenId == tokenIdB || tokenId == tokenIdC)
+                        continue; // Skip the words used in the analogy
+                    float[] candidateEmbedding = new float[EmbeddingDim];
+                    for (int i = 0; i < EmbeddingDim; i++)
+                    {
+                        candidateEmbedding[i] = embeddings[tokenId, i];
+                    }
+                    float similarity = CosineSimilarity(analogyVector, candidateEmbedding);
+                    if (similarity > bestSimilarity)
+                    {
+                        bestSimilarity = similarity;
+                        bestMatchWord = tokenIdToWord[tokenId];
+                    }
+                }
+                AnsiConsole.MarkupLine($"[yellow]{wordA}[/] - [yellow]{wordB}[/] + [yellow]{wordC}[/] ≈ [green]{bestMatchWord}[/] [dim]({bestSimilarity:F3})[/]");
+            }
+        }
     }
 
-    private static List<string> FindSimilarWords(float[,] queryEmbeddings, Word2VecModel model,
-        List<string> indexToWord, Dictionary<string, int> wordToIndex, int queryIdx, int topK)
+    private static List<string> FindSimilarWords(float[,] embeddings, List<string> tokenIdToWord, int queryTokenId, int topK)
     {
         // Compute cosine similarity with all words
         List<(string word, float similarity)> similarities = [];
 
-        /* TODO: This performs a full forward pass per vocabulary entry (`O(vocabSize)` forwards) for each query word, which will become a bottleneck once vocab grows. Prefer pulling the embedding matrix once (or caching all embeddings) and computing cosine similarity directly against vectors, avoiding repeated model forwards.
-         * */
-
-        for (int i = 0; i < indexToWord.Count; i++)
+        float[] queryEmbeddings = new float[EmbeddingDim];
+        for (int i = 0; i < EmbeddingDim; i++)
         {
-            if (i == queryIdx) continue; // Skip the query word itself
-
-            int[,] input = new int[1, 1];
-            input[0, 0] = i;
-            _ = model.Forward(input, inference: true);
-            float[,] embeddings = model.GetEmbeddingOutput();
-
-            float similarity = CosineSimilarity(queryEmbeddings, embeddings);
-            similarities.Add((indexToWord[i], similarity));
+            queryEmbeddings[i] = embeddings[queryTokenId, i];
         }
 
-        return similarities
+        for (int tokenId = 0; tokenId < tokenIdToWord.Count; tokenId++)
+        {
+            if (tokenId == queryTokenId) 
+                continue; // Skip the query word itself
+
+            float[] candidateEmbedding = new float[EmbeddingDim];
+            for (int i = 0; i < EmbeddingDim; i++)
+            {
+                candidateEmbedding[i] = embeddings[tokenId, i];
+            }
+
+            float similarity = CosineSimilarity(queryEmbeddings, candidateEmbedding);
+            similarities.Add((tokenIdToWord[tokenId], similarity));
+        }
+
+        return [.. similarities
             .OrderByDescending(x => x.similarity)
             .Take(topK)
-            .Select(x => $"[green]{x.word}[/] [dim]({x.similarity:F3})[/]")
-            .ToList();
+            .Select(x => $"[green]{x.word}[/] [dim]({x.similarity:F3})[/]")];
     }
 
-    private static float CosineSimilarity(float[,] a, float[,] b)
+    private static float CosineSimilarity(float[] a, float[] b)
     {
-        int dim = a.GetLength(1);
+        int dim = a.Length;
         float dotProduct = 0;
         float normA = 0;
         float normB = 0;
 
         for (int i = 0; i < dim; i++)
         {
-            float valA = a[0, i];
-            float valB = b[0, i];
+            float valA = a[i];
+            float valB = b[i];
             dotProduct += valA * valB;
             normA += valA * valA;
             normB += valB * valB;

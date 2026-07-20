@@ -27,7 +27,8 @@ internal static class Program
     private const string DataFolder = "..\\..\\..\\..\\..\\data";
     internal const string MnistDataFolderPath = DataFolder + "\\MNIST";
     internal const string BostonHousingDataFilePath = DataFolder + "\\Boston\\BostonHousing.csv";
-    internal const string Ecg200DataFolderPath = DataFolder + "\\ecg200";
+    internal const string Ecg200DataFolderPath = DataFolder + "\\ECG200";
+    internal const string Word2VecDataFolderPath = DataFolder + "\\Word2Vec";
     private const string OptionsFileName = "options.json";
 
     internal static ILoggerFactory LoggerFactory { get; private set; } = default!;
