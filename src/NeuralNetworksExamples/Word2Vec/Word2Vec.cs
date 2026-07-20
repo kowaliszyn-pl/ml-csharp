@@ -25,15 +25,14 @@ namespace NeuralNetworksExamples.Word2Vec;
 /// Word2Vec model using Skip-gram architecture.
 /// Maps center words to context words.
 /// </summary>
-internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? random = null) 
+internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? random = null)
     : BaseModel<int[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
-    EmbeddingLayer? _embeddingLayer;
+    private EmbeddingLayer? _embeddingLayer;
 
     protected override LayerListBuilder<int[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
-
 
         return
             AddLayer(_embeddingLayer = new EmbeddingLayer(vocabSize, embeddingDim, initializer))
@@ -41,17 +40,22 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
     }
 
     /// <summary>
-    /// Gets the learned word embeddings.
+    /// Gets the embeddings for the last batch.
     /// </summary>
-    /// <returns>Embedding matrix [vocabSize x embeddingDim].</returns>
+    /// <returns>Embedding matrix [batchSize * embeddingDim].</returns>
+    public float[,] GetEmbeddingOutput()
+    {
+        // The embeddings are stored in the first layer (EmbeddingLayer)
+        return _embeddingLayer?.Output
+            ?? throw new InvalidOperationException("Embedding layer output is not available. Ensure the model has been trained or the embedding layer has been initialized.");
+    }
+
+    /// <returns>Embedding matrix [vocabSize * embeddingDim].</returns>
     public float[,] GetEmbeddings()
     {
         // The embeddings are stored in the first layer (EmbeddingLayer)
-        if (_embeddingLayer?.Output == null)
-        {
-            throw new InvalidOperationException("Embedding layer output is not available. Ensure the model has been trained or the embedding layer has been initialized.");
-        }
-        return _embeddingLayer.Output;
+        return _embeddingLayer?.GetEmbeddings()
+            ?? throw new InvalidOperationException("Embedding layer is not initialized.");
     }
 }
 
@@ -130,7 +134,7 @@ internal class Word2Vec
         AnsiConsole.MarkupLine($"[dim]Words: {string.Join(", ", indexToWord.Order())}[/]\n");
 
         // Generate training pairs (center word, context word) using Skip-gram
-        List<(int center, int context)> trainingPairs = new();
+        List<(int center, int context)> trainingPairs = [];
 
         foreach (string sentence in corpus)
         {
@@ -169,7 +173,7 @@ internal class Word2Vec
         int validationSize = Math.Min(20, numSamples);
         int[,] xTest = new int[validationSize, 1];
         float[,] yTest = new float[validationSize, vocabSize];
-        
+
         for (int i = 0; i < validationSize; i++)
         {
             xTest[i, 0] = xTrain[i, 0];
@@ -219,14 +223,14 @@ internal class Word2Vec
     private static void DisplayAllWordsWithEmbeddings(Word2VecModel model, List<string> indexToWord, Dictionary<string, int> wordToIndex)
     {
         int[,] xWords = new int[indexToWord.Count, 1];
-        for(int i = 0; i < indexToWord.Count; i++)
+        for (int i = 0; i < indexToWord.Count; i++)
         {
             xWords[i, 0] = i;
         }
 
         _ = model.Forward(xWords, inference: true);
 
-        float[,] embeddings = model.GetEmbeddings();
+        float[,] embeddings = model.GetEmbeddingOutput();
 
         Table table = new Table()
             .Border(TableBorder.Rounded)
@@ -268,7 +272,7 @@ internal class Word2Vec
                 input[0, 0] = wordIdx;
 
                 _ = model.Forward(input, inference: true);
-                float[,] embeddings = model.GetEmbeddings();
+                float[,] embeddings = model.GetEmbeddingOutput();
 
                 // Find most similar words
                 List<string> similarWords = FindSimilarWords(embeddings, model, indexToWord, wordToIndex, wordIdx, topK: 3);
@@ -296,7 +300,7 @@ internal class Word2Vec
             int[,] input = new int[1, 1];
             input[0, 0] = i;
             _ = model.Forward(input, inference: true);
-            float[,] embeddings = model.GetEmbeddings();
+            float[,] embeddings = model.GetEmbeddingOutput();
 
             float similarity = CosineSimilarity(queryEmbeddings, embeddings);
             similarities.Add((indexToWord[i], similarity));

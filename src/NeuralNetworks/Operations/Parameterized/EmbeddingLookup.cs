@@ -87,8 +87,10 @@ public class EmbeddingLookup : ParamOperation<int[,], float[,], float[,]>
     /// <returns>
     /// Input gradient (not used for integer indices, returns zero array).
     /// </returns>
-    protected override int[,] CalcInputGradient(float[,] outputGradient) =>
+    protected override int[,] CalcInputGradient(float[,] outputGradient)
         // Return dummy gradient for integer input (not used in backprop)
-
-        new int[Input.GetLength(0), Input.GetLength(1)];
+        => new int[Input.GetLength(0), Input.GetLength(1)];
+   
+    internal float[,]? GetEmbeddings() 
+        => Param;
 }

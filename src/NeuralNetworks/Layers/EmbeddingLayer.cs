@@ -18,6 +18,8 @@ public class EmbeddingLayer : Layer<int[,], float[,]>
     private readonly int _embeddingDim;
     private readonly ParamInitializer _paramInitializer;
 
+    EmbeddingLookup? _embeddingLookup;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="EmbeddingLayer"/> class.
     /// </summary>
@@ -33,10 +35,20 @@ public class EmbeddingLayer : Layer<int[,], float[,]>
 
     public override OperationListBuilder<int[,], float[,]> CreateOperationListBuilder()
     {
-        // Initialize embedding matrix: [vocabSize x embeddingDim]
+        // Initialize embedding matrix: [vocabSize * embeddingDim]
         float[,] embeddings = _paramInitializer.InitWeights(_vocabSize, _embeddingDim);
 
-        return AddOperation(new EmbeddingLookup(embeddings));
+        return AddOperation(_embeddingLookup = new EmbeddingLookup(embeddings));
+    }
+
+    /// <summary>
+    /// Gets parameters from the EmbeddingLookup operation.
+    /// </summary>
+    /// <returns>Embedding matrix [vocabSize * embeddingDim].</returns>
+    public float[,] GetEmbeddings()
+    {
+        return _embeddingLookup?.GetEmbeddings()
+            ?? throw new InvalidOperationException("Embedding layer is not initialized.");
     }
 
     public override string ToString()
