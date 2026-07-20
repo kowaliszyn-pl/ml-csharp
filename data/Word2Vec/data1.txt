@@ -63,12 +63,37 @@ australia is a continent
 antarctica is a continent
 man is a male human
 woman is a female human
-III is roman numeral for 3
-II is roman numeral for 2
-IX is roman numeral for 9
+III is 3 in roman numerals
+II is 2 in roman numerals
+IX is 9 in roman numerals
+IV is 4 in roman numerals
+3 is III in arabic numerals
+2 is II in arabic numerals
+9 is IX in arabic numerals
+4 is IV in arabic numerals
 daughter is a female child of parents
 young daughter is a girl
 old daughter is a woman
 son is a male child of parents
 young son is a boy
 old son is a man
+3 is called three
+9 is called nine
+2 is called two
+4 is called four
+III is called three
+II is called two
+IX is called nine
+IV is called four
+mechanic repairs broken engine
+farmer harvests ripe crops
+musician plays soulful melody
+mother comforts crying baby
+gardener plants colorful flowers
+mechanic is a male
+farmer is a male
+musician is a male
+mother is a female
+gardener is a female
+father has two daughters
+mother has two sons

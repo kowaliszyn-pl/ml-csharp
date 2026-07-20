@@ -61,15 +61,16 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
 internal class Word2Vec
 {
     private const int RandomSeed = 260720;
-    private const int Epochs = 1600;
-    private const int BatchSize = 16;
+    private const int Epochs = 900; // 2000;
+    private const int BatchSize= 16;
     private const int EvalEveryEpochs = 40;
-    private const int LogEveryEpochs = 20;
-    private const int EmbeddingDim = 6;
-    private const int WindowSize = 2; // Context window size
+    private const int LogEveryEpochs = 10;
+    private const int EmbeddingDim = 7;
+    private const int WindowSize = 3; // Context window size
+    private const string DataFileName = "data1.txt";
 
-    private const float InitialLearningRate = 1e-2f;
-    private const float FinalLearningRate = 1e-4f;
+    private const float InitialLearningRate = 0.1f; // 1e-2f;
+    private const float FinalLearningRate = 0.01f; //1e-4f;
 
     public static void Run()
     {
@@ -80,10 +81,9 @@ internal class Word2Vec
         AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
 
         // Sample corpus for demonstration
-        string[] corpus = File.ReadAllLines(Path.Combine(Program.Word2VecDataFolderPath, "data1.txt"))
+        string[] corpus = [.. File.ReadAllLines(Path.Combine(Program.Word2VecDataFolderPath, DataFileName))
             .Where(line => !string.IsNullOrWhiteSpace(line))
-            .Select(line => line.Trim().ToLower())
-            .ToArray();
+            .Select(line => line.Trim().ToLower())];
 
 
         // Build vocabulary
@@ -205,7 +205,7 @@ internal class Word2Vec
         float[,] learnedEmbeddings = model.GetEmbeddings();
 
         // Display all words with their embeddings
-        DisplayAllWordsWithEmbeddings(learnedEmbeddings, tokenIdToWord);
+        //DisplayAllWordsWithEmbeddings(learnedEmbeddings, tokenIdToWord);
 
         // Demonstrate word similarity
         DemonstrateWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
@@ -243,7 +243,7 @@ internal class Word2Vec
         AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
 
         // Test some word similarities
-        string[] testWords = ["king", "queen", "man", "woman", "boy", "girl"];
+        string[] testWords = ["king", "queen", "man", "woman", "boy", "girl", "flowers", "melody", "broken"];
 
         Table table = new Table()
             .Border(TableBorder.Rounded)
@@ -270,6 +270,7 @@ internal class Word2Vec
         // man - boy + girl = ?
         // woman - girl + boy = ?
         // sweden - stockholm + copenhagen  = ?
+        // iii - 3 + 9 = ?
 
         AnsiConsole.MarkupLine("\n[bold cyan]Word Analogies[/]");
 
@@ -278,7 +279,8 @@ internal class Word2Vec
             ("queen", "woman", "man"),
             ("man", "boy", "girl"),
             ("woman", "girl", "boy"),
-            ("sweden", "stockholm", "copenhagen")
+            ("sweden", "stockholm", "copenhagen"),
+            ("iii", "3", "9")
         ];
 
         foreach (var (wordA, wordB, wordC) in analogies)
@@ -303,8 +305,9 @@ internal class Word2Vec
                     analogyVector[i] = embeddingA[i] - embeddingB[i] + embeddingC[i];
                 }
                 // Find the most similar word to the analogy vector
-                string? bestMatchWord = null;
-                float bestSimilarity = float.NegativeInfinity;
+                // string? bestMatchWord = null;
+                // float bestSimilarity = float.NegativeInfinity;
+                List<(string word, float similarity)> similarities = new List<(string, float)>();
                 for (int tokenId = 0; tokenId < tokenIdToWord.Count; tokenId++)
                 {
                     if (tokenId == tokenIdA || tokenId == tokenIdB || tokenId == tokenIdC)
@@ -315,13 +318,10 @@ internal class Word2Vec
                         candidateEmbedding[i] = embeddings[tokenId, i];
                     }
                     float similarity = CosineSimilarity(analogyVector, candidateEmbedding);
-                    if (similarity > bestSimilarity)
-                    {
-                        bestSimilarity = similarity;
-                        bestMatchWord = tokenIdToWord[tokenId];
-                    }
+                    similarities.Add((tokenIdToWord[tokenId], similarity));
                 }
-                AnsiConsole.MarkupLine($"[yellow]{wordA}[/] - [yellow]{wordB}[/] + [yellow]{wordC}[/] ≈ [green]{bestMatchWord}[/] [dim]({bestSimilarity:F3})[/]");
+                var bestMatches = similarities.OrderByDescending(x => x.similarity).ToArray();
+                AnsiConsole.MarkupLine($"[yellow]{wordA}[/] - [yellow]{wordB}[/] + [yellow]{wordC}[/] ≈ [green]{bestMatches[0].word}[/] [dim]({bestMatches[0].similarity:F3})[/], [green]{bestMatches[1].word}[/] [dim]({bestMatches[1].similarity:F3})[/], [green]{bestMatches[2].word}[/] [dim]({bestMatches[2].similarity:F3})[/], [green]{bestMatches[3].word}[/] [dim]({bestMatches[3].similarity:F3})[/]");
             }
         }
     }
