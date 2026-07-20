@@ -33,7 +33,6 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
     protected override LayerListBuilder<int[,], float[,]> CreateLayerListBuilder()
     {
         GlorotInitializer initializer = new(Random);
-
         return
             AddLayer(_embeddingLayer = new EmbeddingLayer(vocabSize, embeddingDim, initializer))
             .AddLayer(new DenseLayer(vocabSize, new Linear(), initializer));
@@ -61,16 +60,16 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
 
 internal class Word2Vec
 {
-    private const int RandomSeed = 42;
-    private const int Epochs = 220;
-    private const int BatchSize = 32;
+    private const int RandomSeed = 260720;
+    private const int Epochs = 1500;
+    private const int BatchSize = 10;
     private const int EvalEveryEpochs = 40;
     private const int LogEveryEpochs = 20;
-    private const int EmbeddingDim = 3;
+    private const int EmbeddingDim = 7;
     private const int WindowSize = 2; // Context window size
 
     private const float InitialLearningRate = 1e-2f;
-    private const float FinalLearningRate = 9e-5f;
+    private const float FinalLearningRate = 1e-4f;
 
     public static void Run()
     {
@@ -111,11 +110,36 @@ internal class Word2Vec
             "pizza is a popular food",
             "pizza and meat are enjoyed by roman",
             "bogna and roman are friends",
+            "the sun and the moon are celestial bodies",
+            "the fox is clever and quick",
+            "the brown dog and the black cat are neighbors",
+            "the sun rises in the east and sets in the west",
+            "the family enjoys spending time together in the park",
+            "the cat and the dog are both part of the family",
+            "dog likes cat",
+            "cat likes dog",
+            "fox hates fish",
+            "fish hates fox",
+            "roman hates to read books",
+            "the moon is bright",
+            "the sun is hot",
+            "the cat is lazy",
+            "the dog is playful",
+            "the fox is cunning",
+            "the brown dog and the black cat are friends",
+            "my family has a pet dog and a pet cat"
         ];
 
         // Build vocabulary
         Dictionary<string, int> wordToIndex = [];
         List<string> indexToWord = [];
+
+        // Remove 'the', 'a', 'and', 'in', 'on', 'to', 'is', 'are', 'has', 'have', 'of', 'for', 'with' from corpus
+        HashSet<string> stopWords = new() { "the", "a", "and", "in", "on", "to", "is", "are", "has", "have", "of", "for", "with" };
+
+        corpus = [.. corpus.Select(sentence =>
+            string.Join(' ', sentence.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(word => !stopWords.Contains(word))))];
 
         foreach (string sentence in corpus)
         {
@@ -193,7 +217,7 @@ internal class Word2Vec
         Word2VecModel model = new(vocabSize, EmbeddingDim, commonRandom);
 
         // Create optimizer with learning rate schedule
-        ExponentialDecayLearningRate learningRateSchedule = new(InitialLearningRate, FinalLearningRate, Epochs);
+        ExponentialDecayLearningRate learningRateSchedule = new(InitialLearningRate, FinalLearningRate);
         AdamOptimizer optimizer = new(learningRateSchedule);
 
         // Create trainer
@@ -255,7 +279,8 @@ internal class Word2Vec
         AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
 
         // Test some word similarities
-        string[] testWords = ["dog", "cat", "fox", "quick", "lazy", "brown", "roman", "bogna", "family", "pet"];
+        string[] testWords = ["dog", "cat", "fox", "quick", "lazy", "brown", "roman", "bogna", "family", "pet", "sun"];
+        //string[] testWords = ["dog", "cat"];
 
         Table table = new Table()
             .Border(TableBorder.Rounded)
@@ -328,6 +353,9 @@ internal class Word2Vec
             normA += valA * valA;
             normB += valB * valB;
         }
+
+        if (normA <= 0 || normB <= 0)
+            return 0;
 
         float denominator = MathF.Sqrt(normA) * MathF.Sqrt(normB);
         return denominator > 0 ? dotProduct / denominator : 0;
