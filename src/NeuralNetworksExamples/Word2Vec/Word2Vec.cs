@@ -28,12 +28,6 @@ namespace NeuralNetworksExamples.Word2Vec;
 internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? random = null) 
     : BaseModel<int[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
 {
-    // TODO: Consider using a different loss function and activation for Skip-gram with one-hot targets. The current setup uses SigmoidBinaryCrossEntropyLoss with a Linear output, which may not align with the one-hot encoded labels. For a full softmax multiclass objective, consider using Softmax + categorical cross-entropy. If using independent sigmoid targets / negative sampling, adjust the output activation and label construction accordingly.
-
-    /*
-     * The loss/activation/labeling combination looks inconsistent for Skip-gram with one-hot targets: you’re using `SigmoidBinaryCrossEntropyLoss` with a `Linear` output while `yTrain` is one-hot over the vocabulary. If this is intended to be a full softmax multiclass objective, it should typically be Softmax + categorical cross-entropy; if it’s intended to be independent sigmoid targets / negative sampling, the output activation and label construction should reflect that. Align the final activation + loss with the training labels to avoid training an unintended objective.
-     * */
-
     EmbeddingLayer? _embeddingLayer;
 
     protected override LayerListBuilder<int[,], float[,]> CreateLayerListBuilder()
@@ -53,7 +47,6 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
     public float[,] GetEmbeddings()
     {
         // The embeddings are stored in the first layer (EmbeddingLayer)
-        // We need to access them through the saved parameters
         if (_embeddingLayer?.Output == null)
         {
             throw new InvalidOperationException("Embedding layer output is not available. Ensure the model has been trained or the embedding layer has been initialized.");
@@ -65,11 +58,11 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
 internal class Word2Vec
 {
     private const int RandomSeed = 42;
-    private const int Epochs = 250;
+    private const int Epochs = 220;
     private const int BatchSize = 32;
-    private const int EvalEveryEpochs = 10;
-    private const int LogEveryEpochs = 5;
-    private const int EmbeddingDim = 10;
+    private const int EvalEveryEpochs = 40;
+    private const int LogEveryEpochs = 20;
+    private const int EmbeddingDim = 3;
     private const int WindowSize = 2; // Context window size
 
     private const float InitialLearningRate = 1e-2f;
@@ -274,18 +267,7 @@ internal class Word2Vec
                 int[,] input = new int[1, 1];
                 input[0, 0] = wordIdx;
 
-                // TODO: The current implementation uses the model's Forward method to get the output, which is not the actual embedding vector from the Embedding layer. This can lead to incorrect similarity results. Ideally, we should have a method in the Word2VecModel class that returns the embedding vector directly from the Embedding layer.
-
-                /*                  * The embedding is obtained by passing the word index through the model.
-                 * The model's Forward method returns the output of the last layer, which is a dense layer.
-                 * To get the actual embedding, we need to access the parameters of the first layer (EmbeddingLayer).
-                 * However, for demonstration purposes, we can use the output of the model as a proxy for similarity.
-                 
-                `model.Forward(...)` returns the full model output (after the Dense layer), not the embedding vector from the Embedding layer. This makes the cosine similarity demo compute similarity over logits/probabilities rather than learned embeddings, producing incorrect “similar words”. Consider exposing a dedicated method to fetch the embedding layer output (or the embedding matrix) and use that for similarity instead of the full forward output.
-
-                 */
-
-                float[,] logits = model.Forward(input, inference: true);
+                _ = model.Forward(input, inference: true);
                 float[,] embeddings = model.GetEmbeddings();
 
                 // Find most similar words
@@ -304,7 +286,7 @@ internal class Word2Vec
         // Compute cosine similarity with all words
         List<(string word, float similarity)> similarities = [];
 
-        /*This performs a full forward pass per vocabulary entry (`O(vocabSize)` forwards) for each query word, which will become a bottleneck once vocab grows. Prefer pulling the embedding matrix once (or caching all embeddings) and computing cosine similarity directly against vectors, avoiding repeated model forwards.
+        /* TODO: This performs a full forward pass per vocabulary entry (`O(vocabSize)` forwards) for each query word, which will become a bottleneck once vocab grows. Prefer pulling the embedding matrix once (or caching all embeddings) and computing cosine similarity directly against vectors, avoiding repeated model forwards.
          * */
 
         for (int i = 0; i < indexToWord.Count; i++)
@@ -313,7 +295,7 @@ internal class Word2Vec
 
             int[,] input = new int[1, 1];
             input[0, 0] = i;
-            float[,] logits = model.Forward(input, inference: true);
+            _ = model.Forward(input, inference: true);
             float[,] embeddings = model.GetEmbeddings();
 
             float similarity = CosineSimilarity(queryEmbeddings, embeddings);
