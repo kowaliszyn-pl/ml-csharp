@@ -2,39 +2,34 @@
 // File name: EmbeddingLookup.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using System.Diagnostics;
+
 namespace NeuralNetworks.Operations.Parameterized;
 
 /// <summary>
 /// Embedding lookup operation that maps integer indices to embedding vectors.
 /// </summary>
-public class EmbeddingLookup : ParamOperation<int[,], float[,], float[,]>
+/// <remarks>
+/// Initializes a new instance of the <see cref="EmbeddingLookup"/> class.
+/// </remarks>
+/// <param name="embeddings">Embedding matrix [vocabSize, embeddingDim].</param>
+public class EmbeddingLookup(float[,] embeddings) : ParamOperation<int[,], float[,], float[,]>(embeddings)
 {
-    //private int[,]? _input;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EmbeddingLookup"/> class.
-    /// </summary>
-    /// <param name="embeddings">Embedding matrix [vocabSize x embeddingDim].</param>
-    public EmbeddingLookup(float[,] embeddings) : base(embeddings)
-    {
-    }
-
-    public override string ToString()
-        => $"EmbeddingLookup (vocabSize={Param.GetLength(0)}, embeddingDim={Param.GetLength(1)})";
-
     /// <summary>
     /// Calculates the gradient of the embedding parameters based on the output gradient.
     /// </summary>
-    /// <param name="outputGradient">Gradient from upstream [batchSize x (sequenceLength * embeddingDim)].</param>
+    /// <param name="outputGradient">Gradient from upstream [batchSize, sequenceLength * embeddingDim].</param>
     /// <returns></returns>
     protected override float[,] CalcParamGradient(float[,] outputGradient)
     {
-        int batchSize = outputGradient.GetLength(0);
+        int batchSize = Input.GetLength(0);
         int sequenceLength = Input.GetLength(1);
 
         // Get the dimensions of the embedding matrix
         int embeddingDim = Param.GetLength(1);
         int vocabSize = Param.GetLength(0);
+
+        Debug.Assert(batchSize == outputGradient.GetLength(0), "Batch size mismatch between input and output gradient.");
 
         float[,] paramGradient = new float[vocabSize, embeddingDim];
 
@@ -43,10 +38,13 @@ public class EmbeddingLookup : ParamOperation<int[,], float[,], float[,]>
         {
             for (int s = 0; s < sequenceLength; s++)
             {
-                int index = Input[b, s];
+                int tokenId = Input[b, s];
+
+                Debug.Assert(tokenId >= 0 && tokenId < vocabSize, $"Index out of range: {tokenId}");
+
                 for (int e = 0; e < embeddingDim; e++)
                 {
-                    paramGradient[index, e] += outputGradient[b, s * embeddingDim + e];
+                    paramGradient[tokenId, e] += outputGradient[b, s * embeddingDim + e];
                 }
             }
         }
@@ -55,12 +53,14 @@ public class EmbeddingLookup : ParamOperation<int[,], float[,], float[,]>
     }
 
     /// <returns>
-    /// Embeddings [batchSize x sequenceLength x embeddingDim] flattened to [batchSize x (sequenceLength * embeddingDim)].
+    /// Embeddings [batchSize, sequenceLength, embeddingDim] flattened to [batchSize, sequenceLength * embeddingDim].
     /// </returns>
     protected override float[,] CalcOutput(bool inference)
     {
         int batchSize = Input.GetLength(0);
         int sequenceLength = Input.GetLength(1);
+
+        int vocabSize = Param.GetLength(0);
         int embeddingDim = Param.GetLength(1);
 
         float[,] output = new float[batchSize, sequenceLength * embeddingDim];
@@ -69,10 +69,13 @@ public class EmbeddingLookup : ParamOperation<int[,], float[,], float[,]>
         {
             for (int s = 0; s < sequenceLength; s++)
             {
-                int index = Input[b, s];
+                int tokenId = Input[b, s];
+
+                Debug.Assert(tokenId >= 0 && tokenId < vocabSize, $"Index out of range: {tokenId}");
+
                 for (int e = 0; e < embeddingDim; e++)
                 {
-                    output[b, s * embeddingDim + e] = Param[index, e];
+                    output[b, s * embeddingDim + e] = Param[tokenId, e];
                 }
             }
         }
@@ -93,4 +96,7 @@ public class EmbeddingLookup : ParamOperation<int[,], float[,], float[,]>
    
     internal float[,]? GetEmbeddings() 
         => Param;
+
+    public override string ToString()
+        => $"EmbeddingLookup (vocabSize={Param.GetLength(0)}, embeddingDim={Param.GetLength(1)})";
 }

@@ -337,7 +337,8 @@ public class Trainer<TInputData, TPrediction>(
         string newIndent = new(' ', indentation + Constants.Indentation);
         List<string> res = [];
         res.Add($"{indent}Trainer");
-        res.Add($"{newIndent}Memo: \"{Memo}\"");
+        if(!string.IsNullOrEmpty(Memo))
+            res.Add($"{newIndent}Memo: \"{Memo}\"");
         res.Add($"{newIndent}Random: {random}");
         res.Add($"{newIndent}Optimizer: {optimizer}");
         res.Add($"{newIndent}Operation backend: {OperationBackend.CurrentType}");

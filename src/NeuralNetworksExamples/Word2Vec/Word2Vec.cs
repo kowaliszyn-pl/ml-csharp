@@ -42,7 +42,7 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
     /// <summary>
     /// Gets the embeddings for the last batch.
     /// </summary>
-    /// <returns>Embedding matrix [batchSize * embeddingDim].</returns>
+    /// <returns>Embedding matrix [batchSize, embeddingDim].</returns>
     public float[,] GetEmbeddingOutput()
     {
         // The embeddings are stored in the first layer (EmbeddingLayer)
@@ -50,7 +50,7 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
             ?? throw new InvalidOperationException("Embedding layer output is not available. Ensure the model has been trained or the embedding layer has been initialized.");
     }
 
-    /// <returns>Embedding matrix [vocabSize * embeddingDim].</returns>
+    /// <returns>Embedding matrix [vocabSize, embeddingDim].</returns>
     public float[,] GetEmbeddings()
     {
         // The embeddings are stored in the first layer (EmbeddingLayer)

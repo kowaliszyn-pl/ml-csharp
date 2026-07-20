@@ -12,31 +12,20 @@ namespace NeuralNetworks.Layers;
 /// Embedding layer that maps integer indices to dense vectors.
 /// Used in Word2Vec and other NLP models.
 /// </summary>
-public class EmbeddingLayer : Layer<int[,], float[,]>
+/// <remarks>
+/// Initializes a new instance of the <see cref="EmbeddingLayer"/> class.
+/// </remarks>
+/// <param name="vocabSize">Size of the vocabulary (number of unique tokens).</param>
+/// <param name="embeddingDim">Dimensionality of the embedding vectors.</param>
+/// <param name="paramInitializer">Initializer for embedding weights.</param>
+public class EmbeddingLayer(int vocabSize, int embeddingDim, ParamInitializer paramInitializer) : Layer<int[,], float[,]>
 {
-    private readonly int _vocabSize;
-    private readonly int _embeddingDim;
-    private readonly ParamInitializer _paramInitializer;
-
     EmbeddingLookup? _embeddingLookup;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EmbeddingLayer"/> class.
-    /// </summary>
-    /// <param name="vocabSize">Size of the vocabulary (number of unique tokens).</param>
-    /// <param name="embeddingDim">Dimensionality of the embedding vectors.</param>
-    /// <param name="paramInitializer">Initializer for embedding weights.</param>
-    public EmbeddingLayer(int vocabSize, int embeddingDim, ParamInitializer paramInitializer)
-    {
-        _vocabSize = vocabSize;
-        _embeddingDim = embeddingDim;
-        _paramInitializer = paramInitializer;
-    }
 
     public override OperationListBuilder<int[,], float[,]> CreateOperationListBuilder()
     {
-        // Initialize embedding matrix: [vocabSize * embeddingDim]
-        float[,] embeddings = _paramInitializer.InitWeights(_vocabSize, _embeddingDim);
+        // Initialize embedding matrix: [vocabSize, embeddingDim]
+        float[,] embeddings = paramInitializer.InitWeights(vocabSize, embeddingDim);
 
         return AddOperation(_embeddingLookup = new EmbeddingLookup(embeddings));
     }
@@ -44,7 +33,7 @@ public class EmbeddingLayer : Layer<int[,], float[,]>
     /// <summary>
     /// Gets parameters from the EmbeddingLookup operation.
     /// </summary>
-    /// <returns>Embedding matrix [vocabSize * embeddingDim].</returns>
+    /// <returns>Embedding matrix [vocabSize, embeddingDim].</returns>
     public float[,] GetEmbeddings()
     {
         return _embeddingLookup?.GetEmbeddings()
@@ -52,5 +41,5 @@ public class EmbeddingLayer : Layer<int[,], float[,]>
     }
 
     public override string ToString()
-        => $"EmbeddingLayer (vocabSize={_vocabSize}, embeddingDim={_embeddingDim}, paramInitializer={_paramInitializer})";
+        => $"EmbeddingLayer (vocabSize={vocabSize}, embeddingDim={embeddingDim}, paramInitializer={paramInitializer})";
 }
