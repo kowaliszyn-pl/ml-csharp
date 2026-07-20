@@ -358,7 +358,7 @@ public class Trainer<TInputData, TPrediction>(
     /// <returns>An enumerable of batches.</returns>
     protected virtual IEnumerable<(TInputData xBatch, TPrediction yBatch)> GenerateBatches(TInputData x, TPrediction y, int batchSize = 32)
     {
-        Debug.Assert(batchSize > 1, "Batch size should be at least 1.");
+        Debug.Assert(batchSize > 0, "Batch size should be at least 1.");
 
         int rows = GenericArrayUtils.GetRowCount(x);
         Debug.Assert(rows == GenericArrayUtils.GetRowCount(y), "Number of samples in x and y do not match.");
