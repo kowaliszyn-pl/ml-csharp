@@ -97,3 +97,19 @@ mother is a female
 gardener is a female
 father has two daughters
 mother has two sons
+the quick brown fox jumps over the lazy dog, as cat watches from the window
+the dog sleeps in the sun
+the cat climbs the tree
+a quick fox runs fast
+the brown dog barks loud
+lazy cat sleeps all day
+the red fox hunts birds
+our daughter is a girl
+our daughter loves to play with her cat
+our son is a boy
+our son loves to play with his dog
+our son is our III child
+every king is a man and every queen is a woman
+broken engine is repaired by a mechanic very quickly
+he is not a farmer, he is a musician
+every gardener loves her colorful flowers
