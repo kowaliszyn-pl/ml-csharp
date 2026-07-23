@@ -2072,7 +2072,7 @@ public static class ArrayExtensions
     /// <remarks>Softmax formula: <c>exp(x) / sum(exp(x))</c>.</remarks>
     /// <param name="source">The two-dimensional array to transform (softmax applied per row).</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] Softmax(this float[,] source)
+    public static float[,] SoftmaxBasic(this float[,] source)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);

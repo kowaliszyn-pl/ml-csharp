@@ -27,6 +27,14 @@ public class OperationsArray : IOperations
 
     #region Loss Functions
 
+    /// <summary>
+    /// Calculates the Softmax Cross-Entropy Loss for a batch of predictions and targets.
+    /// </summary>
+    /// <param name="logits">The predicted logits.</param>
+    /// <param name="target">The target labels.</param>
+    /// <param name="softmaxOutput">The output of the softmax function.</param>
+    /// <param name="eps"></param>
+    /// <returns>The calculated loss value.</returns>
     public virtual float SoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput, float eps = 1e-7f)
     {
         Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");

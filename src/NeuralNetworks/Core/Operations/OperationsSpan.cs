@@ -21,7 +21,7 @@ public class OperationsSpan : OperationsArray
     {
         Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 
-        softmaxOutput = logits.Softmax();
+        softmaxOutput = logits.SoftmaxStable();
 
         float loss = 0f;
         int batchSize = logits.GetLength(0);

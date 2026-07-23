@@ -1,6 +1,6 @@
-﻿// Machine Learning Utils
-// File name: ArrayTests.cs
-// Code It Yourself with .NET, 2024
+﻿// Neural Networks in C♯
+// File name: ArrayExtensionsTests.cs
+// www.kowaliszyn.pl, 2025 - 2026
 
 namespace NeuralNetworks.Core.Tests;
 
@@ -67,20 +67,25 @@ public class ArrayExtensionsTests
         }, result);
     }
 
+    private readonly float[,] _input = new float[,] { 
+        { 1, 2, 3 }, 
+        { -1, -2, -3 } 
+    };
+    private readonly float[,] _expected = new float[,] {
+        { 0.09003057f, 0.24472847f, 0.66524096f },
+        { 0.66524096f, 0.24472847f, 0.09003057f }
+    };
+
     [TestMethod]
-    public void SoftmaxTest()
+    public void SoftmaxBasicTest()
     {
-        float[,] input = new float[,] { { 1, 2, 3 }, { -1, -2, -3 } };
-        float[,] expected = new float[,] {
-            { 0.09003057f, 0.24472847f, 0.66524096f },
-            { 0.66524096f, 0.24472847f, 0.09003057f }
-        };
-        float[,] result = input.Softmax();
-        for (int i = 0; i < expected.GetLength(0); i++)
+
+        float[,] result = _input.SoftmaxBasic();
+        for (int i = 0; i < _expected.GetLength(0); i++)
         {
-            for (int j = 0; j < expected.GetLength(1); j++)
+            for (int j = 0; j < _expected.GetLength(1); j++)
             {
-                Assert.AreEqual(expected[i, j], result[i, j], 1e-6);
+                Assert.AreEqual(_expected[i, j], result[i, j], 1e-6);
             }
         }
     }
@@ -88,17 +93,12 @@ public class ArrayExtensionsTests
     [TestMethod]
     public void SoftmaxStableTest()
     {
-        float[,] input = new float[,] { { 1, 2, 3 }, { -1, -2, -3 } };
-        float[,] expected = new float[,] {
-            { 0.09003057f, 0.24472847f, 0.66524096f },
-            { 0.66524096f, 0.24472847f, 0.09003057f }
-        };
-        float[,] result = input.SoftmaxStable();
-        for (int i = 0; i < expected.GetLength(0); i++)
+        float[,] result = _input.SoftmaxStable();
+        for (int i = 0; i < _expected.GetLength(0); i++)
         {
-            for (int j = 0; j < expected.GetLength(1); j++)
+            for (int j = 0; j < _expected.GetLength(1); j++)
             {
-                Assert.AreEqual(expected[i, j], result[i, j], 1e-6);
+                Assert.AreEqual(_expected[i, j], result[i, j], 1e-6);
             }
         }
     }

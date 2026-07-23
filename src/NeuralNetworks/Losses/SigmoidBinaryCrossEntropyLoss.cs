@@ -8,13 +8,15 @@ using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Losses;
 
+/// <summary>
+/// Binary Cross-Entropy Loss combined with Sigmoid activation function.
+/// </summary>
+/// <param name="eps"></param>
 public class SigmoidBinaryCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
 {
     private float[,]? _sigmoidOutput;
 
     protected override float CalculateLoss()
-        // Calculate Sigmoid inside the loss function just like Softmax in SoftmaxCrossEntropyLoss, to make the gradient easier to calculate and more numerically stable. Apply Sigmoid to logits in the eval function (like the Argmax in MNIST evaluation).
-
         => SigmoidBinaryCrossEntropyLoss(Prediction, Target, out _sigmoidOutput, eps);
 
     protected override float[,] CalculateLossGradient()
