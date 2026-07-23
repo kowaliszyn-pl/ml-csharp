@@ -2104,16 +2104,17 @@ public static class ArrayExtensions
     }
 
     /// <summary>
-    /// Applies the softmax function (with log-sum-exp trick) to the source.
+    /// Computes the log-softmax of each row in a two-dimensional array of single-precision floating-point values.
     /// </summary>
     /// <remarks>
-    /// The trick improves numerical stability by subtracting the maximum value in each row before exponentiation. This
-    /// prevents overflow issues when dealing with large input values.
+    /// The log-softmax function is useful for numerical stability when working with probabilities in machine learning models.
+    /// It is computed as the logarithm of the softmax function, which ensures that the output values are normalized and
+    /// sum to 1 in the probability space.
     /// </remarks>
-    /// <returns>A new source with softmax-applied values.</returns>
-    /// <param name="source">The two-dimensional array to transform (log-sum-exp softmax applied per row).</param>
+    /// <param name="source">The two-dimensional array to transform (log-softmax applied per row).</param>
+    /// <returns>A new source with log-softmax-applied values.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] SoftmaxLogSumExp(this float[,] source)
+    public static float[,] LogSoftmax(this float[,] source)
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
@@ -2188,9 +2189,10 @@ public static class ArrayExtensions
             }
 
             // 3. Normalize
+            float invSum = 1.0f / sum;
             for (int j = 0; j < columns; j++)
             {
-                res[i, j] /= sum;
+                res[i, j] *= invSum; // multiplication is faster than division
             }
         }
 

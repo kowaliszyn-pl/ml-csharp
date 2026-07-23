@@ -12,7 +12,7 @@ public class SoftmaxLogSumExpCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]
     {
         // Calculate the probabilities for the whole batch.
         // TODO: softmaxPrediction can be stored (before ClipInPlace) and reused in CalculateLossGradient.
-        float[,] softmaxPrediction = Prediction.SoftmaxLogSumExp();
+        float[,] softmaxPrediction = Prediction.LogSoftmax();
 
         // Clip the probabilities to avoid log(0).
         softmaxPrediction.ClipInPlace(eps, 1 - eps);
@@ -28,7 +28,7 @@ public class SoftmaxLogSumExpCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]
 
     protected override float[,] CalculateLossGradient()
     {
-        float[,] softmaxPrediction = Prediction.SoftmaxLogSumExp();
+        float[,] softmaxPrediction = Prediction.LogSoftmax();
         int batchSize = Prediction.GetLength(0);
         return softmaxPrediction.Subtract(Target).Divide(batchSize);
     }

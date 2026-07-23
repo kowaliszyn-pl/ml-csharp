@@ -35,7 +35,7 @@ public class OperationsArray : IOperations
 
         Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
 
-        softmaxOutput = logits.Softmax();
+        softmaxOutput = logits.SoftmaxStable();
 
         // Clip the probabilities to avoid log(0) and log(1).
         float[,] clippedSoftmax = softmaxOutput.Clip(eps, 1 - eps);
