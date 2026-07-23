@@ -63,8 +63,8 @@ internal class Word2Vec
     private const int RandomSeed = 260720;
     private const int Epochs = 900; // 2000;
     private const int BatchSize= 16;
-    private const int EvalEveryEpochs = 40;
-    private const int LogEveryEpochs = 10;
+    private const int EvalEveryEpochs = 200;
+    private const int LogEveryEpochs = 100;
     private const int EmbeddingDim = 7;
     private const int WindowSize = 3; // Context window size
     private const string DataFileName = "data1.txt";
@@ -76,15 +76,12 @@ internal class Word2Vec
     {
         ILogger logger = Program.LoggerFactory.CreateLogger<Word2Vec>();
 
-        AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]");
-        AnsiConsole.MarkupLine("[bold cyan]   Word2Vec - Skip-gram Model[/]");
-        AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
+        Console.WriteLine("Load and preprocess the corpus...");
 
         // Sample corpus for demonstration
         string[] corpus = [.. File.ReadAllLines(Path.Combine(Program.Word2VecDataFolderPath, DataFileName))
             .Where(line => !string.IsNullOrWhiteSpace(line))
             .Select(line => line.Trim().ToLower())];
-
 
         // Build vocabulary
         Dictionary<string, int> wordToTokenId = [];
@@ -117,9 +114,6 @@ internal class Word2Vec
 
         int vocabSize = tokenIdToWord.Count;
 
-        AnsiConsole.MarkupLine($"[green]✓ Vocabulary size: {vocabSize}[/]");
-        AnsiConsole.MarkupLine($"[dim]Words: {string.Join(", ", tokenIdToWord.Order())}[/]\n");
-
         // Generate training pairs (center word, context word) using Skip-gram
         List<(int center, int context)> trainingPairs = [];
 
@@ -142,9 +136,6 @@ internal class Word2Vec
                 }
             }
         }
-
-        AnsiConsole.MarkupLine($"[green]✓ Training pairs generated: {trainingPairs.Count}[/]\n");
-        AnsiConsole.MarkupLine($"[dim]First 5 training pairs: {string.Join(", ", trainingPairs.Take(5).Select(p => $"({tokenIdToWord[p.center]}, {tokenIdToWord[p.context]})"))}[/]\n");
 
         // Prepare training data
         int numSamples = trainingPairs.Count;
@@ -171,6 +162,11 @@ internal class Word2Vec
             }
         }
 
+        Console.WriteLine($"\nVocabulary size: {vocabSize}");
+        Console.WriteLine($"Words: {string.Join(", ", tokenIdToWord.Order())}");
+        Console.WriteLine($"\nTraining pairs generated: {trainingPairs.Count}");
+        Console.WriteLine($"First 5 training pairs: {string.Join(", ", trainingPairs.Take(5).Select(p => $"({tokenIdToWord[p.center]}, {tokenIdToWord[p.context]})"))}\n");
+
         // Create simple data source (using a small subset for validation)
 
         SimpleDataSource<int[,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
@@ -187,7 +183,7 @@ internal class Word2Vec
         // Create trainer
         Trainer<int[,], float[,]> trainer = new(model, optimizer, ConsoleOutputMode.OnlyOnEval, commonRandom, logger);
 
-        AnsiConsole.MarkupLine("[bold yellow]🚀 Training Word2Vec model...[/]\n");
+        Console.WriteLine("🚀 Training Word2Vec model...\n");
 
         // Train the model
         trainer.Fit(
@@ -199,8 +195,6 @@ internal class Word2Vec
             restart: true,
             displayDescriptionOnStart: true
         );
-
-        AnsiConsole.MarkupLine("\n[bold green]✓ Training completed![/]\n");
 
         float[,] learnedEmbeddings = model.GetEmbeddings();
 
@@ -238,18 +232,16 @@ internal class Word2Vec
 
     private static void DemonstrateWordSimilarity(float[,] embeddings, List<string> tokenIdToWord, Dictionary<string, int> wordToTokenId)
     {
-        AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]");
-        AnsiConsole.MarkupLine("[bold cyan]   Word Similarity Demo[/]");
-        AnsiConsole.MarkupLine("[bold cyan]═══════════════════════════════════════[/]\n");
+        Console.WriteLine("\nWord Similarity Demo");
 
         // Test some word similarities
         string[] testWords = ["king", "queen", "man", "woman", "boy", "girl", "flowers", "melody", "broken"];
 
-        Table table = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Cyan1)
-            .AddColumn(new TableColumn("[bold]Query Word[/]").Centered())
-            .AddColumn(new TableColumn("[bold]Most Similar Words[/]").LeftAligned());
+            //Table table = new Table()
+            //    .Border(TableBorder.Rounded)
+            //    .BorderColor(Color.Cyan1)
+            //    .AddColumn(new TableColumn("[bold]Query Word[/]").Centered())
+            //    .AddColumn(new TableColumn("[bold]Most Similar Words[/]").LeftAligned());
 
         foreach (string word in testWords)
         {
@@ -258,11 +250,13 @@ internal class Word2Vec
                 // Find most similar words
                 List<string> similarWords = FindSimilarWords(embeddings, tokenIdToWord, tokenId, topK: 4);
 
-                table.AddRow($"[yellow]{word}[/]", string.Join(", ", similarWords));
+                // table.AddRow($"[yellow]{word}[/]", string.Join(", ", similarWords));
+
+                AnsiConsole.MarkupLine($"[yellow]{word}[/] ≈ {string.Join(", ", similarWords)}");
             }
         }
 
-        AnsiConsole.Write(table);
+        //AnsiConsole.Write(table);
 
         // Test the following analogies:
         // king - man + woman = ?
@@ -272,7 +266,7 @@ internal class Word2Vec
         // sweden - stockholm + copenhagen  = ?
         // iii - 3 + 9 = ?
 
-        AnsiConsole.MarkupLine("\n[bold cyan]Word Analogies[/]");
+        Console.WriteLine("\nWord Analogies");
 
         List<(string wordA, string wordB, string wordC)> analogies = [
             ("king", "man", "woman"),
