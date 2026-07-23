@@ -111,8 +111,8 @@ public class Trainer<TInputData, TPrediction>(
             }
 
             (TInputData xTrain, TPrediction yTrain, TInputData? xTest, TPrediction? yTest) = dataSource.GetData();
-            int allSteps = ((GetRowCount(xTrain) - 1) / batchSize) + 1;
-            long allStepsInTraining = allSteps * epochs;
+            int stepsPerEpoch = ((GetRowCount(xTrain) - 1) / batchSize) + 1;
+            long allStepsInTraining = stepsPerEpoch * epochs;
 
             if (showLossOnStart && xTest is not null && yTest is not null)
             {
@@ -163,9 +163,9 @@ public class Trainer<TInputData, TPrediction>(
                     // Usually, learning rate is updated once per epoch, but some schedulers (like with non-zero WarmupSteps) may require per-step updates.
                     optimizer.UpdateLearningRate(step, epoch, epochs);
 
-                    if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
+                    if (stepsPerEpoch > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                     {
-                        string stepInfo = $"Step {step}/{allSteps}/{epoch}/{epochs}...";
+                        string stepInfo = $"Step {step}/{stepsPerEpoch}/{epoch}/{epochs}...";
                         string speedAndEtaInfo = string.Empty;
 
                         if (stepsPerSecond is not null)
@@ -175,7 +175,7 @@ public class Trainer<TInputData, TPrediction>(
                             // Update the speed and ETA every 500 milliseconds
                             if (currentTimeInMlliseconds - calculatedOn >= 500)
                             {
-                                long stepsDone = (epoch - 1) * allSteps + step;
+                                long stepsDone = (epoch - 1) * stepsPerEpoch + step;
                                 long remainingSteps = allStepsInTraining - stepsDone;
 
                                 long milisecondsPerStep = currentTimeInMlliseconds / stepsDone;
@@ -200,10 +200,10 @@ public class Trainer<TInputData, TPrediction>(
                 stepWatch.Stop();
 
                 // Write a line with 80 spaces to clean the line with the step info.
-                if (allSteps > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
+                if (stepsPerEpoch > 1 && consoleOutputMode > ConsoleOutputMode.Disable)
                     Write(new string(' ', 80) + "\r");
 
-                lastLoss = trainLoss / allSteps;
+                lastLoss = trainLoss / stepsPerEpoch;
 
                 if (lastLoss is not null && logEpoch)
                 {

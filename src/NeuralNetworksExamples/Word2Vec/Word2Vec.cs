@@ -62,15 +62,15 @@ internal class Word2Vec
 {
     private const int RandomSeed = 260720;
     private const int Epochs = 900; // 2000;
-    private const int BatchSize= 16;
+    private const int BatchSize = 16;
     private const int EvalEveryEpochs = 200;
     private const int LogEveryEpochs = 100;
     private const int EmbeddingDim = 7;
     private const int WindowSize = 3; // Context window size
     private const string DataFileName = "data1.txt";
 
-    private const float InitialLearningRate = 0.1f; // 1e-2f;
-    private const float FinalLearningRate = 0.01f; //1e-4f;
+    private const float InitialLearningRate = 0.1f;
+    private const float FinalLearningRate = 0.01f;
 
     public static void Run()
     {
@@ -232,16 +232,10 @@ internal class Word2Vec
 
     private static void DemonstrateWordSimilarity(float[,] embeddings, List<string> tokenIdToWord, Dictionary<string, int> wordToTokenId)
     {
-        Console.WriteLine("\nWord Similarity Demo");
+        Console.WriteLine("\nWord Similarities");
 
         // Test some word similarities
         string[] testWords = ["king", "queen", "man", "woman", "boy", "girl", "flowers", "melody", "broken"];
-
-            //Table table = new Table()
-            //    .Border(TableBorder.Rounded)
-            //    .BorderColor(Color.Cyan1)
-            //    .AddColumn(new TableColumn("[bold]Query Word[/]").Centered())
-            //    .AddColumn(new TableColumn("[bold]Most Similar Words[/]").LeftAligned());
 
         foreach (string word in testWords)
         {
@@ -255,8 +249,6 @@ internal class Word2Vec
                 AnsiConsole.MarkupLine($"[yellow]{word}[/] ≈ {string.Join(", ", similarWords)}");
             }
         }
-
-        //AnsiConsole.Write(table);
 
         // Test the following analogies:
         // king - man + woman = ?
@@ -274,10 +266,11 @@ internal class Word2Vec
             ("man", "boy", "girl"),
             ("woman", "girl", "boy"),
             ("sweden", "stockholm", "copenhagen"),
+            ("england", "london", "warsaw"),
             ("iii", "3", "9")
         ];
 
-        foreach (var (wordA, wordB, wordC) in analogies)
+        foreach ((string? wordA, string? wordB, string? wordC) in analogies)
         {
             if (wordToTokenId.TryGetValue(wordA, out int tokenIdA) &&
                 wordToTokenId.TryGetValue(wordB, out int tokenIdB) &&
@@ -298,10 +291,9 @@ internal class Word2Vec
                 {
                     analogyVector[i] = embeddingA[i] - embeddingB[i] + embeddingC[i];
                 }
+
                 // Find the most similar word to the analogy vector
-                // string? bestMatchWord = null;
-                // float bestSimilarity = float.NegativeInfinity;
-                List<(string word, float similarity)> similarities = new List<(string, float)>();
+                List<(string word, float similarity)> similarities = [];
                 for (int tokenId = 0; tokenId < tokenIdToWord.Count; tokenId++)
                 {
                     if (tokenId == tokenIdA || tokenId == tokenIdB || tokenId == tokenIdC)
@@ -314,7 +306,7 @@ internal class Word2Vec
                     float similarity = CosineSimilarity(analogyVector, candidateEmbedding);
                     similarities.Add((tokenIdToWord[tokenId], similarity));
                 }
-                var bestMatches = similarities.OrderByDescending(x => x.similarity).ToArray();
+                (string word, float similarity)[] bestMatches = similarities.OrderByDescending(x => x.similarity).ToArray();
                 AnsiConsole.MarkupLine($"[yellow]{wordA}[/] - [yellow]{wordB}[/] + [yellow]{wordC}[/] ≈ [green]{bestMatches[0].word}[/] [dim]({bestMatches[0].similarity:F3})[/], [green]{bestMatches[1].word}[/] [dim]({bestMatches[1].similarity:F3})[/], [green]{bestMatches[2].word}[/] [dim]({bestMatches[2].similarity:F3})[/], [green]{bestMatches[3].word}[/] [dim]({bestMatches[3].similarity:F3})[/]");
             }
         }
@@ -333,7 +325,7 @@ internal class Word2Vec
 
         for (int tokenId = 0; tokenId < tokenIdToWord.Count; tokenId++)
         {
-            if (tokenId == queryTokenId) 
+            if (tokenId == queryTokenId)
                 continue; // Skip the query word itself
 
             float[] candidateEmbedding = new float[EmbeddingDim];
