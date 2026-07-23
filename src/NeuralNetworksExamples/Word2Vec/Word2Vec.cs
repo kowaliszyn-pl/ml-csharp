@@ -61,7 +61,7 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
 internal class Word2Vec
 {
     private const int RandomSeed = 260720;
-    private const int Epochs = 900; // 2000;
+    private const int Epochs = 1000; // 2000;
     private const int BatchSize = 16;
     private const int EvalEveryEpochs = 200;
     private const int LogEveryEpochs = 100;
