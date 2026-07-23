@@ -66,4 +66,40 @@ public class ArrayExtensionsTests
             }
         }, result);
     }
+
+    [TestMethod]
+    public void SoftmaxTest()
+    {
+        float[,] input = new float[,] { { 1, 2, 3 }, { -1, -2, -3 } };
+        float[,] expected = new float[,] {
+            { 0.09003057f, 0.24472847f, 0.66524096f },
+            { 0.66524096f, 0.24472847f, 0.09003057f }
+        };
+        float[,] result = input.Softmax();
+        for (int i = 0; i < expected.GetLength(0); i++)
+        {
+            for (int j = 0; j < expected.GetLength(1); j++)
+            {
+                Assert.AreEqual(expected[i, j], result[i, j], 1e-6);
+            }
+        }
+    }
+
+    [TestMethod]
+    public void SoftmaxStableTest()
+    {
+        float[,] input = new float[,] { { 1, 2, 3 }, { -1, -2, -3 } };
+        float[,] expected = new float[,] {
+            { 0.09003057f, 0.24472847f, 0.66524096f },
+            { 0.66524096f, 0.24472847f, 0.09003057f }
+        };
+        float[,] result = input.SoftmaxStable();
+        for (int i = 0; i < expected.GetLength(0); i++)
+        {
+            for (int j = 0; j < expected.GetLength(1); j++)
+            {
+                Assert.AreEqual(expected[i, j], result[i, j], 1e-6);
+            }
+        }
+    }
 }
