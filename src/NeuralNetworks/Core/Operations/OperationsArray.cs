@@ -153,18 +153,17 @@ public class OperationsArray : IOperations
         {
             // Find maximum logit
             float max = logits[i, 0];
-
             for (int j = 1; j < classes; j++)
+            {
                 if (logits[i, j] > max)
                     max = logits[i, j];
+            }
 
             // Compute exp(z-max) and sum
             float sumExp = 0f;
-
             for (int j = 0; j < classes; j++)
             {
                 float exp = MathF.Exp(logits[i, j] - max);
-
                 softmaxOutput[i, j] = exp;   // temporarily store exp(...)
                 sumExp += exp;
             }
@@ -173,10 +172,10 @@ public class OperationsArray : IOperations
             float logSumExp = max + MathF.Log(sumExp);
 
             // Finish softmax and accumulate loss
+            float invSumExp = 1f / sumExp;
             for (int j = 0; j < classes; j++)
             {
-                softmaxOutput[i, j] /= sumExp;
-
+                softmaxOutput[i, j] *= invSumExp; // multiplication is faster than division
                 loss -= target[i, j] * (logits[i, j] - logSumExp);
             }
         }

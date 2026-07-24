@@ -2076,6 +2076,7 @@ public static class ArrayExtensions
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
+
         float[,] res = new float[rows, columns];
 
         float[,] expCache = new float[rows, columns];
@@ -2118,6 +2119,7 @@ public static class ArrayExtensions
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
+
         float[,] res = new float[rows, columns];
 
         for (int i = 0; i < rows; i++) // dim1 = batch size (obervations)
@@ -2167,6 +2169,7 @@ public static class ArrayExtensions
     {
         int rows = source.GetLength(0);
         int columns = source.GetLength(1);
+
         float[,] res = new float[rows, columns];
 
         for (int i = 0; i < rows; i++)
@@ -2180,19 +2183,19 @@ public static class ArrayExtensions
             }
 
             // 2. Exponentiate shifted values and compute sum
-            float sum = 0f;
+            float sumExp = 0f;
             for (int j = 0; j < columns; j++)
             {
                 float exp = MathF.Exp(source[i, j] - max);
                 res[i, j] = exp;
-                sum += exp;
+                sumExp += exp;
             }
 
             // 3. Normalize
-            float invSum = 1.0f / sum;
+            float invSumExp = 1.0f / sumExp;
             for (int j = 0; j < columns; j++)
             {
-                res[i, j] *= invSum; // multiplication is faster than division
+                res[i, j] *= invSumExp; // multiplication is faster than division
             }
         }
 
