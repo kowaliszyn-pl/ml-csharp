@@ -124,20 +124,18 @@ public class OperationsArray : IOperations
     }
 
     /// <summary>
-    /// Calculates the Cross-Entropy Loss for a batch of predictions and targets.
+    /// Calculates the Log-Softmax Cross-Entropy Loss for a batch of predictions and targets.
     /// </summary>
     /// <param name="logits">The predicted logits.</param>
     /// <param name="target">The target labels.</param>
     /// <param name="softmaxOutput">The output of the softmax function.</param>
     /// <returns>The calculated loss value.</returns>
     /// <remarks>
-    /// Unlike the <see cref="SoftmaxCrossEntropyLoss"/> implementations, this method:
-    /// 1) Never calls Softmax().
-    /// 2) Never calls Log().
-    /// 3) Never calls Clip().
-    /// 4) Never computes log(softmax) explicitly.
+    /// This method computes the Log-Softmax Cross-Entropy Loss, which is numerically more stable than
+    /// computing the softmax followed by the log and cross-entropy separately. It avoids potential
+    /// overflow or underflow issues by combining the operations in a single step.
     /// </remarks>
-    public virtual float CrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput)
+    public virtual float LogSoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput)
     {
         Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
 

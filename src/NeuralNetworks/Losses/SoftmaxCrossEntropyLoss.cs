@@ -14,7 +14,7 @@ namespace NeuralNetworks.Losses;
 /// <param name="eps"></param>
 /// <remarks>
 /// Usually used in MNIST-like classification problems, where the target is a one-hot encoded vector and the prediction is a probability distribution over classes.
-/// This class uses the <see cref="Core.Operations.OperationBackend.SoftmaxCrossEntropyLossGradient"/> method to compute the loss gradient, which is valid for both <see cref="SoftmaxCrossEntropyLoss"/> and <see cref="CrossEntropyLoss"/>.
+/// This class uses the <see cref="Core.Operations.OperationBackend.SoftmaxCrossEntropyLossGradient"/> method to compute the loss gradient, which is valid for both <see cref="SoftmaxCrossEntropyLoss"/> and <see cref="LogSoftmaxCrossEntropyLoss"/>.
 /// </remarks>
 public class SoftmaxCrossEntropyLoss(float eps = 1e-7f) : Loss<float[,]>
 {

@@ -20,7 +20,7 @@ public interface IOperations
     public float SigmoidBinaryCrossEntropyLoss(float[,] logits, float[,] target, out float[,] sigmoidOutput, float eps = 1e-7f);
     public float[,] SigmoidBinaryCrossEntropyLossGradient(float[,] sigmoidOutput, float[,] target);
 
-    public float CrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput);
+    public float LogSoftmaxCrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput);
 
     public float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, MseReduction mseReduction);
     public float[,] MeanSquaredErrorLossGradient(float[,] errors, MseReduction mseReduction);

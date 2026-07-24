@@ -8,38 +8,38 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Losses.SoftmaxCrossEntropyLoss" Collapsed="true">
-    <Position X="3" Y="2.75" Width="2.5" />
+    <Position X="3" Y="1.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAACAAAAAAEAAAAAAAAAAACAABAAAAAAAAAAAA=</HashCode>
       <FileName>Losses\SoftmaxCrossEntropyLoss.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Losses.MeanSquaredErrorLoss" Collapsed="true">
-    <Position X="3" Y="4.75" Width="2" />
+    <Position X="3" Y="4.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAACABAAAAEAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
       <FileName>Losses\MeanSquaredErrorLoss.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Losses.MeanSquaredErrorLoss4D" Collapsed="true">
-    <Position X="3" Y="5.75" Width="2.25" />
+    <Position X="3" Y="5.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAACABAAAAEAAAAAAAAAAAAAABAAAAAAAAAAAA=</HashCode>
       <FileName>Losses\MeanSquaredErrorLoss4D.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Losses.SigmoidBinaryCrossEntropyLoss" Collapsed="true">
-    <Position X="3" Y="3.75" Width="2.5" />
+    <Position X="3" Y="3.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAACAAAAAAEAAAAAAAAAAAAAAJAAAAAAAAAAAA=</HashCode>
       <FileName>Losses\SigmoidBinaryCrossEntropyLoss.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="NeuralNetworks.Losses.CrossEntropyLoss" Collapsed="true">
-    <Position X="3" Y="1.75" Width="1.5" />
+  <Class Name="NeuralNetworks.Losses.LogSoftmaxCrossEntropyLoss" Collapsed="true">
+    <Position X="3" Y="2.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAACAAAAAAEAAAAAAAAAAACAABAAAAAAAAAAAA=</HashCode>
-      <FileName>Losses\CrossEntropyLoss.cs</FileName>
+      <FileName>Losses\LogSoftmaxCrossEntropyLoss.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />
