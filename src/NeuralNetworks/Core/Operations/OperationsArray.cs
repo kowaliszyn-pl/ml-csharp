@@ -186,29 +186,6 @@ public class OperationsArray : IOperations
         return loss / batchSize;
     }
 
-    /// <summary>
-    /// Calculates the gradient of the Cross-Entropy Loss with respect to the logits for a batch of predictions and targets.
-    /// </summary>
-    /// <param name="softmaxOutput">The output of the softmax function.</param>
-    /// <param name="target">The target labels.</param>
-    /// <returns>The calculated gradient.</returns>
-    /// <remarks>
-    /// The gradient is calculated as the difference between the softmax output and the target labels,
-    /// divided by the batch size. It's the same implementation as <see
-    /// cref="SoftmaxCrossEntropyLossGradient"/>, but provided here for completeness.
-    /// </remarks>
-    public virtual float[,] CrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
-    {
-        Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
-
-        int batchSize = softmaxOutput.GetLength(0);
-
-        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
-
-        return softmaxOutput.Subtract(target).Divide(batchSize);
-    }
-
-
     public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, MseReduction mseReduction)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");

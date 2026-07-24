@@ -176,10 +176,6 @@ public static class OperationBackend
        => Current.CrossEntropyLoss(predicted, target, out softmaxOutput);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static float[,] CrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
-        => Current.CrossEntropyLossGradient(softmaxOutput, target);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, MseReduction mseReduction)
         => Current.MeanSquaredErrorLoss(predicted, target, out errors, mseReduction);
 
