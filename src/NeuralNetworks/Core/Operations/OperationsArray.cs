@@ -99,6 +99,116 @@ public class OperationsArray : IOperations
         return sigmoidOutput.Subtract(target).Divide(batchSize);
     }
 
+    public virtual float NLLLoss(float[,] logProbabilities, float[,] target)
+    {
+        Debug.Assert(logProbabilities.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = logProbabilities.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
+        return -logProbabilities
+            .MultiplyElementwise(target)
+            .Sum() / batchSize;
+    }
+
+    public virtual float[,] NLLLossGradient(float[,] logProbabilities, float[,] target)
+    {
+        Debug.Assert(logProbabilities.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = logProbabilities.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
+        return target.Multiply(-1f / batchSize);
+    }
+
+    /// <summary>
+    /// Calculates the Cross-Entropy Loss for a batch of predictions and targets.
+    /// </summary>
+    /// <param name="logits">The predicted logits.</param>
+    /// <param name="target">The target labels.</param>
+    /// <param name="softmaxOutput">The output of the softmax function.</param>
+    /// <returns>The calculated loss value.</returns>
+    /// <remarks>
+    /// Unlike the <see cref="SoftmaxCrossEntropyLoss"/> implementations, this method:
+    /// 1) Never calls Softmax().
+    /// 2) Never calls Log().
+    /// 3) Never calls Clip().
+    /// 4) Never computes log(softmax) explicitly.
+    /// </remarks>
+    public virtual float CrossEntropyLoss(float[,] logits, float[,] target, out float[,] softmaxOutput)
+    {
+        Debug.Assert(logits.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = logits.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
+        int classes = logits.GetLength(1);
+
+        softmaxOutput = new float[batchSize, classes];
+
+        float loss = 0f;
+
+        for (int i = 0; i < batchSize; i++)
+        {
+            // Find maximum logit
+            float max = logits[i, 0];
+
+            for (int j = 1; j < classes; j++)
+                if (logits[i, j] > max)
+                    max = logits[i, j];
+
+            // Compute exp(z-max) and sum
+            float sumExp = 0f;
+
+            for (int j = 0; j < classes; j++)
+            {
+                float exp = MathF.Exp(logits[i, j] - max);
+
+                softmaxOutput[i, j] = exp;   // temporarily store exp(...)
+                sumExp += exp;
+            }
+
+            // Compute log(sum(exp))
+            float logSumExp = max + MathF.Log(sumExp);
+
+            // Finish softmax and accumulate loss
+            for (int j = 0; j < classes; j++)
+            {
+                softmaxOutput[i, j] /= sumExp;
+
+                loss -= target[i, j] * (logits[i, j] - logSumExp);
+            }
+        }
+
+        return loss / batchSize;
+    }
+
+    /// <summary>
+    /// Calculates the gradient of the Cross-Entropy Loss with respect to the logits for a batch of predictions and targets.
+    /// </summary>
+    /// <param name="softmaxOutput">The output of the softmax function.</param>
+    /// <param name="target">The target labels.</param>
+    /// <returns>The calculated gradient.</returns>
+    /// <remarks>
+    /// The gradient is calculated as the difference between the softmax output and the target labels,
+    /// divided by the batch size. It's the same implementation as <see
+    /// cref="SoftmaxCrossEntropyLossGradient"/>, but provided here for completeness.
+    /// </remarks>
+    public virtual float[,] CrossEntropyLossGradient(float[,] softmaxOutput, float[,] target)
+    {
+        Debug.Assert(softmaxOutput.Length == target.Length, "Predicted and target arrays must have the same length.");
+
+        int batchSize = softmaxOutput.GetLength(0);
+
+        Debug.Assert(batchSize > 0, "Batch size must be greater than zero.");
+
+        return softmaxOutput.Subtract(target).Divide(batchSize);
+    }
+
+
     public virtual float MeanSquaredErrorLoss(float[,] predicted, float[,] target, out float[,] errors, MseReduction mseReduction)
     {
         Debug.Assert(predicted.Length == target.Length, "Predicted and target arrays must have the same length.");
