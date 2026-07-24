@@ -26,7 +26,7 @@ namespace NeuralNetworksExamples.Word2Vec;
 /// Maps center words to context words.
 /// </summary>
 internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? random = null)
-    : BaseModel<int[,], float[,]>(new SoftmaxCrossEntropyLoss(), random)
+    : BaseModel<int[,], float[,]>(new CrossEntropyLoss(), random)
 {
     private EmbeddingLayer? _embeddingLayer;
 
