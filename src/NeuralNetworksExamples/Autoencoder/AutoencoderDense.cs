@@ -12,6 +12,7 @@ using NeuralNetworks.LearningRates;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
+using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
@@ -26,8 +27,8 @@ namespace NeuralNetworksExamples.Autoencoder;
 internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
     : BaseModel<float[,], float[,]>(new MeanSquaredErrorLoss(MseReduction.ElementMean), random, modelFilePath)
 {
-    private Layer<float[,], float[,]>? _bottleneckLayer;
-    private Layer<float[,], float[,]>? _firstDecoderLayer;
+    private DenseLayer? _bottleneckLayer;
+    private DenseLayer? _firstDecoderLayer;
 
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
@@ -73,6 +74,12 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
             throw new InvalidOperationException("Decoder layer is not initialized.");
 
         return InferFromLayer(_firstDecoderLayer, encoded);
+    }
+
+    public Operation GetBottleneckActivationFunction()
+    {
+        return _bottleneckLayer?.GetActivationFunction()
+            ?? throw new InvalidOperationException("Bottleneck layer is not initialized.");
     }
 }
 
@@ -156,6 +163,7 @@ internal class AutoencoderDense
         int bottleneckDim = Program.LatentSpaceDimensions;
         string modelPath = GetFileName(ModelName, bottleneckDim);
         AutoencoderDenseModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        string bottleneckActivationFunction = model.GetBottleneckActivationFunction().GetType().Name;
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters loaded from {modelPath}.");
         ResetColor();
@@ -185,7 +193,7 @@ internal class AutoencoderDense
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-        SaveReconstructionComparison(ModelName, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
+        SaveReconstructionComparison(ModelName, bottleneckActivationFunction, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
     }
 
     internal static void VisualizeLatentSpace()
@@ -196,6 +204,7 @@ internal class AutoencoderDense
 
         string modelPath = GetFileName(ModelName, bottleneckDim);
         AutoencoderDenseModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        string bottleneckActivationFunction = model.GetBottleneckActivationFunction().GetType().Name;
 
         // Load data and labels
         float[,] train = GetMnistTrainData();
@@ -212,7 +221,7 @@ internal class AutoencoderDense
         WriteLine("Encoding data to latent space...");
         _ = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();
-        VisualizeWithHistogramAndTSNE(ModelName, labels, encoded);
+        VisualizeWithHistogramAndTSNE(ModelName, bottleneckActivationFunction, labels, encoded);
     }
 
     private static float[,] LoadTrainingData()

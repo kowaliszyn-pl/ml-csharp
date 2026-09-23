@@ -12,6 +12,7 @@ using NeuralNetworks.LearningRates;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
+using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
@@ -27,8 +28,8 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
     : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
 {
 
-    private Layer<float[,], float[,]>? _bottleneckLayer;
-    private Layer<float[,], float[,]>? _firstDecoderLayer;
+    private DenseLayer? _bottleneckLayer;
+    private DenseLayer? _firstDecoderLayer;
 
     protected override LayerListBuilder<float[,,,], float[,,,]> CreateLayerListBuilder()
     {
@@ -98,6 +99,12 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
             throw new InvalidOperationException("Decoder layer is not initialized.");
 
         return InferFromLayer(_firstDecoderLayer, encoded);
+    }
+
+    public Operation GetBottleneckActivationFunction()
+    {
+        return _bottleneckLayer?.GetActivationFunction()
+            ?? throw new InvalidOperationException("Bottleneck layer is not initialized.");
     }
 }
 
@@ -175,6 +182,8 @@ internal class AutoencoderCnn
         int bottleneckDim = Program.LatentSpaceDimensions;
         string modelPath = GetFileName(ModelName, bottleneckDim);
         AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        string bottleneckActivationFunction = model.GetBottleneckActivationFunction().GetType().Name;
+
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters loaded from {modelPath}.");
         ResetColor();
@@ -199,7 +208,7 @@ internal class AutoencoderCnn
 
        // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-       SaveReconstructionComparison(ModelName, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
+       SaveReconstructionComparison(ModelName, bottleneckActivationFunction, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
     }
 
     internal static void VisualizeLatentSpace()
@@ -210,6 +219,7 @@ internal class AutoencoderCnn
 
         string modelPath = GetFileName(ModelName, bottleneckDim);
         AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        string bottleneckActivationFunction = model.GetBottleneckActivationFunction().GetType().Name;
 
         // Load data and labels
         float[,] train = GetMnistTrainData();
@@ -227,7 +237,7 @@ internal class AutoencoderCnn
         _ = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();
 
-        VisualizeWithHistogramAndTSNE(ModelName, labels, encoded);
+        VisualizeWithHistogramAndTSNE(ModelName, bottleneckActivationFunction, labels, encoded);
     }
 
 

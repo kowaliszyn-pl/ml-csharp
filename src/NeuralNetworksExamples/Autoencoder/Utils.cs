@@ -14,7 +14,7 @@ namespace NeuralNetworksExamples.Autoencoder;
 
 internal static class Utils
 {
-    internal static void SaveReconstructionComparison(string modelName, int bottleneckDim, float[,] originalImages, float[,] reconstructedImages, float[,] randomlyGeneratedImages)
+    internal static void SaveReconstructionComparison(string modelName, string bottleneckActivationFunction, int bottleneckDim, float[,] originalImages, float[,] reconstructedImages, float[,] randomlyGeneratedImages)
     {
         WriteLine($"Saving original and reconstructed images.");
 
@@ -22,18 +22,18 @@ internal static class Utils
 
         foreach (int index in selectedImages)
         {
-            Drawing.SaveMnistPicture(100, index, originalImages, $"{modelName}_{bottleneckDim}_original_{index}");
-            Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckDim}_reconstructed_{index}");
+            Drawing.SaveMnistPicture(100, index, originalImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_original_{index}");
+            Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_reconstructed_{index}");
             
         }
 
         for(int i = 0; i < randomlyGeneratedImages.GetLength(0); i++ )
         {
-            Drawing.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckDim}_random_{i}");
+            Drawing.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_random_{i}");
         }
     }
 
-    internal static void VisualizeWithHistogramAndTSNE(string modelName, float[,] labels, float[,] encoded)
+    internal static void VisualizeWithHistogramAndTSNE(string modelName, string bottleneckActivationFunction, float[,] labels, float[,] encoded)
     {
         // Convert to double[][] for Accord.NET
         int n = encoded.GetLength(0);
@@ -87,7 +87,7 @@ internal static class Utils
         plt.XLabel("t-SNE Component 1");
         plt.YLabel("t-SNE Component 2");
 
-        string outputPath = $"{modelName}_{dim}_{n}_tsne.png";
+        string outputPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{n}_tsne.png";
         plt.SavePng(outputPath, 1200, 900);
 
         ForegroundColor = ConsoleColor.Green;
@@ -127,7 +127,7 @@ internal static class Utils
         pltHistogram.XLabel("Encoded Value");
         pltHistogram.YLabel("Frequency");
 
-        string histogramPath = $"{modelName}_{dim}_{n}_histogram.png";
+        string histogramPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{n}_histogram.png";
         pltHistogram.SavePng(histogramPath, 1200, 900);
 
         ForegroundColor = ConsoleColor.Green;

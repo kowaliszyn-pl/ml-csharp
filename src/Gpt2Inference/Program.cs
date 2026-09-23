@@ -229,10 +229,10 @@ internal class Program
     /// <param name="inputTokenIds">An array of token IDs representing the input sequence. Each value must be a valid index into the token
     /// embeddings matrix.</param>
     /// <param name="tokenEmbeddings">A two-dimensional array containing the embedding vectors for each token in the vocabulary. The first dimension
-    /// corresponds to the vocabulary size; the second dimension corresponds to the embedding size.</param>
-    /// <param name="positionalEmbeddings">A two-dimensional array containing the positional embedding vectors for each possible position in the input
-    /// sequence. The first dimension corresponds to the maximum context size; the second dimension corresponds to the
-    /// embedding size.</param>
+    /// corresponds to the vocabulary size, the second dimension corresponds to the embedding size: [vocabularySize, embeddingSize].</param>
+    /// <param name="positionalEmbeddings">A two-dimensional array containing the positional embedding vectors for each possible position 
+    /// in the input sequence. The first dimension corresponds to the maximum context size; the second dimension corresponds to the
+    /// embedding size: [contextSize, embeddingSize].</param>
     /// <returns>A two-dimensional array of shape [inputTokenIds.Length, embeddingSize], where each row contains the sum of the
     /// token embedding and positional embedding for the corresponding input token position.</returns>
     private static float[,] EmbedTokens(int[] inputTokenIds, float[,] tokenEmbeddings, float[,] positionalEmbeddings)

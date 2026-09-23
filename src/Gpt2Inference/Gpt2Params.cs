@@ -22,8 +22,16 @@ internal sealed record Gpt2Params
     /// embeddingSize].</remarks>
     public float[,] TokenEmbeddings { get; init; } = default!;
 
+    /// <summary>
+    /// Gets the matrix of positional embeddings used by the model.
+    /// </summary>
+    /// <remarks>
+    /// Each row in the matrix corresponds to a position in the input sequence, and each column represents a dimension of the embedding vector. The shape of the matrix is [contextSize, embeddingSize].
+    /// </remarks>
     public float[,] PositionalEmbeddings { get; init; } = default!;
+
     public Gpt2Block[] Blocks { get; init; } = default!;
+
     public Gpt2LayerNormParams FinalLayerNorm { get; init; } = default!;
 
     public static Gpt2Params CreateNew(Gpt2HParams gpt2HParams, Random random)
