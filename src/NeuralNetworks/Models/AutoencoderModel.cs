@@ -21,8 +21,14 @@ public abstract class AutoencoderModel<T>(
 
     where T : notnull
 {
+    /// <summary>
+    /// Gets or sets the bottleneck layer of the autoencoder model, which represents the compressed latent representation of the input data.
+    /// </summary>
     protected DenseLayer? BottleneckLayer { get; set; }
 
+    /// <summary>
+    /// Gets or sets the first decoder layer of the autoencoder model, which is responsible for reconstructing the input data from the encoded representation.
+    /// </summary>
     protected DenseLayer? FirstDecoderLayer { get; set; }
 
     /// <summary>
