@@ -12,7 +12,6 @@ using NeuralNetworks.LearningRates;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
-using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
@@ -24,12 +23,15 @@ using static NeuralNetworksExamples.Utils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
-internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
-    : BaseModel<float[,,,], float[,,,]>(new MeanSquaredErrorLoss4D(MseReduction.ElementMean), random, modelFilePath)
+internal class AutoencoderConvModel(
+    int bottleneckDim,
+    SeededRandom? random,
+    string? modelFilePath = null)
+    : AutoencoderModel<float[,,,]>(
+        new MeanSquaredErrorLoss4D(MseReduction.ElementMean),
+        random,
+        modelFilePath)
 {
-
-    private DenseLayer? _bottleneckLayer;
-    private DenseLayer? _firstDecoderLayer;
 
     protected override LayerListBuilder<float[,,,], float[,,,]> CreateLayerListBuilder()
     {
@@ -52,11 +54,11 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
 
             // 2. Bottleneck
             // 32 * 14 * 14 = 6272
-            .AddLayer(_bottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer))
+            .AddLayer(BottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer))
 
             // 3. Decoder
             // bottleneckDim
-            .AddLayer(_firstDecoderLayer = new DenseLayer(32 * 14 * 14, new LeakyReLU2D(), initializer))
+            .AddLayer(FirstDecoderLayer = new DenseLayer(32 * 14 * 14, new LeakyReLU2D(), initializer))
             // 32 * 14 * 14 = 6272 as a flattened representation
             .AddLayer(new UnflattenLayer(32, 14, 14))
             // 32 * 14 * 14
@@ -71,40 +73,6 @@ internal class AutoencoderConvModel(int bottleneckDim, SeededRandom? random, str
             ));
 
         // 1 * 28 * 28 as output
-    }
-
-    /// <summary>
-    /// Gets the encoded representation (latent data) produced by the bottleneck layer of the model.
-    /// </summary>
-    /// <returns>
-    /// A two-dimensional array of floating-point values representing the output of the bottleneck layer.
-    /// </returns>
-    /// <exception cref="InvalidOperationException">Thrown if the bottleneck layer output is not available.</exception>
-    public float[,] GetEncodedRepresentation()
-    {
-        return _bottleneckLayer?.Output
-            ?? throw new InvalidOperationException("Bottleneck layer output is not available.");
-    }
-
-    /// <summary>
-    /// Forward encoded representation and return the decoded output. This can be used to visualize the output of the
-    /// decoder part of the autoencoder based on randomly generated encoded data or to see how the decoder reconstructs
-    /// the input data from the encoded (bottleneck) representation.
-    /// </summary>
-    public float[,,,] Decode(float[,] encoded)
-    {
-        // We need to pass the encoded data through the first decoder layer and then through the remaining layers of the model.
-
-        if (_firstDecoderLayer is null)
-            throw new InvalidOperationException("Decoder layer is not initialized.");
-
-        return InferFromLayer(_firstDecoderLayer, encoded);
-    }
-
-    public Operation GetBottleneckActivationFunction()
-    {
-        return _bottleneckLayer?.GetActivationFunction()
-            ?? throw new InvalidOperationException("Bottleneck layer is not initialized.");
     }
 }
 
@@ -206,9 +174,9 @@ internal class AutoencoderCnn
         float[,,,] randomDecoded = model.Decode(randomEncoded);
         float[,] randomlyGeneratedImages = DenormalizeAndReshapeTo2D(randomDecoded);
 
-       // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
+        // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
-       SaveReconstructionComparison(ModelName, bottleneckActivationFunction, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
+        SaveReconstructionComparison(ModelName, bottleneckActivationFunction, bottleneckDim, originalImages, reconstructedImages, randomlyGeneratedImages);
     }
 
     internal static void VisualizeLatentSpace()
@@ -239,6 +207,5 @@ internal class AutoencoderCnn
 
         VisualizeWithHistogramAndTSNE(ModelName, bottleneckActivationFunction, labels, encoded);
     }
-
 
 }
