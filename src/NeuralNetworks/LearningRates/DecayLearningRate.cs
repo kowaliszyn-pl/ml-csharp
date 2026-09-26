@@ -8,7 +8,17 @@ public abstract class DecayLearningRate(float initialLearningRate, int warmupSte
 {
     protected float CurrentLearningRate { get; set; } = initialLearningRate;
 
+    protected float InitialLearningRate { get; } = initialLearningRate;
+
     public override float GetLearningRate() => CurrentLearningRate;
 
     public int WarmupSteps { get; init; } = warmupSteps;
+
+    protected void ApplyWarmup(int steps)
+    {
+        if (WarmupSteps > 0 && steps < WarmupSteps) // Only for the first epoch
+            CurrentLearningRate = InitialLearningRate * steps / WarmupSteps;
+        else
+            CurrentLearningRate = InitialLearningRate;
+    }
 }
