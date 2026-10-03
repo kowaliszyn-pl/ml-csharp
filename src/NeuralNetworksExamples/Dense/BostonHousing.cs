@@ -17,7 +17,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.DataUtils;
 
 namespace NeuralNetworksExamples.Dense;
 

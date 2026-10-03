@@ -20,7 +20,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworksExamples.Utils;
+using static NeuralNetworksExamples.MnistUtils;
 
 namespace NeuralNetworksExamples.Dense;
 
@@ -78,8 +78,8 @@ internal class MnistDense
         float[,] train = GetMnistTrainData();
         float[,] test = GetMnistTestData();
 
-        (float[,] xTrain, float[,] yTrain) = SplitFeaturesAndEncodeLabels(train);
-        (float[,] xTest, float[,] yTest) = SplitFeaturesAndEncodeLabels(test);
+        (float[,] xTrain, float[,] yTrain) = train.SplitFeaturesAndEncodeLabels();
+        (float[,] xTest, float[,] yTest) = test.SplitFeaturesAndEncodeLabels();
 
         float[,] testImages = (float[,])xTest.Clone();
 
@@ -88,8 +88,8 @@ internal class MnistDense
         // This means that before inference, we need to apply the same standardization to new data as we did to the training data.
         WriteLine("Standardize to mean 0 and variance 1 for all features together...");
 
-        (float mean, float stdDev) = StandardizeInPlace(xTrain);
-        ApplyStandardizationInPlace(xTest, mean, stdDev);
+        (float mean, float stdDev) = xTrain.StandardizeInPlace();
+        xTest.ApplyStandardizationInPlace(mean, stdDev);
 
         SimpleDataSource<float[,], float[,]> dataSource = new(xTrain, yTrain, xTest, yTest);
         SeededRandom commonRandom = new(RandomSeed);
@@ -166,14 +166,14 @@ internal class MnistDense
     {
         // Load test data
         float[,] test = GetMnistTestData();
-        (float[,] xTest, float[,] yTest) = SplitFeaturesAndEncodeLabels(test);
+        (float[,] xTest, float[,] yTest) = test.SplitFeaturesAndEncodeLabels();
 
         // Load standardization stats
         // Note: We have to use the same mean and stdDev as used during training.
         string[] stats = File.ReadAllText($"{ModelName}.stats").Split(';');
         float mean = float.Parse(stats[0]);
         float stdDev = float.Parse(stats[1]);
-        ApplyStandardizationInPlace(xTest, mean, stdDev);
+        xTest.ApplyStandardizationInPlace(mean, stdDev);
 
         // Load the model
         MnistDenseModel model = new($"{ModelName}.json");

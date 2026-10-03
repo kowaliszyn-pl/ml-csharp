@@ -20,7 +20,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworksExamples.Utils;
+using static NeuralNetworksExamples.EcgUtils;
 
 namespace NeuralNetworksExamples.Cnn;
 
@@ -142,7 +142,7 @@ internal class Ecg200
 
         float[,] predictions = model.Forward(xTest, true);
         predictions = predictions.Sigmoid();
-        Utils.DisplayClassificationPredictionExamples(yTest, predictions, testImagesForDrawing, "cnn");
+        DisplayClassificationPredictionExamples(yTest, predictions, testImagesForDrawing, "cnn");
     }
 
     private static readonly EvalFunction<float[,,], float[,]> s_evalFunction = (model, xEvalTest, yEvalTest, predictionLogits) =>

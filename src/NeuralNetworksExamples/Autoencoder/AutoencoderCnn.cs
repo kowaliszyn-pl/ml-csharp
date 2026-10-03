@@ -19,7 +19,7 @@ using NeuralNetworks.Trainers;
 
 using static System.Console;
 using static NeuralNetworksExamples.Autoencoder.Utils;
-using static NeuralNetworksExamples.Utils;
+using static NeuralNetworksExamples.MnistUtils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
@@ -98,12 +98,18 @@ internal class AutoencoderCnn
         WriteLine("Loading and preprocessing data...");
 
         float[,] train = GetMnistTrainData();
-        float[,,,] xTrain = ExtractFeaturesAsTanhNormalized4D(train);
+        float[,,,] xTrain = train
+            .ExtractFeatureColumns()
+            .ScaleTo(-1f, 1f)
+            .ReshapeTo4D(1, 28, 28);
 
         float[,,,] yTrain = (float[,,,])xTrain.Clone();
 
         float[,] test = GetMnistTestData();
-        float[,,,] xTest = ExtractFeaturesAsTanhNormalized4D(test);
+        float[,,,] xTest = test
+            .ExtractFeatureColumns()
+            .ScaleTo(-1f, 1f)
+            .ReshapeTo4D(1, 28, 28);
 
         // It's not quite necessary to clone the test data, but we do it for consistency.
         float[,,,] yTest = (float[,,,])xTest.Clone();
@@ -159,20 +165,27 @@ internal class AutoencoderCnn
         WriteLine("Loading and preprocessing data...");
 
         float[,] train = GetMnistTrainData();
-        float[,] originalImages = ExtractFeatureColumns(train);
+        float[,] originalImages = train.ExtractFeatureColumns();
 
-        float[,,,] xTrain = TanhNormalizeAndReshapeTo4D(originalImages);
+        float[,,,] xTrain = originalImages
+            .ScaleTo(-1f, 1f)
+            .ReshapeTo4D(1, 28, 28);
 
         WriteLine("Reconstructing images using the loaded model...");
 
         float[,,,] yTrain = model.Forward(xTrain, true);
 
-        float[,] reconstructedImages = DenormalizeAndReshapeTo2D(yTrain);
+        float[,] reconstructedImages = yTrain
+            .ReshapeTo2D()
+            .ScaleTo(0f, 255f);
 
         // Generate random encoded data for visualization of the decoder's output
+
         float[,] randomEncoded = GenerateRandomEncodedData(bottleneckDim, 5, RandomSeed);
         float[,,,] randomDecoded = model.Decode(randomEncoded);
-        float[,] randomlyGeneratedImages = DenormalizeAndReshapeTo2D(randomDecoded);
+        float[,] randomlyGeneratedImages = randomDecoded
+            .ReshapeTo2D()
+            .ScaleTo(0f, 255f);
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
@@ -190,17 +203,22 @@ internal class AutoencoderCnn
         string bottleneckActivationFunction = model.GetBottleneckActivationFunction().GetType().Name;
 
         // Load data and labels
+
         float[,] train = GetMnistTrainData();
 
         // Restrict to MaxSamplesToVisualize samples for t-SNE visualization to reduce computation time
+
         train = train.GetRows(0..Program.MaxSamplesToVisualize);
 
         float[,] labels = train.GetColumn(0);
-        train = ExtractFeatureColumns(train);
 
-        float[,,,] xTrain = TanhNormalizeAndReshapeTo4D(train);
+        float[,,,] xTrain = train
+            .ExtractFeatureColumns()
+            .ScaleTo(-1f, 1f)
+            .ReshapeTo4D(1, 28, 28);
 
         // Get latent representation
+
         WriteLine("Encoding data to latent space...");
         _ = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();

@@ -19,7 +19,7 @@ using NeuralNetworks.Trainers;
 
 using static System.Console;
 using static NeuralNetworksExamples.Autoencoder.Utils;
-using static NeuralNetworksExamples.Utils;
+using static NeuralNetworksExamples.MnistUtils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
@@ -81,8 +81,8 @@ internal class AutoencoderDense
 
         // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
-        TanhNormalizeInPlace(xTrain);
-        TanhNormalizeInPlace(xTest);
+        xTrain.ScaleToInPlace(-1f, 1f);
+        xTest.ScaleToInPlace(-1f, 1f);
 
         float[,] yTrain = (float[,])xTrain.Clone();
 
@@ -144,7 +144,7 @@ internal class AutoencoderDense
 
         // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
 
-        TanhNormalizeInPlace(xTrain);
+        xTrain.ScaleToInPlace(-1f, 1f);
 
         WriteLine("Reconstructing images using the loaded model...");
 
@@ -152,12 +152,13 @@ internal class AutoencoderDense
 
         // Rescale the pixel values back to [0, 255] for visualization purposes.
 
-        DenormalizeToPixelValuesInPlace(reconstructedImages);
+        reconstructedImages.ScaleToInPlace(0f, 255f);
 
         // Generate random encoded data for visualization of the decoder's output
+
         float[,] randomEncoded = GenerateRandomEncodedData(bottleneckDim, 5, RandomSeed);
         float[,] randomlyGeneratedImages = model.Decode(randomEncoded);
-        DenormalizeToPixelValuesInPlace(randomlyGeneratedImages);
+        randomlyGeneratedImages.ScaleToInPlace(0f, 255f);
 
         // Now we have xTrain2D and yTrain2D, which can be used for the following visualizations
 
@@ -180,10 +181,10 @@ internal class AutoencoderDense
         // Restrict to MaxSamplesToVisualize samples for t-SNE visualization to reduce computation time
         train = train.GetRows(0..Program.MaxSamplesToVisualize);
 
-        (float[,] xTrain, float[,] labels) = SplitFeaturesAndLabels(train);
+        (float[,] xTrain, float[,] labels) = train.SplitFeaturesAndLabels();
 
         // Normalize
-        TanhNormalizeInPlace(xTrain);
+        xTrain.ScaleToInPlace(-1f, 1f);
 
         // Get latent representation
         WriteLine("Encoding data to latent space...");
@@ -193,8 +194,8 @@ internal class AutoencoderDense
     }
 
     private static float[,] LoadTrainingData()
-        => ExtractFeatureColumns(GetMnistTrainData());
+        => GetMnistTrainData().ExtractFeatureColumns();
 
     private static float[,] LoadTestData()
-        => ExtractFeatureColumns(GetMnistTestData());
+        => GetMnistTestData().ExtractFeatureColumns();
 }

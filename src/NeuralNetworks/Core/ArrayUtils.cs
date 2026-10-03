@@ -6,40 +6,12 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-using ILGPU.Runtime.Cuda;
-
 using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Core;
 
 public class ArrayUtils
 {
-    public static float[,] LoadCsv(string filePath, int skipHeaderLines = 0)
-        => LoadSv(filePath, ',', skipHeaderLines);
-
-    public static float[,] LoadTsv(string filePath, int skipHeaderLines = 0)
-        => LoadSv(filePath, '\t', skipHeaderLines);
-
-    public static float[,] LoadSv(string filePath, char separator, int skipHeaderLines)
-    {
-        string[] lines = [.. File.ReadAllLines(filePath).Skip(skipHeaderLines)];
-        int rows = lines.Length;
-        int cols = lines[0].Split(separator).Length;
-        float[,] matrix = new float[rows, cols];
-        for (int i = 0; i < rows; i++)
-        {
-            string[] values = lines[i].Split(separator);
-            for (int j = 0; j < cols; j++)
-            {
-                string value = values[j].Trim('"');
-                matrix[i, j] = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-            }
-        }
-        return matrix;
-    }
-
-    
-
     public static Span<float> ConvertToSpan(Array array)
     {
         return array switch
@@ -48,17 +20,8 @@ public class ArrayUtils
             float[,] arr2D => MemoryMarshal.CreateSpan(ref arr2D[0, 0], arr2D.Length),
             float[,,] arr3D => MemoryMarshal.CreateSpan(ref arr3D[0, 0, 0], arr3D.Length),
             float[,,,] arr4D => MemoryMarshal.CreateSpan(ref arr4D[0, 0, 0, 0], arr4D.Length),
-            _ => throw new ArgumentException("Array must be of type float[] or float[,] or float[,,,].")
+            _ => throw new ArgumentException("Array must be of the following types: float[], float[,], float[,,], float[,,,].")
         };
-
-        //if (array is float[] arr1D)
-        //    return arr1D.AsSpan();
-        //else if (array is float[,] arr2D)
-        //    return MemoryMarshal.CreateSpan(ref arr2D[0, 0], arr2D.Length);
-        //else if (array is float[,,,] arr4D)
-        //    return MemoryMarshal.CreateSpan(ref arr4D[0, 0, 0, 0], arr4D.Length);
-        //else
-        //    throw new ArgumentException("Array must be of type float[] or float[,] or float[,,,].");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

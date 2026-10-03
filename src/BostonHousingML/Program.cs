@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using NeuralNetworks.Core;
 
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.DataUtils;
 
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -170,7 +170,7 @@ static void MultipleLinearRegression()
 
     // Show predictions for the test set
 
-    int[] showTestSamples = { 0, 1, 2, nTest - 3, nTest - 2, nTest - 1 };
+    int[] showTestSamples = [0, 1, 2, nTest - 3, nTest - 2, nTest - 1];
     float[,] testPredictions = XTestAnd1.MultiplyDot(AB);
 
     for (int i = 0; i < showTestSamples.Length; i++)
@@ -402,7 +402,7 @@ static void FirstNeuralNetwork()
 
     // Show predictions for the test set
 
-    int[] showTestSamples = { 0, 1, 2, nTest - 3, nTest - 2, nTest - 1 };
+    int[] showTestSamples = [0, 1, 2, nTest - 3, nTest - 2, nTest - 1];
 
     // Do a forward pass for all test samples at once
 
@@ -588,7 +588,7 @@ static void FirstNeuralNetworkSimplified()
 
     // Show predictions for the test set
 
-    int[] showTestSamples = { 0, 1, 2, nTest - 3, nTest - 2, nTest - 1 };
+    int[] showTestSamples = [0, 1, 2, nTest - 3, nTest - 2, nTest - 1];
 
     // Do a forward pass for all test samples at once
 

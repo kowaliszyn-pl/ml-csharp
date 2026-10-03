@@ -20,7 +20,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworksExamples.Utils;
+using static NeuralNetworksExamples.MnistUtils;
 
 namespace NeuralNetworksExamples.Cnn;
 
@@ -72,20 +72,20 @@ internal class MnistCnn
         // rows - batch
         // cols - features
         float[,] train = GetMnistTrainData();
-        (float[,] xTrain, float[,] yTrain) = SplitFeaturesAndEncodeLabels(train);
-        float[,,,] xTrain4D = ReshapeTo4D(xTrain);
+        (float[,] xTrain, float[,] yTrain) = train.SplitFeaturesAndEncodeLabels();
+        float[,,,] xTrain4D = xTrain.ReshapeTo4D(1, 28, 28);
 
         float[,] test = GetMnistTestData();
-        (float[,] xTest, float[,] yTest) = SplitFeaturesAndEncodeLabels(test);
-        float[,,,] xTest4D = ReshapeTo4D(xTest);
+        (float[,] xTest, float[,] yTest) = test.SplitFeaturesAndEncodeLabels();
+        float[,,,] xTest4D = xTest.ReshapeTo4D(1, 28, 28);
 
         // Standardize data
         // We can standardize all features (columns) together because they are all in the same scale (pixel values from 0 to 255) and have similar meaning (brightness). We calculate mean and stdDev on the training set only, because in a real-world scenario we would not have access to the test set during training.
         // This means that before inference, we need to apply the same standardization to new data as we did to the training data.
         WriteLine("Standardize to mean 0 and variance 1 for all features together...");
 
-        (float mean, float stdDev) = StandardizeInPlace(xTrain4D);
-        ApplyStandardizationInPlace(xTest4D, mean, stdDev);
+        (float mean, float stdDev) = xTrain4D.StandardizeInPlace();
+        xTest4D.ApplyStandardizationInPlace(mean, stdDev);
 
         SimpleDataSource<float[,,,], float[,]> dataSource = new(xTrain4D, yTrain, xTest4D, yTest);
         SeededRandom commonRandom = new(RandomSeed);
