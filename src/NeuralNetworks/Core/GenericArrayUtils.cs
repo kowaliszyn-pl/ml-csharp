@@ -1,11 +1,25 @@
 ﻿// Neural Networks in C♯
-// File name: GenericUtils.cs
+// File name: GenericArrayUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
+
+using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core;
 
 public static class GenericArrayUtils
 {
+    public static Span<float> ConvertToSpan<T>(T matrix)
+    {
+        return matrix switch
+        {
+            float[] arr1D => arr1D.AsSpan(),
+            float[,] arr2D => MemoryMarshal.CreateSpan(ref arr2D[0, 0], arr2D.Length),
+            float[,,] arr3D => MemoryMarshal.CreateSpan(ref arr3D[0, 0, 0], arr3D.Length),
+            float[,,,] arr4D => MemoryMarshal.CreateSpan(ref arr4D[0, 0, 0, 0], arr4D.Length),
+            _ => throw new ArgumentException("Array must be one of the following types: float[], float[,], float[,,], float[,,,].")
+        };
+    }
+
     public static void EnsureSameShape<T>(T? matrix1, T? matrix2)
     {
         if (matrix1 is null || matrix2 is null)
@@ -22,6 +36,14 @@ public static class GenericArrayUtils
                     throw new InvalidOperationException($"Input and input gradient must have the same shape. Dimension {i} has length {matrix1Array.GetLength(i)} and {matrix2Array.GetLength(i)}.");
             }
         }
+    }
+
+    public static int GetRowCount<T>(T matrix)
+    {
+        if (matrix is Array array)
+            return array.GetLength(0);
+
+        throw new NotSupportedException();
     }
 
     public static void PermuteData<TX, TY>(TX matrix1, TY matrix2, Random random)
@@ -54,14 +76,6 @@ public static class GenericArrayUtils
             default:
                 throw new NotSupportedException($"Unsupported permutation pair: x={matrix1.GetType().Name}, y={matrix2.GetType().Name}. Please override this method in the Trainer subclass or add here a permutation method for these data types.");
         }
-    }
-
-    public static int GetRowCount<T>(T matrix)
-    {
-        if (matrix is Array array)
-            return array.GetLength(0);
-
-        throw new NotSupportedException();
     }
 
     public static T SliceDim0<T>(T source, int startInclusive, int endExclusive)

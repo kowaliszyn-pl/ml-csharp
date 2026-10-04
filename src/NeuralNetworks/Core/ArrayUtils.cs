@@ -2,9 +2,7 @@
 // File name: ArrayUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 using NeuralNetworks.Core;
 
@@ -12,18 +10,6 @@ namespace NeuralNetworks.Core;
 
 public class ArrayUtils
 {
-    public static Span<float> ConvertToSpan(Array array)
-    {
-        return array switch
-        {
-            float[] arr1D => arr1D.AsSpan(),
-            float[,] arr2D => MemoryMarshal.CreateSpan(ref arr2D[0, 0], arr2D.Length),
-            float[,,] arr3D => MemoryMarshal.CreateSpan(ref arr3D[0, 0, 0], arr3D.Length),
-            float[,,,] arr4D => MemoryMarshal.CreateSpan(ref arr4D[0, 0, 0, 0], arr4D.Length),
-            _ => throw new ArgumentException("Array must be of the following types: float[], float[,], float[,,], float[,,,].")
-        };
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] CreateRange(int rows, int columns, float from, float to)
     {
@@ -68,7 +54,7 @@ public class ArrayUtils
         // Assert all sets have the same number of columns
         int columns = sets[0].GetLength(1);
 #if DEBUG
-        foreach (var set in sets)
+        foreach (float[,] set in sets)
         {
             if (set.GetLength(1) != columns)
                 throw new ArgumentException("All sets must have the same number of columns.");
