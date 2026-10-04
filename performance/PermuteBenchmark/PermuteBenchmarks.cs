@@ -74,14 +74,14 @@ public class PermuteBenchmarks
     public void PermuteData4()
     {
         Random random = new SeededRandom(251207);
-        (float[,,,] newX, float[,] newY) = ArrayUtils.PermuteData(_x4, _y, random);
+        (float[,,,] newX, float[,] newY) = DataUtils.PermuteData(_x4, _y, random);
     }
 
     [Benchmark]
     public void PermuteData2()
     {
         Random random = new SeededRandom(251207);
-        (float[,] newX, float[,] newY) = ArrayUtils.PermuteData(_x2, _y, random);
+        (float[,] newX, float[,] newY) = DataUtils.PermuteData(_x2, _y, random);
     }
 
     [Benchmark]

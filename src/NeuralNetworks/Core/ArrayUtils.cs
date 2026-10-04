@@ -63,56 +63,6 @@ public class ArrayUtils
         return res;
     }
 
-    public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
-    {
-        Debug.Assert(x.GetLength(0) == y.GetLength(0));
-
-        int[] indices = [.. Enumerable.Range(0, x.GetLength(0)).OrderBy(i => random.Next())];
-
-        float[,] xPermuted = x.AsZeros();
-        float[,] yPermuted = y.AsZeros();
-
-        for (int i = 0; i < x.GetLength(0); i++)
-        {
-            //xPermuted[i] = x[indices[i]];
-            //yPermuted[i] = y[indices[i]];
-            xPermuted.SetRow(i, x.GetRow(indices[i]));
-            yPermuted.SetRow(i, y.GetRow(indices[i]));
-        }
-
-        return (xPermuted, yPermuted);
-    }
-
-    /// <summary>
-    /// Permutes the data in the input arrays x and y using the provided random number generator.
-    /// </summary>
-    /// <remarks>
-    /// This method is the quickest way to permute data for 4D input arrays.
-    /// </remarks>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="random"></param>
-    /// <returns></returns>
-    public static (float[,,,] xPermuted, float[,] yPermuted) PermuteData(float[,,,] x, float[,] y, Random random)
-    {
-        Debug.Assert(x.GetLength(0) == y.GetLength(0));
-
-        int[] indices = [.. Enumerable.Range(0, x.GetLength(0)).OrderBy(i => random.Next())];
-
-        float[,,,] xPermuted = x.AsZeros();
-        float[,] yPermuted = y.AsZeros();
-
-        for (int i = 0; i < x.GetLength(0); i++)
-        {
-            //xPermuted[i] = x[indices[i]];
-            //yPermuted[i] = y[indices[i]];
-            xPermuted.SetRow(i, x.GetRow(indices[i]));
-            yPermuted.SetRow(i, y.GetRow(indices[i]));
-        }
-
-        return (xPermuted, yPermuted);
-    }
-
     public static void StandardizeColumns(float minStdDev, params List<float[,]> sets)
     {
         // Assert all sets have the same number of columns

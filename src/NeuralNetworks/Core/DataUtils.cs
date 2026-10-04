@@ -35,12 +35,15 @@ public static class DataUtils
         data.DivideInPlace(stdDev);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] LoadCsv(string filePath, int skipHeaderLines = 0)
         => LoadSv(filePath, ',', skipHeaderLines);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] LoadTsv(string filePath, int skipHeaderLines = 0)
         => LoadSv(filePath, '\t', skipHeaderLines);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] LoadSv(string filePath, char separator, int skipHeaderLines)
     {
         string[] lines = [.. File.ReadAllLines(filePath).Skip(skipHeaderLines)];
@@ -57,6 +60,59 @@ public static class DataUtils
             }
         }
         return matrix;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
+    {
+        Debug.Assert(x.GetLength(0) == y.GetLength(0));
+
+        int[] indices = [.. Enumerable.Range(0, x.GetLength(0)).OrderBy(i => random.Next())];
+
+        float[,] xPermuted = x.AsZeros();
+        float[,] yPermuted = y.AsZeros();
+
+        for (int i = 0; i < x.GetLength(0); i++)
+        {
+            //xPermuted[i] = x[indices[i]];
+            //yPermuted[i] = y[indices[i]];
+            xPermuted.SetRow(i, x.GetRow(indices[i]));
+            yPermuted.SetRow(i, y.GetRow(indices[i]));
+        }
+
+        return (xPermuted, yPermuted);
+    }
+
+
+    /// <summary>
+    /// Permutes the data in the input arrays x and y using the provided random number generator.
+    /// </summary>
+    /// <remarks>
+    /// This method is the quickest way to permute data for 4D input arrays.
+    /// </remarks>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="random"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static (float[,,,] xPermuted, float[,] yPermuted) PermuteData(float[,,,] x, float[,] y, Random random)
+    {
+        Debug.Assert(x.GetLength(0) == y.GetLength(0));
+
+        int[] indices = [.. Enumerable.Range(0, x.GetLength(0)).OrderBy(i => random.Next())];
+
+        float[,,,] xPermuted = x.AsZeros();
+        float[,] yPermuted = y.AsZeros();
+
+        for (int i = 0; i < x.GetLength(0); i++)
+        {
+            //xPermuted[i] = x[indices[i]];
+            //yPermuted[i] = y[indices[i]];
+            xPermuted.SetRow(i, x.GetRow(indices[i]));
+            yPermuted.SetRow(i, y.GetRow(indices[i]));
+        }
+
+        return (xPermuted, yPermuted);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
