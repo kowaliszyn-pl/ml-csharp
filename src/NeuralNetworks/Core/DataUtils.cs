@@ -83,7 +83,6 @@ public static class DataUtils
         return (xPermuted, yPermuted);
     }
 
-
     /// <summary>
     /// Permutes the data in the input arrays x and y using the provided random number generator.
     /// </summary>

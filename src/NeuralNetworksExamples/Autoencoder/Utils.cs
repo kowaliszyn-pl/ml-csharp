@@ -26,7 +26,7 @@ internal static class Utils
             Helpers.Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_reconstructed_{index}");
         }
 
-        for(int i = 0; i < randomlyGeneratedImages.GetLength(0); i++ )
+        for (int i = 0; i < randomlyGeneratedImages.GetLength(0); i++)
         {
             Helpers.Drawing.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_random_{i}");
         }
@@ -108,8 +108,8 @@ internal static class Utils
             }
         }
 
-        var histogram = Histogram.WithBinCount(binCount, allValues);
-        var pltHistogram = new Plot();
+        Histogram histogram = Histogram.WithBinCount(binCount, allValues);
+        Plot pltHistogram = new();
 
         // add histogram to the plot
         Bar[] bars = [.. Enumerable.Range(0, histogram.Counts.Length)
