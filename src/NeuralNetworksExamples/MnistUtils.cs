@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: Utils.cs
+// File name: MnistUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using NeuralNetworks.Core;
@@ -12,7 +12,6 @@ namespace NeuralNetworksExamples;
 
 internal static class MnistUtils
 {
-    // MNIST
     private const int DigitImageSize = 100; // Size of a saved image in pixels
 
     internal static void DisplayDigit3PredictionExamples(float[,] yTest, float[,] logits, float[,] testImages, string prefix)
@@ -25,9 +24,12 @@ internal static class MnistUtils
         // 3. "3" that was incorrectly predicted as not "3"
         // 4. Not "3" that was incorrectly predicted as "3"
 
-        int correctlyPredicted3Index = -1, correctlyPredictedNot3Index = -1, incorrectlyPredicted3Index = -1, incorrectlyPredictedNot3Index = -1;
-        int correctlyPredicted3Count = 0, correctlyPredictedNot3Count = 0, incorrectlyPredicted3Count = 0, incorrectlyPredictedNot3Count = 0;
-        int correctlyPredicted3Label = -1, correctlyPredictedNot3Label = -1, incorrectlyPredicted3Label = -1, incorrectlyPredictedNot3Label = -1;
+        int actual3Predicted3Index = -1, actualNot3PredictedNot3Index = -1, actualNot3Predicted3Index = -1, actual3PredictedNot3Index = -1;
+
+        int actual3Predicted3Count = 0, actualNot3PredictedNot3Count = 0, actualNot3Predicted3Count = 0, actual3PredictedNot3Count = 0;
+
+        int actual3Predicted3Label = -1, actualNot3PredictedNot3Label = -1, actualNot3Predicted3Label = -1, actual3PredictedNot3Label = -1;
+
         int correctlyPredictedDigit = -1, incorrectlyPredictedDigit = -1;
         int rows = results.Length;
 
@@ -40,64 +42,64 @@ internal static class MnistUtils
             // Correctly predicted
             if (is3Predicted && is3Actual) // predicted digit is "3" and actual digit is "3"
             {
-                if (correctlyPredicted3Index == -1)
+                if (actual3Predicted3Index == -1)
                 {
-                    correctlyPredicted3Index = i;
-                    correctlyPredicted3Label = FindDigit(yTest, i);
+                    actual3Predicted3Index = i;
+                    actual3Predicted3Label = FindDigit(yTest, i);
                 }
-                correctlyPredicted3Count++;
+                actual3Predicted3Count++;
             }
             else if (!is3Predicted && !is3Actual) // predicted digit is not "3" and actual digit is not "3"
             {
-                if (correctlyPredictedNot3Index == -1)
+                if (actualNot3PredictedNot3Index == -1)
                 {
-                    correctlyPredictedNot3Index = i;
-                    correctlyPredictedNot3Label = FindDigit(yTest, i);
+                    actualNot3PredictedNot3Index = i;
+                    actualNot3PredictedNot3Label = FindDigit(yTest, i);
                     correctlyPredictedDigit = results[i];
                 }
-                correctlyPredictedNot3Count++;
+                actualNot3PredictedNot3Count++;
             }
 
             // Incorrectly predicted
             else if (!is3Predicted && is3Actual) // predicted digit is not "3" but actual digit is "3"
             {
-                if (incorrectlyPredictedNot3Index == -1)
+                if (actual3PredictedNot3Index == -1)
                 {
-                    incorrectlyPredictedNot3Index = i;
-                    incorrectlyPredictedNot3Label = FindDigit(yTest, i);
+                    actual3PredictedNot3Index = i;
+                    actual3PredictedNot3Label = FindDigit(yTest, i);
                     incorrectlyPredictedDigit = results[i];
                 }
-                incorrectlyPredictedNot3Count++;
+                actual3PredictedNot3Count++;
             }
             else if (is3Predicted && !is3Actual) // predicted digit is "3" but actual digit is not "3"
             {
-                if (incorrectlyPredicted3Index == -1)
+                if (actualNot3Predicted3Index == -1)
                 {
-                    incorrectlyPredicted3Index = i;
-                    incorrectlyPredicted3Label = FindDigit(yTest, i);
+                    actualNot3Predicted3Index = i;
+                    actualNot3Predicted3Label = FindDigit(yTest, i);
                 }
-                incorrectlyPredicted3Count++;
+                actualNot3Predicted3Count++;
             }
         }
 
         // Correctly predicted
-        SaveMnistPicture(DigitImageSize, correctlyPredicted3Index, testImages, $"{prefix}_correctlyPredicted3_its{correctlyPredicted3Label}");
-        SaveMnistPicture(DigitImageSize, correctlyPredictedNot3Index, testImages, $"{prefix}_correctlyPredictedNot3_its{correctlyPredictedNot3Label}");
+        SaveMnistPicture(DigitImageSize, actual3Predicted3Index, testImages, $"{prefix}_correctlyPredicted3_its{actual3Predicted3Label}");
+        SaveMnistPicture(DigitImageSize, actualNot3PredictedNot3Index, testImages, $"{prefix}_correctlyPredictedNot3_its{actualNot3PredictedNot3Label}");
 
         // Incorrectly predicted
-        SaveMnistPicture(DigitImageSize, incorrectlyPredictedNot3Index, testImages, $"{prefix}_incorrectlyPredictedNot3_its{incorrectlyPredictedNot3Label}");
-        SaveMnistPicture(DigitImageSize, incorrectlyPredicted3Index, testImages, $"{prefix}_incorrectlyPredicted3_its{incorrectlyPredicted3Label}");
+        SaveMnistPicture(DigitImageSize, actual3PredictedNot3Index, testImages, $"{prefix}_incorrectlyPredictedNot3_its{actual3PredictedNot3Label}");
+        SaveMnistPicture(DigitImageSize, actualNot3Predicted3Index, testImages, $"{prefix}_incorrectlyPredicted3_its{actualNot3Predicted3Label}");
 
         // Print the results
         WriteLine("Examples of predictions vs actual values for the digit \"3\":");
 
         // Correctly predicted
-        WriteLine($"1. \"{correctlyPredicted3Label}\" that was correctly predicted as \"3\": index {correctlyPredicted3Index}, count {correctlyPredicted3Count}");
-        WriteLine($"2. \"{correctlyPredictedNot3Label}\" that was correctly predicted as not \"3\" (but \"{correctlyPredictedDigit}\"): index {correctlyPredictedNot3Index}, count {correctlyPredictedNot3Count}");
+        WriteLine($"1. \"{actual3Predicted3Label}\" that was correctly predicted as \"3\": index {actual3Predicted3Index}, count {actual3Predicted3Count}");
+        WriteLine($"2. \"{actualNot3PredictedNot3Label}\" that was correctly predicted as not \"3\" (but \"{correctlyPredictedDigit}\"): index {actualNot3PredictedNot3Index}, count {actualNot3PredictedNot3Count}");
 
         // Incorrectly predicted
-        WriteLine($"3. \"{incorrectlyPredictedNot3Label}\" that was incorrectly predicted as not \"3\" (but \"{incorrectlyPredictedDigit}\"): index {incorrectlyPredictedNot3Index}, count {incorrectlyPredicted3Count}");
-        WriteLine($"4. \"{incorrectlyPredicted3Label}\" that was incorrectly predicted as \"3\": index {incorrectlyPredicted3Index}, count {incorrectlyPredictedNot3Count}");
+        WriteLine($"3. \"{actual3PredictedNot3Label}\" that was incorrectly predicted as not \"3\" (but \"{incorrectlyPredictedDigit}\"): index {actual3PredictedNot3Index}, count {actual3PredictedNot3Count}");
+        WriteLine($"4. \"{actualNot3Predicted3Label}\" that was incorrectly predicted as \"3\": index {actualNot3Predicted3Index}, count {actualNot3Predicted3Count}");
 
         WriteLine($"The corresponding images have been saved as JPG files in the current bin directory.");
         WriteLine();
@@ -164,7 +166,7 @@ internal static class MnistUtils
     /// </summary>
     /// <param name="source">The source 2D array.</param>
     /// <returns>The extracted feature columns.</returns>
-    internal static float[,] ExtractFeatureColumns(this float[,] source) 
+    internal static float[,] ExtractFeatureColumns(this float[,] source)
         => source.GetColumns(1..source.GetLength(1));
 
     internal static float[,] ExtractLabelColumn(this float[,] source)

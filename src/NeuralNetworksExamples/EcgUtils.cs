@@ -10,7 +10,6 @@ namespace NeuralNetworksExamples;
 
 internal class EcgUtils
 {
-    // ECG
     private const int EcgChartWidth = 500;
     private const int EcgChartHeight = 210;
     private const int EcgChartMargin = 15;
