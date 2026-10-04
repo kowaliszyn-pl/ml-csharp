@@ -4,6 +4,8 @@
 
 using Accord.MachineLearning.Clustering;
 
+using NeuralNetworksExamples.Helpers;
+
 using ScottPlot;
 using ScottPlot.Plottables;
 using ScottPlot.Statistics;
@@ -22,14 +24,14 @@ internal static class Utils
 
         foreach (int index in selectedImages)
         {
-            Drawing.SaveMnistPicture(100, index, originalImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_original_{index}");
-            Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_reconstructed_{index}");
+            Helpers.Drawing.SaveMnistPicture(100, index, originalImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_original_{index}");
+            Helpers.Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_reconstructed_{index}");
             
         }
 
         for(int i = 0; i < randomlyGeneratedImages.GetLength(0); i++ )
         {
-            Drawing.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_random_{i}");
+            Helpers.Drawing.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_random_{i}");
         }
     }
 

@@ -4,9 +4,9 @@
 
 using static System.Console;
 using static NeuralNetworks.Core.DataUtils;
-using static NeuralNetworksExamples.Drawing;
+using static NeuralNetworksExamples.Helpers.Drawing;
 
-namespace NeuralNetworksExamples;
+namespace NeuralNetworksExamples.Helpers;
 
 internal class EcgUtils
 {

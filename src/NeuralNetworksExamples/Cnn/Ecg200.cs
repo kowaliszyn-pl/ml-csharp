@@ -20,7 +20,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworksExamples.EcgUtils;
+using static NeuralNetworksExamples.Helpers.EcgUtils;
 
 namespace NeuralNetworksExamples.Cnn;
 

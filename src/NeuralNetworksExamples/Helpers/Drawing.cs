@@ -7,7 +7,7 @@ using System.Drawing;
 
 using NeuralNetworks.Core;
 
-namespace NeuralNetworksExamples;
+namespace NeuralNetworksExamples.Helpers;
 
 [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Display one warning at beginning of the method")]
 public class Drawing

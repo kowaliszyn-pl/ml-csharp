@@ -20,7 +20,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworksExamples.MnistUtils;
+using static NeuralNetworksExamples.Helpers.MnistUtils;
 
 namespace NeuralNetworksExamples.Cnn;
 

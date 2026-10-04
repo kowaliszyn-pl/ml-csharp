@@ -17,9 +17,11 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
+using NeuralNetworksExamples.Helpers;
+
 using static System.Console;
 using static NeuralNetworksExamples.Autoencoder.Utils;
-using static NeuralNetworksExamples.MnistUtils;
+using static NeuralNetworksExamples.Helpers.MnistUtils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
