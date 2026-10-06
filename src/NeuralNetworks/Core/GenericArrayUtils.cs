@@ -29,11 +29,11 @@ public static class GenericArrayUtils
         if (matrix1 is Array matrix1Array && matrix2 is Array matrix2Array)
         {
             if (matrix1Array.Rank != matrix2Array.Rank)
-                throw new InvalidOperationException($"Input and input gradient must have the same number of dimensions. Got {matrix1Array.Rank} and {matrix2Array.Rank}.");
+                throw new InvalidOperationException($"Matrices must have the same number of dimensions. Got {matrix1Array.Rank} and {matrix2Array.Rank}.");
             for (int i = 0; i < matrix1Array.Rank; i++)
             {
                 if (matrix1Array.GetLength(i) != matrix2Array.GetLength(i))
-                    throw new InvalidOperationException($"Input and input gradient must have the same shape. Dimension {i} has length {matrix1Array.GetLength(i)} and {matrix2Array.GetLength(i)}.");
+                    throw new InvalidOperationException($"Matrices must have the same shape. Dimension {i} has length {matrix1Array.GetLength(i)} and {matrix2Array.GetLength(i)}.");
             }
         }
     }
