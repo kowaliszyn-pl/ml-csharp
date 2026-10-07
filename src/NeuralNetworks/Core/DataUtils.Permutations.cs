@@ -51,6 +51,12 @@ public static partial class DataUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteTogetherWith(float[,] x, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.Indices, CopyMethod copyMethod = CopyMethod.CopyValues)
+    {
+        PermuteInPlaceInternal(x, y, random, permuteMethod, copyMethod);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceInternal(float[,] x, float[,]? y, Random? random, PermuteMethod permuteMethod, CopyMethod copyMethod)
     {
         Debug.Assert(y == null || x.GetLength(0) == y.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
@@ -146,7 +152,6 @@ public static partial class DataUtils
     }
 
     #endregion
-
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
@@ -558,5 +563,5 @@ public static partial class DataUtils
             }
         }
     }
-
+    
 }
