@@ -5,8 +5,9 @@
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Utils;
 
-using static NeuralNetworks.Core.DataUtils;
+using static NeuralNetworks.Core.Utils.DataUtils;
 using static NeuralNetworks.Core.Utils.PermutationUtils;
 
 bool running = true;

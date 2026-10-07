@@ -5,9 +5,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace NeuralNetworks.Core;
+namespace NeuralNetworks.Core.Utils;
 
 public static partial class DataUtils
 {
@@ -63,7 +61,7 @@ public static partial class DataUtils
         }
         return matrix;
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] ReshapeTo2D(this float[,,,] data)
     {
@@ -127,10 +125,8 @@ public static partial class DataUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ScaleToInPlace(this float[,] data, float newMin, float newMax)
-    {
-        ScaleToInternal(data, data, newMin, newMax);
-    }
+    public static void ScaleToInPlace(this float[,] data, float newMin, float newMax) 
+        => ScaleToInternal(data, data, newMin, newMax);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void ScaleToInternal(float[,] source, float[,] dest, float newMin, float newMax)

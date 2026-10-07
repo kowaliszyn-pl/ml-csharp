@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Utils;
 
 using static NeuralNetworks.Core.Utils.PermutationUtils;
 
