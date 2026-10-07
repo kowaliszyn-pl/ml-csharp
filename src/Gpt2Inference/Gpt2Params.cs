@@ -8,7 +8,7 @@
 using System.Numerics.Tensors;
 using System.Text;
 
-using static NeuralNetworks.Core.RandomUtils;
+using static NeuralNetworks.Core.Utils.RandomUtils;
 
 namespace Gpt2Inference;
 

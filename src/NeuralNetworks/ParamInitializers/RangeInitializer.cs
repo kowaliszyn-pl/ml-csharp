@@ -2,7 +2,7 @@
 // File name: RangeInitializer.cs
 // www.kowaliszyn.pl, 2025
 
-using static NeuralNetworks.Core.ArrayUtils;
+using static NeuralNetworks.Core.Utils.ArrayUtils;
 
 namespace NeuralNetworks.ParamInitializers;
 

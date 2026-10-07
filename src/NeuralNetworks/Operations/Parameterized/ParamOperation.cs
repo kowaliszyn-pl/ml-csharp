@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using NeuralNetworks.Optimizers;
 
-using static NeuralNetworks.Core.GenericArrayUtils;
+using static NeuralNetworks.Core.Utils.GenericArrayUtils;
 using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Operations.Parameterized;

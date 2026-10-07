@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Core.Operations;
+using NeuralNetworks.Core.Utils;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
@@ -16,7 +17,7 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.Trainers.Logging;
 
 using static System.Console;
-using static NeuralNetworks.Core.GenericArrayUtils;
+using static NeuralNetworks.Core.Utils.GenericArrayUtils;
 
 namespace NeuralNetworks.Trainers;
 

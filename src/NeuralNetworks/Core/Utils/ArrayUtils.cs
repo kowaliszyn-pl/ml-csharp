@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 using NeuralNetworks.Core;
 
-namespace NeuralNetworks.Core;
+namespace NeuralNetworks.Core.Utils;
 
 public class ArrayUtils
 {

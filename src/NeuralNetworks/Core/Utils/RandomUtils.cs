@@ -4,7 +4,7 @@
 
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core;
+namespace NeuralNetworks.Core.Utils;
 
 public class RandomUtils
 {

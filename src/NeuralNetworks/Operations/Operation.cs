@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-using static NeuralNetworks.Core.GenericArrayUtils;
+using static NeuralNetworks.Core.Utils.GenericArrayUtils;
 
 namespace NeuralNetworks.Operations;
 

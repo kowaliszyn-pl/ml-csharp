@@ -4,7 +4,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace NeuralNetworks.Core;
+namespace NeuralNetworks.Core.Utils;
 
 public static class GenericArrayUtils
 {
