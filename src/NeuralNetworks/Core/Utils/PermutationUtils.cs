@@ -73,6 +73,10 @@ public static class PermutationUtils
     #region Arrays float[,,], float[,]
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlace(this float[,,] source, Random? random = null)
+        => PermuteInPlaceInternal(source, null, random);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this float[,,] source, float[,] y, Random? random = null)
         => PermuteInPlaceInternal(source, y, random);
 
@@ -108,6 +112,10 @@ public static class PermutationUtils
     #endregion
 
     #region Arrays float[,,,], float[,]
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlace(this float[,,,] source, Random? random = null)
+        => PermuteInPlaceInternal(source, (float[,]?)null, random);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this float[,,,] source, float[,] y, Random? random = null)
@@ -186,6 +194,10 @@ public static class PermutationUtils
     #endregion
 
     #region Arrays int[,], float[,]
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlace(this int[,] source, Random? random = null)
+        => PermuteInPlaceInternal(source,  null, random);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this int[,] source, float[,] y, Random? random = null)

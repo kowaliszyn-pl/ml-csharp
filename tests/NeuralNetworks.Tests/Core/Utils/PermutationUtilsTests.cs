@@ -52,8 +52,10 @@ public class PermutationUtilsTests
         float[,] source = CreateMatrix(5, 3);
         HashSet<string> expectedRows = RowsAsSet(source);
         Random random = new(42);
+
         // Act
         source.PermuteInPlace(random);
+
         // Assert
         CollectionAssert.AreEquivalent(expectedRows.ToList(), RowsAsSet(source).ToList());
     }
@@ -64,8 +66,10 @@ public class PermutationUtilsTests
         // Arrange
         float[,] source = CreateMatrix(4, 2);
         HashSet<string> expectedRows = RowsAsSet(source);
+
         // Act
         source.PermuteInPlace();
+
         // Assert
         CollectionAssert.AreEquivalent(expectedRows.ToList(), RowsAsSet(source).ToList());
     }
@@ -77,8 +81,10 @@ public class PermutationUtilsTests
         float[,] source = CreateMatrix(5, 3);
         float[,] sourceCopy = (float[,])source.Clone();
         Random random = new(7);
+
         // Act
         float[,] result = source.Permute(random);
+
         // Assert
         Assert.AreNotSame(source, result);
         CollectionAssert.AreEquivalent(RowsAsSet(sourceCopy).ToList(), RowsAsSet(result).ToList());
@@ -97,8 +103,10 @@ public class PermutationUtilsTests
     {
         // Arrange
         float[,] source = CreateMatrix(3, 2);
+
         // Act
         float[,] result = source.Permute();
+
         // Assert
         Assert.AreEqual(source.GetLength(0), result.GetLength(0));
         Assert.AreEqual(source.GetLength(1), result.GetLength(1));
@@ -118,8 +126,10 @@ public class PermutationUtilsTests
         }
 
         Random random = new(123);
+
         // Act
         x.PermuteInPlaceTogetherWith(y, random);
+
         // Assert: after permutation, for each row i, y[i,0] must equal x[i,0] (they moved together)
         for (int i = 0; i < 5; i++)
         {
@@ -140,6 +150,7 @@ public class PermutationUtilsTests
 
         // Act
         x.PermuteInPlaceTogetherWith(y);
+
         // Assert
         for (int i = 0; i < 4; i++)
         {
@@ -161,8 +172,10 @@ public class PermutationUtilsTests
         float[,] xCopy = (float[,])x.Clone();
         float[,] yCopy = (float[,])y.Clone();
         Random random = new(99);
+
         // Act
         (float[,] xPermuted, float[,] yPermuted) = PermutationUtils.Permute(x, y, random);
+
         // Assert
         Assert.AreNotSame(x, xPermuted);
         Assert.AreNotSame(y, yPermuted);
@@ -189,8 +202,10 @@ public class PermutationUtilsTests
         // Arrange
         float[,] x = CreateMatrix(3, 2);
         float[,] y = CreateMatrix(3, 1);
+
         // Act
         (float[,] xPermuted, float[,] yPermuted) = PermutationUtils.Permute(x, y);
+
         // Assert
         Assert.AreEqual(3, xPermuted.GetLength(0));
         Assert.AreEqual(3, yPermuted.GetLength(0));
@@ -208,8 +223,10 @@ public class PermutationUtilsTests
         }
 
         Random random = new(55);
+
         // Act
         PermutationUtils.PermuteTogetherWith(x, y, random);
+
         // Assert
         for (int i = 0; i < 5; i++)
         {
@@ -230,6 +247,7 @@ public class PermutationUtilsTests
 
         // Act
         PermutationUtils.PermuteTogetherWith(x, y);
+
         // Assert
         for (int i = 0; i < 4; i++)
         {
@@ -257,8 +275,10 @@ public class PermutationUtilsTests
         }
 
         Random random = new(321);
+
         // Act
         x.PermuteInPlaceTogetherWith(y, random);
+
         // Assert: for each row i, x[i,0,0] / 100 must equal y[i,0] (they moved together)
         for (int i = 0; i < 5; i++)
         {
@@ -280,6 +300,7 @@ public class PermutationUtilsTests
 
         // Act
         x.PermuteInPlaceTogetherWith(y);
+
         // Assert
         for (int i = 0; i < 4; i++)
         {
@@ -300,8 +321,10 @@ public class PermutationUtilsTests
         }
 
         Random random = new(654);
+
         // Act
         x.PermuteInPlaceTogetherWith(y, random);
+
         // Assert
         for (int i = 0; i < 5; i++)
         {
@@ -323,6 +346,7 @@ public class PermutationUtilsTests
 
         // Act
         x.PermuteInPlaceTogetherWith(y);
+
         // Assert
         for (int i = 0; i < 4; i++)
         {
@@ -343,8 +367,10 @@ public class PermutationUtilsTests
         }
 
         Random random = new(987);
+
         // Act
         x.PermuteInPlaceTogetherWith(y, random);
+
         // Assert
         for (int i = 0; i < 5; i++)
         {
@@ -366,6 +392,7 @@ public class PermutationUtilsTests
 
         // Act
         x.PermuteInPlaceTogetherWith(y);
+
         // Assert
         for (int i = 0; i < 4; i++)
         {
@@ -386,8 +413,10 @@ public class PermutationUtilsTests
         }
 
         Random random = new(159);
+
         // Act
         x.PermuteInPlaceTogetherWith(y, random);
+
         // Assert
         for (int i = 0; i < 5; i++)
         {
@@ -409,6 +438,7 @@ public class PermutationUtilsTests
 
         // Act
         x.PermuteInPlaceTogetherWith(y);
+
         // Assert
         for (int i = 0; i < 4; i++)
         {
@@ -416,4 +446,40 @@ public class PermutationUtilsTests
         }
     }
 
+    [TestMethod]
+    public void AllMethodsPermutesInTheSameWay()
+    {
+        // Arrange
+        const int rows = 5;
+        const int cols = 3;
+        const int dim = 2;
+        const int seed = 19690914;
+
+        int[,] a1 = new int[rows, cols];
+        float[,] a2 = new float[rows, cols];
+        float[,,] a3 = new float[rows, cols, dim];
+        float[,,,] a4 = new float[rows, cols, dim, dim];
+
+        // Fill arrays with identifiable values
+        for (int i = 0; i < rows; i++)
+        {
+            a1[i, 0] = i;
+            a2[i, 0] = i;
+            a3[i, 0, 0] = i;
+            a4[i, 0, 0, 0] = i;
+        }
+
+        // Act
+        a1.PermuteInPlace(new(seed));
+        a2.PermuteInPlace(new(seed));
+        a3.PermuteInPlace(new(seed));
+        a4.PermuteInPlace(new(seed));
+
+        // Assert
+        Assert.IsTrue(a1[0, 0] == a2[0, 0] && a1[0, 0] == a3[0, 0, 0] && a1[0, 0] == a4[0, 0, 0, 0] && a1[0, 0] == 4);
+        Assert.IsTrue(a1[1, 0] == a2[1, 0] && a1[1, 0] == a3[1, 0, 0] && a1[1, 0] == a4[1, 0, 0, 0] && a1[1, 0] == 1);
+        Assert.IsTrue(a1[2, 0] == a2[2, 0] && a1[2, 0] == a3[2, 0, 0] && a1[2, 0] == a4[2, 0, 0, 0] && a1[2, 0] == 0);
+        Assert.IsTrue(a1[3, 0] == a2[3, 0] && a1[3, 0] == a3[3, 0, 0] && a1[3, 0] == a4[3, 0, 0, 0] && a1[3, 0] == 2);
+        Assert.IsTrue(a1[4, 0] == a2[4, 0] && a1[4, 0] == a3[4, 0, 0] && a1[4, 0] == a4[4, 0, 0, 0] && a1[4, 0] == 3);
+    }
 }
