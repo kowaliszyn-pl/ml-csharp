@@ -22,10 +22,11 @@ public static class PermutationUtils
     #region Arrays float[,]
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PermuteInPlace(this float[,] source, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.Indices, CopyMethod copyMethod = CopyMethod.CopyValues) => PermuteInPlaceInternal(source, null, random, permuteMethod, copyMethod);
+    public static void PermuteInPlace(this float[,] source, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues) 
+        => PermuteInPlaceInternal(source, null, random, permuteMethod, copyMethod);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] Permute(this float[,] source, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.Indices, CopyMethod copyMethod = CopyMethod.CopyValues)
+    public static float[,] Permute(this float[,] source, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues)
     {
         float[,] res = (float[,])source.Clone();
         PermuteInPlaceInternal(res, null, random, permuteMethod, copyMethod);
@@ -33,10 +34,11 @@ public static class PermutationUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PermuteInPlaceTogetherWith(this float[,] source, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.Indices, CopyMethod copyMethod = CopyMethod.CopyValues) => PermuteInPlaceInternal(source, y, random, permuteMethod, copyMethod);
+    public static void PermuteInPlaceTogetherWith(this float[,] source, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues) 
+        => PermuteInPlaceInternal(source, y, random, permuteMethod, copyMethod);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (float[,] xPermuted, float[,] yPermuted) Permute(float[,] x, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.Indices, CopyMethod copyMethod = CopyMethod.CopyValues)
+    public static (float[,] xPermuted, float[,] yPermuted) Permute(float[,] x, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues)
     {
         float[,] xRes = (float[,])x.Clone();
         float[,] yRes = (float[,])y.Clone();
@@ -45,7 +47,8 @@ public static class PermutationUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PermuteTogetherWith(float[,] x, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.Indices, CopyMethod copyMethod = CopyMethod.CopyValues) => PermuteInPlaceInternal(x, y, random, permuteMethod, copyMethod);
+    public static void PermuteTogetherWith(float[,] x, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues) 
+        => PermuteInPlaceInternal(x, y, random, permuteMethod, copyMethod);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceInternal(float[,] x, float[,]? y, Random? random, PermuteMethod permuteMethod, CopyMethod copyMethod)
