@@ -8,7 +8,7 @@ using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Core.Utils;
 
-public class ArrayUtils
+public static class ArrayUtils
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] CreateRange(int rows, int columns, float from, float to)

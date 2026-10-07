@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core.Utils;
 
-public class RandomUtils
+public static class RandomUtils
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] CreateRandomNormal(int rows, int columns, Random random, float mean = 0, float stdDev = 1)
