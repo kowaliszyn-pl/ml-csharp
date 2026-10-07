@@ -9,139 +9,262 @@ namespace NeuralNetworks.Core.Utils;
 
 public static class PermutationUtils
 {
-    public enum PermuteMethod
-    {
-        Indices, FisherYates
-    }
-
-    public enum CopyMethod
-    {
-        CopyValues, SetRow
-    }
-
-    #region Arrays float[,]
+    #region Arrays float[,], float[,]
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PermuteInPlace(this float[,] source, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues) 
-        => PermuteInPlaceInternal(source, null, random, permuteMethod, copyMethod);
+    public static void PermuteInPlace(this float[,] source, Random? random = null)
+        => PermuteInPlaceInternal(source, null, random);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] Permute(this float[,] source, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues)
+    public static float[,] Permute(this float[,] source, Random? random = null)
     {
         float[,] res = (float[,])source.Clone();
-        PermuteInPlaceInternal(res, null, random, permuteMethod, copyMethod);
+        PermuteInPlaceInternal(res, null, random);
         return res;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PermuteInPlaceTogetherWith(this float[,] source, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues) 
-        => PermuteInPlaceInternal(source, y, random, permuteMethod, copyMethod);
+    public static void PermuteInPlaceTogetherWith(this float[,] source, float[,] y, Random? random = null)
+        => PermuteInPlaceInternal(source, y, random);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (float[,] xPermuted, float[,] yPermuted) Permute(float[,] x, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues)
+    public static (float[,] xPermuted, float[,] yPermuted) Permute(float[,] x, float[,] y, Random? random = null)
     {
         float[,] xRes = (float[,])x.Clone();
         float[,] yRes = (float[,])y.Clone();
-        PermuteInPlaceInternal(xRes, yRes, random, permuteMethod, copyMethod);
+        PermuteInPlaceInternal(xRes, yRes, random);
         return (xRes, yRes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PermuteTogetherWith(float[,] x, float[,] y, Random? random = null, PermuteMethod permuteMethod = PermuteMethod.FisherYates, CopyMethod copyMethod = CopyMethod.CopyValues) 
-        => PermuteInPlaceInternal(x, y, random, permuteMethod, copyMethod);
+    public static void PermuteTogetherWith(float[,] x, float[,] y, Random? random = null)
+        => PermuteInPlaceInternal(x, y, random);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void PermuteInPlaceInternal(float[,] x, float[,]? y, Random? random, PermuteMethod permuteMethod, CopyMethod copyMethod)
+    private static void PermuteInPlaceInternal(float[,] x, float[,]? y, Random? random)
     {
         Debug.Assert(y == null || x.GetLength(0) == y.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
 
         random ??= new();
 
-        int rows = x.GetLength(0);
-        int xColumns = x.GetLength(1);
-        int yColumns = y?.GetLength(1) ?? 0;
+        int xDim1 = x.GetLength(0);
+        int xDim2 = x.GetLength(1);
+        int yDim2 = y?.GetLength(1) ?? 0;
 
-        if (permuteMethod == PermuteMethod.Indices)
+        for (int i1 = xDim1 - 1; i1 > 0; i1--)
         {
-            int[] indices = [.. Enumerable.Range(0, rows).OrderBy(i => random.Next())];
-            float[,] xCopy = (float[,])x.Clone();
-            float[,]? yCopy = y == null ? null : (float[,])y.Clone();
-
-            if (copyMethod == CopyMethod.CopyValues)
+            int i2 = random.Next(i1 + 1);
+            if (i1 != i2)
             {
-                for (int i = 0; i < rows; i++)
-                {
-                    int fromRow = indices[i];
-                    for (int j = 0; j < xColumns; j++)
-                    {
-                        x[i, j] = xCopy[fromRow, j];
-                    }
+                // Swap rows in x
+                SwapMatrixRows(x, xDim2, i1, i2);
 
-                    if (yCopy != null)
-                        for (int j = 0; j < yColumns; j++)
-                        {
-                            y![i, j] = yCopy[fromRow, j];
-                        }
-                }
-            }
-            else if (copyMethod == CopyMethod.SetRow)
-            {
-                for (int i = 0; i < rows; i++)
+                // Swap rows in y if applicable
+                if (y != null)
                 {
-                    x.SetRow(i, xCopy.GetRow(indices[i]));
-                    if (yCopy != null)
-                    {
-                        y!.SetRow(i, yCopy.GetRow(indices[i]));
-                    }
+                    SwapMatrixRows(y, yDim2, i1, i2);
                 }
             }
         }
-        else if (permuteMethod == PermuteMethod.FisherYates)
+    }
+
+    #endregion
+
+    #region Arrays float[,,], float[,]
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith(this float[,,] source, float[,] y, Random? random = null)
+        => PermuteInPlaceInternal(source, y, random);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void PermuteInPlaceInternal(float[,,] x, float[,]? y, Random? random)
+    {
+        Debug.Assert(y == null || x.GetLength(0) == y.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
+
+        random ??= new();
+
+        int xDim1 = x.GetLength(0);
+        int xDim2 = x.GetLength(1);
+        int xDim3 = x.GetLength(2);
+        int yDim2 = y?.GetLength(1) ?? 0;
+
+        for (int i1 = xDim1 - 1; i1 > 0; i1--)
         {
-            if (copyMethod == CopyMethod.CopyValues)
+            int i2 = random.Next(i1 + 1);
+            if (i1 != i2)
             {
-                for (int i = rows - 1; i > 0; i--)
+                // Swap rows in x
+                SwapMatrixRows(x, xDim2, xDim3, i1, i2);
+
+                // Swap rows in y if applicable
+                if (y != null)
                 {
-                    int j = random.Next(i + 1);
-                    if (i != j)
-                    {
-                        // Swap rows in x
-                        for (int col = 0; col < xColumns; col++)
-                        {
-                            (x[i, col], x[j, col]) = (x[j, col], x[i, col]);
-                        }
-                        // Swap rows in y if applicable
-                        if (y != null)
-                        {
-                            for (int col = 0; col < yColumns; col++)
-                            {
-                                (y[i, col], y[j, col]) = (y[j, col], y[i, col]);
-                            }
-                        }
-                    }
+                    SwapMatrixRows(y, yDim2, i1, i2);
                 }
             }
-            else if (copyMethod == CopyMethod.SetRow)
+        }
+    }
+
+    #endregion
+
+    #region Arrays float[,,,], float[,]
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith(this float[,,,] source, float[,] y, Random? random = null)
+        => PermuteInPlaceInternal(source, y, random);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void PermuteInPlaceInternal(float[,,,] x, float[,]? y, Random? random)
+    {
+        Debug.Assert(y == null || x.GetLength(0) == y.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
+
+        random ??= new();
+
+        int xDim1 = x.GetLength(0);
+        int xDim2 = x.GetLength(1);
+        int xDim3 = x.GetLength(2);
+        int xDim4 = x.GetLength(3);
+        int yDim2 = y?.GetLength(1) ?? 0;
+
+        for (int i1 = xDim1 - 1; i1 > 0; i1--)
+        {
+            int i2 = random.Next(i1 + 1);
+            if (i1 != i2)
             {
-                for (int i = rows - 1; i > 0; i--)
+                // Swap rows in x
+                SwapMatrixRows(x, xDim2, xDim3, xDim4, i1, i2);
+
+                // Swap rows in y if applicable
+                if (y != null)
                 {
-                    int j = random.Next(i + 1);
-                    if (i != j)
-                    {
-                        // Swap rows in x
-                        float[] tempX = x.GetRow(i);
-                        x.SetRow(i, x.GetRow(j));
-                        x.SetRow(j, tempX);
-                        // Swap rows in y if applicable
-                        if (y != null)
-                        {
-                            float[] tempY = y.GetRow(i);
-                            y.SetRow(i, y.GetRow(j));
-                            y.SetRow(j, tempY);
-                        }
-                    }
+                    SwapMatrixRows(y, yDim2, i1, i2);
                 }
             }
+        }
+    }
+
+    #endregion
+
+    #region Arrays float[,,,], float[,,,]
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith(this float[,,,] source, float[,,,] y, Random? random = null)
+        => PermuteInPlaceInternal(source, y, random);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void PermuteInPlaceInternal(float[,,,] x, float[,,,]? y, Random? random)
+    {
+        Debug.Assert(y == null || x.GetLength(0) == y.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
+
+        random ??= new();
+
+        int xDim1 = x.GetLength(0);
+        int xDim2 = x.GetLength(1);
+        int xDim3 = x.GetLength(2);
+        int xDim4 = x.GetLength(3);
+        int yDim2 = y?.GetLength(1) ?? 0;
+        int yDim3 = y?.GetLength(2) ?? 0;
+        int yDim4 = y?.GetLength(3) ?? 0;
+
+        for (int i1 = xDim1 - 1; i1 > 0; i1--)
+        {
+            int i2 = random.Next(i1 + 1);
+            if (i1 != i2)
+            {
+                // Swap rows in x
+                SwapMatrixRows(x, xDim2, xDim3, xDim4, i1, i2);
+
+                // Swap rows in y if applicable
+                if (y != null)
+                {
+                    SwapMatrixRows(y, yDim2, yDim3, yDim4, i1, i2);
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region Arrays int[,], float[,]
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith(this int[,] source, float[,] y, Random? random = null)
+        => PermuteInPlaceInternal(source, y, random);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void PermuteInPlaceInternal(int[,] x, float[,]? y, Random? random)
+    {
+        Debug.Assert(y == null || x.GetLength(0) == y.GetLength(0), "Both matrices must have the same number of rows to permute them together.");
+
+        random ??= new();
+
+        int xDim1 = x.GetLength(0);
+        int xDim2 = x.GetLength(1);
+        int yDim2 = y?.GetLength(1) ?? 0;
+
+        for (int i1 = xDim1 - 1; i1 > 0; i1--)
+        {
+            int i2 = random.Next(i1 + 1);
+            if (i1 != i2)
+            {
+                // Swap rows in x
+                SwapMatrixRows(x, xDim2, i1, i2);
+
+                // Swap rows in y if applicable
+                if (y != null)
+                {
+                    SwapMatrixRows(y, yDim2, i1, i2);
+                }
+            }
+        }
+    }
+
+    #endregion
+
+    #region Swap
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void SwapMatrixRows(float[,] x, int xDim2, int i1, int i2)
+    {
+        for (int j = 0; j < xDim2; j++)
+        {
+            (x[i1, j], x[i2, j]) = (x[i2, j], x[i1, j]);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void SwapMatrixRows(float[,,] x, int xDim2, int xDim3, int i1, int i2)
+    {
+        for (int j = 0; j < xDim2; j++)
+        {
+            for (int k = 0; k < xDim3; k++)
+            {
+                (x[i1, j, k], x[i2, j, k]) = (x[i2, j, k], x[i1, j, k]);
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void SwapMatrixRows(float[,,,] x, int xDim2, int xDim3, int xDim4, int i1, int i2)
+    {
+        for (int j = 0; j < xDim2; j++)
+        {
+            for (int k = 0; k < xDim3; k++)
+            {
+                for (int l = 0; l < xDim4; l++)
+                {
+                    (x[i1, j, k, l], x[i2, j, k, l]) = (x[i2, j, k, l], x[i1, j, k, l]);
+                }
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void SwapMatrixRows(int[,] x, int xDim2, int i1, int i2)
+    {
+        for (int j = 0; j < xDim2; j++)
+        {
+            (x[i1, j], x[i2, j]) = (x[i2, j], x[i1, j]);
         }
     }
 

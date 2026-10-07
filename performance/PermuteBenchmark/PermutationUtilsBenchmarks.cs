@@ -40,6 +40,7 @@ public class PermutationUtilsBenchmarks
         }
     }
 
+    /*
     // (1) Redundant Array.Clone() in Permute(x,y) overload vs internal clone only (PermuteInPlaceTogetherWith)
     [Benchmark]
     public void Permute_XY_RedundantClone()
@@ -93,5 +94,5 @@ public class PermutationUtilsBenchmarks
         float[,] yCopy = (float[,])_y.Clone();
         Random random = new SeededRandom(251207);
         xCopy.PermuteInPlaceTogetherWith(yCopy, random, PermutationUtils.PermuteMethod.FisherYates, PermutationUtils.CopyMethod.SetRow);
-    }
+    }*/
 }
