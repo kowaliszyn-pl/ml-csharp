@@ -7,6 +7,7 @@ using System.Diagnostics;
 using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.DataUtils;
+using static NeuralNetworks.Core.Utils.PermutationUtils;
 
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
@@ -634,7 +635,7 @@ static (float[,] TrainData, float[,] TestData) GetData()
     bostonData.StandardizeByColumns(0..inputFeatureCount);
 
     // Permute the data randomly
-    bostonData.PermuteInPlace(RandomSeed);
+    bostonData.PermuteInPlace(new Random(RandomSeed));
 
     // Return train and test data split by ratio
     return bostonData.SplitRowsByRatio(TestSplitRatio);

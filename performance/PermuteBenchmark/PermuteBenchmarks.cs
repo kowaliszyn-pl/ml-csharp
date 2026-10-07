@@ -69,7 +69,7 @@ public class PermuteBenchmarks
             _y[i, 0] = random.NextSingle();
         }
     }
-
+    /*
     [Benchmark]
     public void PermuteData4()
     {
@@ -111,5 +111,5 @@ public class PermuteBenchmarks
         Random random = new SeededRandom(251207);
         _x2.PermuteInPlaceTogetherWithSetRow(_y, random);
     }
-
+    */
 }

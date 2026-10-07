@@ -4,6 +4,8 @@
 
 using NeuralNetworks.Core;
 
+using static NeuralNetworks.Core.Utils.PermutationUtils;
+
 namespace NeuralNetworks.DataSources;
 
 public class FunctionDataSource(float[,] arguments, Func<float[], float> function, float testRatio = 0.7f, SeededRandom? random = null)

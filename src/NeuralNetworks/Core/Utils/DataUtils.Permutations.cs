@@ -10,7 +10,7 @@ namespace NeuralNetworks.Core;
 public static partial class DataUtils
 {
     
-
+    /*
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (float[,] xPermuted, float[,] yPermuted) PermuteData(float[,] x, float[,] y, Random random)
     {
@@ -421,5 +421,5 @@ public static partial class DataUtils
             }
         }
     }
-    
+    */
 }
