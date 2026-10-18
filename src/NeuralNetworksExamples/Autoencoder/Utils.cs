@@ -55,43 +55,52 @@ internal static class Utils
             Perplexity = 30
         };
 
-        double[][] reduced = tsne.Transform(encodedDouble);
-
-        // Create plot
-        WriteLine("Creating visualization...");
-        Plot plt = new();
-
-        // Group points by digit
-        for (int digit = 0; digit <= 9; digit++)
+        try
         {
-            List<double> xPoints = [];
-            List<double> yPoints = [];
+            double[][] reduced = tsne.Transform(encodedDouble);
 
-            for (int i = 0; i < n; i++)
+            // Create plot
+            WriteLine("Creating visualization...");
+            Plot plt = new();
+
+            // Group points by digit
+            for (int digit = 0; digit <= 9; digit++)
             {
-                if ((int)labels[i, 0] == digit)
+                List<double> xPoints = [];
+                List<double> yPoints = [];
+
+                for (int i = 0; i < n; i++)
                 {
-                    xPoints.Add(reduced[i][0]);
-                    yPoints.Add(reduced[i][1]);
+                    if ((int)labels[i, 0] == digit)
+                    {
+                        xPoints.Add(reduced[i][0]);
+                        yPoints.Add(reduced[i][1]);
+                    }
                 }
+
+                Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
+                scatter.LegendText = $"Digit {digit}";
+                scatter.MarkerSize = 5;
             }
 
-            Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
-            scatter.LegendText = $"Digit {digit}";
-            scatter.MarkerSize = 5;
+            plt.ShowLegend();
+            plt.Title($"t-SNE Visualization of Latent Space ({modelName}, bottleneck={dim}, points={n})");
+            plt.XLabel("t-SNE Component 1");
+            plt.YLabel("t-SNE Component 2");
+
+            string outputPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{n}_tsne.png";
+            plt.SavePng(outputPath, 1200, 900);
+
+            ForegroundColor = ConsoleColor.Green;
+            WriteLine($"t-SNE plot saved to {outputPath}");
+            ResetColor();
         }
-
-        plt.ShowLegend();
-        plt.Title($"t-SNE Visualization of Latent Space ({modelName}, bottleneck={dim}, points={n})");
-        plt.XLabel("t-SNE Component 1");
-        plt.YLabel("t-SNE Component 2");
-
-        string outputPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{n}_tsne.png";
-        plt.SavePng(outputPath, 1200, 900);
-
-        ForegroundColor = ConsoleColor.Green;
-        WriteLine($"t-SNE plot saved to {outputPath}");
-        ResetColor();
+        catch (Exception ex)
+        {
+            ForegroundColor = ConsoleColor.Red;
+            WriteLine($"Error during t-SNE transformation: {ex.Message}");
+            ResetColor();
+        }
 
         // Generate a chart with a histogram of the encoded values (float[,] encoded) within the range [-1, 1] and 20 bins
 

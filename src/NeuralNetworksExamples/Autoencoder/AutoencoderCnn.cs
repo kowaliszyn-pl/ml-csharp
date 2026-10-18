@@ -57,7 +57,7 @@ internal class AutoencoderConvModel(
 
             // 2. Bottleneck
             // 32 * 14 * 14 = 6272
-            .AddLayer(BottleneckLayer = new DenseLayer(bottleneckDim, new Tanh2D(), initializer))
+            .AddLayer(BottleneckLayer = new DenseLayer(bottleneckDim, new Softsign(), initializer))
 
             // 3. Decoder
             // bottleneckDim
