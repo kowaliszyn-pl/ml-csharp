@@ -9,16 +9,8 @@ using NeuralNetworks.Operations;
 
 namespace NeuralNetworks.Models;
 
-public abstract class AutoencoderModel<T>(
-    Loss<T>? defaultLossFunction,
-    SeededRandom? random,
-    string? modelFilePath)
-
-    : BaseModel<T, T>(
-        defaultLossFunction,
-        random,
-        modelFilePath)
-
+public abstract class AutoencoderModel<T>(Loss<T>? defaultLossFunction, SeededRandom? random, string? modelFilePath)
+    : BaseModel<T, T>(defaultLossFunction, random, modelFilePath)
     where T : notnull
 {
     /// <summary>

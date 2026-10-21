@@ -26,14 +26,8 @@ using static NeuralNetworksExamples.Helpers.MnistUtils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
-internal class AutoencoderDenseModel(
-    int bottleneckDim,
-    SeededRandom? random,
-    string? modelFilePath = null)
-    : AutoencoderModel<float[,]>(
-        new MeanSquaredErrorLoss(MseReduction.ElementMean),
-        random,
-        modelFilePath)
+internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, string? modelFilePath = null)
+    : AutoencoderModel<float[,]>(new MeanSquaredErrorLoss(MseReduction.ElementMean), random, modelFilePath)
 {
     protected override LayerListBuilder<float[,], float[,]> CreateLayerListBuilder()
     {
