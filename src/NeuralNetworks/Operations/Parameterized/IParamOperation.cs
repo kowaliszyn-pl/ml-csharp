@@ -12,4 +12,5 @@ public interface IParamOperation
     public void UpdateParams(Optimizer optimizer);
     public ParamOperationData GetData();
     public void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
+    public float GetRegularizationLoss();
 }

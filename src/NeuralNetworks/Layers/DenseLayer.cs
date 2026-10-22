@@ -9,10 +9,11 @@ using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.ParamInitializers;
+using NeuralNetworks.Regularization;
 
 namespace NeuralNetworks.Layers;
 
-public class DenseLayer(int neurons, ActivationFunction<float[,], float[,]> activationFunction, ParamInitializer paramInitializer, BaseDropout<float[,]>? dropout = null) : Layer<float[,], float[,]>
+public class DenseLayer(int neurons, ActivationFunction<float[,], float[,]> activationFunction, ParamInitializer paramInitializer, BaseDropout<float[,]>? dropout = null, Regularizer? weightsRegularizer = null, Regularizer? biasesRegularizer = null) : Layer<float[,], float[,]>
 {
     public override OperationListBuilder<float[,], float[,]> CreateOperationListBuilder()
     {
@@ -22,8 +23,8 @@ public class DenseLayer(int neurons, ActivationFunction<float[,], float[,]> acti
         float[] biases = paramInitializer.InitBiases(neurons);
 
         OperationListBuilder<float[,], float[,]> res =
-            AddOperation(new WeightMultiply(weights))
-            .AddOperation(new BiasAdd(biases))
+            AddOperation(new WeightMultiply(weights, weightsRegularizer))
+            .AddOperation(new BiasAdd(biases, biasesRegularizer))
             .AddOperation(activationFunction);
 
         if (dropout != null)
@@ -36,5 +37,5 @@ public class DenseLayer(int neurons, ActivationFunction<float[,], float[,]> acti
         => activationFunction;
 
     public override string ToString()
-        => $"DenseLayer (neurons={neurons}, activation={activationFunction}, paramInitializer={paramInitializer}, dropout={dropout})";
+        => $"DenseLayer (neurons={neurons}, activation={activationFunction}, paramInitializer={paramInitializer}, dropout={dropout}, weightsRegularizer={weightsRegularizer}, biasesRegularizer={biasesRegularizer})";
 }

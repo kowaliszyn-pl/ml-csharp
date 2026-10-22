@@ -5,6 +5,7 @@
 using System.Diagnostics;
 
 using NeuralNetworks.Optimizers;
+using NeuralNetworks.Regularization;
 
 using static NeuralNetworks.Core.Utils.GenericArrayUtils;
 using static NeuralNetworks.Utils.ModelUtils;
@@ -19,13 +20,15 @@ public abstract class ParamOperation<TIn, TOut> : Operation<TIn, TOut>, IParamOp
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract ParamOperationData GetData();
     public abstract void ApplyData(ParamOperationData data, int layerIndex, int operationIndex);
+    public abstract float GetRegularizationLoss();
 }
 
 /// <summary>
 /// An Operation with parameters of type TParam.
 /// </summary>
 /// <param name="param">Parameter matrix.</param>
-public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOperation<TIn, TOut>
+/// <param name="regularizer">Optional L1/L2 regularizer applied to this parameter's gradient (and optionally its loss).</param>
+public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, Regularizer? regularizer = null) : ParamOperation<TIn, TOut>
     where TIn : notnull
     where TOut : notnull
     where TParam : class
@@ -49,8 +52,16 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param) : ParamOpe
 
         _paramGradient = CalcParamGradient(outputGradient);
         EnsureSameShapeForParam(param, _paramGradient);
+
+        regularizer?.ApplyGradient(param, _paramGradient);
+
         return inputGrad;
     }
+
+    public override float GetRegularizationLoss()
+        => regularizer is { IncludeInLossValue: true }
+            ? regularizer.CalculatePenalty(param)
+            : 0f;
 
     [Conditional("DEBUG")]
     private static void EnsureSameShapeForParam(TParam? param, TParam paramGradient) 

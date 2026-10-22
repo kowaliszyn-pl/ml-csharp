@@ -95,6 +95,7 @@ public abstract class Model<TInputData, TPrediction>
 
         TPrediction predictions = Forward(xBatch, false);
         _lastLoss = lossFunction.Forward(predictions, yBatch);
+        _lastLoss += _layers.Sum(layer => layer.GetRegularizationLoss());
         Backward(lossFunction.Backward());
         return _lastLoss;
     }

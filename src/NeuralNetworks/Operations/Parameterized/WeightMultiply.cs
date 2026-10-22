@@ -2,6 +2,8 @@
 // File name: WeightMultiply.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using NeuralNetworks.Regularization;
+
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;
@@ -10,7 +12,8 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Weight multiplication operation for a neural network.
 /// </summary>
 /// <param name="weights">Weight matrix.</param>
-public class WeightMultiply(float[,] weights) : ParamOperation<float[,], float[,], float[,]>(weights)
+/// <param name="regularizer">Optional L1/L2 regularizer applied to the weights.</param>
+public class WeightMultiply(float[,] weights, Regularizer? regularizer = null) : ParamOperation<float[,], float[,], float[,]>(weights, regularizer)
 {
     protected override float[,] CalcOutput(bool inference)
         => WeightMultiplyOutput(Input, Param);

@@ -31,6 +31,7 @@ public abstract class Layer
     public abstract object Backward(object outputGradient);
     public abstract void UpdateParams(Optimizer optimizer);
     public abstract int GetParamCount();
+    public abstract float GetRegularizationLoss();
     internal abstract LayerParams GetParams();
     internal abstract void ApplyParams(LayerParams layerParams, int layerIndex);
     internal virtual bool IsInitialized => true;
@@ -144,6 +145,15 @@ public abstract class Layer<TIn, TOut> : Layer
         Debug.Assert(_operations != null, "Operations were not set up.");
 
         return _operations.GetParamCount();
+    }
+
+    public override float GetRegularizationLoss()
+    {
+        Debug.Assert(_operations != null, "Operations were not set up.");
+
+        return _operations
+            .OfType<IParamOperation>()
+            .Sum(paramOperation => paramOperation.GetRegularizationLoss());
     }
 
     internal override bool IsInitialized => _operations is not null;
