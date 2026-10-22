@@ -27,6 +27,18 @@ public static class GenericArrayUtils
         };
     }
 
+    public static ReadOnlySpan<float> ConvertToReadOnlySpan<T>(T matrix)
+    {
+        return matrix switch
+        {
+            float[] arr1D => arr1D.AsSpan(),
+            float[,] arr2D => MemoryMarshal.CreateReadOnlySpan(ref arr2D[0, 0], arr2D.Length),
+            float[,,] arr3D => MemoryMarshal.CreateReadOnlySpan(ref arr3D[0, 0, 0], arr3D.Length),
+            float[,,,] arr4D => MemoryMarshal.CreateReadOnlySpan(ref arr4D[0, 0, 0, 0], arr4D.Length),
+            _ => throw new ArgumentException("Array must be one of the following types: float[], float[,], float[,,], float[,,,].")
+        };
+    }
+
     public static void EnsureSameShape<T>(T? matrix1, T? matrix2)
     {
         if (matrix1 is null || matrix2 is null)
