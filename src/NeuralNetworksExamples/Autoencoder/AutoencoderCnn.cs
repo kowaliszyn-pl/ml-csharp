@@ -152,7 +152,7 @@ internal class AutoencoderCnn
     {
         int bottleneckDim = Program.LatentSpaceDimensions;
         string modelPath = GetFileName(ModelName, bottleneckDim);
-        AutoencoderConvModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        AutoencoderConvModel model = new(bottleneckDim, null, modelPath);
         string bottleneckActivationFunction = model.GetBottleneckActivationFunction().GetType().Name;
 
         ForegroundColor = ConsoleColor.Green;

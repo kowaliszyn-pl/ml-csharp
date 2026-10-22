@@ -76,7 +76,7 @@ internal class AutoencoderDense
 
         float[,] trainingImagesForDrawing = (float[,])xTrain.Clone();
 
-        // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
+        // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Softsign activation function which outputs values in the range [-1, 1].
 
         xTrain.ScaleToInPlace(-1f, 1f);
         xTest.ScaleToInPlace(-1f, 1f);
@@ -127,7 +127,7 @@ internal class AutoencoderDense
     {
         int bottleneckDim = Program.LatentSpaceDimensions;
         string modelPath = GetFileName(ModelName, bottleneckDim);
-        AutoencoderDenseModel model = new(bottleneckDim, new SeededRandom(RandomSeed), modelPath);
+        AutoencoderDenseModel model = new(bottleneckDim, null, modelPath);
         string bottleneckActivationFunction = model.GetBottleneckActivationFunction().GetType().Name;
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters loaded from {modelPath}.");
@@ -139,7 +139,7 @@ internal class AutoencoderDense
 
         float[,] originalImages = (float[,])xTrain.Clone();
 
-        // Normalize the pixel values from [0, 255] to [-1, 1] for better training of the autoencoder with Tanh activation function which outputs values in the range [-1, 1].
+        // Normalize the pixel values from [0, 255] to [-1, 1]
 
         xTrain.ScaleToInPlace(-1f, 1f);
 
