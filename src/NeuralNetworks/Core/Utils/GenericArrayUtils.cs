@@ -6,6 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core.Utils;
 
+/// <summary>
+/// Provides helper methods for working with supported numeric arrays of varying ranks, including span conversion, shape
+/// validation, row-count retrieval, coordinated permutation, and slicing along the first dimension.
+/// </summary>
+/// <remarks>Designed for array-based tensor-like data and supports specific combinations such as <c>float[]</c>,
+/// <c>float[,]</c>, <c>float[,,]</c>, <c>float[,,,]</c>, and related paired types used for synchronized
+/// operations.</remarks>
 public static class GenericArrayUtils
 {
     public static Span<float> ConvertToSpan<T>(T matrix)

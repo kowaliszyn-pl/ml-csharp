@@ -6,6 +6,12 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core.Utils;
 
+/// <summary>
+/// Provides utility methods for creating multidimensional <see langword="float"/> arrays initialized with evenly spaced
+/// values across a specified range.
+/// </summary>
+/// <remarks>Includes overloads for two-dimensional and four-dimensional arrays. Values are assigned in index
+/// order using a computed step size.</remarks>
 public static class ArrayUtils
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

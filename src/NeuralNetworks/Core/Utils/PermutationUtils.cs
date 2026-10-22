@@ -7,6 +7,14 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core.Utils;
 
+/// <summary>
+/// Provides helper methods to randomly permute the first dimension of multi-dimensional arrays, with support for
+/// in-place and copy-based operations.
+/// </summary>
+/// <remarks>Uses a Fisher-Yates shuffle over index 0 and can apply the same permutation to a paired array to keep
+/// rows aligned. Overloads support float and int arrays across 2D, 3D, and 4D shapes. When no random number generator
+/// is provided, a new Random instance is used. Arrays permuted together are expected to have the same length in the
+/// first dimension.</remarks>
 public static class PermutationUtils
 {
     #region Arrays float[,], float[,]

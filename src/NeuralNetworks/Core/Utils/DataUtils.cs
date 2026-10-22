@@ -7,6 +7,12 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core.Utils;
 
+/// <summary>
+/// Provides utility methods for loading, reshaping, scaling, splitting, and standardizing numeric datasets represented
+/// as multidimensional <see langword="float"/> arrays.
+/// </summary>
+/// <remarks>Includes both in-place and copy-based operations, with extension methods targeting 2D and 4D arrays
+/// for common data-preprocessing workflows.</remarks>
 public static partial class DataUtils
 {
     /// <summary>

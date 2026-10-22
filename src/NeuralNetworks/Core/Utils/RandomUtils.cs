@@ -6,6 +6,12 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core.Utils;
 
+/// <summary>
+/// Provides helper methods for generating random single-precision values and arrays, including uniform values in the
+/// range [-0.5, 0.5) and normally distributed values with configurable mean and standard deviation.
+/// </summary>
+/// <remarks>Uses a caller-supplied <see cref="Random"/> instance and includes Box-Muller-based standard normal
+/// sampling. Intended for scenarios that need 1D to 4D random data buffers.</remarks>
 public static class RandomUtils
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
