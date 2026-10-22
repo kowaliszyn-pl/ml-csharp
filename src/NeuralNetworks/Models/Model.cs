@@ -95,7 +95,13 @@ public abstract class Model<TInputData, TPrediction>
 
         TPrediction predictions = Forward(xBatch, false);
         _lastLoss = lossFunction.Forward(predictions, yBatch);
-        _lastLoss += _layers.Sum(layer => layer.GetRegularizationLoss());
+
+        // Add regularization loss from all layers to the total loss
+        foreach(Layer layer in _layers)
+        {
+            _lastLoss += layer.GetRegularizationLoss();
+        }
+
         Backward(lossFunction.Backward());
         return _lastLoss;
     }

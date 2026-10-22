@@ -8,6 +8,7 @@ using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.Optimizers;
+using NeuralNetworks.Regularization;
 
 using static NeuralNetworks.Core.Utils.GenericArrayUtils;
 using static NeuralNetworks.Utils.ModelUtils;
@@ -147,13 +148,34 @@ public abstract class Layer<TIn, TOut> : Layer
         return _operations.GetParamCount();
     }
 
+    private IParamOperation[]? _cachedParamOperations;
+
+    private IParamOperation[] GetParamOperations()
+    {
+        if (_cachedParamOperations == null)
+        {
+            Debug.Assert(_operations != null, "Operations were not set up.");
+
+            _cachedParamOperations = [.. _operations.OfType<IParamOperation>()];
+        }
+
+        return _cachedParamOperations;
+    }
+
+
+    /// <summary>
+    /// Calculates the total regularization loss across all parameter operations.
+    /// </summary>
+    /// <remarks>Returns 0 when no parameter operations are available. When the <see cref="Regularizer.IncludeInLossValue"/> property of a parameter operation is false, its regularization loss is not included in the total.</remarks>
+    /// <returns>The sum of regularization loss values returned by each parameter operation.</returns>
     public override float GetRegularizationLoss()
     {
-        Debug.Assert(_operations != null, "Operations were not set up.");
-
-        return _operations
-            .OfType<IParamOperation>()
-            .Sum(paramOperation => paramOperation.GetRegularizationLoss());
+        float regularizationLoss = 0f;
+        foreach (IParamOperation paramOperation in GetParamOperations())
+        {
+            regularizationLoss += paramOperation.GetRegularizationLoss();
+        }
+        return regularizationLoss;
     }
 
     internal override bool IsInitialized => _operations is not null;
@@ -162,10 +184,9 @@ public abstract class Layer<TIn, TOut> : Layer
     {
         Debug.Assert(_operations != null, "Operations were not set up.");
 
-        List<ParamOperationData> paramOperationDatas = _operations
-            .OfType<IParamOperation>()
+        List<ParamOperationData> paramOperationDatas = [.. GetParamOperations()
             .Select(paramOperation => paramOperation.GetData())
-            .ToList();
+        ];
 
         string layerType = GetTypeIdentifier(GetType());
         return new LayerParams(layerType, paramOperationDatas);
@@ -177,17 +198,15 @@ public abstract class Layer<TIn, TOut> : Layer
 
         EnsureTypeMatch(layerParams.LayerType, GetType(), layerIndex);
 
-        List<IParamOperation> paramOperations = _operations
-            .OfType<IParamOperation>()
-            .ToList();
+        IParamOperation[] paramOperations = GetParamOperations();
 
-        int operationCount = paramOperations.Count;
+        int operationCount = paramOperations.Length;
         int serializedOperationCount = layerParams.Operations.Count;
 
         if (operationCount != serializedOperationCount)
             throw new InvalidOperationException($"Operation count mismatch. Layer '{GetType().Name}' at index {layerIndex} has {operationCount} operations but {serializedOperationCount} were found in the serialized data.");
 
-        for (int operationIndex = 0; operationIndex < paramOperations.Count; operationIndex++)
+        for (int operationIndex = 0; operationIndex < paramOperations.Length; operationIndex++)
         {
             IParamOperation operation = paramOperations[operationIndex];
             ParamOperationData operationDto = layerParams.Operations[operationIndex];

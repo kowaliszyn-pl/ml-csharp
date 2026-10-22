@@ -2,6 +2,8 @@
 // File name: Regularizer.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using System.Diagnostics;
+
 using static NeuralNetworks.Core.Utils.GenericArrayUtils;
 
 namespace NeuralNetworks.Regularization;
@@ -18,6 +20,8 @@ namespace NeuralNetworks.Regularization;
 /// </param>
 public sealed class Regularizer(float l1 = 0f, float l2 = 0f, bool includeInLossValue = false)
 {
+    // TODO: l1, l2 must be non-negative. Add validation.
+
     public float L1 => l1;
 
     public float L2 => l2;
@@ -31,6 +35,8 @@ public sealed class Regularizer(float l1 = 0f, float l2 = 0f, bool includeInLoss
     {
         Span<float> paramSpan = ConvertToSpan(param);
         Span<float> paramGradientSpan = ConvertToSpan(paramGradient);
+
+        Debug.Assert(paramSpan.Length == paramGradientSpan.Length, "Parameter and its gradient must have the same length.");
 
         for (int i = 0; i < paramSpan.Length; i++)
         {
