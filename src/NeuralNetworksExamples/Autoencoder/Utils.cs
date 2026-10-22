@@ -154,7 +154,7 @@ internal static class Utils
         {
             for (int j = 0; j < bottleneckDim; j++)
             {
-                randomEncoded[i, j] = (float)(random.NextDouble() * 2 - 1); // Random values in [-1, 1]
+                randomEncoded[i, j] = (float)(random.NextDouble() * 2 - 1); // Random values in [-1, 1)
             }
         }
         return randomEncoded;

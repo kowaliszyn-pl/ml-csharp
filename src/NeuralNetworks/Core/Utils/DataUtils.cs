@@ -125,7 +125,7 @@ public static partial class DataUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ScaleToInPlace(this float[,] data, float newMin, float newMax) 
+    public static void ScaleToInPlace(this float[,] data, float newMin, float newMax)
         => ScaleToInternal(data, data, newMin, newMax);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -194,6 +194,62 @@ public static partial class DataUtils
             }
         }
         return (set1, set2);
+    }
+
+    public static void StandardizeColumns(float minStdDev, params List<float[,]> sets)
+    {
+        // Assert all sets have the same number of columns
+        int columns = sets[0].GetLength(1);
+#if DEBUG
+        foreach (float[,] set in sets)
+        {
+            if (set.GetLength(1) != columns)
+                throw new ArgumentException("All sets must have the same number of columns.");
+        }
+#endif
+
+        int rows = sets.Sum(s => s.GetLength(0));
+
+        // Compute mean and stdDev for each column using both train and test
+        float[] mean = new float[columns];
+        float[] stdDev = new float[columns];
+        float[] variance = new float[columns];
+
+        for (int col = 0; col < columns; col++)
+        {
+            float sum = 0f;
+            float sumOfSquares = 0f;
+
+            // Calculate sum and sum of squares for the current column across all sets
+            foreach (float[,] set in sets)
+            {
+                int rowsInSet = set.GetLength(0);
+                for (int row = 0; row < rowsInSet; row++)
+                {
+                    float val = set[row, col];
+                    sum += val;
+                    sumOfSquares += val * val;
+                }
+            }
+
+            mean[col] = sum / rows;
+            variance[col] = (sumOfSquares / rows) - (mean[col] * mean[col]);
+            stdDev[col] = MathF.Max(MathF.Sqrt(variance[col]), minStdDev);
+            if (stdDev[col] == 0f)
+            {
+                stdDev[col] = 1f; // Prevent division by zero
+            }
+        }
+
+        // Update each set
+        foreach (float[,] set in sets)
+        {
+            int rowsInSet = set.GetLength(0);
+            // Standardize set
+            for (int row = 0; row < rowsInSet; row++)
+                for (int col = 0; col < columns; col++)
+                    set[row, col] = (set[row, col] - mean[col]) / stdDev[col];
+        }
     }
 
     /// <summary>
