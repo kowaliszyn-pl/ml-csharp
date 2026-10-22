@@ -47,6 +47,8 @@ public abstract class Layer<TIn, TOut> : Layer
 
     private OperationList<TIn, TOut>? _operations;
 
+    private IParamOperation[]? _cachedParamOperations;
+
     protected TIn? Input => _input;
 
     /// <summary>
@@ -110,16 +112,22 @@ public abstract class Layer<TIn, TOut> : Layer
 
     public override void UpdateParams(Optimizer optimizer)
     {
-        Debug.Assert(_operations != null, "Operations were not set up.");
-
-        _operations.UpdateParams(optimizer);
+        foreach (IParamOperation operation in GetParamOperations())
+        {
+            operation.UpdateParams(optimizer);
+        }
     }
 
     public abstract OperationListBuilder<TIn, TOut> CreateOperationListBuilder();
 
     protected virtual void SetupLayer()
+    {
         // Build the operation list
-        => _operations = CreateOperationListBuilder().Build();
+        _operations = CreateOperationListBuilder().Build();
+
+        // Invalidate cached parameter operations since the operation list has changed
+        _cachedParamOperations = null;
+    }
 
     protected static OperationListBuilder<TIn, TOpOut> AddOperation<TOpOut>(Operation<TIn, TOpOut> operation)
         where TOpOut : notnull
@@ -143,12 +151,14 @@ public abstract class Layer<TIn, TOut> : Layer
 
     public override int GetParamCount()
     {
-        Debug.Assert(_operations != null, "Operations were not set up.");
+        int paramCount = 0;
+        foreach (IParamOperation paramOperation in GetParamOperations())
+        {
+            paramCount += paramOperation.GetParamCount();
+        }
 
-        return _operations.GetParamCount();
+        return paramCount;
     }
-
-    private IParamOperation[]? _cachedParamOperations;
 
     private IParamOperation[] GetParamOperations()
     {
@@ -161,7 +171,6 @@ public abstract class Layer<TIn, TOut> : Layer
 
         return _cachedParamOperations;
     }
-
 
     /// <summary>
     /// Calculates the total regularization loss across all parameter operations.
@@ -182,8 +191,6 @@ public abstract class Layer<TIn, TOut> : Layer
 
     internal override LayerParams GetParams()
     {
-        Debug.Assert(_operations != null, "Operations were not set up.");
-
         List<ParamOperationData> paramOperationDatas = [.. GetParamOperations()
             .Select(paramOperation => paramOperation.GetData())
         ];
@@ -194,8 +201,6 @@ public abstract class Layer<TIn, TOut> : Layer
 
     internal override void ApplyParams(LayerParams layerParams, int layerIndex)
     {
-        Debug.Assert(_operations != null, "Operations were not set up.");
-
         EnsureTypeMatch(layerParams.LayerType, GetType(), layerIndex);
 
         IParamOperation[] paramOperations = GetParamOperations();

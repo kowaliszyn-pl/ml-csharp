@@ -1,6 +1,8 @@
-﻿using NeuralNetworks.Operations;
-using NeuralNetworks.Operations.Parameterized;
-using NeuralNetworks.Optimizers;
+﻿// Neural Networks in C♯
+// File name: OperationList.cs
+// www.kowaliszyn.pl, 2025 - 2026
+
+using NeuralNetworks.Operations;
 
 namespace NeuralNetworks.Layers.OperationList;
 
@@ -27,20 +29,5 @@ public class OperationList<TIn, TOut> : List<Operation>
             stream = operation.Backward(stream);
         }
         return (TIn)stream;
-    }
-
-    public void UpdateParams(Optimizer optimizer)
-    {
-        foreach (IParamOperation operation in this.OfType<IParamOperation>())
-        {
-            operation.UpdateParams(optimizer);
-        }
-    }
-
-    public int GetParamCount()
-    {
-        return this
-            .OfType<IParamOperation>()
-            .Sum(po => (int?)po.GetParamCount()) ?? 0;
     }
 }
