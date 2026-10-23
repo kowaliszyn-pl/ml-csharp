@@ -13,7 +13,8 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// </summary>
 /// <param name="bias">Bias matrix.</param>
 /// <param name="regularizer">Optional L1/L2 regularizer applied to the biases.</param>
-public class BiasAdd(float[] bias, Regularizer? regularizer = null) : ParamOperation<float[,], float[,], float[]>(bias, regularizer)
+public class BiasAdd(float[] bias, Regularizer? regularizer = null)
+    : ParamOperation<float[,], float[,], float[]>(bias, regularizer)
 {
 
     protected override float[,] CalcOutput(bool inference)

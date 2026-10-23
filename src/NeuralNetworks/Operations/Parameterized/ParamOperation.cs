@@ -12,7 +12,8 @@ using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-public abstract class ParamOperation<TIn, TOut> : Operation<TIn, TOut>, IParamOperation
+public abstract class ParamOperation<TIn, TOut> 
+    : Operation<TIn, TOut>, IParamOperation
     where TIn : notnull
     where TOut : notnull
 {
@@ -28,7 +29,8 @@ public abstract class ParamOperation<TIn, TOut> : Operation<TIn, TOut>, IParamOp
 /// </summary>
 /// <param name="param">Parameter matrix.</param>
 /// <param name="regularizer">Optional L1/L2 regularizer applied to this parameter's gradient (and optionally its loss).</param>
-public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, Regularizer? regularizer = null) : ParamOperation<TIn, TOut>
+public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, Regularizer? regularizer = null) 
+    : ParamOperation<TIn, TOut>
     where TIn : notnull
     where TOut : notnull
     where TParam : class

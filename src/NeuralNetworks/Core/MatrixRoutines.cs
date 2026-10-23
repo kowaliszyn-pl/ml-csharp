@@ -2,16 +2,29 @@
 // File name: MatrixRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace NeuralNetworks.Core;
 
 public static class MatrixRoutines
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Abs(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                res[row, col] = MathF.Abs(source[row, col]);
+            }
+        }
+        return res;
+    }
+
     /// <summary>
     /// Adds a scalar value to each element of the source.
     /// </summary>
@@ -367,6 +380,62 @@ public static class MatrixRoutines
         => new float[source.GetLength(0), source.GetLength(1), source.GetLength(2), source.GetLength(3)];
 
     /// <summary>
+    /// Returns a new two-dimensional array with each element of the source array limited to the specified minimum and
+    /// maximum values.
+    /// </summary>
+    /// <remarks>
+    /// If an element in the source array is less than the specified minimum, the result will contain the minimum value
+    /// at that position. If an element is greater than the specified maximum, the result will contain the maximum
+    /// value. The original array is not modified.
+    /// </remarks>
+    /// <param name="source">The two-dimensional array of single-precision floating-point numbers to be clipped.</param>
+    /// <param name="min">The minimum value to which elements in the array will be limited.</param>
+    /// <param name="max">The maximum value to which elements in the array will be limited.</param>
+    /// <returns>
+    /// A new two-dimensional array where each element is set to the corresponding value from the source array, limited
+    /// to the specified minimum and maximum values.
+    /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Clip(this float[,] source, float min, float max)
+    {
+        Debug.Assert(min <= max, "Minimum value must be less than or equal to maximum value.");
+
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                res[row, col] = MathF.Max(min, MathF.Min(max, source[row, col]));
+            }
+        }
+        return res;
+    }
+
+    /// <summary>
+    /// Clips the values of the source in-place between the specified minimum and maximum values.
+    /// </summary>
+    /// <param name="source">The two-dimensional array to clip.</param>
+    /// <param name="min">The minimum value to clip the source elements to.</param>
+    /// <param name="max">The maximum value to clip the source elements to.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ClipInPlace(this float[,] source, float min, float max)
+    {
+        Debug.Assert(min <= max, "Minimum value must be less than or equal to maximum value.");
+
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                source[row, col] = MathF.Max(min, MathF.Min(max, source[row, col]));
+            }
+        }
+    }
+
+    /// <summary>
     /// Divides each element of the two-dimensional array by a scalar and returns a new array.
     /// </summary>
     /// <param name="source">The array whose elements will be divided.</param>
@@ -484,6 +553,29 @@ public static class MatrixRoutines
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Computes the natural logarithm elementwise and returns a new array.
+    /// </summary>
+    /// <param name="source">The array whose elements will be transformed.</param>
+    /// <returns>A new array with <c>log(x)</c> applied elementwise.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] Log(this float[,] source)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] res = new float[rows, columns];
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                res[i, j] = MathF.Log(source[i, j]);
+            }
+        }
+
+        return res;
     }
 
     /// <summary>

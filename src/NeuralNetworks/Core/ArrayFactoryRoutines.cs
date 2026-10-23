@@ -172,6 +172,26 @@ public static class ArrayFactoryRoutines
     }
 
     /// <summary>
+    /// Fills the source with random float values between -0.5 and 0.5 using the specified seed.
+    /// </summary>
+    /// <param name="source">The two-dimensional array to fill with random values.</param>
+    /// <param name="seed">The seed used to initialize the random number generator.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void RandomInPlace(this float[,] source, int seed)
+    {
+        Random rand = new(seed);
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                source[row, col] = rand.NextSingle() - 0.5f;
+            }
+        }
+    }
+
+    /// <summary>
     /// Generates a random number following a standard normal distribution (mean = 0, stdDev = 1) using the Box-Muller transform.
     /// </summary>
     /// <param name="random"></param>
