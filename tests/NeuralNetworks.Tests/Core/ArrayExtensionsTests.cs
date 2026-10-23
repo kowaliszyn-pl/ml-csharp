@@ -2,6 +2,8 @@
 // File name: ArrayExtensionsTests.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using NeuralNetworks.Core.Utils;
+
 namespace NeuralNetworks.Core.Tests;
 
 [TestClass]
@@ -67,10 +69,11 @@ public class ArrayExtensionsTests
         }, result);
     }
 
-    private readonly float[,] _input = new float[,] { 
-        { 1, 2, 3 }, 
-        { -1, -2, -3 } 
+    private readonly float[,] _input = new float[,] {
+        { 1, 2, 3 },
+        { -1, -2, -3 }
     };
+
     private readonly float[,] _expected = new float[,] {
         { 0.09003057f, 0.24472847f, 0.66524096f },
         { 0.66524096f, 0.24472847f, 0.09003057f }
@@ -79,7 +82,6 @@ public class ArrayExtensionsTests
     [TestMethod]
     public void SoftmaxBasicTest()
     {
-
         float[,] result = _input.SoftmaxBasic();
         for (int i = 0; i < _expected.GetLength(0); i++)
         {
@@ -99,6 +101,32 @@ public class ArrayExtensionsTests
             for (int j = 0; j < _expected.GetLength(1); j++)
             {
                 Assert.AreEqual(_expected[i, j], result[i, j], 1e-6);
+            }
+        }
+    }
+
+    [TestMethod]
+    public void SoftmaxStableWithTemperatureTest()
+    {
+        for(int row = 0; row < _input.GetLength(0); row++)
+        {
+            float[] input = new float[_input.GetLength(1)];
+            for (int col = 0; col < _input.GetLength(1); col++)
+            {
+                input[col] = _input[row, col];
+            }
+
+            float[] expected = new float[_expected.GetLength(1)];
+            for (int col = 0; col < _expected.GetLength(1); col++)
+            {
+                expected[col] = _expected[row, col];
+            }
+
+            float[] result = input.SoftmaxStableWithTemperature(1.0f);
+
+            for (int col = 0; col < expected.Length; col++)
+            {
+                Assert.AreEqual(expected[col], result[col], 1e-6);
             }
         }
     }

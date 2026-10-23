@@ -5,6 +5,8 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+using NeuralNetworks.Core.Utils;
+
 namespace NeuralNetworks.Core.Operations;
 
 public class OperationsSpan : OperationsArray
