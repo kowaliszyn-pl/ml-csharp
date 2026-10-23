@@ -142,7 +142,7 @@ internal class AutoencoderCnn
         // Save the model
 
         string modelPath = GetFileName(ModelName, bottleneckDim);
-        model.SaveParams(modelPath, $"Final trained model with loss {finalLoss:F5}. Date time: {DateTime.Now}.");
+        model.SaveParams(modelPath, $"Final trained model with loss {finalLoss:F5}.");
         ForegroundColor = ConsoleColor.Green;
         WriteLine($"Model parameters saved to {modelPath}.");
         ResetColor();

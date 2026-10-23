@@ -242,7 +242,5 @@ public abstract class Model<TInputData, TPrediction>
         }
     }
 
-    private sealed record ModelParams(int Version, List<string> ArchitectureDescription, string? Comment, ModelInputShape Input, List<LayerParams> Layers);
-
     #endregion Serialization
 }
