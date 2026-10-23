@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: PermutationUtils.cs
+// File name: PermutationRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
@@ -197,7 +197,7 @@ public static class PermutationRoutines
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlace(this int[,] source, Random? random = null)
-        => PermuteInPlaceInternal(source,  null, random);
+        => PermuteInPlaceInternal(source, null, random);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void PermuteInPlaceTogetherWith(this int[,] source, float[,] y, Random? random = null)

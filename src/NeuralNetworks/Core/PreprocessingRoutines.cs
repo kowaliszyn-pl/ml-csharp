@@ -5,8 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using NeuralNetworks.Core;
-
 namespace NeuralNetworks.Core;
 
 public static class PreprocessingRoutines

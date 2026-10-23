@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: ReshapeUtils.cs
+// File name: ReshapeRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;

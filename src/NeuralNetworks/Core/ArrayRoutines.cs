@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: ArrayExtensions.cs
+// File name: ArrayRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Runtime.CompilerServices;
@@ -154,9 +154,5 @@ public static class ArrayRoutines
             }
         }
     }
-
-
-
-
 
 }
