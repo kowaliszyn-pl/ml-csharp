@@ -103,7 +103,7 @@ public class BiasAddTests
 
     private static void AssertEqual1D(float[] expected, float[] actual)
     {
-        Assert.AreEqual(expected.Length, actual.Length);
+        Assert.HasCount(expected.Length, actual);
         for (int i = 0; i < expected.Length; i++)
         {
             Assert.AreEqual(expected[i], actual[i], 1e-5, $"Mismatch at [{i}]");

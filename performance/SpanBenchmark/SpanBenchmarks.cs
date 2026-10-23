@@ -35,7 +35,7 @@ public class SpanBenchmarks
     [Benchmark]
     public void MultiplyByTanhDerivative()
     {
-        ArrayExtensions.MultiplyByTanhDerivative(array1, array2);
+        //MatrixRoutines.MultiplyByTanhDerivative(array1, array2);
     }
 
     [Benchmark]
