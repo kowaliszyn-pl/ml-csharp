@@ -9,7 +9,6 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.VSDiagnostics;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Utils;
 
 namespace PermuteBenchmark;
 

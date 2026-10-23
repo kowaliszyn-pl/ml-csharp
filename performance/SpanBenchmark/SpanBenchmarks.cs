@@ -9,7 +9,6 @@ using BenchmarkDotNet.Attributes;
 using Microsoft.VSDiagnostics;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Utils;
 
 namespace SpanBenchmark;
 // For more information on the VS BenchmarkDotNet Diagnosers see https://learn.microsoft.com/visualstudio/profiling/profiling-with-benchmark-dotnet
@@ -22,8 +21,8 @@ public class SpanBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        array1 = ArrayFactoryUtils.CreateRandom(100, 100, 3, 3, new Random(42));
-        array2 = ArrayFactoryUtils.CreateRandom(100, 100, 3, 3, new Random(43));
+        array1 = ArrayFactoryRoutines.CreateRandom(100, 100, 3, 3, new Random(42));
+        array2 = ArrayFactoryRoutines.CreateRandom(100, 100, 3, 3, new Random(43));
     }
 
     [Benchmark]

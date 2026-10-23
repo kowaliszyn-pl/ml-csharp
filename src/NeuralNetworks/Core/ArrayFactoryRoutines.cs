@@ -1,18 +1,12 @@
 ﻿// Neural Networks in C♯
-// File name: ArrayFactoryUtils.cs
+// File name: ArrayFactoryRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core.Utils;
+namespace NeuralNetworks.Core;
 
-/// <summary>
-/// Provides utility methods for creating multidimensional <see langword="float"/> arrays initialized with evenly spaced
-/// values across a specified range.
-/// </summary>
-/// <remarks>Includes overloads for two-dimensional and four-dimensional arrays. Values are assigned in index
-/// order using a computed step size.</remarks>
-public static class ArrayFactoryUtils
+public static class ArrayFactoryRoutines
 {
     #region CreateRange
 

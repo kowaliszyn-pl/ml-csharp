@@ -10,7 +10,7 @@ using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.Regularization;
 
-using static NeuralNetworks.Core.Utils.GenericArrayUtils;
+using static NeuralNetworks.Core.GenericArrayRoutines;
 using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Layers;

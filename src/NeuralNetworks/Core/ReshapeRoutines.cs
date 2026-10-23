@@ -5,9 +5,9 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core.Utils;
+namespace NeuralNetworks.Core;
 
-public static class ReshapeUtils
+public static class ReshapeRoutines
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] ReshapeTo2D(this float[,,,] data)

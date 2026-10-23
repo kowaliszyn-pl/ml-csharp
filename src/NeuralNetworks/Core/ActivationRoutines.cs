@@ -1,13 +1,13 @@
 ﻿// Neural Networks in C♯
-// File name: ActivationUtils.cs
+// File name: ActivationRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core.Utils;
+namespace NeuralNetworks.Core;
 
-public static class ActivationUtils
+public static class ActivationRoutines
 {
     /// <summary>
     /// Applies the Gaussian Error Linear Unit (GELU) activation function to each element of the specified

@@ -3,9 +3,8 @@
 // www.kowaliszyn.pl, 2025
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Utils;
 
-using static NeuralNetworks.Core.Utils.PermutationUtils;
+using static NeuralNetworks.Core.PermutationRoutines;
 
 namespace NeuralNetworks.DataSources;
 

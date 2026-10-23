@@ -4,7 +4,7 @@
 
 using System.Runtime.InteropServices;
 
-using NeuralNetworks.Core.Utils;
+using NeuralNetworks.Core;
 using NeuralNetworks.LearningRates;
 
 namespace NeuralNetworks.Optimizers;
@@ -21,8 +21,8 @@ public abstract class Optimizer(LearningRate learningRate)
 
     private static void ConvertToSpans<T>(T param, T paramGradient, out Span<float> paramSpan, out ReadOnlySpan<float> paramGradientSpan) where T : notnull
     {
-        paramSpan = GenericArrayUtils.ConvertToSpan(param);
-        paramGradientSpan = GenericArrayUtils.ConvertToReadOnlySpan(paramGradient);
+        paramSpan = GenericArrayRoutines.ConvertToSpan(param);
+        paramGradientSpan = GenericArrayRoutines.ConvertToReadOnlySpan(paramGradient);
 
         //paramSpan = param switch
         //{

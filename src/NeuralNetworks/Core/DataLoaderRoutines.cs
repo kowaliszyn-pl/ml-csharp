@@ -1,12 +1,12 @@
 ﻿// Neural Networks in C♯
-// File name: DataLoaderUtils.cs
+// File name: DataLoaderRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core.Utils;
+namespace NeuralNetworks.Core;
 
-public static class DataLoaderUtils
+public static class DataLoaderRoutines
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] LoadCsv(string filePath, int skipHeaderLines = 0)

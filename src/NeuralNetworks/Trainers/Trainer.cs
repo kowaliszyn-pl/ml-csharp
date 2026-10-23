@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Core.Operations;
-using NeuralNetworks.Core.Utils;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
@@ -17,8 +16,8 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.Trainers.Logging;
 
 using static System.Console;
-using static NeuralNetworks.Core.Utils.ArraySlicingUtils;
-using static NeuralNetworks.Core.Utils.PermutationUtils;
+using static NeuralNetworks.Core.ArraySlicingRoutines;
+using static NeuralNetworks.Core.PermutationRoutines;
 
 namespace NeuralNetworks.Trainers;
 
@@ -362,8 +361,8 @@ public class Trainer<TInputData, TPrediction>(
     {
         Debug.Assert(batchSize > 0, "Batch size should be at least 1.");
 
-        int rows = GenericArrayUtils.GetRowCount(x);
-        Debug.Assert(rows == GenericArrayUtils.GetRowCount(y), "Number of samples in x and y do not match.");
+        int rows = GenericArrayRoutines.GetRowCount(x);
+        Debug.Assert(rows == GenericArrayRoutines.GetRowCount(y), "Number of samples in x and y do not match.");
 
         for (int batchStart = 0; batchStart < rows; batchStart += batchSize)
         {
@@ -376,5 +375,5 @@ public class Trainer<TInputData, TPrediction>(
         => PermuteInPlaceTogetherWith(x, y, random);
 
     protected virtual int GetRowCount(TInputData x)
-        => GenericArrayUtils.GetRowCount(x);
+        => GenericArrayRoutines.GetRowCount(x);
 }

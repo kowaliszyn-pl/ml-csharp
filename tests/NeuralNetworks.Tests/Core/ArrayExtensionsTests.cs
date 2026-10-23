@@ -2,8 +2,6 @@
 // File name: ArrayExtensionsTests.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Core.Utils;
-
 namespace NeuralNetworks.Core.Tests;
 
 [TestClass]

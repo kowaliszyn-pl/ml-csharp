@@ -4,7 +4,7 @@
 
 using System.Diagnostics;
 
-using NeuralNetworks.Core.Utils;
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Losses;
 
@@ -79,7 +79,7 @@ public abstract class Loss<TPrediction>
 
     [Conditional("DEBUG")]
     private void EnsureSameShape(TPrediction? prediction, TPrediction target)
-        => GenericArrayUtils.EnsureSameShape(prediction, target);
+        => GenericArrayRoutines.EnsureSameShape(prediction, target);
 
     #endregion EnsureSameShape
 }

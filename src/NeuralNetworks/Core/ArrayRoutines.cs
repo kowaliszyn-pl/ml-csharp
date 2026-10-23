@@ -6,19 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
-/// <summary>
-/// Provides extension methods for performing mathematical and utility operations on multidimensional arrays of type
-/// <see cref="float"/>. These methods enable elementwise arithmetic, statistical calculations, source manipulation, and
-/// other common operations for arrays and matrices.
-/// </summary>
-/// <remarks>
-/// The <see cref="ArrayExtensions"/> class includes methods for both in-place and out-of-place operations, supporting
-/// 1D, 2D, and 4D float arrays. It offers functionality such as elementwise addition, multiplication, subtraction,
-/// standardization, transposition, and application of activation functions (e.g., sigmoid, softmax, tanh). Methods are
-/// designed to simplify array manipulation in numerical and machine learning scenarios. Thread safety is not
-/// guaranteed; callers should synchronize access if arrays are shared across threads.
-/// </remarks>
-public static class ArrayExtensions
+public static class ArrayRoutines
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] Abs(this float[,] source)

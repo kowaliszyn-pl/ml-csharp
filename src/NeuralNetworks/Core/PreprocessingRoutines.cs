@@ -1,19 +1,15 @@
 ﻿// Neural Networks in C♯
-// File name: PreprocessingUtils.cs
+// File name: PreprocessingRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core.Utils;
+using NeuralNetworks.Core;
 
-/// <summary>
-/// Provides utility methods for loading, reshaping, scaling, splitting, and standardizing numeric datasets represented
-/// as multidimensional <see langword="float"/> arrays.
-/// </summary>
-/// <remarks>Includes both in-place and copy-based operations, with extension methods targeting 2D and 4D arrays
-/// for common data-preprocessing workflows.</remarks>
-public static class PreprocessingUtils
+namespace NeuralNetworks.Core;
+
+public static class PreprocessingRoutines
 {
     /// <summary>
     /// Standardize the 2D array in place by subtracting the given mean and dividing by the given standard deviation.

@@ -1,13 +1,13 @@
 ﻿// Neural Networks in C♯
-// File name: ArraySlicingUtils.cs
+// File name: ArraySlicingRoutines.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace NeuralNetworks.Core.Utils;
+namespace NeuralNetworks.Core;
 
-public static class ArraySlicingUtils
+public static class ArraySlicingRoutines
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T SliceDim0<T>(T source, int startInclusive, int endExclusive)

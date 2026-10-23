@@ -10,7 +10,6 @@
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Utils;
 
 namespace Gpt2Inference;
 

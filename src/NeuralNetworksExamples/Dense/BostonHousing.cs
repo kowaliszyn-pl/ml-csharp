@@ -5,7 +5,6 @@
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Utils;
 using NeuralNetworks.DataSources;
 using NeuralNetworks.Layers;
 using NeuralNetworks.LearningRates;
@@ -18,9 +17,9 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworks.Core.Utils.DataLoaderUtils;
-using static NeuralNetworks.Core.Utils.PreprocessingUtils;
-using static NeuralNetworks.Core.Utils.PermutationUtils;
+using static NeuralNetworks.Core.DataLoaderRoutines;
+using static NeuralNetworks.Core.PreprocessingRoutines;
+using static NeuralNetworks.Core.PermutationRoutines;
 
 namespace NeuralNetworksExamples.Dense;
 

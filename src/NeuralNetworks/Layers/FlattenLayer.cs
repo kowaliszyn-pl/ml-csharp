@@ -6,7 +6,7 @@ using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations;
 using NeuralNetworks.Operations.Reshaping;
 
-using static NeuralNetworks.Core.Utils.ArrayFactoryUtils;
+using static NeuralNetworks.Core.ArrayFactoryRoutines;
 
 namespace NeuralNetworks.Layers;
 

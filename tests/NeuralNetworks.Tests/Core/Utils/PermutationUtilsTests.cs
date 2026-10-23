@@ -4,7 +4,7 @@
 
 using System.Text;
 
-using NeuralNetworks.Core.Utils;
+using NeuralNetworks.Core;
 
 namespace NeuralNetworks.Tests.Core.Utils;
 
@@ -174,7 +174,7 @@ public class PermutationUtilsTests
         Random random = new(99);
 
         // Act
-        (float[,] xPermuted, float[,] yPermuted) = PermutationUtils.Permute(x, y, random);
+        (float[,] xPermuted, float[,] yPermuted) = PermutationRoutines.Permute(x, y, random);
 
         // Assert
         Assert.AreNotSame(x, xPermuted);
@@ -204,7 +204,7 @@ public class PermutationUtilsTests
         float[,] y = CreateMatrix(3, 1);
 
         // Act
-        (float[,] xPermuted, float[,] yPermuted) = PermutationUtils.Permute(x, y);
+        (float[,] xPermuted, float[,] yPermuted) = PermutationRoutines.Permute(x, y);
 
         // Assert
         Assert.AreEqual(3, xPermuted.GetLength(0));
@@ -225,7 +225,7 @@ public class PermutationUtilsTests
         Random random = new(55);
 
         // Act
-        PermutationUtils.PermuteTogetherWith(x, y, random);
+        PermutationRoutines.PermuteTogetherWith(x, y, random);
 
         // Assert
         for (int i = 0; i < 5; i++)
@@ -246,7 +246,7 @@ public class PermutationUtilsTests
         }
 
         // Act
-        PermutationUtils.PermuteTogetherWith(x, y);
+        PermutationRoutines.PermuteTogetherWith(x, y);
 
         // Assert
         for (int i = 0; i < 4; i++)

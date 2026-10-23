@@ -5,11 +5,10 @@
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
-using NeuralNetworks.Core.Utils;
 
-using static NeuralNetworks.Core.Utils.DataLoaderUtils;
-using static NeuralNetworks.Core.Utils.PreprocessingUtils;
-using static NeuralNetworks.Core.Utils.PermutationUtils;
+using static NeuralNetworks.Core.DataLoaderRoutines;
+using static NeuralNetworks.Core.PreprocessingRoutines;
+using static NeuralNetworks.Core.PermutationRoutines;
 
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
