@@ -18,8 +18,6 @@ using NeuralNetworks.Trainers;
 
 using static System.Console;
 using static NeuralNetworks.Core.DataLoaderRoutines;
-using static NeuralNetworks.Core.PreprocessingRoutines;
-using static NeuralNetworks.Core.PermutationRoutines;
 
 namespace NeuralNetworksExamples.Dense;
 

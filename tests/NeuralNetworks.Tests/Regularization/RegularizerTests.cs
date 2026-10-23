@@ -2,8 +2,6 @@
 // File name: RegularizerTests.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using NeuralNetworks.Regularization;
-
 namespace NeuralNetworks.Regularization.Tests;
 
 [TestClass]

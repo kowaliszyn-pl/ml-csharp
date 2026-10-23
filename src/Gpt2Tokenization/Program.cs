@@ -36,7 +36,7 @@ należny należnemu należnej należnym
 
 😎
 
-Po japońskui:
+Po japońsku:
 今日も遠くを眺，涙を流す。 (Kyō mo tōku o nage, namida o nagasu.)
 
 Po rosyjsku:

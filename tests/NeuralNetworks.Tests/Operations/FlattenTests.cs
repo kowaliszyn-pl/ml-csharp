@@ -1,4 +1,6 @@
-
+// Neural Networks in C♯
+// File name: FlattenTests.cs
+// www.kowaliszyn.pl, 2025 - 2026
 
 using NeuralNetworks.Operations.Reshaping;
 
@@ -11,7 +13,7 @@ public class FlattenTests
     [TestMethod]
     public void CalcOutputTest()
     {
-        var flatten = new Flatten();
+        Flatten flatten = new();
         float[,,,] input = new float[,,,]
         {
             {
@@ -58,7 +60,7 @@ public class FlattenTests
     [TestMethod]
     public void CalcInputGradientTest()
     {
-        var flatten = new Flatten();
+        Flatten flatten = new();
         float[,,,] input = new float[,,,]
         {
             {

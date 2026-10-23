@@ -4,9 +4,7 @@
 
 using System.Text;
 
-using NeuralNetworks.Core;
-
-namespace NeuralNetworks.Tests.Core.Utils;
+namespace NeuralNetworks.Core.Tests;
 
 [TestClass]
 public class PermutationUtilsTests

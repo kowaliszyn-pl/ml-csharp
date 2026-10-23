@@ -7,8 +7,6 @@ using System.Diagnostics;
 using NeuralNetworks.Core;
 
 using static NeuralNetworks.Core.DataLoaderRoutines;
-using static NeuralNetworks.Core.PreprocessingRoutines;
-using static NeuralNetworks.Core.PermutationRoutines;
 
 bool running = true;
 Console.OutputEncoding = System.Text.Encoding.UTF8;
