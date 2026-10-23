@@ -241,6 +241,43 @@ public static class PermutationUtils
 
     #endregion
 
+    #region Generic
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PermuteInPlaceTogetherWith<TX, TY>(TX matrix1, TY matrix2, Random? random = null)
+        where TX : notnull
+        where TY : notnull
+    {
+        // TODO: let's use Span<T> (and Memory<T>?) to make it more efficient and avoid copying data when possible.
+        switch (matrix1, matrix2)
+        {
+            case (float[,] x2, float[,] y2):
+                x2.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
+            case (float[,,] x3, float[,] y2):
+                x3.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
+            case (float[,,,] x4, float[,] y2):
+                x4.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
+            case (float[,,,] x4, float[,,,] y4):
+                x4.PermuteInPlaceTogetherWith(y4, random);
+                return;
+
+            case (int[,] x2i, float[,] y2): // embedding indices and labels
+                x2i.PermuteInPlaceTogetherWith(y2, random);
+                return;
+
+            default:
+                throw new NotSupportedException($"Unsupported permutation pair: x={matrix1.GetType().Name}, y={matrix2.GetType().Name}. Please override this method in the Trainer subclass or add here a permutation method for these data types.");
+        }
+    }
+
+    #endregion
+
     #region Swap
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

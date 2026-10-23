@@ -65,38 +65,6 @@ public static class GenericArrayUtils
         throw new NotSupportedException();
     }
 
-    public static void PermuteData<TX, TY>(TX matrix1, TY matrix2, Random random)
-        where TX : notnull
-        where TY : notnull
-    {
-        // TODO: let's use Span<T> (and Memory<T>?) to make it more efficient and avoid copying data when possible.
-        switch (matrix1, matrix2)
-        {
-            case (float[,] x2, float[,] y2):
-                x2.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            case (float[,,] x3, float[,] y2):
-                x3.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            case (float[,,,] x4, float[,] y2):
-                x4.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            case (float[,,,] x4, float[,,,] y2):
-                x4.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            case (int[,] x5, float[,] y2): // embedding indices and labels
-                x5.PermuteInPlaceTogetherWith(y2, random);
-                return;
-
-            default:
-                throw new NotSupportedException($"Unsupported permutation pair: x={matrix1.GetType().Name}, y={matrix2.GetType().Name}. Please override this method in the Trainer subclass or add here a permutation method for these data types.");
-        }
-    }
-
     public static T SliceDim0<T>(T source, int startInclusive, int endExclusive)
         where T : notnull
     {

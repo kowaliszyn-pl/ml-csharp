@@ -18,6 +18,7 @@ using NeuralNetworks.Trainers.Logging;
 
 using static System.Console;
 using static NeuralNetworks.Core.Utils.GenericArrayUtils;
+using static NeuralNetworks.Core.Utils.PermutationUtils;
 
 namespace NeuralNetworks.Trainers;
 
@@ -372,7 +373,7 @@ public class Trainer<TInputData, TPrediction>(
     }
 
     protected virtual void PermuteData(TInputData x, TPrediction y, Random random)
-        => GenericArrayUtils.PermuteData(x, y, random);
+        => PermuteInPlaceTogetherWith(x, y, random);
 
     protected virtual int GetRowCount(TInputData x)
         => GenericArrayUtils.GetRowCount(x);
