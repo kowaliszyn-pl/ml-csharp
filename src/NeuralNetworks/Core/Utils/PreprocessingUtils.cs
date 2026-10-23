@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: DataUtils.cs
+// File name: PreprocessingUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
@@ -13,7 +13,7 @@ namespace NeuralNetworks.Core.Utils;
 /// </summary>
 /// <remarks>Includes both in-place and copy-based operations, with extension methods targeting 2D and 4D arrays
 /// for common data-preprocessing workflows.</remarks>
-public static class DataUtils
+public static class PreprocessingUtils
 {
     /// <summary>
     /// Standardize the 2D array in place by subtracting the given mean and dividing by the given standard deviation.
@@ -41,8 +41,6 @@ public static class DataUtils
         data.DivideInPlace(stdDev);
     }
 
-   
-  
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] ScaleTo(this float[,] data, float newMin, float newMax)
     {
@@ -160,7 +158,7 @@ public static class DataUtils
             }
 
             mean[col] = sum / rows;
-            variance[col] = (sumOfSquares / rows) - (mean[col] * mean[col]);
+            variance[col] = MathF.Max((sumOfSquares / rows) - (mean[col] * mean[col]), 0f); // Ensure variance is non-negative
             stdDev[col] = MathF.Max(MathF.Sqrt(variance[col]), minStdDev);
             if (stdDev[col] == 0f)
             {
@@ -211,5 +209,228 @@ public static class DataUtils
         data.DivideInPlace(stdDev);
 
         return (mean, stdDev);
+    }
+
+    /// <summary>
+    /// Standardizes the source in-place so that each column (or a specified range of dim2) has a mean of 0 and a
+    /// standard deviation of 1 by applying the <c> (x - mean) / stdDev</c> transformation.
+    /// </summary>
+    /// <remarks>
+    /// Standard deviation is calculated using the formula: <c> sqrt(sum((x - mean)^2) / N)</c>, where N is the number
+    /// of dim1.
+    /// </remarks>
+    /// <param name="source">The source to standardize.</param>
+    /// <param name="columnRange">
+    /// Optional. The range of dim2 to standardize. If null, all dim2 are standardized.
+    /// </param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void StandardizeByColumns(this float[,] source, Range? columnRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        int beginColumn, endColumn;
+
+        if (columnRange is not null)
+        {
+            (int offset, int length) = columnRange.Value.GetOffsetAndLength(columns);
+            beginColumn = offset;
+            endColumn = beginColumn + length;
+        }
+        else
+        {
+            beginColumn = 0;
+            endColumn = columns;
+        }
+
+        for (int col = beginColumn; col < endColumn; col++)
+        {
+            // Calculate mean
+            float sum = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                sum += source[row, col];
+            }
+            float mean = sum / rows;
+
+            // Calculate standard deviation
+            float sumOfSquares = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                float value = source[row, col] - mean;
+                sumOfSquares += value * value;
+            }
+            float stdDev = MathF.Sqrt(sumOfSquares / rows);
+
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int row = 0; row < rows; row++)
+            {
+                source[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void StandardizeByRowsInPlace(this float[,] source, Range? rowRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        int beginRow, endRow;
+        if (rowRange is not null)
+        {
+            (int offset, int length) = rowRange.Value.GetOffsetAndLength(rows);
+            beginRow = offset;
+            endRow = beginRow + length;
+        }
+        else
+        {
+            beginRow = 0;
+            endRow = rows;
+        }
+
+        for (int row = beginRow; row < endRow; row++)
+        {
+            // Calculate mean
+            float sum = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                sum += source[row, col];
+            }
+            float mean = sum / columns;
+
+            // Calculate standard deviation
+            float sumOfSquares = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                float value = source[row, col] - mean;
+                sumOfSquares += value * value;
+            }
+            float stdDev = MathF.Sqrt(sumOfSquares / columns);
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int col = 0; col < columns; col++)
+            {
+                source[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] StandardizeByRows(this float[,] source, Range? rowRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+        float[,] result = new float[rows, columns];
+
+        int beginRow, endRow;
+        if (rowRange is not null)
+        {
+            (int offset, int length) = rowRange.Value.GetOffsetAndLength(rows);
+            beginRow = offset;
+            endRow = beginRow + length;
+        }
+        else
+        {
+            beginRow = 0;
+            endRow = rows;
+        }
+
+        for (int row = beginRow; row < endRow; row++)
+        {
+            // Calculate mean
+            float sum = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                sum += source[row, col];
+            }
+            float mean = sum / columns;
+
+            // Calculate standard deviation
+            float sumOfSquares = 0;
+            for (int col = 0; col < columns; col++)
+            {
+                float value = source[row, col] - mean;
+                sumOfSquares += value * value;
+            }
+            float stdDev = MathF.Sqrt(sumOfSquares / columns);
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int col = 0; col < columns; col++)
+            {
+                result[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
+        return result;
+
+    }
+
+    /// <summary>
+    /// Standardizes the source in-place so that each column (or a specified range of dim2) has mean 0 and standard
+    /// deviation 1, computed in a single pass.
+    /// </summary>
+    /// <param name="source">The source to standardize.</param>
+    /// <param name="columnRange">
+    /// Optional. The range of dim2 to standardize. If null, all dim2 are standardized.
+    /// </param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void StandardizeSinglePass(this float[,] source, Range? columnRange = null)
+    {
+        int rows = source.GetLength(0);
+        int columns = source.GetLength(1);
+
+        int beginColumn, endColumn;
+
+        if (columnRange is not null)
+        {
+            (int offset, int length) = columnRange.Value.GetOffsetAndLength(columns);
+            beginColumn = offset;
+            endColumn = beginColumn + length;
+        }
+        else
+        {
+            beginColumn = 0;
+            endColumn = columns;
+        }
+
+        for (int col = beginColumn; col < endColumn; col++)
+        {
+            // Calculate standard deviation in a single pass
+            float sum = 0, sumOfSquares = 0;
+            for (int row = 0; row < rows; row++)
+            {
+                float value = source[row, col];
+                sum += value;
+                sumOfSquares += value * value;
+            }
+            float mean = sum / rows;
+            float variance = MathF.Max((sumOfSquares / rows) - (mean * mean), 0f); // Ensure variance is non-negative
+            float stdDev = MathF.Sqrt(variance);
+
+            if (stdDev == 0)
+            {
+                stdDev = 1; // To avoid division by zero
+            }
+
+            // Standardize values
+            for (int row = 0; row < rows; row++)
+            {
+                source[row, col] = (source[row, col] - mean) / stdDev;
+            }
+        }
     }
 }

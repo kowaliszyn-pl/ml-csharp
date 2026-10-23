@@ -19,7 +19,7 @@ using NeuralNetworks.Trainers;
 
 using static System.Console;
 using static NeuralNetworks.Core.Utils.DataLoaderUtils;
-using static NeuralNetworks.Core.Utils.DataUtils;
+using static NeuralNetworks.Core.Utils.PreprocessingUtils;
 using static NeuralNetworks.Core.Utils.PermutationUtils;
 
 namespace NeuralNetworksExamples.Dense;

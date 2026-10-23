@@ -8,7 +8,7 @@ using NeuralNetworks.Core;
 using NeuralNetworks.Core.Utils;
 
 using static NeuralNetworks.Core.Utils.DataLoaderUtils;
-using static NeuralNetworks.Core.Utils.DataUtils;
+using static NeuralNetworks.Core.Utils.PreprocessingUtils;
 using static NeuralNetworks.Core.Utils.PermutationUtils;
 
 bool running = true;
