@@ -5,7 +5,7 @@
 using NeuralNetworks.Core;
 
 using static System.Console;
-using static NeuralNetworks.Core.Utils.DataUtils;
+using static NeuralNetworks.Core.Utils.DataLoaderUtils;
 using static NeuralNetworksExamples.Helpers.Drawing;
 
 namespace NeuralNetworksExamples.Helpers;

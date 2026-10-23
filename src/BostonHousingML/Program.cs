@@ -1,12 +1,13 @@
 ﻿// Neural Networks in C♯
 // File name: Program.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 
 using NeuralNetworks.Core;
 using NeuralNetworks.Core.Utils;
 
+using static NeuralNetworks.Core.Utils.DataLoaderUtils;
 using static NeuralNetworks.Core.Utils.DataUtils;
 using static NeuralNetworks.Core.Utils.PermutationUtils;
 

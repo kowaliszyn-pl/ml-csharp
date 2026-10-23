@@ -13,7 +13,7 @@ namespace NeuralNetworks.Core.Utils;
 /// </summary>
 /// <remarks>Includes both in-place and copy-based operations, with extension methods targeting 2D and 4D arrays
 /// for common data-preprocessing workflows.</remarks>
-public static partial class DataUtils
+public static class DataUtils
 {
     /// <summary>
     /// Standardize the 2D array in place by subtracting the given mean and dividing by the given standard deviation.
@@ -41,33 +41,7 @@ public static partial class DataUtils
         data.DivideInPlace(stdDev);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] LoadCsv(string filePath, int skipHeaderLines = 0)
-        => LoadSv(filePath, ',', skipHeaderLines);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] LoadTsv(string filePath, int skipHeaderLines = 0)
-        => LoadSv(filePath, '\t', skipHeaderLines);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,] LoadSv(string filePath, char separator, int skipHeaderLines)
-    {
-        string[] lines = [.. File.ReadAllLines(filePath).Skip(skipHeaderLines)];
-        int rows = lines.Length;
-        int cols = lines[0].Split(separator).Length;
-        float[,] matrix = new float[rows, cols];
-        for (int i = 0; i < rows; i++)
-        {
-            string[] values = lines[i].Split(separator);
-            for (int j = 0; j < cols; j++)
-            {
-                string value = values[j].Trim('"');
-                matrix[i, j] = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
-            }
-        }
-        return matrix;
-    }
-
+   
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] ReshapeTo2D(this float[,,,] data)
     {
