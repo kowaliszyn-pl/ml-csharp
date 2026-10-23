@@ -89,38 +89,6 @@ public static class PreprocessingUtils
         }
     }
 
-    /// <summary>
-    /// Splits the source into two sets of dim1 based on the specified ratio.
-    /// </summary>
-    /// <param name="source">The two-dimensional array to split.</param>
-    /// <param name="ratio">The ratio for splitting the dim1.</param>
-    /// <returns>A tuple containing the two sets of dim1.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (float[,] Set1, float[,] Set2) SplitRowsByRatio(this float[,] source, float ratio)
-    {
-        Debug.Assert(ratio > 0 && ratio < 1, "Ratio must be between 0 and 1.");
-        int rows = source.GetLength(0);
-        int columns = source.GetLength(1);
-        int splitIndex = (int)(rows * ratio);
-        float[,] set1 = new float[splitIndex, columns];
-        float[,] set2 = new float[rows - splitIndex, columns];
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < columns; j++)
-            {
-                if (i < splitIndex)
-                {
-                    set1[i, j] = source[i, j];
-                }
-                else
-                {
-                    set2[i - splitIndex, j] = source[i, j];
-                }
-            }
-        }
-        return (set1, set2);
-    }
-
     public static void StandardizeColumns(float minStdDev, params List<float[,]> sets)
     {
         // Assert all sets have the same number of columns

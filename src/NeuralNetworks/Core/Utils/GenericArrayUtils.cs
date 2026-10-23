@@ -65,18 +65,5 @@ public static class GenericArrayUtils
         throw new NotSupportedException();
     }
 
-    public static T SliceDim0<T>(T source, int startInclusive, int endExclusive)
-        where T : notnull
-    {
-        Range range = startInclusive..endExclusive;
-
-        return source switch
-        {
-            float[,] a => (T)(object)a.GetRows(range),
-            float[,,] a => (T)(object)a.GetRows(range),
-            float[,,,] a => (T)(object)a.GetRows(range),
-            int[,] a => (T)(object)a.GetRows(range),
-            _ => throw new NotSupportedException($"Slicing not supported for array type: {source.GetType().Name}.")
-        };
-    }
+    
 }

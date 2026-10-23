@@ -1,6 +1,6 @@
 ﻿// Neural Networks in C♯
 // File name: Trainer.cs
-// www.kowaliszyn.pl, 2025
+// www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -17,7 +17,7 @@ using NeuralNetworks.Optimizers;
 using NeuralNetworks.Trainers.Logging;
 
 using static System.Console;
-using static NeuralNetworks.Core.Utils.GenericArrayUtils;
+using static NeuralNetworks.Core.Utils.ArraySlicingUtils;
 using static NeuralNetworks.Core.Utils.PermutationUtils;
 
 namespace NeuralNetworks.Trainers;
@@ -36,9 +36,9 @@ public class Trainer<TInputData, TPrediction>(
     where TPrediction : notnull
 {
 #if DEBUG
-    const string BuildConfiguration = "Debug";
+    private const string BuildConfiguration = "Debug";
 #else
-    const string BuildConfiguration = "Release";
+    private const string BuildConfiguration = "Release";
 #endif
 
     private float _bestLoss = float.MaxValue;
@@ -339,7 +339,7 @@ public class Trainer<TInputData, TPrediction>(
         string newIndent = new(' ', indentation + Constants.Indentation);
         List<string> res = [];
         res.Add($"{indent}Trainer");
-        if(!string.IsNullOrEmpty(Memo))
+        if (!string.IsNullOrEmpty(Memo))
             res.Add($"{newIndent}Memo: \"{Memo}\"");
         res.Add($"{newIndent}Random: {random}");
         res.Add($"{newIndent}Optimizer: {optimizer}");

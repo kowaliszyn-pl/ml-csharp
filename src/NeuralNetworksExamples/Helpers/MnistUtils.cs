@@ -3,6 +3,7 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Utils;
 
 using static System.Console;
 using static NeuralNetworks.Core.Utils.DataLoaderUtils;

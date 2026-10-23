@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 using NeuralNetworks.Core;
+using NeuralNetworks.Core.Utils;
 
 namespace NeuralNetworksExamples.Helpers;
 
