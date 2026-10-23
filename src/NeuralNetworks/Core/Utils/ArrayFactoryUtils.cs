@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: RandomUtils.cs
+// File name: ArrayFactoryUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Runtime.CompilerServices;
@@ -7,13 +7,60 @@ using System.Runtime.CompilerServices;
 namespace NeuralNetworks.Core.Utils;
 
 /// <summary>
-/// Provides helper methods for generating random single-precision values and arrays, including uniform values in the
-/// range [-0.5, 0.5) and normally distributed values with configurable mean and standard deviation.
+/// Provides utility methods for creating multidimensional <see langword="float"/> arrays initialized with evenly spaced
+/// values across a specified range.
 /// </summary>
-/// <remarks>Uses a caller-supplied <see cref="Random"/> instance and includes Box-Muller-based standard normal
-/// sampling. Intended for scenarios that need 1D to 4D random data buffers.</remarks>
-public static class RandomUtils
+/// <remarks>Includes overloads for two-dimensional and four-dimensional arrays. Values are assigned in index
+/// order using a computed step size.</remarks>
+public static class ArrayFactoryUtils
 {
+    #region CreateRange
+
+    // TODO: CreateRange - make them consistent with the step calculation and value assignment across all overloads.
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,] CreateRange(int rows, int columns, float from, float to)
+    {
+        float[,] res = new float[rows, columns];
+        // float step = (to - from) / (rows * columns);
+        float step = (to - from) / columns;
+        for (int i = 0; i < rows; i++)
+        {
+            float value = from;
+            for (int j = 0; j < columns; j++)
+            {
+                res[i, j] = value;
+                value += step;
+            }
+        }
+        return res;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float[,,,] CreateRange(int dim1, int dim2, int dim3, int dim4, float from, float to)
+    {
+        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float step = (to - from) / (dim1 * dim2 * dim3 * dim4);
+        for (int i = 0; i < dim1; i++)
+        {
+            for (int j = 0; j < dim2; j++)
+            {
+                for (int k = 0; k < dim3; k++)
+                {
+                    for (int l = 0; l < dim4; l++)
+                    {
+                        res[i, j, k, l] = from + step * (i * dim2 * dim3 * dim4 + j * dim3 * dim4 + k * dim4 + l);
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    #endregion
+
+    #region CreateRandom
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] CreateRandomNormal(int rows, int columns, Random random, float mean = 0, float stdDev = 1)
     {
@@ -77,23 +124,6 @@ public static class RandomUtils
     }
 
     /// <summary>
-    /// Generates a random number following a standard normal distribution (mean = 0, stdDev = 1) using the Box-Muller transform.
-    /// </summary>
-    /// <param name="random"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float NextBoxMuller(Random random)
-    {
-        // uniform(0,1] random floats
-        float u1 = 1 - random.NextSingle();
-        float u2 = 1 - random.NextSingle();
-
-        //random normal(0,1)
-        float randStdNormal = MathF.Sqrt(-2.0f * MathF.Log(u1)) * MathF.Sin(2.0f * MathF.PI * u2);
-        return randStdNormal;
-    }
-
-    /// <summary>
     /// Creates a new matrix filled with random values between -0.5 and 0.5, with the specified number of rows and columns.
     /// </summary>
     /// <param name="rows">The number of rows in the matrix.</param>
@@ -116,7 +146,7 @@ public static class RandomUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] CreateRandom(int dim1, int dim2, int dim3, int dim4, Random _random)
+    public static float[,,,] CreateRandom(int dim1, int dim2, int dim3, int dim4, Random random)
     {
         float[,,,] res = new float[dim1, dim2, dim3, dim4];
         for (int i = 0; i < dim1; i++)
@@ -127,7 +157,7 @@ public static class RandomUtils
                 {
                     for (int l = 0; l < dim4; l++)
                     {
-                        res[i, j, k, l] = _random.NextSingle() - 0.5f;
+                        res[i, j, k, l] = random.NextSingle() - 0.5f;
                     }
                 }
             }
@@ -147,4 +177,22 @@ public static class RandomUtils
         return res;
     }
 
+    /// <summary>
+    /// Generates a random number following a standard normal distribution (mean = 0, stdDev = 1) using the Box-Muller transform.
+    /// </summary>
+    /// <param name="random"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static float NextBoxMuller(Random random)
+    {
+        // uniform(0,1] random floats
+        float u1 = 1 - random.NextSingle();
+        float u2 = 1 - random.NextSingle();
+
+        //random normal(0,1)
+        float randStdNormal = MathF.Sqrt(-2.0f * MathF.Log(u1)) * MathF.Sin(2.0f * MathF.PI * u2);
+        return randStdNormal;
+    }
+
+    #endregion
 }

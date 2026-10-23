@@ -22,8 +22,8 @@ public class SpanBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        array1 = RandomUtils.CreateRandom(100, 100, 3, 3, new Random(42));
-        array2 = RandomUtils.CreateRandom(100, 100, 3, 3, new Random(43));
+        array1 = ArrayFactoryUtils.CreateRandom(100, 100, 3, 3, new Random(42));
+        array2 = ArrayFactoryUtils.CreateRandom(100, 100, 3, 3, new Random(43));
     }
 
     [Benchmark]
