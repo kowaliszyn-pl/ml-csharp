@@ -46,4 +46,7 @@ public class MaxNormRegularizer : BaseRegularizer
             }
         }
     }
+
+    public override string ToString() 
+        => $"MaxNormRegularizer(MaxNorm={_maxNorm})";
 }

@@ -100,5 +100,8 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, IRegulariz
     }
 
     public override void UpdateParams(Optimizer optimizer)
-        => optimizer.Update(param, ParamGradient);
+    {
+        optimizer.Update(param, ParamGradient);
+        _regularizer.UpdateParams(param);
+    }
 }
