@@ -9,45 +9,52 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NeuralNetworks.Regularization.CompositeRegularizer">
-    <Position X="5.5" Y="2.75" Width="2.25" />
+    <Position X="6.5" Y="2.75" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAIAAgAAAAAAAAAAAAACAEAAAAAAAAAABAEAAAA=</HashCode>
+      <HashCode>AAAAAAIAAgAAAAAEAAAAAAACAEAAAAAAAAAABAEAAAA=</HashCode>
       <FileName>Regularization\CompositeRegularizer.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="NeuralNetworks.Regularization.ElasticNetRegularizer">
-    <Position X="5.75" Y="6.25" Width="1.75" />
+    <Position X="6.75" Y="6.25" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAABAAAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAABAAAAAAAAgAAAAAAAAAAAA=</HashCode>
       <FileName>Regularization\ElasticNetRegularizer.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Regularization.L1Regularizer">
-    <Position X="0.75" Y="6" Width="1.75" />
+    <Position X="0.5" Y="6" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAABAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAKAAABAAAAAAA=</HashCode>
       <FileName>Regularization\L1Regularizer.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Regularization.L2Regularizer">
-    <Position X="3.25" Y="6" Width="1.75" />
+    <Position X="2.5" Y="6" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAABAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAKAAABAAAAAAA=</HashCode>
       <FileName>Regularization\L2Regularizer.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Regularization.NullRegularizer">
     <Position X="3.25" Y="2.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
       <FileName>Regularization\NullRegularizer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Regularization.MaxNormRegularizer">
+    <Position X="4.5" Y="6" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAEAAAAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Regularization\MaxNormRegularizer.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Interface Name="NeuralNetworks.Regularization.IRegularizer" Collapsed="true">
     <Position X="0.75" Y="0.75" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAAAAAIAAgAAAAAAAAAAAAACAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <HashCode>AAAAAAIAAgAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Regularization\IRegularizer.cs</FileName>
     </TypeIdentifier>
   </Interface>
