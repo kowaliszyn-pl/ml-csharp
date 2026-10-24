@@ -35,45 +35,45 @@
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.LearningRates.ConstantLearningRate" Collapsed="true">
-    <Position X="6.25" Y="3.25" Width="1.5" />
+    <Position X="8" Y="3.25" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAIAA=</HashCode>
       <FileName>LearningRates\ConstantLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.LearningRates.DecayLearningRate" Collapsed="true">
-    <Position X="8" Y="3.25" Width="1.5" />
+    <Position X="6.25" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAAAAAAAIAA=</HashCode>
+      <HashCode>AAAAAAAAAAAEBAAAAAAAAAAASAAAAAAAAAAAAAAAIAA=</HashCode>
       <FileName>LearningRates\DecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.LearningRates.ExponentialDecayLearningRate" Collapsed="true">
-    <Position X="6.25" Y="4.5" Width="2.5" />
+    <Position X="6.25" Y="5.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAQAAgAAAAAAAACEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAQAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>LearningRates\ExponentialDecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.LearningRates.LinearDecayLearningRate" Collapsed="true">
-    <Position X="9" Y="4.5" Width="2" />
+    <Position X="9" Y="5.5" Width="2" />
     <TypeIdentifier>
-      <HashCode>AAQAAgAAAAAAAACEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAQAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>LearningRates\LinearDecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Optimizers.AdamOptimizer" Collapsed="true">
     <Position X="2.25" Y="2.75" Width="1.5" />
-    <NestedTypes>
-      <Class Name="NeuralNetworks.Optimizers.AdamOptimizer.State" Collapsed="true">
-        <TypeIdentifier>
-          <NewMemberFileName>Optimizers\AdamOptimizer.cs</NewMemberFileName>
-        </TypeIdentifier>
-      </Class>
-    </NestedTypes>
     <TypeIdentifier>
       <HashCode>AEQAAAAAAABAAAAEAAAAAAAAEAQAAAAAAAAAAAAAgAA=</HashCode>
       <FileName>Optimizers\AdamOptimizer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.LearningRates.CosineDecayLearningRate" Collapsed="true">
+    <Position X="4" Y="5.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>LearningRates\CosineDecayLearningRate.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />
