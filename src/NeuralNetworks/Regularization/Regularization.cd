@@ -51,7 +51,7 @@
       <FileName>Regularization\MaxNormRegularizer.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Interface Name="NeuralNetworks.Regularization.IRegularizer" Collapsed="true">
+  <Interface Name="NeuralNetworks.Regularization.IRegularizer">
     <Position X="0.75" Y="0.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAIAAgAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>

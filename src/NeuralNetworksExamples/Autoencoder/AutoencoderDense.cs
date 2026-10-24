@@ -13,6 +13,7 @@ using NeuralNetworks.Losses;
 using NeuralNetworks.Models;
 using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
+using NeuralNetworks.Operations.Dropouts;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Regularization;
@@ -38,9 +39,11 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
             new MaxNormRegularizer(2.8f)
         );
 
+        Dropout2D dropout = new(0.95f, Random);
+
         return
             // Encoder
-            AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer))
+            AddLayer(new DenseLayer(178, new LeakyReLU2D(), initializer, dropout))
             .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer))
 
             // Bottleneck
