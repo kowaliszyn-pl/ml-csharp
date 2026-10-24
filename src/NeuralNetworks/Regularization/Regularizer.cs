@@ -9,24 +9,43 @@ using static NeuralNetworks.Core.GenericArrayRoutines;
 namespace NeuralNetworks.Regularization;
 
 /// <summary>
-/// Configures L1 and/or L2 regularization (elastic net) applied to a parameter (weights or biases) of a
-/// neural network operation.
+/// Represents L1 and L2 regularization settings (elastic net) for neural network parameters and provides methods to
+/// apply regularization to gradients and compute the corresponding penalty.
 /// </summary>
-/// <param name="l1">L1 regularization coefficient. Use 0 to disable L1 regularization.</param>
-/// <param name="l2">L2 regularization coefficient. Use 0 to disable L2 regularization.</param>
-/// <param name="includeInLossValue">
-/// When <see langword="true"/>, the regularization penalty for this parameter is added to the reported training loss.
-/// When <see langword="false"/>, only the gradient (weight decay) is affected and the reported loss is unchanged.
-/// </param>
-public sealed class Regularizer(float l1 = 0f, float l2 = 0f, bool includeInLossValue = false)
+/// <remarks>Use <c>l1</c> and <c>l2</c> coefficients to enable L1, L2, or combined regularization. When
+/// <c>IncludeInLossValue</c> is <see langword="true"/>, the regularization penalty is intended to be included in the
+/// reported training loss; otherwise, regularization affects gradients without changing the reported loss
+/// value.</remarks>
+public sealed class Regularizer
 {
-    // TODO: l1, l2 must be non-negative. Add validation.
+    private readonly float _l1, _l2;
+    private readonly bool _includeInLossValue;
 
-    public float L1 => l1;
+    /// <summary>
+    /// Configures L1 and/or L2 regularization (elastic net) applied to a parameter (weights or biases) of a
+    /// neural network operation.
+    /// </summary>
+    /// <param name="l1">L1 regularization coefficient. Use 0 to disable L1 regularization.</param>
+    /// <param name="l2">L2 regularization coefficient. Use 0 to disable L2 regularization.</param>
+    /// <param name="includeInLossValue">
+    /// When <see langword="true"/>, the regularization penalty for this parameter is added to the reported training loss.
+    /// When <see langword="false"/>, only the gradient (weight decay) is affected and the reported loss is unchanged.
+    /// </param>
+    public Regularizer(float l1 = 0f, float l2 = 0f, bool includeInLossValue = false)
+    {
+        Debug.Assert(l1 >= 0f, "L1 regularization coefficient must be non-negative.");
+        Debug.Assert(l2 >= 0f, "L2 regularization coefficient must be non-negative.");
 
-    public float L2 => l2;
+        _l1 = l1;
+        _l2 = l2;
+        _includeInLossValue = includeInLossValue;
+    }
 
-    public bool IncludeInLossValue => includeInLossValue;
+    public float L1 => _l1;
+
+    public float L2 => _l2;
+
+    public bool IncludeInLossValue => _includeInLossValue;
 
     /// <summary>
     /// Adds the L1/L2 regularization gradient contribution to <paramref name="paramGradient"/> in place.
@@ -43,11 +62,11 @@ public sealed class Regularizer(float l1 = 0f, float l2 = 0f, bool includeInLoss
             float value = paramSpan[i];
             float gradientContribution = 0f;
 
-            if (l1 != 0f)
-                gradientContribution += l1 * MathF.Sign(value);
+            if (_l1 != 0f)
+                gradientContribution += _l1 * MathF.Sign(value);
 
-            if (l2 != 0f)
-                gradientContribution += 2f * l2 * value;
+            if (_l2 != 0f)
+                gradientContribution += 2f * _l2 * value;
 
             paramGradientSpan[i] += gradientContribution;
         }
@@ -66,19 +85,19 @@ public sealed class Regularizer(float l1 = 0f, float l2 = 0f, bool includeInLoss
 
         foreach (float value in paramSpan)
         {
-            if (l1 != 0f)
+            if (_l1 != 0f)
                 l1Sum += MathF.Abs(value);
 
-            if (l2 != 0f)
+            if (_l2 != 0f)
                 l2Sum += value * value;
         }
 
-        penalty += l1 * l1Sum;
-        penalty += l2 * l2Sum;
+        penalty += _l1 * l1Sum;
+        penalty += _l2 * l2Sum;
 
         return penalty;
     }
 
     public override string ToString()
-        => $"Regularizer (l1={l1}, l2={l2}, includeInLossValue={includeInLossValue})";
+        => $"Regularizer (l1={_l1}, l2={_l2}, includeInLossValue={_includeInLossValue})";
 }
