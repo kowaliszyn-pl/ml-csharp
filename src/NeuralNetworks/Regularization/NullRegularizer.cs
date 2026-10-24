@@ -4,20 +4,14 @@
 
 namespace NeuralNetworks.Regularization;
 
-public class NullRegularizer : IRegularizer
+public sealed class NullRegularizer : BaseRegularizer
 {
     public static NullRegularizer Instance { get; } = new NullRegularizer();
 
-    public bool ReportPenaltyInLoss => false;
-
-    public void ApplyGradient<T>(T param, T paramGradient) where T : notnull
+    private NullRegularizer(): base(false)
     {
     }
 
-    public float ReportPenalty<T>(T param) where T : notnull
+    protected internal override float CalculatePenaltyCore(ReadOnlySpan<float> paramSpan)
         => 0f;
-
-    public void UpdateParams<T>(T param) where T : notnull
-    {
-    }
 }

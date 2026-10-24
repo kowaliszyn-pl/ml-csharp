@@ -60,7 +60,7 @@ public class RegularizerTests
     public void ApplyGradient_ZeroCoefficients_NoOp()
     {
         // Arrange
-        NullRegularizer regularizer = new();
+        NullRegularizer regularizer = NullRegularizer.Instance;
         float[] param = [2f, -3f];
         float[] paramGradient = [1f, 1f];
 
@@ -80,7 +80,7 @@ public class RegularizerTests
         float[] param = [2f, -3f];
 
         // Act
-        float penalty = regularizer.CalculatePenalty(param);
+        float penalty = regularizer.CalculatePenaltyCore(param);
 
         // Assert
         Assert.AreEqual(0.5f * (2f + 3f), penalty, 1e-6);
@@ -94,7 +94,7 @@ public class RegularizerTests
         float[] param = [2f, -3f];
 
         // Act
-        float penalty = regularizer.CalculatePenalty(param);
+        float penalty = regularizer.CalculatePenaltyCore(param);
 
         // Assert
         Assert.AreEqual(0.5f * (4f + 9f), penalty, 1e-6);
@@ -104,11 +104,11 @@ public class RegularizerTests
     public void CalculatePenalty_Combined_ReturnsSumOfBoth()
     {
         // Arrange
-        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.2f);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.2f, reportPenaltyInLoss: true);
         float[] param = [2f, -3f];
 
         // Act
-        float penalty = regularizer.CalculatePenalty(param);
+        float penalty = regularizer.ReportPenalty(param);
 
         // Assert
         float expected = 0.1f * (2f + 3f) + 0.2f * (4f + 9f);

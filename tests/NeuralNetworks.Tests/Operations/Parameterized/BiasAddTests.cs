@@ -80,7 +80,7 @@ public class BiasAddTests
         float loss = biasAdd.GetRegularizationLoss();
 
         // Assert
-        float expected = regularizer.CalculatePenalty(bias);
+        float expected = regularizer.ReportPenalty(bias);
         Assert.AreEqual(expected, loss, 1e-6);
     }
 

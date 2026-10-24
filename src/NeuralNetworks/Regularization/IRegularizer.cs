@@ -6,6 +6,8 @@ namespace NeuralNetworks.Regularization;
 
 public interface IRegularizer
 {
+    public bool ReportPenaltyInLoss { get; }
+
     public void ApplyGradient<T>(T param, T paramGradient) where T : notnull;
 
     public float ReportPenalty<T>(T param) where T : notnull;
@@ -15,6 +17,4 @@ public interface IRegularizer
     /// Does nothing by default.
     /// </summary>
     public void UpdateParams<T>(T param) where T : notnull;
-
-    public bool ReportPenaltyInLoss { get; }
 }
