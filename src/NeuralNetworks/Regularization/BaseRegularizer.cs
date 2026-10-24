@@ -14,7 +14,7 @@ public abstract class BaseRegularizer(bool reportPenaltyInLoss) : IRegularizer
     {
         Span<float> paramSpan = GenericArrayRoutines.ConvertToSpan(param);
         Span<float> paramGradientSpan = GenericArrayRoutines.ConvertToSpan(paramGradient);
-        ApplyGradient(paramSpan, paramGradientSpan);
+        ApplyGradientCore(paramSpan, paramGradientSpan);
     }
 
     public float ReportPenalty<T>(T param) where T : notnull
@@ -30,10 +30,10 @@ public abstract class BaseRegularizer(bool reportPenaltyInLoss) : IRegularizer
     public void UpdateParams<T>(T param) where T : notnull
     {
         Span<float> paramSpan = GenericArrayRoutines.ConvertToSpan(param);
-        UpdateParams(paramSpan);
+        UpdateParamsCore(paramSpan);
     }
 
-    protected abstract void ApplyGradient(Span<float> paramSpan, Span<float> paramGradientSpan);
-    protected abstract float CalculatePenalty(ReadOnlySpan<float> paramSpan);
-    protected virtual void UpdateParams(Span<float> paramSpan) { }
+    protected internal abstract void ApplyGradientCore(Span<float> paramSpan, Span<float> paramGradientSpan);
+    protected internal abstract float CalculatePenalty(ReadOnlySpan<float> paramSpan);
+    protected virtual void UpdateParamsCore(Span<float> paramSpan) { }
 }

@@ -32,7 +32,7 @@ public class WeightMultiplyTests
     {
         // Arrange
         float[,] weights = { { 1f, -2f }, { 3f, 4f } };
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.2f);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.2f);
         WeightMultiply weightMultiply = new(weights, regularizer);
         float[,] input = { { 1f, 1f } };
         _ = weightMultiply.Forward(input, false);
@@ -76,7 +76,7 @@ public class WeightMultiplyTests
     {
         // Arrange
         float[,] weights = { { 1f, -2f }, { 3f, 4f } };
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: false);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: false);
         WeightMultiply weightMultiply = new(weights, regularizer);
 
         // Act
@@ -91,14 +91,14 @@ public class WeightMultiplyTests
     {
         // Arrange
         float[,] weights = { { 1f, -2f }, { 3f, 4f } };
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: true);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: true);
         WeightMultiply weightMultiply = new(weights, regularizer);
 
         // Act
         float loss = weightMultiply.GetRegularizationLoss();
 
         // Assert
-        float expected = regularizer.CalculatePenalty(weights);
+        float expected = regularizer.ReportPenalty(weights);
         Assert.AreEqual(expected, loss, 1e-6);
     }
 

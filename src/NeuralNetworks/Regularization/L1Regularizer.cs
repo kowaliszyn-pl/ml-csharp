@@ -17,7 +17,7 @@ public class L1Regularizer : BaseRegularizer
         _l1 = l1;
     }
 
-    protected override void ApplyGradient(Span<float> paramSpan, Span<float> paramGradientSpan)
+    protected internal override void ApplyGradientCore(Span<float> paramSpan, Span<float> paramGradientSpan)
     {
         for (int i = 0; i < paramSpan.Length; i++)
         {
@@ -25,7 +25,7 @@ public class L1Regularizer : BaseRegularizer
         }
     }
 
-    protected override float CalculatePenalty(ReadOnlySpan<float> paramSpan)
+    protected internal override float CalculatePenalty(ReadOnlySpan<float> paramSpan)
     {
         float sum = 0f;
         foreach (float paramValue in paramSpan)

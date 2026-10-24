@@ -11,7 +11,7 @@ public class RegularizerTests
     public void ApplyGradient_L1Only_AddsSignContribution()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0.1f, l2: 0f);
+        L1Regularizer regularizer = new(l1: 0.1f);
         float[] param = [2f, -3f, 0f];
         float[] paramGradient = [1f, 1f, 1f];
 
@@ -28,7 +28,7 @@ public class RegularizerTests
     public void ApplyGradient_L2Only_AddsScaledValueContribution()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0f, l2: 0.1f);
+        L2Regularizer regularizer = new(l2: 0.1f);
         float[] param = [2f, -3f];
         float[] paramGradient = [1f, 1f];
 
@@ -44,7 +44,7 @@ public class RegularizerTests
     public void ApplyGradient_CombinedL1AndL2_AddsBothContributions()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.2f);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.2f);
         float[] param = [2f];
         float[] paramGradient = [1f];
 
@@ -60,7 +60,7 @@ public class RegularizerTests
     public void ApplyGradient_ZeroCoefficients_NoOp()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0f, l2: 0f);
+        NullRegularizer regularizer = new();
         float[] param = [2f, -3f];
         float[] paramGradient = [1f, 1f];
 
@@ -76,7 +76,7 @@ public class RegularizerTests
     public void CalculatePenalty_L1Only_ReturnsSumOfAbsoluteValues()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0.5f, l2: 0f);
+        L1Regularizer regularizer = new(l1: 0.5f);
         float[] param = [2f, -3f];
 
         // Act
@@ -90,7 +90,7 @@ public class RegularizerTests
     public void CalculatePenalty_L2Only_ReturnsSumOfSquares()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0f, l2: 0.5f);
+        L2Regularizer regularizer = new(l2: 0.5f);
         float[] param = [2f, -3f];
 
         // Act
@@ -104,7 +104,7 @@ public class RegularizerTests
     public void CalculatePenalty_Combined_ReturnsSumOfBoth()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.2f);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.2f);
         float[] param = [2f, -3f];
 
         // Act
@@ -119,7 +119,7 @@ public class RegularizerTests
     public void ReportPenaltyInLoss_DefaultsToFalse()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.1f);
 
         // Act & Assert
         Assert.IsFalse(regularizer.ReportPenaltyInLoss);
@@ -129,7 +129,7 @@ public class RegularizerTests
     public void ReportPenaltyInLoss_CanBeSetToTrue()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: true);
+        ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: true);
 
         // Act & Assert
         Assert.IsTrue(regularizer.ReportPenaltyInLoss);
