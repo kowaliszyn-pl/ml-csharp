@@ -116,22 +116,22 @@ public class RegularizerTests
     }
 
     [TestMethod]
-    public void IncludeInLossValue_DefaultsToFalse()
+    public void ReportPenaltyInLoss_DefaultsToFalse()
     {
         // Arrange
         Regularizer regularizer = new(l1: 0.1f, l2: 0.1f);
 
         // Act & Assert
-        Assert.IsFalse(regularizer.IncludeInLossValue);
+        Assert.IsFalse(regularizer.ReportPenaltyInLoss);
     }
 
     [TestMethod]
-    public void IncludeInLossValue_CanBeSetToTrue()
+    public void ReportPenaltyInLoss_CanBeSetToTrue()
     {
         // Arrange
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, includeInLossValue: true);
+        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: true);
 
         // Act & Assert
-        Assert.IsTrue(regularizer.IncludeInLossValue);
+        Assert.IsTrue(regularizer.ReportPenaltyInLoss);
     }
 }

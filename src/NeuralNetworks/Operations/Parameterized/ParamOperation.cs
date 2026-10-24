@@ -61,7 +61,7 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, Regularize
     }
 
     public override float GetRegularizationLoss()
-        => regularizer is { IncludeInLossValue: true }
+        => regularizer is { ReportPenaltyInLoss: true }
             ? regularizer.CalculatePenalty(param)
             : 0f;
 

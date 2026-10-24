@@ -76,7 +76,7 @@ public class WeightMultiplyTests
     {
         // Arrange
         float[,] weights = { { 1f, -2f }, { 3f, 4f } };
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, includeInLossValue: false);
+        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: false);
         WeightMultiply weightMultiply = new(weights, regularizer);
 
         // Act
@@ -91,7 +91,7 @@ public class WeightMultiplyTests
     {
         // Arrange
         float[,] weights = { { 1f, -2f }, { 3f, 4f } };
-        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, includeInLossValue: true);
+        Regularizer regularizer = new(l1: 0.1f, l2: 0.1f, reportPenaltyInLoss: true);
         WeightMultiply weightMultiply = new(weights, regularizer);
 
         // Act

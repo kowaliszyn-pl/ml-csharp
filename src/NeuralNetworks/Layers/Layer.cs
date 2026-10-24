@@ -175,7 +175,7 @@ public abstract class Layer<TIn, TOut> : Layer
     /// <summary>
     /// Calculates the total regularization loss across all parameter operations.
     /// </summary>
-    /// <remarks>Returns 0 when no parameter operations are available. When the <see cref="Regularizer.IncludeInLossValue"/> property of a parameter operation is false, its regularization loss is not included in the total.</remarks>
+    /// <remarks>Returns 0 when no parameter operations are available. When the <see cref="Regularizer.ReportPenaltyInLoss"/> property of a parameter operation is false, its regularization loss is not included in the total.</remarks>
     /// <returns>The sum of regularization loss values returned by each parameter operation.</returns>
     public override float GetRegularizationLoss()
     {
