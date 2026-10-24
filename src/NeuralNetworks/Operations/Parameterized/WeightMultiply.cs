@@ -12,8 +12,8 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Weight multiplication operation for a neural network.
 /// </summary>
 /// <param name="weights">Weight matrix.</param>
-/// <param name="regularizer">Optional L1/L2 regularizer applied to the weights.</param>
-public class WeightMultiply(float[,] weights, Regularizer? regularizer = null) : ParamOperation<float[,], float[,], float[,]>(weights, regularizer)
+/// <param name="regularizer">Optional regularizer applied to the weights.</param>
+public class WeightMultiply(float[,] weights, IRegularizer? regularizer = null) : ParamOperation<float[,], float[,], float[,]>(weights, regularizer)
 {
     protected override float[,] CalcOutput(bool inference)
         => WeightMultiplyOutput(Input, Param);

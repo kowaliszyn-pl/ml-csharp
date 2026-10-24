@@ -2,6 +2,8 @@
 // File name: Conv2D.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using NeuralNetworks.Regularization;
+
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;
@@ -13,7 +15,7 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Padding is assumed to be the same on all sides = kernelSize / 2
 /// </summary>
 /// <param name="weights"></param>
-public class Conv2D(float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1) : ParamOperation<float[,,,], float[,,,], float[,,,]>(weights)
+public class Conv2D(float[,,,] weights, int paddingHeight, int paddingWidth, int strideHeight = 1, int strideWidth = 1, int dilatationHeight = 1, int dilatationWidth = 1, IRegularizer? regularizer = null) : ParamOperation<float[,,,], float[,,,], float[,,,]>(weights, regularizer)
 {
 
     protected override float[,,,] CalcOutput(bool inference)

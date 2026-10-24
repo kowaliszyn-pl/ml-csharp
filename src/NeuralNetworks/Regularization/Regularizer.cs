@@ -16,6 +16,7 @@ namespace NeuralNetworks.Regularization;
 /// <c>ReportPenaltyInLoss</c> is <see langword="true"/>, the regularization penalty is intended to be included in the
 /// reported training loss; otherwise, regularization affects gradients without changing the reported loss
 /// value.</remarks>
+[Obsolete]
 public sealed class Regularizer
 {
     private readonly float _l1, _l2;

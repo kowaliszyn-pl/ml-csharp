@@ -13,7 +13,8 @@ using NeuralNetworks.Regularization;
 
 namespace NeuralNetworks.Layers;
 
-public class DenseLayer(int neurons, ActivationFunction<float[,], float[,]> activationFunction, ParamInitializer paramInitializer, BaseDropout<float[,]>? dropout = null, Regularizer? weightsRegularizer = null, Regularizer? biasesRegularizer = null) : Layer<float[,], float[,]>
+public class DenseLayer(int neurons, ActivationFunction<float[,], float[,]> activationFunction, ParamInitializer paramInitializer, BaseDropout<float[,]>? dropout = null, IRegularizer? weightsRegularizer = null, IRegularizer? biasesRegularizer = null) 
+    : Layer<float[,], float[,]>
 {
     public override OperationListBuilder<float[,], float[,]> CreateOperationListBuilder()
     {

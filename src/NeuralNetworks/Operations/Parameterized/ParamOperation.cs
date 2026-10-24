@@ -12,7 +12,7 @@ using static NeuralNetworks.Utils.ModelUtils;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-public abstract class ParamOperation<TIn, TOut> 
+public abstract class ParamOperation<TIn, TOut>
     : Operation<TIn, TOut>, IParamOperation
     where TIn : notnull
     where TOut : notnull
@@ -29,13 +29,15 @@ public abstract class ParamOperation<TIn, TOut>
 /// </summary>
 /// <param name="param">Parameter matrix.</param>
 /// <param name="regularizer">Optional L1/L2 regularizer applied to this parameter's gradient (and optionally its loss).</param>
-public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, Regularizer? regularizer = null) 
+public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, IRegularizer? regularizer)
     : ParamOperation<TIn, TOut>
     where TIn : notnull
     where TOut : notnull
     where TParam : class
 {
     private TParam? _paramGradient;
+
+    private readonly IRegularizer _regularizer = regularizer ?? NullRegularizer.Instance;
 
     protected TParam Param => param;
 
@@ -55,18 +57,16 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, Regularize
         _paramGradient = CalcParamGradient(outputGradient);
         EnsureSameShapeForParam(param, _paramGradient);
 
-        regularizer?.ApplyGradient(param, _paramGradient);
+        _regularizer.ApplyGradient(param, _paramGradient);
 
         return inputGrad;
     }
 
     public override float GetRegularizationLoss()
-        => regularizer is { ReportPenaltyInLoss: true }
-            ? regularizer.CalculatePenalty(param)
-            : 0f;
+        => _regularizer.ReportPenalty(param);
 
     [Conditional("DEBUG")]
-    private static void EnsureSameShapeForParam(TParam? param, TParam paramGradient) 
+    private static void EnsureSameShapeForParam(TParam? param, TParam paramGradient)
         => EnsureSameShape(param, paramGradient);
 
     protected abstract TParam CalcParamGradient(TOut outputGradient);
@@ -99,6 +99,6 @@ public abstract class ParamOperation<TIn, TOut, TParam>(TParam param, Regularize
             throw new NotSupportedException();
     }
 
-    public override void UpdateParams(Optimizer optimizer) 
+    public override void UpdateParams(Optimizer optimizer)
         => optimizer.Update(param, ParamGradient);
 }

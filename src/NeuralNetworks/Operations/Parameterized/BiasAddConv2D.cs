@@ -2,11 +2,13 @@
 // File name: BiasAddConv1D.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using NeuralNetworks.Regularization;
+
 using static NeuralNetworks.Core.Operations.OperationBackend;
 
 namespace NeuralNetworks.Operations.Parameterized;
 
-public class BiasAddConv2D(float[] bias) : ParamOperation<float[,,,], float[,,,], float[]>(bias)
+public class BiasAddConv2D(float[] bias, IRegularizer? regularizer = null) : ParamOperation<float[,,,], float[,,,], float[]>(bias, regularizer)
 {
     protected override float[,,,] CalcOutput(bool inference)
         => BiasAddConv2DOutput(Input, Param);

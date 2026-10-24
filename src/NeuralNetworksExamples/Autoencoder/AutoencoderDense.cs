@@ -15,6 +15,7 @@ using NeuralNetworks.Models.LayerList;
 using NeuralNetworks.Operations.ActivationFunctions;
 using NeuralNetworks.Optimizers;
 using NeuralNetworks.ParamInitializers;
+using NeuralNetworks.Regularization;
 using NeuralNetworks.Trainers;
 
 using NeuralNetworksExamples.Helpers;
@@ -38,7 +39,7 @@ internal class AutoencoderDenseModel(int bottleneckDim, SeededRandom? random, st
             .AddLayer(new DenseLayer(46, new LeakyReLU2D(), initializer))
 
             // Bottleneck
-            .AddLayer(BottleneckLayer = new DenseLayer(bottleneckDim, new Softsign(), initializer, weightsRegularizer: new(l2: 0.01f)))
+            .AddLayer(BottleneckLayer = new DenseLayer(bottleneckDim, new Softsign(), initializer, weightsRegularizer: new L2Regularizer(0.01f)))
 
             // Decoder
             .AddLayer(FirstDecoderLayer = new DenseLayer(46, new LeakyReLU2D(), initializer))

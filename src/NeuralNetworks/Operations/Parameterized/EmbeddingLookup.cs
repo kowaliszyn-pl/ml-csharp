@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 
+using NeuralNetworks.Regularization;
+
 namespace NeuralNetworks.Operations.Parameterized;
 
 /// <summary>
@@ -13,7 +15,7 @@ namespace NeuralNetworks.Operations.Parameterized;
 /// Initializes a new instance of the <see cref="EmbeddingLookup"/> class.
 /// </remarks>
 /// <param name="embeddings">Embedding matrix [vocabSize, embeddingDim].</param>
-public class EmbeddingLookup(float[,] embeddings) : ParamOperation<int[,], float[,], float[,]>(embeddings)
+public class EmbeddingLookup(float[,] embeddings, IRegularizer? regularizer = null) : ParamOperation<int[,], float[,], float[,]>(embeddings, regularizer)
 {
     /// <summary>
     /// Calculates the gradient of the embedding parameters based on the output gradient.
