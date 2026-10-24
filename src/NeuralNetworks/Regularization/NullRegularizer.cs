@@ -12,9 +12,6 @@ public sealed class NullRegularizer : BaseRegularizer
     {
     }
 
-    protected internal override float CalculatePenaltyCore(ReadOnlySpan<float> paramSpan)
-        => 0f;
-
     public override string ToString()
         => "NullRegularizer";
 }

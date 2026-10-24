@@ -82,7 +82,8 @@ public abstract class BaseRegularizer(bool reportPenaltyInLoss) : IRegularizer
     {
     }
 
-    protected internal abstract float CalculatePenaltyCore(ReadOnlySpan<float> paramSpan);
+    protected internal virtual float CalculatePenaltyCore(ReadOnlySpan<float> paramSpan) 
+        => 0f;
 
     /// <summary>
     /// Updates parameter values in the specified span.
