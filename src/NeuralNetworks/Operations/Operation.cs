@@ -12,6 +12,11 @@ public abstract class Operation
 {
     private bool _registered = false;
 
+    /// <summary>
+    /// Marks the operation as used in a layer. This is important for ensuring that the operation is not reused in multiple layers, which could lead to incorrect behavior, like sharing operation parameters (for example, weights or masks) between layers unintentionally.
+    /// </summary>
+    /// <remarks>Can be called only once per instance.</remarks>
+    /// <exception cref="InvalidOperationException">Thrown when the operation is already registered.</exception>
     public void SetRegistered()
     {
         if (_registered)

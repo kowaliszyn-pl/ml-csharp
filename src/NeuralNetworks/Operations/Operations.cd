@@ -3,7 +3,7 @@
   <Class Name="NeuralNetworks.Operations.Operation">
     <Position X="0.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAKAAAAAAQCAAAAAAAI=</HashCode>
+      <HashCode>AAAAAACAAAAAAAAEAAAAAAAAAAKAAAAAAQCAAAAAAAI=</HashCode>
       <FileName>Operations\Operation.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -66,14 +66,14 @@
   <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation&lt;TIn, TOut, TParam&gt;" Collapsed="true">
     <Position X="1" Y="5.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAKAEAgCAAAAAAAAABAgAAAQAAAAAAAAAAAQAAA=</HashCode>
+      <HashCode>AAAAAAKAEAgCAAIAAAAAABggAAAQAAAAAAAAAAAQAAA=</HashCode>
       <FileName>Operations\Parameterized\ParamOperation.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="NeuralNetworks.Operations.Parameterized.ParamOperation&lt;TIn, TOut&gt;" Collapsed="true">
     <Position X="1.75" Y="3.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAIAEAgCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAIAEAgCAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\Parameterized\ParamOperation.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -104,6 +104,13 @@
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>Operations\ActivationFunctions\ActivationFunction.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="NeuralNetworks.Operations.Parameterized.EmbeddingLookup" Collapsed="true">
+    <Position X="0.5" Y="9.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAAAAEAAAACBAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Operations\Parameterized\EmbeddingLookup.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

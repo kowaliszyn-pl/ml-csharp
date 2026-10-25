@@ -5,6 +5,7 @@
 using NeuralNetworks.Layers.OperationList;
 using NeuralNetworks.Operations.Parameterized;
 using NeuralNetworks.ParamInitializers;
+using NeuralNetworks.Regularization;
 
 namespace NeuralNetworks.Layers;
 
@@ -18,7 +19,8 @@ namespace NeuralNetworks.Layers;
 /// <param name="vocabSize">Size of the vocabulary (number of unique tokens).</param>
 /// <param name="embeddingDim">Dimensionality of the embedding vectors.</param>
 /// <param name="paramInitializer">Initializer for embedding weights.</param>
-public class EmbeddingLayer(int vocabSize, int embeddingDim, ParamInitializer paramInitializer) : Layer<int[,], float[,]>
+public class EmbeddingLayer(int vocabSize, int embeddingDim, ParamInitializer paramInitializer, IRegularizer? regularizer = null) 
+    : Layer<int[,], float[,]>
 {
     EmbeddingLookup? _embeddingLookup;
 
@@ -27,7 +29,7 @@ public class EmbeddingLayer(int vocabSize, int embeddingDim, ParamInitializer pa
         // Initialize embedding matrix: [vocabSize, embeddingDim]
         float[,] embeddings = paramInitializer.InitWeights(vocabSize, embeddingDim);
 
-        return AddOperation(_embeddingLookup = new EmbeddingLookup(embeddings));
+        return AddOperation(_embeddingLookup = new EmbeddingLookup(embeddings, regularizer));
     }
 
     /// <summary>
@@ -41,5 +43,5 @@ public class EmbeddingLayer(int vocabSize, int embeddingDim, ParamInitializer pa
     }
 
     public override string ToString()
-        => $"EmbeddingLayer (vocabSize={vocabSize}, embeddingDim={embeddingDim}, paramInitializer={paramInitializer})";
+        => $"EmbeddingLayer (vocabSize={vocabSize}, embeddingDim={embeddingDim}, paramInitializer={paramInitializer}, regularizer={regularizer})";
 }
