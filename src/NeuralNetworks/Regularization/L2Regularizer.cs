@@ -12,6 +12,7 @@ namespace NeuralNetworks.Regularization;
 public class L2Regularizer : BaseRegularizer
 {
     private readonly float _l2;
+    private readonly float _l2TimesTwo;
 
     /// <summary>
     /// Initializes a new instance of the <c>L2Regularizer</c> class with the specified L2 regularization factor.
@@ -25,6 +26,7 @@ public class L2Regularizer : BaseRegularizer
             throw new ArgumentOutOfRangeException(nameof(l2), "L2 regularization parameter must be positive.");
 
         _l2 = l2;
+        _l2TimesTwo = 2f * l2;
     }
 
     /// <summary>
@@ -37,7 +39,7 @@ public class L2Regularizer : BaseRegularizer
     {
         for (int i = 0; i < paramSpan.Length; i++)
         {
-            paramGradientSpan[i] += 2f * _l2 * paramSpan[i];
+            paramGradientSpan[i] += _l2TimesTwo * paramSpan[i];
         }
     }
 
