@@ -17,17 +17,12 @@ public abstract class Optimizer(LearningRate learningRate)
     public virtual void UpdateLearningRate(int steps, int epoch, int epochs)
         => learningRate.Update(steps, epoch, epochs);
 
-    private static void ConvertToSpans<T>(T param, T paramGradient, out Span<float> paramSpan, out ReadOnlySpan<float> paramGradientSpan) where T : notnull
-    {
-        paramSpan = GenericArrayRoutines.ConvertToSpan(param);
-        paramGradientSpan = GenericArrayRoutines.ConvertToReadOnlySpan(paramGradient);
-    }
-
     public void Update<T>(T paramsToUpdate, T paramGradients)
         where T : notnull
     {
-        ConvertToSpans(paramsToUpdate, paramGradients, out Span<float> paramSpan, out ReadOnlySpan<float> paramGradientSpan);
-        Update(paramsToUpdate, paramSpan, paramGradientSpan);
+        Span<float> paramsToUpdateSpan = GenericArrayRoutines.ConvertToSpan(paramsToUpdate);
+        ReadOnlySpan<float> paramGradientsSpan = GenericArrayRoutines.ConvertToReadOnlySpan(paramGradients);
+        Update(paramsKey: paramsToUpdate, paramsToUpdateSpan, paramGradientsSpan);
     }
 
     protected abstract void Update(object paramsKey, Span<float> paramsToUpdate, ReadOnlySpan<float> paramGradients);
