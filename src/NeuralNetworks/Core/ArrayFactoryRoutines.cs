@@ -6,6 +6,12 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides factory and initialization routines for creating single-precision arrays with range-based values, uniformly
+/// distributed random values, and normally distributed random values.
+/// </summary>
+/// <remarks>Includes overloads for multiple array ranks and an in-place extension routine for filling
+/// two-dimensional arrays with reproducible random values from a seed.</remarks>
 public static class ArrayFactoryRoutines
 {
     #region CreateRange
@@ -31,19 +37,19 @@ public static class ArrayFactoryRoutines
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] CreateRange(int dim1, int dim2, int dim3, int dim4, float from, float to)
+    public static float[,,,] CreateRange(int dim0, int dim1, int dim2, int dim3, float from, float to)
     {
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
-        float step = (to - from) / (dim1 * dim2 * dim3 * dim4);
-        for (int i = 0; i < dim1; i++)
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
+        float step = (to - from) / (dim0 * dim1 * dim2 * dim3);
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
-                        res[i, j, k, l] = from + step * (i * dim2 * dim3 * dim4 + j * dim3 * dim4 + k * dim4 + l);
+                        res[i, j, k, l] = from + step * (i * dim1 * dim2 * dim3 + j * dim2 * dim3 + k * dim3 + l);
                     }
                 }
             }
@@ -81,14 +87,14 @@ public static class ArrayFactoryRoutines
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,] CreateRandomNormal(int dim1, int dim2, int dim3, Random random, float mean = 0, float stdDev = 1)
+    public static float[,,] CreateRandomNormal(int dim0, int dim1, int dim2, Random random, float mean = 0, float stdDev = 1)
     {
-        float[,,] res = new float[dim1, dim2, dim3];
-        for (int i = 0; i < dim1; i++)
+        float[,,] res = new float[dim0, dim1, dim2];
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     res[i, j, k] = NextBoxMuller(random) * stdDev + mean;
                 }
@@ -98,16 +104,16 @@ public static class ArrayFactoryRoutines
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] CreateRandomNormal(int dim1, int dim2, int dim3, int dim4, Random random, float mean = 0, float stdDev = 1)
+    public static float[,,,] CreateRandomNormal(int dim0, int dim1, int dim2, int dim3, Random random, float mean = 0, float stdDev = 1)
     {
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
-        for (int i = 0; i < dim1; i++)
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         res[i, j, k, l] = NextBoxMuller(random) * stdDev + mean;
                     }
@@ -140,16 +146,16 @@ public static class ArrayFactoryRoutines
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float[,,,] CreateRandom(int dim1, int dim2, int dim3, int dim4, Random random)
+    public static float[,,,] CreateRandom(int dim0, int dim1, int dim2, int dim3, Random random)
     {
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
-        for (int i = 0; i < dim1; i++)
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         res[i, j, k, l] = random.NextSingle() - 0.5f;
                     }

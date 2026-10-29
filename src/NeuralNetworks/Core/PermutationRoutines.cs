@@ -7,6 +7,12 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides routines for randomly permuting samples along the first dimension of multidimensional arrays, including
+/// in-place and cloned permutations, and synchronized permutations of paired feature and label arrays.
+/// </summary>
+/// <remarks>Implements Fisher-Yates-style row swaps to keep paired datasets aligned during shuffling. Supports
+/// specialized overloads for float and int array shapes and a generic dispatcher for supported type pairs.</remarks>
 public static class PermutationRoutines
 {
     #region Arrays float[,], float[,]

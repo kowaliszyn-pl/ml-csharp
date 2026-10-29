@@ -7,6 +7,13 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides extension methods for computing common statistics on single- and multi-dimensional <see
+/// cref="System.Single"/> arrays, including argmax, min, max, sum, mean, standard deviation, and per-column aggregates.
+/// </summary>
+/// <remarks>Methods are implemented for one-dimensional vectors and for two-, three-, and four-dimensional
+/// arrays. Standard deviation is computed as population standard deviation (dividing by the total element
+/// count).</remarks>
 public static class StatisticRoutines
 {
     /// <summary>
@@ -104,15 +111,15 @@ public static class StatisticRoutines
     {
         float max = float.MinValue;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     max = Math.Max(max, source[i, j, k]);
                 }
@@ -132,18 +139,18 @@ public static class StatisticRoutines
     {
         float max = float.MinValue;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         max = Math.Max(max, source[i, j, k, l]);
                     }
@@ -205,15 +212,15 @@ public static class StatisticRoutines
     {
         float min = float.MaxValue;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     min = Math.Min(min, source[i, j, k]);
                 }
@@ -233,18 +240,18 @@ public static class StatisticRoutines
     {
         float min = float.MaxValue;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         min = Math.Min(min, source[i, j, k, l]);
                     }
@@ -261,7 +268,8 @@ public static class StatisticRoutines
     /// <param name="source">The array whose mean will be computed.</param>
     /// <returns>The arithmetic mean of all elements.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static float Mean(this float[,,,] source) => source.Sum() / source.Length;
+    public static float Mean(this float[,,,] source)
+        => source.Sum() / source.Length;
 
     /// <summary>
     /// Calculates the mean of each column in the source.
@@ -341,15 +349,15 @@ public static class StatisticRoutines
         float mean = source.Mean();
         float sum = 0;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     float value = source[i, j, k] - mean;
                     sum += value * value;
@@ -377,18 +385,18 @@ public static class StatisticRoutines
         float mean = source.Mean();
         float sum = 0;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         float value = source[i, j, k, l] - mean;
                         sum += value * value;
@@ -435,15 +443,15 @@ public static class StatisticRoutines
         // Sum over all elements.
         float sum = 0;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     sum += source[i, j, k];
                 }
@@ -464,18 +472,18 @@ public static class StatisticRoutines
         // Sum over all elements.
         float sum = 0;
 
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         sum += source[i, j, k, l];
                     }

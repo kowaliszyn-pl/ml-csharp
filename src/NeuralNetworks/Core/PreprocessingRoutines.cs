@@ -7,6 +7,13 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides preprocessing routines for numeric array data, including scaling and standardization operations for 2D and
+/// 4D single-precision tensors.
+/// </summary>
+/// <remarks>Includes methods that operate in place and methods that return transformed copies. Supports
+/// whole-array, row-wise, and column-wise standardization, optional range-based targeting, and safeguards for
+/// zero-variance data to avoid division by zero.</remarks>
 public static class PreprocessingRoutines
 {
     /// <summary>
@@ -174,16 +181,16 @@ public static class PreprocessingRoutines
     }
 
     /// <summary>
-    /// Standardizes the source in-place so that each column (or a specified range of dim2) has a mean of 0 and a
+    /// Standardizes the source in-place so that each column (or a specified range of columns) has a mean of 0 and a
     /// standard deviation of 1 by applying the <c> (x - mean) / stdDev</c> transformation.
     /// </summary>
     /// <remarks>
     /// Standard deviation is calculated using the formula: <c> sqrt(sum((x - mean)^2) / N)</c>, where N is the number
-    /// of dim1.
+    /// of rows.
     /// </remarks>
     /// <param name="source">The source to standardize.</param>
     /// <param name="columnRange">
-    /// Optional. The range of dim2 to standardize. If null, all dim2 are standardized.
+    /// Optional. The range of columns to standardize. If null, all columns are standardized.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void StandardizeByColumns(this float[,] source, Range? columnRange = null)
@@ -342,12 +349,12 @@ public static class PreprocessingRoutines
     }
 
     /// <summary>
-    /// Standardizes the source in-place so that each column (or a specified range of dim2) has mean 0 and standard
+    /// Standardizes the source in-place so that each column (or a specified range of columns) has mean 0 and standard
     /// deviation 1, computed in a single pass.
     /// </summary>
     /// <param name="source">The source to standardize.</param>
     /// <param name="columnRange">
-    /// Optional. The range of dim2 to standardize. If null, all dim2 are standardized.
+    /// Optional. The range of columns to standardize. If null, all columns are standardized.
     /// </param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void StandardizeSinglePass(this float[,] source, Range? columnRange = null)

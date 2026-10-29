@@ -7,6 +7,12 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides array slicing and row/column manipulation routines for supported multidimensional array types.
+/// </summary>
+/// <remarks>Includes extension methods for selecting rows, columns, and ranges across dimensions, splitting row
+/// sets by ratio, and writing row values back into arrays. Most slicing operations return new arrays rather than
+/// views.</remarks>
 public static class ArraySlicingRoutines
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -26,11 +32,11 @@ public static class ArraySlicingRoutines
     }
 
     /// <summary>
-    /// Gets a submatrix containing the specified column from the current source. The shape is [dim1, 1].
+    /// Gets a submatrix containing the specified column from the current source. The shape is [rows, 1].
     /// </summary>
     /// <param name="source">The array to slice.</param>
     /// <param name="column">The zero-based column index.</param>
-    /// <returns>A new [dim1, 1] array representing the selected column.</returns>
+    /// <returns>A new [rows, 1] array representing the selected column.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetColumn(this float[,] source, int column)
     {
@@ -49,22 +55,22 @@ public static class ArraySlicingRoutines
     }
 
     /// <summary>
-    /// Gets a submatrix containing the specified range of dim2 from the current source. The shape is [dim1, range].
+    /// Gets a submatrix containing the specified range of columns from the current source. The shape is [rows, range].
     /// </summary>
     /// <param name="source">The array to slice.</param>
-    /// <param name="range">The range specifying the subset of dim2.</param>
-    /// <returns>A new array with [dim1, selectedColumns].</returns>
+    /// <param name="range">The range specifying the subset of columns.</param>
+    /// <returns>A new array with [rows, selectedColumns].</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetColumns(this float[,] source, Range range)
     {
-        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(1));
+        (int offset, int columns) = range.GetOffsetAndLength(source.GetLength(1));
 
         int rows = source.GetLength(0);
-        float[,] res = new float[rows, length];
+        float[,] res = new float[rows, columns];
 
         for (int i = 0; i < rows; i++)
         {
-            for (int j = 0; j < length; j++)
+            for (int j = 0; j < columns; j++)
             {
                 res[i, j] = source[i, j + offset];
             }
@@ -80,7 +86,7 @@ public static class ArraySlicingRoutines
     /// <param name="row">The index of the row to retrieve.</param>
     /// <returns>A new array representing the specified row.</returns>
     /// <remarks>
-    /// The returned row is a new instance and has the same number of dim2 as the original source.
+    /// The returned row is a new instance and has the same number of columns as the original source.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] GetRow(this float[,] source, int row)
@@ -103,21 +109,21 @@ public static class ArraySlicingRoutines
     /// </summary>
     /// <param name="source">The four-dimensional array to slice.</param>
     /// <param name="row">The zero-based index along dimension 0.</param>
-    /// <returns>A new three-dimensional array with shape [dim2, dim3, dim4] containing the selected row.</returns>
+    /// <returns>A new three-dimensional array with shape [dim1, dim2, dim3] containing the selected row.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,] GetRow(this float[,,,] source, int row)
     {
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
         // Create an array to store the row.
-        float[,,] res = new float[dim2, dim3, dim4];
-        for (int i = 0; i < dim2; i++)
+        float[,,] res = new float[dim1, dim2, dim3];
+        for (int i = 0; i < dim1; i++)
         {
-            for (int j = 0; j < dim3; j++)
+            for (int j = 0; j < dim2; j++)
             {
-                for (int k = 0; k < dim4; k++)
+                for (int k = 0; k < dim3; k++)
                 {
                     // Access each element in the specified row.
                     res[i, j, k] = source[row, i, j, k];
@@ -130,11 +136,11 @@ public static class ArraySlicingRoutines
     }
 
     /// <summary>
-    /// Gets the specified row as a two-dimensional array with shape [1, dim2].
+    /// Gets the specified row as a two-dimensional array with shape [1, columns].
     /// </summary>
     /// <param name="source">The two-dimensional array to slice.</param>
     /// <param name="row">The zero-based row index.</param>
-    /// <returns>A new [1, dim2] array containing the row values.</returns>
+    /// <returns>A new [1, columns] array containing the row values.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetRowAs2D(this float[,] source, int row)
     {
@@ -150,10 +156,10 @@ public static class ArraySlicingRoutines
     }
 
     /// <summary>
-    /// Gets a submatrix containing the specified range of dim1 from the current source.
+    /// Gets a submatrix containing the specified range of rows from the current source.
     /// </summary>
     /// <param name="source">The array to slice.</param>
-    /// <param name="range">The range of dim1 to retrieve.</param>
+    /// <param name="range">The range of rows to retrieve.</param>
     /// <returns>A new array representing the submatrix.</returns>
     /// <remarks>
     /// The returned columns are the same as in the original source.
@@ -161,12 +167,12 @@ public static class ArraySlicingRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] GetRows(this float[,] source, Range range)
     {
-        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(0));
+        (int offset, int rows) = range.GetOffsetAndLength(source.GetLength(0));
 
         int columns = source.GetLength(1);
-        float[,] res = new float[length, columns];
+        float[,] res = new float[rows, columns];
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
             {
@@ -180,12 +186,12 @@ public static class ArraySlicingRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int[,] GetRows(this int[,] source, Range range)
     {
-        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(0));
+        (int offset, int rows) = range.GetOffsetAndLength(source.GetLength(0));
 
         int columns = source.GetLength(1);
-        int[,] res = new int[length, columns];
+        int[,] res = new int[rows, columns];
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
             {
@@ -197,26 +203,26 @@ public static class ArraySlicingRoutines
     }
 
     /// <summary>
-    /// Gets a contiguous range of dim1 (dimension 0) from a three-dimensional array.
+    /// Gets a contiguous range of rows from a three-dimensional array.
     /// </summary>
     /// <param name="source">The three-dimensional array to slice.</param>
-    /// <param name="range">The range applied to dimension 0.</param>
-    /// <returns>A new four-dimensional array containing the selected dim1.</returns>
+    /// <param name="range">The range applied to rows.</param>
+    /// <returns>A new three-dimensional array containing the selected rows.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,] GetRows(this float[,,] source, Range range)
     {
-        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(0));
+        (int offset, int dim0) = range.GetOffsetAndLength(source.GetLength(0));
 
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        float[,,] res = new float[length, dim2, dim3];
+        float[,,] res = new float[dim0, dim1, dim2];
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     res[i, j, k] = source[i + offset, j, k];
                 }
@@ -228,29 +234,29 @@ public static class ArraySlicingRoutines
     }
 
     /// <summary>
-    /// Gets a contiguous range of dim1 (dimension 0) from a four-dimensional array.
+    /// Gets a contiguous range of rows from a four-dimensional array.
     /// </summary>
     /// <param name="source">The four-dimensional array to slice.</param>
-    /// <param name="range">The range applied to dimension 0.</param>
-    /// <returns>A new four-dimensional array containing the selected dim1.</returns>
+    /// <param name="range">The range applied to rows.</param>
+    /// <returns>A new four-dimensional array containing the selected rows.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] GetRows(this float[,,,] source, Range range)
     {
-        (int offset, int length) = range.GetOffsetAndLength(source.GetLength(0));
+        (int offset, int dim0) = range.GetOffsetAndLength(source.GetLength(0));
 
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        float[,,,] res = new float[length, dim2, dim3, dim4];
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
 
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         res[i, j, k, l] = source[i + offset, j, k, l];
                     }
@@ -302,17 +308,15 @@ public static class ArraySlicingRoutines
     /// </summary>
     /// <param name="source">The two-dimensional array to modify.</param>
     /// <param name="rowIndex">The index of the row to set.</param>
-    /// <param name="row">The array containing the values to set. Length must equal the number of dim2.</param>
-    /// <exception cref="System.Diagnostics.Debug">
-    /// Asserts when the row index is out of bounds or lengths mismatch.
-    /// </exception>
+    /// <param name="row">The array containing the values to set. Length must equal the number of columns.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void SetRow(this float[,] source, int rowIndex, float[] row)
     {
         Debug.Assert(rowIndex >= 0 && rowIndex < source.GetLength(0), "Row index out of bounds.");
-        Debug.Assert(row.Length == source.GetLength(1), "Row length does not match the number of columns.");
 
         int columns = source.GetLength(1);
+        Debug.Assert(row.Length == columns, "Row length does not match the number of columns.");
+        
         for (int col = 0; col < columns; col++)
         {
             source[rowIndex, col] = row[col];
@@ -324,24 +328,23 @@ public static class ArraySlicingRoutines
     /// </summary>
     /// <param name="source">The four-dimensional array to modify.</param>
     /// <param name="rowIndex">The zero-based index along dimension 0 to set.</param>
-    /// <param name="row">A three-dimensional array with shape [dim2, dim3, dim4] providing values.</param>
+    /// <param name="row">A three-dimensional array with shape [dim1, dim2, dim3] providing values.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void SetRow(this float[,,,] source, int rowIndex, float[,,] row)
     {
         Debug.Assert(rowIndex >= 0 && rowIndex < source.GetLength(0), "Row index out of bounds.");
 
-        //int dim1 = source.GetLength(0);
-        int cols = source.GetLength(1);
-        int depths = source.GetLength(2);
-        int channels = source.GetLength(3);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        for (int col = 0; col < cols; col++)
+        for (int i = 0; i < dim1; i++)
         {
-            for (int depth = 0; depth < depths; depth++)
+            for (int j = 0; j < dim2; j++)
             {
-                for (int channel = 0; channel < channels; channel++)
+                for (int k = 0; k < dim3; k++)
                 {
-                    source[rowIndex, col, depth, channel] = row[col, depth, channel];
+                    source[rowIndex, i, j, k] = row[i, j, k];
                 }
             }
         }

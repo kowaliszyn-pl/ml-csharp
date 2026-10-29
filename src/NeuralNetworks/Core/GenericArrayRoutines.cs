@@ -6,6 +6,12 @@ using System.Runtime.InteropServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides utility methods for working with single- and multi-dimensional <see cref="float"/> arrays, including span
+/// conversion, shape validation, and row-count retrieval.
+/// </summary>
+/// <remarks>Span conversion supports <c>float[]</c>, <c>float[,]</c>, <c>float[,,]</c>, and <c>float[,,,]</c>.
+/// Multi-dimensional arrays are projected as contiguous spans over their underlying storage.</remarks>
 public static class GenericArrayRoutines
 {
     public static Span<float> ConvertToSpan<T>(T matrix)

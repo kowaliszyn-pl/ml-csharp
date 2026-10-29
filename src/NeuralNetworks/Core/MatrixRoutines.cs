@@ -7,6 +7,13 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides extension methods for single-precision matrix and tensor operations, including arithmetic, elementwise
+/// transformations, shape-preserving initialization, clipping, transposition, and matrix multiplication.
+/// </summary>
+/// <remarks>Includes overloads for one-dimensional through four-dimensional arrays. Most operations return a new
+/// array, while methods named InPlace modify the input array directly. Some elementwise operations support broadcasting
+/// across compatible dimensions.</remarks>
 public static class MatrixRoutines
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,7 +37,7 @@ public static class MatrixRoutines
     /// </summary>
     /// <remarks>
     /// This method creates a new array and does not modify the original <paramref name="source"/> array. <para/>
-    /// Complexity: O(n * m), where n = dim1 of <paramref name="source"/>, m = dim2 of <paramref name="source"/>.
+    /// Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>.
     /// </remarks>
     /// <param name="source">The two-dimensional array to process.</param>
     /// <param name="scalar">The value to add to each element.</param>
@@ -76,7 +83,7 @@ public static class MatrixRoutines
     /// </summary>
     /// <remarks>
     /// This method modifies the contents of the <paramref name="source"/> array directly. The array must be initialized
-    /// before calling this method. <para/> Complexity: O(n * m), where n = dim1 of <paramref name="source"/>, m = dim2
+    /// before calling this method. <para/> Complexity: O(n * m), where n = rows of <paramref name="source"/>, m = columns
     /// of <paramref name="source"/>.
     /// </remarks>
     /// <param name="source">
@@ -111,15 +118,15 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddInPlace(this float[,,] source, float scalar)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     source[i, j, k] += scalar;
                 }
@@ -140,18 +147,18 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void AddInPlace(this float[,,,] source, float scalar)
     {
-        int rows = source.GetLength(0);
-        int columns = source.GetLength(1);
-        int depth = source.GetLength(2);
-        int channels = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        for (int i = 0; i < rows; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < columns; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < depth; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < channels; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         source[i, j, k, l] += scalar;
                     }
@@ -167,11 +174,11 @@ public static class MatrixRoutines
     /// <remarks>
     /// This method creates a new array and does not modify the original <paramref name="source"/> array. It adds
     /// <paramref name="vector"/> to each row of <paramref name="source"/> elementwise. <para/> Complexity: O(n * m),
-    /// where n = dim1 of <paramref name="source"/>, m = dim2 of <paramref name="source"/>.
+    /// where n = rows of <paramref name="source"/>, m = columns of <paramref name="source"/>.
     /// </remarks>
     /// <param name="source">The source two-dimensional array.</param>
     /// <param name="vector">
-    /// The row values to be added elementwise to each row of the source. Length must equal the number of dim2.
+    /// The row values to be added elementwise to each row of the source. Length must equal the number of columns.
     /// </param>
     /// <returns>A new array containing the elementwise sum of each row with <paramref name="vector"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -203,20 +210,20 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] AsOnes(this float[,,,] source)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         res[i, j, k, l] = 1;
                     }
@@ -277,7 +284,7 @@ public static class MatrixRoutines
     /// Creates a new two-dimensional array with elements set to 1 with probability <paramref name="onesProbability"/>,
     /// otherwise 0.
     /// </summary>
-    /// <param name="source">The array used only for shape (dim1 and dim2).</param>
+    /// <param name="source">The array used only for shape (rows and columns).</param>
     /// <param name="onesProbability">Probability of placing 1 in a cell. Must be between 0 and 1.</param>
     /// <param name="random">The random number generator instance.</param>
     /// <returns>A new array with the same shape as <paramref name="source"/> containing zeros and ones.</returns>
@@ -304,16 +311,16 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,] AsZeroOnes(this float[,,] source, float onesProbability, Random random)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        float[,,] res = new float[dim1, dim2, dim3];
-        for (int i = 0; i < dim1; i++)
+        float[,,] res = new float[dim0, dim1, dim2];
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
                     if (random.NextDouble() < onesProbability)
                     {
@@ -336,19 +343,19 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] AsZeroOnes(this float[,,,] source, float onesProbability, Random random)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
-        for (int i = 0; i < dim1; i++)
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         if (random.NextDouble() < onesProbability)
                         {
@@ -511,17 +518,17 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void DivideInPlace(this float[,,] source, float scalar)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        for (int d1 = 0; d1 < dim1; d1++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int d2 = 0; d2 < dim2; d2++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int d3 = 0; d3 < dim3; d3++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    source[d1, d2, d3] /= scalar;
+                    source[i, j, k] /= scalar;
                 }
             }
         }
@@ -535,20 +542,20 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void DivideInPlace(this float[,,,] source, float scalar)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        for (int d1 = 0; d1 < dim1; d1++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int d2 = 0; d2 < dim2; d2++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int d3 = 0; d3 < dim3; d3++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int d4 = 0; d4 < dim4; d4++)
+                    for (int l = 0; l < dim3; l++)
                     {
-                        source[d1, d2, d3, d4] /= scalar;
+                        source[i, j, k, l] /= scalar;
                     }
                 }
             }
@@ -606,7 +613,7 @@ public static class MatrixRoutines
     /// Multiplies each element of the source by a scalar value.
     /// </summary>
     /// <remarks>
-    /// Complexity: O(n * m), where n = dim1 of <paramref name="source"/>, m = dim2 of <paramref name="source"/>
+    /// Complexity: O(n), where n = length of <paramref name="source"/>
     /// </remarks>
     /// <param name="source">The one-dimensional array to multiply.</param>
     /// <param name="scalar">The multiplier.</param>
@@ -614,7 +621,7 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[] Multiply(this float[] source, float scalar)
     {
-        int length = source.GetLength(0);
+        int length = source.Length;
         float[] res = new float[length];
         for (int i = 0; i < length; i++)
         {
@@ -626,19 +633,19 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,] Multiply(this float[,,] source, float scalar)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        float[,,] res = new float[dim1, dim2, dim3];
+        float[,,] res = new float[dim0, dim1, dim2];
 
-        for (int d1 = 0; d1 < dim1; d1++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int d2 = 0; d2 < dim2; d2++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int d3 = 0; d3 < dim3; d3++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    res[d1, d2, d3] = source[d1, d2, d3] * scalar;
+                    res[i, j, k] = source[i, j, k] * scalar;
                 }
             }
         }
@@ -655,22 +662,22 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Multiply(this float[,,,] source, float scalar)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
 
-        for (int d1 = 0; d1 < dim1; d1++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int d2 = 0; d2 < dim2; d2++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int d3 = 0; d3 < dim3; d3++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int d4 = 0; d4 < dim4; d4++)
+                    for (int l = 0; l < dim3; l++)
                     {
-                        res[d1, d2, d3, d4] = source[d1, d2, d3, d4] * scalar;
+                        res[i, j, k, l] = source[i, j, k, l] * scalar;
                     }
                 }
             }
@@ -683,7 +690,7 @@ public static class MatrixRoutines
     /// Multiplies the current source with another source using the dot product.
     /// </summary>
     /// <remarks>
-    /// Complexity: O(n * m * p), where n = dim1 of <paramref name="source"/>, m = shared dimension, p = dim2 of
+    /// Complexity: O(n * m * p), where n = rows of <paramref name="source"/>, m = shared dimension, p = columns of
     /// <paramref name="matrix"/>
     /// </remarks>
     /// <param name="source">Left operand with shape [n, m].</param>
@@ -760,29 +767,29 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,] MultiplyElementwise(this float[,,] source, float[,,] matrix)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
 
-        int matrixDim1 = matrix.GetLength(0);
-        int matrixDim2 = matrix.GetLength(1);
-        int matrixDim3 = matrix.GetLength(2);
+        int matrixDim0 = matrix.GetLength(0);
+        int matrixDim1 = matrix.GetLength(1);
+        int matrixDim2 = matrix.GetLength(2);
 
+        int maxDim0 = Math.Max(dim0, matrixDim0);
         int maxDim1 = Math.Max(dim1, matrixDim1);
         int maxDim2 = Math.Max(dim2, matrixDim2);
-        int maxDim3 = Math.Max(dim3, matrixDim3);
 
-        float[,,] res = new float[maxDim1, maxDim2, maxDim3];
+        float[,,] res = new float[maxDim0, maxDim1, maxDim2];
 
-        for (int d1 = 0; d1 < maxDim1; d1++)
+        for (int i = 0; i < maxDim0; i++)
         {
-            for (int d2 = 0; d2 < maxDim2; d2++)
+            for (int j = 0; j < maxDim1; j++)
             {
-                for (int d3 = 0; d3 < maxDim3; d3++)
+                for (int k = 0; k < maxDim2; k++)
                 {
-                    float thisValue = source[d1 % dim1, d2 % dim2, d3 % dim3];
-                    float matrixValue = matrix[d1 % matrixDim1, d2 % matrixDim2, d3 % matrixDim3];
-                    res[d1, d2, d3] = thisValue * matrixValue;
+                    float thisValue = source[i % dim0, j % dim1, k % dim2];
+                    float matrixValue = matrix[i % matrixDim0, j % matrixDim1, k % matrixDim2];
+                    res[i, j, k] = thisValue * matrixValue;
                 }
             }
         }
@@ -806,34 +813,34 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] MultiplyElementwise(this float[,,,] source, float[,,,] matrix)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        int matrixDim1 = matrix.GetLength(0);
-        int matrixDim2 = matrix.GetLength(1);
-        int matrixDim3 = matrix.GetLength(2);
-        int matrixDim4 = matrix.GetLength(3);
+        int matrixDim0 = matrix.GetLength(0);
+        int matrixDim1 = matrix.GetLength(1);
+        int matrixDim2 = matrix.GetLength(2);
+        int matrixDim3 = matrix.GetLength(3);
 
+        int maxDim0 = Math.Max(dim0, matrixDim0);
         int maxDim1 = Math.Max(dim1, matrixDim1);
         int maxDim2 = Math.Max(dim2, matrixDim2);
         int maxDim3 = Math.Max(dim3, matrixDim3);
-        int maxDim4 = Math.Max(dim4, matrixDim4);
 
-        float[,,,] res = new float[maxDim1, maxDim2, maxDim3, maxDim4];
+        float[,,,] res = new float[maxDim0, maxDim1, maxDim2, maxDim3];
 
-        for (int d1 = 0; d1 < maxDim1; d1++)
+        for (int i = 0; i < maxDim0; i++)
         {
-            for (int d2 = 0; d2 < maxDim2; d2++)
+            for (int j = 0; j < maxDim1; j++)
             {
-                for (int d3 = 0; d3 < maxDim3; d3++)
+                for (int k = 0; k < maxDim2; k++)
                 {
-                    for (int d4 = 0; d4 < maxDim4; d4++)
+                    for (int l = 0; l < maxDim3; l++)
                     {
-                        float thisValue = source[d1 % dim1, d2 % dim2, d3 % dim3, d4 % dim4];
-                        float matrixValue = matrix[d1 % matrixDim1, d2 % matrixDim2, d3 % matrixDim3, d4 % matrixDim4];
-                        res[d1, d2, d3, d4] = thisValue * matrixValue;
+                        float thisValue = source[i % dim0, j % dim1, k % dim2, l % dim3];
+                        float matrixValue = matrix[i % matrixDim0, j % matrixDim1, k % matrixDim2, l % matrixDim3];
+                        res[i, j, k, l] = thisValue * matrixValue;
                     }
                 }
             }
@@ -849,11 +856,11 @@ public static class MatrixRoutines
     /// <param name="source">The one-dimensional array treated as a row vector.</param>
     /// <param name="matrix">The two-dimensional array to multiply elementwise.</param>
     /// <returns>
-    /// A new two-dimensional array of shape [dim1 of <paramref name="matrix"/>, max(dim2)] containing the elementwise
+    /// A new two-dimensional array of shape [rows of <paramref name="matrix"/>, max(columns)] containing the elementwise
     /// product.
     /// </returns>
     /// <remarks>
-    /// If the dimensions are not the same, the smaller array is broadcasted across dim2.
+    /// If the dimensions are not the same, the smaller array is broadcasted across columns.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,] MultiplyElementwise(this float[] source, float[,] matrix)
@@ -931,22 +938,22 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Power(this float[,,,] source, int scalar)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
 
-        for (int d1 = 0; d1 < dim1; d1++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int d2 = 0; d2 < dim2; d2++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int d3 = 0; d3 < dim3; d3++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int d4 = 0; d4 < dim4; d4++)
+                    for (int l = 0; l < dim3; l++)
                     {
-                        res[d1, d2, d3, d4] = MathF.Pow(source[d1, d2, d3, d4], scalar);
+                        res[i, j, k, l] = MathF.Pow(source[i, j, k, l], scalar);
                     }
                 }
             }
@@ -964,22 +971,22 @@ public static class MatrixRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Subtract(this float[,,,] source, float[,,,] matrix)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
 
-        for (int d1 = 0; d1 < dim1; d1++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int d2 = 0; d2 < dim2; d2++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int d3 = 0; d3 < dim3; d3++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int d4 = 0; d4 < dim4; d4++)
+                    for (int l = 0; l < dim3; l++)
                     {
-                        res[d1, d2, d3, d4] = source[d1, d2, d3, d4] - matrix[d1, d2, d3, d4];
+                        res[i, j, k, l] = source[i, j, k, l] - matrix[i, j, k, l];
                     }
                 }
             }
@@ -1025,6 +1032,7 @@ public static class MatrixRoutines
     public static float[] Subtract(this float[] source, float[] matrix)
     {
         Debug.Assert(source.GetLength(0) == matrix.GetLength(0));
+
         int length = source.GetLength(0);
         float[] res = new float[length];
         for (int i = 0; i < length; i++)

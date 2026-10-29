@@ -4,6 +4,11 @@
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides extension methods for comparing the shape of single- and multi-dimensional <see cref="float"/> arrays.
+/// </summary>
+/// <remarks>Includes overloads that verify dimension lengths match for array ranks one through four. Useful for
+/// validating array compatibility before element-wise operations.</remarks>
 public static class ArrayRoutines
 {
     /// <summary>
@@ -20,7 +25,7 @@ public static class ArrayRoutines
     /// </summary>
     /// <param name="source">The first array.</param>
     /// <param name="matrix">The second array.</param>
-    /// <returns>True if both arrays have equal dim1 and dim2; otherwise false.</returns>
+    /// <returns>True if both arrays have equal rows and columns; otherwise false.</returns>
     public static bool HasSameShape(this float[,] source, float[,] matrix)
         => source.GetLength(0) == matrix.GetLength(0)
             && source.GetLength(1) == matrix.GetLength(1);

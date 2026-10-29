@@ -7,6 +7,12 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides activation routines for neural network computations.
+/// </summary>
+/// <remarks>Includes element-wise transformations and probability normalization operations for single-precision
+/// tensors, with row-wise softmax and log-softmax variants and numerically stable implementations where applicable.
+/// Methods return new arrays and do not mutate inputs.</remarks>
 public static class ActivationRoutines
 {
     /// <summary>
@@ -336,20 +342,20 @@ public static class ActivationRoutines
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static float[,,,] Tanh(this float[,,,] source)
     {
-        int dim1 = source.GetLength(0);
-        int dim2 = source.GetLength(1);
-        int dim3 = source.GetLength(2);
-        int dim4 = source.GetLength(3);
+        int dim0 = source.GetLength(0);
+        int dim1 = source.GetLength(1);
+        int dim2 = source.GetLength(2);
+        int dim3 = source.GetLength(3);
 
-        float[,,,] res = new float[dim1, dim2, dim3, dim4];
+        float[,,,] res = new float[dim0, dim1, dim2, dim3];
 
-        for (int i = 0; i < dim1; i++)
+        for (int i = 0; i < dim0; i++)
         {
-            for (int j = 0; j < dim2; j++)
+            for (int j = 0; j < dim1; j++)
             {
-                for (int k = 0; k < dim3; k++)
+                for (int k = 0; k < dim2; k++)
                 {
-                    for (int l = 0; l < dim4; l++)
+                    for (int l = 0; l < dim3; l++)
                     {
                         res[i, j, k, l] = MathF.Tanh(source[i, j, k, l]);
                     }

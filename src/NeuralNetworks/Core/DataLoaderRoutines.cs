@@ -6,6 +6,11 @@ using System.Runtime.CompilerServices;
 
 namespace NeuralNetworks.Core;
 
+/// <summary>
+/// Provides routines for loading separator-delimited text data into two-dimensional <see langword="float"/> arrays.
+/// </summary>
+/// <remarks>Supports comma-separated and tab-separated formats, optionally skipping header lines. Values are
+/// parsed using invariant culture and optional surrounding double quotes are trimmed.</remarks>
 public static class DataLoaderRoutines
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
