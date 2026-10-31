@@ -10,8 +10,7 @@ namespace NeuralNetworks.Core;
 /// <summary>
 /// Provides activation routines for neural network computations.
 /// </summary>
-/// <remarks>Includes element-wise transformations and probability normalization operations for single-precision
-/// tensors, with row-wise softmax and log-softmax variants and numerically stable implementations where applicable.
+/// <remarks>Includes element-wise transformations and probability normalization operations for <see cref="float"/> arrays, with row-wise softmax and log-softmax variants and numerically stable implementations where applicable.
 /// Methods return new arrays and do not mutate inputs.</remarks>
 public static class ActivationRoutines
 {

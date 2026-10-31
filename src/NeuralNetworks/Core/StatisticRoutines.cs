@@ -8,8 +8,7 @@ using System.Runtime.CompilerServices;
 namespace NeuralNetworks.Core;
 
 /// <summary>
-/// Provides extension methods for computing common statistics on single- and multi-dimensional <see
-/// cref="System.Single"/> arrays, including argmax, min, max, sum, mean, standard deviation, and per-column aggregates.
+/// Provides extension methods for computing common statistics on single- and multi-dimensional <see cref="float"/> arrays, including argmax, min, max, sum, mean, standard deviation, and per-column aggregates.
 /// </summary>
 /// <remarks>Methods are implemented for one-dimensional vectors and for two-, three-, and four-dimensional
 /// arrays. Standard deviation is computed as population standard deviation (dividing by the total element

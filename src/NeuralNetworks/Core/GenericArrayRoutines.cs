@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 namespace NeuralNetworks.Core;
 
 /// <summary>
-/// Provides utility methods for working with single- and multi-dimensional <see cref="float"/> arrays, including span
+/// Provides utility methods for working with generic types, including span
 /// conversion, shape validation, and row-count retrieval.
 /// </summary>
 /// <remarks>Span conversion supports <c>float[]</c>, <c>float[,]</c>, <c>float[,,]</c>, and <c>float[,,,]</c>.

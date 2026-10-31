@@ -9,7 +9,7 @@ namespace NeuralNetworks.Core;
 
 /// <summary>
 /// Provides preprocessing routines for numeric array data, including scaling and standardization operations for 2D and
-/// 4D single-precision tensors.
+/// 4D <see cref="float"/> arrays.
 /// </summary>
 /// <remarks>Includes methods that operate in place and methods that return transformed copies. Supports
 /// whole-array, row-wise, and column-wise standardization, optional range-based targeting, and safeguards for

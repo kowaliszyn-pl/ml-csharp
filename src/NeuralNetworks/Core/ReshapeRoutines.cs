@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace NeuralNetworks.Core;
 
 /// <summary>
-/// Provides reshape routines for converting between 4D and 2D <see cref="System.Single"/> arrays by flattening and
+/// Provides reshape routines for converting between 4D and 2D <see cref="float"/> arrays by flattening and
 /// restoring trailing dimensions.
 /// </summary>
 /// <remarks>Preserves element order by mapping each 4D slice <c>[dim1, dim2, dim3]</c> to a contiguous 2D row

@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace NeuralNetworks.Core;
 
 /// <summary>
-/// Provides extension methods for single-precision matrix and tensor operations, including arithmetic, elementwise
+/// Provides extension methods for <see cref="float"/> array operations, including arithmetic, elementwise
 /// transformations, shape-preserving initialization, clipping, transposition, and matrix multiplication.
 /// </summary>
 /// <remarks>Includes overloads for one-dimensional through four-dimensional arrays. Most operations return a new

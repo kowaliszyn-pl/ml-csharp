@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 namespace NeuralNetworks.Core;
 
 /// <summary>
-/// Provides factory and initialization routines for creating single-precision arrays with range-based values, uniformly
+/// Provides factory and initialization routines for creating <see cref="float"/> arrays with range-based values, uniformly
 /// distributed random values, and normally distributed random values.
 /// </summary>
 /// <remarks>Includes overloads for multiple array ranks and an in-place extension routine for filling
