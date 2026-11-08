@@ -182,10 +182,10 @@ internal class Word2Vec
 
         // Create trainer
         Trainer<int[,], float[,]> trainer = new(
-            model, 
-            optimizer, 
-            ConsoleOutputMode.OnlyOnEval, 
-            commonRandom, 
+            model,
+            optimizer,
+            ConsoleOutputMode.OnlyOnEval,
+            commonRandom,
             logger
         );
 
@@ -209,7 +209,6 @@ internal class Word2Vec
 
         // Demonstrate word similarity
         DemonstrateWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
-
 
     }
 

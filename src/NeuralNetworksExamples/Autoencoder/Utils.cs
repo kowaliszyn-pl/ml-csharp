@@ -3,7 +3,7 @@
 // www.kowaliszyn.pl, 2025 - 2026
 
 using static System.Console;
-using static NeuralNetworksExamples.Helpers.AccordHelper;
+using static NeuralNetworksExamples.Helpers.AccordUtils;
 using static NeuralNetworksExamples.Helpers.ScottPlotUtils;
 
 namespace NeuralNetworksExamples.Autoencoder;
