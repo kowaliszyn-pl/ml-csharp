@@ -181,7 +181,13 @@ internal class Word2Vec
         AdamOptimizer optimizer = new(learningRateSchedule);
 
         // Create trainer
-        Trainer<int[,], float[,]> trainer = new(model, optimizer, ConsoleOutputMode.OnlyOnEval, commonRandom, logger);
+        Trainer<int[,], float[,]> trainer = new(
+            model, 
+            optimizer, 
+            ConsoleOutputMode.OnlyOnEval, 
+            commonRandom, 
+            logger
+        );
 
         Console.WriteLine("🚀 Training Word2Vec model...\n");
 
@@ -203,6 +209,8 @@ internal class Word2Vec
 
         // Demonstrate word similarity
         DemonstrateWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
+
+
     }
 
     private static void DisplayAllWordsWithEmbeddings(float[,] embeddings, List<string> tokenIdToWord)
@@ -249,6 +257,18 @@ internal class Word2Vec
                 AnsiConsole.MarkupLine($"[yellow]{word}[/] ≈ {string.Join(", ", similarWords)}");
             }
         }
+
+        /*
+         *  Produces:
+         *  
+         *  Word Similarities
+         *  king ≈ queen (0,882), continent (0,670), royal (0,480), young (0,414)
+         *  queen ≈ king (0,882), continent (0,583), rules (0,487), both (0,453)
+         *  man ≈ woman (0,975), boy (0,798), young (0,752), son (0,687)
+         *  woman ≈ man (0,975), young (0,756), boy (0,711), son (0,617)
+         *  boy ≈ son (0,835), man (0,798), woman (0,711), daughter (0,706)
+         *  girl ≈ daughter (0,912), margrethe (0,791), elizabeth (0,707), two (0,665)
+         */
 
         // Test the following analogies:
         // king - man + woman = ?
@@ -310,6 +330,18 @@ internal class Word2Vec
                 AnsiConsole.MarkupLine($"[yellow]{wordA}[/] - [yellow]{wordB}[/] + [yellow]{wordC}[/] ≈ [green]{bestMatches[0].word}[/] [dim]({bestMatches[0].similarity:F3})[/], [green]{bestMatches[1].word}[/] [dim]({bestMatches[1].similarity:F3})[/], [green]{bestMatches[2].word}[/] [dim]({bestMatches[2].similarity:F3})[/], [green]{bestMatches[3].word}[/] [dim]({bestMatches[3].similarity:F3})[/]");
             }
         }
+
+        /* Produces:
+         * 
+         * Word Analogies
+         * king - man + woman ≈ queen (0,820), continent (0,778), not (0,709), country (0,586)
+         * queen - woman + man ≈ king (0,780), royal (0,609), young (0,549), family (0,448)
+         * man - boy + girl ≈ female (0,810), margrethe (0,733), elizabeth (0,651), ii (0,592)
+         * woman - girl + boy ≈ man (0,760), state (0,505), royal (0,487), three (0,487)
+         * sweden - stockholm + copenhagen ≈ denmark (0,972), rulers (0,729), called (0,686), england (0,539)
+         * england - london + warsaw ≈ poland (0,888), ruler (0,830), who (0,827), denmark (0,756)
+         * iii - 3 + 9 ≈ ix (0,989), frederik (0,815), nine (0,587), australia (0,567)
+         */
     }
 
     private static List<string> FindSimilarWords(float[,] embeddings, List<string> tokenIdToWord, int queryTokenId, int topK)
@@ -359,9 +391,6 @@ internal class Word2Vec
             normA += valA * valA;
             normB += valB * valB;
         }
-
-        if (normA <= 0 || normB <= 0)
-            return 0;
 
         float denominator = MathF.Sqrt(normA) * MathF.Sqrt(normB);
         return denominator > 0 ? dotProduct / denominator : 0;

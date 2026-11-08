@@ -2,13 +2,9 @@
 // File name: Utils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using Accord.MachineLearning.Clustering;
-
-using ScottPlot;
-using ScottPlot.Plottables;
-using ScottPlot.Statistics;
-
 using static System.Console;
+using static NeuralNetworksExamples.Helpers.AccordHelper;
+using static NeuralNetworksExamples.Helpers.ScottPlotUtils;
 
 namespace NeuralNetworksExamples.Autoencoder;
 
@@ -22,74 +18,40 @@ internal static class Utils
 
         foreach (int index in selectedImages)
         {
-            Helpers.Drawing.SaveMnistPicture(100, index, originalImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_original_{index}");
-            Helpers.Drawing.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_reconstructed_{index}");
+            Helpers.DrawingUtils.SaveMnistPicture(100, index, originalImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_original_{index}");
+            Helpers.DrawingUtils.SaveMnistPicture(100, index, reconstructedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_reconstructed_{index}");
         }
 
         for (int i = 0; i < randomlyGeneratedImages.GetLength(0); i++)
         {
-            Helpers.Drawing.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_random_{i}");
+            Helpers.DrawingUtils.SaveMnistPicture(100, i, randomlyGeneratedImages, $"{modelName}_{bottleneckActivationFunction}_{bottleneckDim}_random_{i}");
         }
     }
 
     internal static void VisualizeWithHistogramAndTSNE(string modelName, string bottleneckActivationFunction, float[,] labels, float[,] encoded)
     {
-        // Convert to double[][] for Accord.NET
-        int n = encoded.GetLength(0);
+        int rows = encoded.GetLength(0);
         int dim = encoded.GetLength(1);
-        double[][] encodedDouble = new double[n][];
-        for (int i = 0; i < n; i++)
-        {
-            encodedDouble[i] = new double[dim];
-            for (int j = 0; j < dim; j++)
-            {
-                encodedDouble[i][j] = encoded[i, j];
-            }
-        }
-
-        // Apply t-SNE
-        WriteLine("Applying t-SNE reduction...");
-        TSNE tsne = new()
-        {
-            NumberOfOutputs = 2,
-            Perplexity = 30
-        };
+        string outputPath;
 
         try
         {
-            double[][] reduced = tsne.Transform(encodedDouble);
+            float[,] reduced = TransformWithTSNE(encoded, outputDimensions: 2, perplexity: 30);
 
-            // Create plot
             WriteLine("Creating visualization...");
-            Plot plt = new();
 
-            // Group points by digit
-            for (int digit = 0; digit <= 9; digit++)
-            {
-                List<double> xPoints = [];
-                List<double> yPoints = [];
+            outputPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{rows}_tsne.png";
 
-                for (int i = 0; i < n; i++)
-                {
-                    if ((int)labels[i, 0] == digit)
-                    {
-                        xPoints.Add(reduced[i][0]);
-                        yPoints.Add(reduced[i][1]);
-                    }
-                }
-
-                Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
-                scatter.LegendText = $"Digit {digit}";
-                scatter.MarkerSize = 5;
-            }
-
-            plt.ShowLegend();
-            plt.Title($"t-SNE Visualization of Latent Space ({modelName}, bottleneck={dim}, points={n})");
-            plt.XLabel("t-SNE Component 1");
-            plt.YLabel("t-SNE Component 2");
-
-            string outputPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{n}_tsne.png";
-            plt.SavePng(outputPath, 1200, 900);
+            SavePointsAsPng(
+                reduced,
+                labels,
+                $"t-SNE Visualization of Latent Space ({modelName}, bottleneck={dim}, points={rows})",
+                "t-SNE Component 1",
+                "t-SNE Component 2",
+                1200,
+                900,
+                outputPath
+            );
 
             ForegroundColor = ConsoleColor.Green;
             WriteLine($"t-SNE plot saved to {outputPath}");
@@ -106,40 +68,20 @@ internal static class Utils
 
         WriteLine("Creating histogram of encoded values...");
 
-        int binCount = 20;
-        double[] allValues = new double[encoded.Length];
-        int index = 0;
-        for (int i = 0; i < encoded.GetLength(0); i++)
-        {
-            for (int j = 0; j < encoded.GetLength(1); j++)
-            {
-                allValues[index++] = encoded[i, j];
-            }
-        }
+        outputPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{rows}_histogram.png";
 
-        Histogram histogram = Histogram.WithBinCount(binCount, allValues);
-        Plot pltHistogram = new();
-
-        // add histogram to the plot
-        Bar[] bars = [.. Enumerable.Range(0, histogram.Counts.Length)
-            .Select(i => new Bar
-            {
-                Position = histogram.Bins[i] + histogram.FirstBinSize / 2, // center of bin
-                Value = histogram.Counts[i],
-                Size = histogram.FirstBinSize
-            })];
-
-        pltHistogram.Add.Bars(bars);
-
-        pltHistogram.Title($"Histogram of Encoded Values ({modelName}, bottleneck={dim})");
-        pltHistogram.XLabel("Encoded Value");
-        pltHistogram.YLabel("Frequency");
-
-        string histogramPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{n}_histogram.png";
-        pltHistogram.SavePng(histogramPath, 1200, 900);
+        SaveHistogramAsPng(
+            encoded,
+            20,
+            $"Histogram of Encoded Values ({modelName}, bottleneck={dim})",
+            "Encoded Value",
+            "Frequency",
+            1200,
+            900,
+            outputPath);
 
         ForegroundColor = ConsoleColor.Green;
-        WriteLine($"Histogram saved to {histogramPath}");
+        WriteLine($"Histogram saved to {outputPath}");
         ResetColor();
     }
 

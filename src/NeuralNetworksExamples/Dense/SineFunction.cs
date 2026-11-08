@@ -19,7 +19,7 @@ using NeuralNetworks.ParamInitializers;
 using NeuralNetworks.Trainers;
 
 using static System.Console;
-using static NeuralNetworksExamples.Helpers.Drawing;
+using static NeuralNetworksExamples.Helpers.DrawingUtils;
 
 namespace NeuralNetworksExamples.Dense;
 

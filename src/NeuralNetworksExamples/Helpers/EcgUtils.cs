@@ -4,7 +4,7 @@
 
 using static System.Console;
 using static NeuralNetworks.Core.DataLoaderRoutines;
-using static NeuralNetworksExamples.Helpers.Drawing;
+using static NeuralNetworksExamples.Helpers.DrawingUtils;
 
 namespace NeuralNetworksExamples.Helpers;
 

@@ -1,5 +1,5 @@
 ﻿// Neural Networks in C♯
-// File name: Drawing.cs
+// File name: DrawingUtils.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
 using System.Diagnostics.CodeAnalysis;
@@ -10,9 +10,9 @@ using NeuralNetworks.Core;
 namespace NeuralNetworksExamples.Helpers;
 
 [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Display one warning at beginning of the method")]
-public class Drawing
+public static class DrawingUtils
 {
-#warning The NeuralNetworksExamples.Drawing class uses System.Drawing, which may not be fully supported on all platforms. Ensure that the necessary dependencies are available and that the application is run in an environment that supports System.Drawing (e.g., Windows).
+#warning The NeuralNetworksExamples.Helpers.DrawingUtils class uses System.Drawing, which may not be fully supported on all platforms. Ensure that the necessary dependencies are available and that the application is run in an environment that supports System.Drawing (e.g., Windows).
 
     #region Create and save pictures
 
@@ -70,6 +70,11 @@ public class Drawing
     {
         float[] chartData = ecgData.GetRow(index);
 
+        if (chartData.Length < 2)
+        {
+            throw new ArgumentException("Chart data must contain at least two points to draw a line.");
+        }
+
         // Build the ECG chart from the data
         using Bitmap bitmap = new(chartWidth, chartHeight, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
@@ -101,11 +106,6 @@ public class Drawing
 
         // Draw the ECG line
         using Pen redPen = new(Color.Red, 2);
-
-        if (chartData.Length < 2)
-        {
-            throw new ArgumentException("Chart data must contain at least two points to draw a line.");
-        }
 
         float xStep = canvasWidth / (float)(chartData.Length - 1);
         float valueRange = maxValue - minValue;
