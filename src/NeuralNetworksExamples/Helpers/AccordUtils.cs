@@ -11,7 +11,7 @@ internal static class AccordUtils
 {
     public static float[,] TransformWithTSNE(float[,] inputData, int outputDimensions = 2, int perplexity = 30)
     {
-        double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData, out int rows);
+        double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData);
 
         TSNE tsne = new()
         {
@@ -21,12 +21,12 @@ internal static class AccordUtils
 
         double[][] reducedDouble = tsne.Transform(inputDataDouble);
 
-        return ConvertToFloat2DArray(outputDimensions, rows, reducedDouble);
+        return ConvertToFloat2DArray(outputDimensions, reducedDouble);
     }
 
     public static float[,] TransformWithPCA(float[,] inputData, int outputDimensions = 2)
     {
-        double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData, out int rows);
+        double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData);
 
         PrincipalComponentAnalysis pca = new()
         {
@@ -42,13 +42,13 @@ internal static class AccordUtils
         //    Console.WriteLine($"Embedding {i} -> X: {coords2D[i][0]:F4}, Y: {coords2D[i][1]:F4}");
         //}
 
-        return ConvertToFloat2DArray(outputDimensions, rows, reducedDouble);
+        return ConvertToFloat2DArray(outputDimensions, reducedDouble);
     }
 
-    private static double[][] ConvertToDoubleJaggedArray(float[,] inputData, out int rows)
+    private static double[][] ConvertToDoubleJaggedArray(float[,] inputData)
     {
         // Convert to double[][] for Accord.NET
-        rows = inputData.GetLength(0);
+        int rows = inputData.GetLength(0);
         int inputDimensions = inputData.GetLength(1);
         double[][] inputDataDouble = new double[rows][];
         for (int i = 0; i < rows; i++)
@@ -62,8 +62,9 @@ internal static class AccordUtils
         return inputDataDouble;
     }
 
-    private static float[,] ConvertToFloat2DArray(int outputDimensions, int rows, double[][] reducedDouble)
+    private static float[,] ConvertToFloat2DArray(int outputDimensions, double[][] reducedDouble)
     {
+        int rows = reducedDouble.Length;
         float[,] reducedFloat = new float[rows, outputDimensions];
         for (int i = 0; i < rows; i++)
         {
