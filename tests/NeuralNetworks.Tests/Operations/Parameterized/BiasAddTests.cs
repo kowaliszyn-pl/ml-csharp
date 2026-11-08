@@ -15,7 +15,7 @@ public class BiasAddTests
         // Arrange
         float[] bias = [1f, -2f];
         BiasAdd biasAdd = new(bias);
-        float[,] input = { { 1f, 1f } };
+        float[,] input = { { 1f, 1f }, { 1f, 1f } };
         _ = biasAdd.Forward(input, false);
         float[,] outputGradient = { { 2f, 3f }, { 4f, 5f } };
 
@@ -34,7 +34,7 @@ public class BiasAddTests
         float[] bias = [1f, -2f];
         ElasticNetRegularizer regularizer = new(l1: 0.1f, l2: 0.2f);
         BiasAdd biasAdd = new(bias, regularizer);
-        float[,] input = { { 1f, 1f } };
+        float[,] input = { { 1f, 1f }, { 1f, 1f } };
         _ = biasAdd.Forward(input, false);
         float[,] outputGradient = { { 2f, 3f }, { 4f, 5f } };
 
