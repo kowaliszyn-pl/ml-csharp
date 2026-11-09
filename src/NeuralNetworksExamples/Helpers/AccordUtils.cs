@@ -28,19 +28,15 @@ internal static class AccordUtils
     {
         double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData);
 
+        // pol. Analiza Głównych Składowych
         PrincipalComponentAnalysis pca = new()
         {
-            Method = PrincipalComponentMethod.CovarianceMatrix
+            Method = PrincipalComponentMethod.Center
         };
 
         pca.Learn(inputDataDouble);
         pca.NumberOfOutputs = outputDimensions;
         double[][] reducedDouble = pca.Transform(inputDataDouble);
-
-        //for (int i = 0; i < coords2D.Length; i++)
-        //{
-        //    Console.WriteLine($"Embedding {i} -> X: {coords2D[i][0]:F4}, Y: {coords2D[i][1]:F4}");
-        //}
 
         return ConvertToFloat2DArray(outputDimensions, reducedDouble);
     }

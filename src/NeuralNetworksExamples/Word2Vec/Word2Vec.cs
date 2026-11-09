@@ -2,6 +2,8 @@
 // File name: Word2Vec.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using Accord.MachineLearning;
+
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
@@ -18,6 +20,9 @@ using NeuralNetworks.Trainers;
 using NeuralNetworks.Trainers.Logging;
 
 using Spectre.Console;
+
+using static NeuralNetworksExamples.Helpers.AccordUtils;
+using static NeuralNetworksExamples.Helpers.ScottPlotUtils;
 
 namespace NeuralNetworksExamples.Word2Vec;
 
@@ -165,7 +170,7 @@ internal class Word2Vec
         Console.WriteLine($"\nVocabulary size: {vocabSize}");
         Console.WriteLine($"Words: {string.Join(", ", tokenIdToWord.Order())}");
         Console.WriteLine($"\nTraining pairs generated: {trainingPairs.Count}");
-        Console.WriteLine($"First 5 training pairs: {string.Join(", ", trainingPairs.Take(5).Select(p => $"({tokenIdToWord[p.center]}, {tokenIdToWord[p.context]})"))}\n");
+        Console.WriteLine($"First 15 training pairs: {string.Join(", ", trainingPairs.Take(15).Select(p => $"({tokenIdToWord[p.center]}, {tokenIdToWord[p.context]})"))}\n");
 
         // Create simple data source (using a small subset for validation)
 
@@ -210,6 +215,55 @@ internal class Word2Vec
         // Demonstrate word similarity
         DemonstrateWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
 
+        // Apply dimensionality reduction (PCA) and save the visualization
+        SaveEmbeddingsWithPCA(learnedEmbeddings, tokenIdToWord);
+    }
+
+    private static void SaveEmbeddingsWithPCA(float[,] embeddings, List<string> tokenIdToWord)
+    {
+        /*
+        List<string> wordsToTransform = ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "3", "iii", "9", "ix", "daughter", "son", "2", "4", "ii", "iv", "three", "nine", "two", "four"];
+
+        float[,] embeddingsToTransform = new float[wordsToTransform.Count, EmbeddingDim];
+        int rows = embeddings.GetLength(0);
+        List<string> tokenIdToWordToTransform = new();
+
+        for (int i = 0; i < rows; i++)
+        {
+            if(wordsToTransform.Contains(tokenIdToWord[i]))
+            {
+                int index = wordsToTransform.IndexOf(tokenIdToWord[i]);
+                for (int j = 0; j < EmbeddingDim; j++)
+                {
+                    embeddingsToTransform[index, j] = embeddings[i, j];
+                }
+                tokenIdToWordToTransform.Add(tokenIdToWord[i]);
+            }
+        }*/
+
+        // Reduce dimensions to 2D using PCA
+        float[,] reducedEmbeddings = TransformWithPCA(embeddings, outputDimensions: 2); // outputDimensions: 2
+
+        /*
+        // Display the reduced embeddings
+        Console.WriteLine("\n2D Embeddings (after PCA):");
+        for (int i = 0; i < tokenIdToWord.Count; i++)
+        {
+            Console.WriteLine($"Word: {tokenIdToWord[i]}, X: {reducedEmbeddings[i, 0]:F4}, Y: {reducedEmbeddings[i, 1]:F4}");
+        }*/
+
+        SaveWordvecPointsAsPng(
+            reducedEmbeddings,
+            tokenIdToWord,
+            // ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "3", "iii", "9", "ix", "daughter", "son", "2", "4", "ii", "iv", "three", "nine", "two", "four", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland"],
+            ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "daughter", "son", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland", "3", "iii", "9", "ix"],
+            title: "Word2Vec Embeddings (PCA)",
+            xLabel: "PCA 1",
+            yLabel: "PCA 2",
+            xSize: 1200,
+            ySize: 900,
+            outputPath: "word2vec_embeddings_pca.png"
+        );
     }
 
     private static void DisplayAllWordsWithEmbeddings(float[,] embeddings, List<string> tokenIdToWord)
@@ -286,7 +340,8 @@ internal class Word2Vec
             ("woman", "girl", "boy"),
             ("sweden", "stockholm", "copenhagen"),
             ("england", "london", "warsaw"),
-            ("iii", "3", "9")
+            ("iii", "3", "9"),
+            ("country", "poland", "america")
         ];
 
         foreach ((string? wordA, string? wordB, string? wordC) in analogies)

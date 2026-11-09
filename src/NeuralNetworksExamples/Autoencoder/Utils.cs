@@ -42,7 +42,7 @@ internal static class Utils
 
             outputPath = $"{modelName}_{bottleneckActivationFunction}_{dim}_{rows}_tsne.png";
 
-            SavePointsAsPng(
+            SaveDigitPointsAsPng(
                 reduced,
                 labels,
                 $"t-SNE Visualization of Latent Space ({modelName}, bottleneck={dim}, points={rows})",

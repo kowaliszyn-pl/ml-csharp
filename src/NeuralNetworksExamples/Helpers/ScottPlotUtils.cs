@@ -10,7 +10,48 @@ namespace NeuralNetworksExamples.Helpers;
 
 internal static class ScottPlotUtils
 {
-    public static void SavePointsAsPng(
+    public static void SaveWordvecPointsAsPng(
+        float[,] points,
+        List<string> words,
+        List<string>? printWords,
+        string title,
+        string xLabel,
+        string yLabel,
+        int xSize,
+        int ySize,
+        string outputPath
+    )
+    {
+        using Plot plt = new();
+        int rows = points.GetLength(0);
+        for (int i = 0; i < rows; i++)
+        {
+            string word = words[i];
+
+            if (printWords == null || printWords.Contains(word))
+            {
+                double x = points[i, 0];
+                double y = points[i, 1];
+
+                Scatter scatter = plt.Add.Scatter(new double[] { x }, new double[] { y });
+                scatter.MarkerSize = 5;
+                scatter.MarkerShape = MarkerShape.FilledCircle;
+
+                var text = plt.Add.Text(word, x, y);
+                text.LabelAlignment = Alignment.MiddleLeft;
+                text.LabelOffsetX = 10;
+                // scatter.LegendText = word;
+                // Add text label for the word
+                // plt.AddText(word, x, y, size: 12, color: System.Drawing.Color.Black);
+            }
+        }
+        plt.Title(title);
+        plt.XLabel(xLabel);
+        plt.YLabel(yLabel);
+        plt.SavePng(outputPath, xSize, ySize);
+    }
+
+    public static void SaveDigitPointsAsPng(
         float[,] points,
         float[,] labels,
         string title,
@@ -20,7 +61,7 @@ internal static class ScottPlotUtils
         int ySize,
         string outputPath)
     {
-        Plot plt = new();
+        using Plot plt = new();
         int rows = points.GetLength(0);
 
         // Group points by digit
@@ -73,7 +114,7 @@ internal static class ScottPlotUtils
         }
 
         Histogram histogram = Histogram.WithBinCount(binCount, allValues);
-        Plot pltHistogram = new();
+        using Plot pltHistogram = new();
 
         // add histogram to the plot
         Bar[] bars = [.. Enumerable.Range(0, histogram.Counts.Length)
