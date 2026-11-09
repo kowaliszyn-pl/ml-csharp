@@ -80,7 +80,7 @@ internal class Word2Vec
     {
         ILogger logger = Program.LoggerFactory.CreateLogger<Word2Vec>();
 
-        Console.WriteLine("Load and preprocess the corpus...");
+        WriteLine("Load and preprocess the corpus...");
 
         // Sample corpus for demonstration
         string[] corpus = [.. File.ReadAllLines(Path.Combine(Program.Word2VecDataFolderPath, DataFileName))
@@ -91,7 +91,7 @@ internal class Word2Vec
         Dictionary<string, int> wordToTokenId = [];
         List<string> tokenIdToWord = [];
 
-        // Remove 'the', 'a', 'and', 'in', 'on', 'to', 'is', 'are', 'has', 'have', 'of', 'for', 'with' from the corpus
+        // Remove 'the', 'a', 'and', 'in', 'on', 'to', 'is', 'are', 'has', 'have', 'of', 'for', 'with' and so on from the corpus
         HashSet<string> stopWords = ["the", "a", "an", "and", "in", "on", "to", "is", "are", "has", "have", "of", "for", "with", "s", "be", "was"];
         char[] separators = [' ', '.', ',', '!', '?', ';', ':', '"', '\'', '(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', '-', '_', '+', '=', '*', '&', '^', '%', '$', '#', '@', '!', '~', '`', '\''];
 
@@ -123,15 +123,17 @@ internal class Word2Vec
 
         foreach (string[] sentence in words)
         {
-            int[] tokenIdsInSentence = sentence.Select(w => wordToTokenId[w]).ToArray();
+            int[] tokenIdsInSentence = [.. sentence.Select(w => wordToTokenId[w])];
             int sentenceLength = tokenIdsInSentence.Length;
 
             for (int i = 0; i < sentenceLength; i++)
             {
                 int centerWord = tokenIdsInSentence[i];
+                int firstWord = Math.Max(0, i - WindowSize);
+                int lastWord = Math.Min(sentenceLength - 1, i + WindowSize);
 
                 // Get context words within window
-                for (int j = Math.Max(0, i - WindowSize); j <= Math.Min(sentenceLength - 1, i + WindowSize); j++)
+                for (int j = firstWord; j <= lastWord; j++)
                 {
                     if (i != j)
                     {
@@ -166,10 +168,12 @@ internal class Word2Vec
             }
         }
 
-        Console.WriteLine($"\nVocabulary size: {vocabSize}");
-        Console.WriteLine($"Words: {string.Join(", ", tokenIdToWord.Order())}");
-        Console.WriteLine($"\nTraining pairs generated: {trainingPairs.Count}");
-        Console.WriteLine($"First 15 training pairs: {string.Join(", ", trainingPairs.Take(15).Select(p => $"({tokenIdToWord[p.center]}, {tokenIdToWord[p.context]})"))}\n");
+        WriteLine($"\nVocabulary size: {vocabSize}");
+        WriteLine($"Words: {string.Join(", ", tokenIdToWord.Order())}");
+        WriteLine();
+        WriteLine($"Training pairs generated: {trainingPairs.Count}");
+        WriteLine($"First 15 training pairs: {string.Join(", ", trainingPairs.Take(15).Select(p => $"({tokenIdToWord[p.center]}, {tokenIdToWord[p.context]})"))}");
+        WriteLine();
 
         // Create simple data source (using a small subset for validation)
 
@@ -193,7 +197,7 @@ internal class Word2Vec
             logger
         );
 
-        Console.WriteLine("🚀 Training Word2Vec model...\n");
+        WriteLine("🚀 Training Word2Vec model...");
 
         // Train the model
         trainer.Fit(
@@ -222,13 +226,13 @@ internal class Word2Vec
     {
         // Reduce dimensions to 2D using PCA. You can also select a different number of output dimensions, for example 3, for 3D visualization.
         float[,] reducedEmbeddings = TransformWithPCA(embeddings, 2);
-        string[] printWords = ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "daughter", "son", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland", "3", "iii", "9", "ix"];
+        string[] plotWords = ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "daughter", "son", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland", "3", "iii", "9", "ix"];
         string outputPath = "word2vec_embeddings_pca.png";
 
         SaveWordvecPointsAsPng(
             reducedEmbeddings,
             tokenIdToWord,
-            printWords,
+            plotWords,
             title: "Word2Vec Embeddings (PCA)",
             xLabel: "PCA 1",
             yLabel: "PCA 2",
@@ -238,13 +242,13 @@ internal class Word2Vec
         );
 
         ForegroundColor = ConsoleColor.Green;
-        WriteLine($"PCA plot saved to {outputPath}");
+        WriteLine($"\nPCA plot saved to {outputPath}");
         ResetColor();
     }
 
     private static void DisplayWordEmbeddings(float[,] embeddings, List<string> tokenIdToWord, int words)
     {
-        Console.WriteLine($"\nWord Embeddings");
+        WriteLine($"\nWord Embeddings");
 
         for (int tokenId = 0; tokenId < words; tokenId++)
         {
@@ -257,7 +261,7 @@ internal class Word2Vec
 
     private static void DisplayWordSimilarity(float[,] embeddings, List<string> tokenIdToWord, Dictionary<string, int> wordToTokenId)
     {
-        Console.WriteLine("\nWord Similarities");
+        WriteLine("\nWord Similarities");
 
         // Test some word similarities
         string[] testWords = ["king", "queen", "man", "woman", "boy", "girl", "flowers", "melody", "broken"];
@@ -284,7 +288,7 @@ internal class Word2Vec
          *  girl ≈ daughter (0,912), margrethe (0,791), elizabeth (0,707), two (0,665)
          */
 
-        Console.WriteLine("\nWord Analogies");
+        WriteLine("\nWord Analogies");
 
         List<(string wordA, string wordB, string wordC)> analogies = [
             ("king", "man", "woman"),
@@ -293,8 +297,8 @@ internal class Word2Vec
             ("woman", "girl", "boy"),
             ("sweden", "stockholm", "copenhagen"),
             ("england", "london", "warsaw"),
-            ("iii", "3", "9"),
-            ("country", "poland", "america")
+            ("country", "poland", "america"),
+            ("iii", "3", "9")
         ];
 
         foreach ((string? wordA, string? wordB, string? wordC) in analogies)
@@ -312,6 +316,7 @@ internal class Word2Vec
                     embeddingB[i] = embeddings[tokenIdB, i];
                     embeddingC[i] = embeddings[tokenIdC, i];
                 }
+
                 // Compute the analogy vector: A - B + C
                 float[] analogyVector = new float[EmbeddingDim];
                 for (int i = 0; i < EmbeddingDim; i++)
@@ -325,6 +330,7 @@ internal class Word2Vec
                 {
                     if (tokenId == tokenIdA || tokenId == tokenIdB || tokenId == tokenIdC)
                         continue; // Skip the words used in the analogy
+
                     float[] candidateEmbedding = new float[EmbeddingDim];
                     for (int i = 0; i < EmbeddingDim; i++)
                     {
@@ -333,7 +339,9 @@ internal class Word2Vec
                     float similarity = CosineSimilarity(analogyVector, candidateEmbedding);
                     similarities.Add((tokenIdToWord[tokenId], similarity));
                 }
-                (string word, float similarity)[] bestMatches = similarities.OrderByDescending(x => x.similarity).ToArray();
+
+                (string word, float similarity)[] bestMatches = [.. similarities.OrderByDescending(x => x.similarity)];
+
                 AnsiConsole.MarkupLine($"[yellow]{wordA}[/] - [yellow]{wordB}[/] + [yellow]{wordC}[/] ≈ [green]{bestMatches[0].word}[/] [dim]({bestMatches[0].similarity:F3})[/], [green]{bestMatches[1].word}[/] [dim]({bestMatches[1].similarity:F3})[/], [green]{bestMatches[2].word}[/] [dim]({bestMatches[2].similarity:F3})[/], [green]{bestMatches[3].word}[/] [dim]({bestMatches[3].similarity:F3})[/]");
             }
         }

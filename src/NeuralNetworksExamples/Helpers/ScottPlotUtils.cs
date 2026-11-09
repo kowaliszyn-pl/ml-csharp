@@ -13,7 +13,7 @@ internal static class ScottPlotUtils
     public static void SaveWordvecPointsAsPng(
         float[,] points,
         List<string> words,
-        string[]? printWords,
+        string[]? plotWords,
         string title,
         string xLabel,
         string yLabel,
@@ -28,7 +28,7 @@ internal static class ScottPlotUtils
         {
             string word = words[i];
 
-            if (printWords == null || printWords.Contains(word))
+            if (plotWords == null || plotWords.Contains(word))
             {
                 double x = points[i, 0];
                 double y = points[i, 1];
