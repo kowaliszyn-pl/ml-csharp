@@ -2,8 +2,6 @@
 // File name: Word2Vec.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
-using Accord.MachineLearning;
-
 using Microsoft.Extensions.Logging;
 
 using NeuralNetworks.Core;
@@ -21,6 +19,7 @@ using NeuralNetworks.Trainers.Logging;
 
 using Spectre.Console;
 
+using static System.Console;
 using static NeuralNetworksExamples.Helpers.AccordUtils;
 using static NeuralNetworksExamples.Helpers.ScottPlotUtils;
 
@@ -209,89 +208,54 @@ internal class Word2Vec
 
         float[,] learnedEmbeddings = model.GetEmbeddings();
 
-        // Display all words with their embeddings
-        //DisplayAllWordsWithEmbeddings(learnedEmbeddings, tokenIdToWord);
+        // Display 10 first words with their embeddings
+        DisplayWordEmbeddings(learnedEmbeddings, tokenIdToWord, 10);
 
         // Demonstrate word similarity
-        DemonstrateWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
+        DisplayWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
 
-        // Apply dimensionality reduction (PCA) and save the visualization
-        SaveEmbeddingsWithPCA(learnedEmbeddings, tokenIdToWord);
+        // Apply dimensionality reduction (PCA) and save the visualization to PNG
+        SaveEmbeddingsPcaVisualization(learnedEmbeddings, tokenIdToWord);
     }
 
-    private static void SaveEmbeddingsWithPCA(float[,] embeddings, List<string> tokenIdToWord)
+    private static void SaveEmbeddingsPcaVisualization(float[,] embeddings, List<string> tokenIdToWord)
     {
-        /*
-        List<string> wordsToTransform = ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "3", "iii", "9", "ix", "daughter", "son", "2", "4", "ii", "iv", "three", "nine", "two", "four"];
-
-        float[,] embeddingsToTransform = new float[wordsToTransform.Count, EmbeddingDim];
-        int rows = embeddings.GetLength(0);
-        List<string> tokenIdToWordToTransform = new();
-
-        for (int i = 0; i < rows; i++)
-        {
-            if(wordsToTransform.Contains(tokenIdToWord[i]))
-            {
-                int index = wordsToTransform.IndexOf(tokenIdToWord[i]);
-                for (int j = 0; j < EmbeddingDim; j++)
-                {
-                    embeddingsToTransform[index, j] = embeddings[i, j];
-                }
-                tokenIdToWordToTransform.Add(tokenIdToWord[i]);
-            }
-        }*/
-
-        // Reduce dimensions to 2D using PCA
-        float[,] reducedEmbeddings = TransformWithPCA(embeddings, outputDimensions: 2); // outputDimensions: 2
-
-        /*
-        // Display the reduced embeddings
-        Console.WriteLine("\n2D Embeddings (after PCA):");
-        for (int i = 0; i < tokenIdToWord.Count; i++)
-        {
-            Console.WriteLine($"Word: {tokenIdToWord[i]}, X: {reducedEmbeddings[i, 0]:F4}, Y: {reducedEmbeddings[i, 1]:F4}");
-        }*/
+        // Reduce dimensions to 2D using PCA. You can also select a different number of output dimensions, for example 3, for 3D visualization.
+        float[,] reducedEmbeddings = TransformWithPCA(embeddings, 2);
+        string[] printWords = ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "daughter", "son", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland", "3", "iii", "9", "ix"];
+        string outputPath = "word2vec_embeddings_pca.png";
 
         SaveWordvecPointsAsPng(
             reducedEmbeddings,
             tokenIdToWord,
-            // ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "3", "iii", "9", "ix", "daughter", "son", "2", "4", "ii", "iv", "three", "nine", "two", "four", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland"],
-            ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "daughter", "son", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland", "3", "iii", "9", "ix"],
+            printWords,
             title: "Word2Vec Embeddings (PCA)",
             xLabel: "PCA 1",
             yLabel: "PCA 2",
             xSize: 1200,
             ySize: 900,
-            outputPath: "word2vec_embeddings_pca.png"
+            outputPath
         );
+
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"PCA plot saved to {outputPath}");
+        ResetColor();
     }
 
-    private static void DisplayAllWordsWithEmbeddings(float[,] embeddings, List<string> tokenIdToWord)
+    private static void DisplayWordEmbeddings(float[,] embeddings, List<string> tokenIdToWord, int words)
     {
-        int vocabSize = tokenIdToWord.Count;
-        int[,] xWords = new int[vocabSize, 1];
-        for (int i = 0; i < vocabSize; i++)
-        {
-            xWords[i, 0] = i;
-        }
+        Console.WriteLine($"\nWord Embeddings");
 
-        Table table = new Table()
-            .Border(TableBorder.Rounded)
-            .BorderColor(Color.Cyan1)
-            .AddColumn(new TableColumn("[bold]Word[/]").Centered())
-            .AddColumn(new TableColumn("[bold]Embedding Vector[/]").LeftAligned());
-
-        for (int tokenId = 0; tokenId < vocabSize; tokenId++)
+        for (int tokenId = 0; tokenId < words; tokenId++)
         {
             string word = tokenIdToWord[tokenId];
             string embeddingVector = string.Join(", ", Enumerable.Range(0, EmbeddingDim).Select(j => embeddings[tokenId, j].ToString("F4")));
-            table.AddRow($"[yellow]{word}[/]", embeddingVector);
-        }
 
-        AnsiConsole.Write(table);
+            AnsiConsole.MarkupLine($"[yellow]{word}[/] = [dim][[{embeddingVector}]][/]");
+        }
     }
 
-    private static void DemonstrateWordSimilarity(float[,] embeddings, List<string> tokenIdToWord, Dictionary<string, int> wordToTokenId)
+    private static void DisplayWordSimilarity(float[,] embeddings, List<string> tokenIdToWord, Dictionary<string, int> wordToTokenId)
     {
         Console.WriteLine("\nWord Similarities");
 
@@ -304,9 +268,6 @@ internal class Word2Vec
             {
                 // Find most similar words
                 List<string> similarWords = FindSimilarWords(embeddings, tokenIdToWord, tokenId, topK: 4);
-
-                // table.AddRow($"[yellow]{word}[/]", string.Join(", ", similarWords));
-
                 AnsiConsole.MarkupLine($"[yellow]{word}[/] ≈ {string.Join(", ", similarWords)}");
             }
         }
@@ -322,14 +283,6 @@ internal class Word2Vec
          *  boy ≈ son (0,835), man (0,798), woman (0,711), daughter (0,706)
          *  girl ≈ daughter (0,912), margrethe (0,791), elizabeth (0,707), two (0,665)
          */
-
-        // Test the following analogies:
-        // king - man + woman = ?
-        // queen - woman + man = ?
-        // man - boy + girl = ?
-        // woman - girl + boy = ?
-        // sweden - stockholm + copenhagen  = ?
-        // iii - 3 + 9 = ?
 
         Console.WriteLine("\nWord Analogies");
 
@@ -395,6 +348,7 @@ internal class Word2Vec
          * sweden - stockholm + copenhagen ≈ denmark (0,972), rulers (0,729), called (0,686), england (0,539)
          * england - london + warsaw ≈ poland (0,888), ruler (0,830), who (0,827), denmark (0,756)
          * iii - 3 + 9 ≈ ix (0,989), frederik (0,815), nine (0,587), australia (0,567)
+         * country - poland + america ≈ continent (0,605), europe (0,537), ii (0,530), 9 (0,530)
          */
     }
 

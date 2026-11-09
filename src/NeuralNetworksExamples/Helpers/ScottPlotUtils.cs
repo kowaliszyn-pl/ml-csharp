@@ -13,7 +13,7 @@ internal static class ScottPlotUtils
     public static void SaveWordvecPointsAsPng(
         float[,] points,
         List<string> words,
-        List<string>? printWords,
+        string[]? printWords,
         string title,
         string xLabel,
         string yLabel,
@@ -33,16 +33,13 @@ internal static class ScottPlotUtils
                 double x = points[i, 0];
                 double y = points[i, 1];
 
-                Scatter scatter = plt.Add.Scatter(new double[] { x }, new double[] { y });
+                Scatter scatter = plt.Add.Scatter(x, y);
                 scatter.MarkerSize = 5;
                 scatter.MarkerShape = MarkerShape.FilledCircle;
 
-                var text = plt.Add.Text(word, x, y);
+                Text text = plt.Add.Text(word, x, y);
                 text.LabelAlignment = Alignment.MiddleLeft;
                 text.LabelOffsetX = 10;
-                // scatter.LegendText = word;
-                // Add text label for the word
-                // plt.AddText(word, x, y, size: 12, color: System.Drawing.Color.Black);
             }
         }
         plt.Title(title);
