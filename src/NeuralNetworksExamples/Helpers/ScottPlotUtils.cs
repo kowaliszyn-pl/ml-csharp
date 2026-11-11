@@ -93,7 +93,7 @@ internal static class ScottPlotUtils
             scatter.LegendText = groupName;
             scatter.MarkerSize = 20;
         }
-        plt.ShowLegend(Alignment.UpperLeft);
+        plt.ShowLegend(Edge.Bottom);
         SavePlotAsPng(plt, title, xLabel, yLabel, xSize, ySize, outputPath);
     }
 

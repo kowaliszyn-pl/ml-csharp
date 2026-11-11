@@ -261,7 +261,7 @@ internal class Word2Vec
             "Names"
         ];
 
-        int perplexity = 4;
+        int perplexity = 3;
         string outputPath = $"word2vec_embeddings_tsne_{perplexity}.png";
 
         float[,] reducedEmbeddings = TransformWithTsne(learnedEmbeddings, 2, perplexity, RandomSeed);
