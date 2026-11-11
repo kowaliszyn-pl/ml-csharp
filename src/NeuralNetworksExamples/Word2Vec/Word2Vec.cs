@@ -227,21 +227,12 @@ internal class Word2Vec
 
     private static void SaveTsneReductionChart(float[,] learnedEmbeddings, List<string> tokenIdToWord)
     {
-        // Define the following groups:
-        // 1. Arabic numbers: 2, 3, 4, 9,
-        // 2. Roman numbers: ii, iii, iv, ix
-        // 3. Countries: denmark, england, poland, sweden
-        // 4. Cities: copenhagen, london, stockholm, warsaw
-        // 5. Kindom: king, kingdom, monarch, rules, royal, ruler, rulers, queen
-        // 6. Children-parents: child, daughter, father,mother, parents, son
-        // 7. Names: charles, elizabeth, frederik, margrethe
-        // 8. three, two, four, nine
+
+        // Define groups of words to visualize in t-SNE plot
 
         List<List<string>> plotWords = [
             ["2", "3", "4", "9"],
-            //["ii", "iii", "iv", "ix"],
             ["three", "two", "four", "nine"],
-            //["2", "3", "4", "9", "three", "two", "four", "nine"],
             ["denmark", "england", "poland", "sweden"],
             ["copenhagen", "london", "stockholm", "warsaw"],
             ["king", "kingdom", "monarch", "rules", "royal", "ruler", "rulers", "queen"],
@@ -251,9 +242,7 @@ internal class Word2Vec
 
         List<string> groups = [
             "Arabic numbers",
-            //"Roman numbers",
             "Numbers written in words",
-            //"Non-Roman Numbers",
             "Countries",
             "Cities",
             "Kindom",
