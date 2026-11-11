@@ -196,7 +196,7 @@ internal class AutoencoderDense
         WriteLine("Encoding data to latent space...");
         _ = model.Forward(xTrain, false);
         float[,] encoded = model.GetEncodedRepresentation();
-        VisualizeWithHistogramAndTSNE(ModelName, bottleneckActivationFunction, labels, encoded);
+        VisualizeWithHistogramAndTsne(ModelName, bottleneckActivationFunction, labels, encoded);
     }
 
     private static float[,] LoadTrainingData()

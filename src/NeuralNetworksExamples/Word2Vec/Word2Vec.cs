@@ -219,13 +219,69 @@ internal class Word2Vec
         DisplayWordSimilarity(learnedEmbeddings, tokenIdToWord, wordToTokenId);
 
         // Apply dimensionality reduction (PCA) and save the visualization to PNG
-        SaveEmbeddingsPcaVisualization(learnedEmbeddings, tokenIdToWord);
+        SavePcaReductionChart(learnedEmbeddings, tokenIdToWord);
+
+        // Apply dimensionality reduction (t-SNE) and save the visualization to PNG
+        SaveTsneReductionChart(learnedEmbeddings, tokenIdToWord);
     }
 
-    private static void SaveEmbeddingsPcaVisualization(float[,] embeddings, List<string> tokenIdToWord)
+    private static void SaveTsneReductionChart(float[,] learnedEmbeddings, List<string> tokenIdToWord)
+    {
+        // Define the following groups:
+        // 1. Arabic numbers: 2, 3, 4, 9,
+        // 2. Roman numbers: ii, iii, iv, ix
+        // 3. Countries: denmark, england, poland, sweden
+        // 4. Cities: copenhagen, london, stockholm, warsaw
+        // 5. Kindom: king, kingdom, monarch, rules, royal, ruler, rulers, queen
+        // 6. Family: child, daughter, family, father, husband, mother, parents, son, wife
+
+        List<List<string>> plotWords = [
+            ["2", "3", "4", "9"],
+            ["ii", "iii", "iv", "ix"],
+            ["denmark", "england", "poland", "sweden"],
+            ["copenhagen", "london", "stockholm", "warsaw"],
+            ["king", "kingdom", "monarch", "rules", "royal", "ruler", "rulers", "queen"],
+            ["child", "daughter", "family", "father", "husband", "mother", "parents", "son", "wife"],
+            ["charles", "elizabeth", "frederik", "margrethe"]
+        ];
+
+        List<string> groups = [
+            "Arabic numbers",
+            "Roman numbers",
+            "Countries",
+            "Cities",
+            "Kindom",
+            "Family",
+            "Names"
+        ];
+
+        int perplexity = 5;
+        string outputPath = $"word2vec_embeddings_tsne_{perplexity}.png";
+
+        float[,] reducedEmbeddings = TransformWithTsne(learnedEmbeddings, outputDimensions: 2, perplexity);
+
+        SaveWordVecGroupPointsAsPng(
+            reducedEmbeddings,
+            tokenIdToWord,
+            plotWords,
+            groups,
+            title: "Word2Vec Embeddings (t-SNE)",
+            xLabel: "t-SNE Component 1",
+            yLabel: "t-SNE Component 2",
+            xSize: 1200,
+            ySize: 900,
+            outputPath
+        );
+
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"\nPCA plot saved to {outputPath}");
+        ResetColor();
+    }
+
+    private static void SavePcaReductionChart(float[,] embeddings, List<string> tokenIdToWord)
     {
         // Reduce dimensions to 2D using PCA. You can also select a different number of output dimensions, for example 3, for 3D visualization.
-        float[,] reducedEmbeddings = TransformWithPCA(embeddings, 2);
+        float[,] reducedEmbeddings = TransformWithPca(embeddings, 2);
         string[] plotWords = ["king", "queen", "man", "woman", "boy", "girl", "male", "female", "daughter", "son", "sweden", "stockholm", "copenhagen", "denmark", "england", "london", "warsaw", "poland", "3", "iii", "9", "ix"];
         string outputPath = "word2vec_embeddings_pca.png";
 

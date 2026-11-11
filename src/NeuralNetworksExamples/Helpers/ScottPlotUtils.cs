@@ -42,10 +42,59 @@ internal static class ScottPlotUtils
                 text.LabelOffsetX = 10;
             }
         }
+        SavePlotAsPng(plt, title, xLabel, yLabel, xSize, ySize, outputPath);
+    }
+
+    private static void SavePlotAsPng(Plot plt, string title, string xLabel, string yLabel, int xSize, int ySize, string outputPath)
+    {
         plt.Title(title);
         plt.XLabel(xLabel);
         plt.YLabel(yLabel);
         plt.SavePng(outputPath, xSize, ySize);
+    }
+
+    public static void SaveWordVecGroupPointsAsPng(
+        float[,] points,
+        List<string> words,
+        List<List<string>> plotWordsInGroups,
+        List<string> groups,
+        string title,
+        string xLabel,
+        string yLabel,
+        int xSize,
+        int ySize,
+        string outputPath
+    )
+    {
+        using Plot plt = new();
+        int rows = points.GetLength(0);
+        for (int groupIndex = 0; groupIndex < plotWordsInGroups.Count; groupIndex++)
+        {
+            List<double> xPoints = [];
+            List<double> yPoints = [];
+
+            List<string> wordsInGroup = plotWordsInGroups[groupIndex];
+            string groupName = groups[groupIndex];
+            for (int i = 0; i < rows; i++)
+            {
+                string word = words[i];
+                if (wordsInGroup.Contains(word))
+                {
+                    xPoints.Add(points[i, 0]);
+                    yPoints.Add(points[i, 1]);
+
+                    Text text = plt.Add.Text(word, points[i, 0], points[i, 1]);
+                    text.LabelAlignment = Alignment.MiddleLeft;
+                    text.LabelOffsetX = 10;
+                }
+            }
+
+            Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
+            scatter.LegendText = groupName;
+            scatter.MarkerSize = 15;
+        }
+        plt.ShowLegend();
+        SavePlotAsPng(plt, title, xLabel, yLabel, xSize, ySize, outputPath);
     }
 
     public static void SaveDigitPointsAsPng(
@@ -82,11 +131,7 @@ internal static class ScottPlotUtils
         }
 
         plt.ShowLegend();
-        plt.Title(title);
-        plt.XLabel(xLabel);
-        plt.YLabel(yLabel);
-
-        plt.SavePng(outputPath, xSize, ySize);
+        SavePlotAsPng(plt, title, xLabel, yLabel, xSize, ySize, outputPath);
     }
 
     public static void SaveHistogramAsPng(

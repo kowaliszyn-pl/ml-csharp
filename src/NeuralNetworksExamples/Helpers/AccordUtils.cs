@@ -9,7 +9,7 @@ namespace NeuralNetworksExamples.Helpers;
 
 internal static class AccordUtils
 {
-    public static float[,] TransformWithTSNE(float[,] inputData, int outputDimensions = 2, int perplexity = 30)
+    public static float[,] TransformWithTsne(float[,] inputData, int outputDimensions, int perplexity)
     {
         double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData);
 
@@ -24,7 +24,7 @@ internal static class AccordUtils
         return ConvertToFloat2DArray(outputDimensions, reducedDouble);
     }
 
-    public static float[,] TransformWithPCA(float[,] inputData, int outputDimensions = 2)
+    public static float[,] TransformWithPca(float[,] inputData, int outputDimensions)
     {
         double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData);
 
