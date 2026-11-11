@@ -29,7 +29,7 @@ namespace NeuralNetworksExamples.Word2Vec;
 /// Word2Vec model using Skip-gram architecture.
 /// Maps center words to context words.
 /// </summary>
-internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? random = null)
+internal class Word2VecSoftmaxModel(int vocabSize, int embeddingDim, SeededRandom? random = null)
     : BaseModel<int[,], float[,]>(new LogSoftmaxCrossEntropyLoss(), random)
 {
     private EmbeddingLayer? _embeddingLayer;
@@ -59,6 +59,21 @@ internal class Word2VecModel(int vocabSize, int embeddingDim, SeededRandom? rand
         // The embeddings are stored in the first layer (EmbeddingLayer)
         return _embeddingLayer?.GetEmbeddings()
             ?? throw new InvalidOperationException("Embedding layer is not initialized.");
+    }
+}
+
+// TODO: Add a Word2VecNegativeSamplingModel class (in new file) that uses negative sampling loss instead of softmax loss for more efficient training on large vocabularies.
+internal class Word2VecNegativeSamplingModel(int vocabSize, int embeddingDim, SeededRandom? random = null)
+    : BaseModel<int[,], float[,]>(new SigmoidBinaryCrossEntropyLoss(), random)
+{
+    private EmbeddingLayer? _embeddingLayer;
+
+    protected override LayerListBuilder<int[,], float[,]> CreateLayerListBuilder()
+    {
+        GlorotInitializer initializer = new(Random);
+        return
+            AddLayer(_embeddingLayer = new EmbeddingLayer(vocabSize, embeddingDim, initializer))
+            .AddLayer(new DenseLayer(1, new Linear(), initializer));
     }
 }
 
@@ -182,7 +197,7 @@ internal class Word2Vec
         SeededRandom commonRandom = new(RandomSeed);
 
         // Create Word2Vec model
-        Word2VecModel model = new(vocabSize, EmbeddingDim, commonRandom);
+        Word2VecSoftmaxModel model = new(vocabSize, EmbeddingDim, commonRandom);
 
         // Create optimizer with learning rate schedule
         ExponentialDecayLearningRate learningRateSchedule = new(InitialLearningRate, FinalLearningRate);
