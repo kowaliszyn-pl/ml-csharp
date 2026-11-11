@@ -92,7 +92,7 @@ internal class Word2Vec
         List<string> tokenIdToWord = [];
 
         // Remove 'the', 'a', 'and', 'in', 'on', 'to', 'is', 'are', 'has', 'have', 'of', 'for', 'with' and so on from the corpus
-        HashSet<string> stopWords = ["the", "a", "an", "and", "in", "on", "to", "is", "are", "has", "have", "of", "for", "with", "s", "be", "was"];
+        HashSet<string> excludedWords = ["the", "a", "an", "and", "in", "on", "to", "is", "are", "has", "have", "of", "for", "with", "s", "be", "was"];
         char[] separators = [' ', '.', ',', '!', '?', ';', ':', '"', '\'', '(', ')', '[', ']', '{', '}', '<', '>', '/', '\\', '|', '-', '_', '+', '=', '*', '&', '^', '%', '$', '#', '@', '!', '~', '`', '\''];
 
         string[][] words = new string[corpus.Length][];
@@ -101,7 +101,7 @@ internal class Word2Vec
         {
             words[i] = [.. corpus[i]
                 .Split(separators, StringSplitOptions.RemoveEmptyEntries)
-                .Where(word => !stopWords.Contains(word))];
+                .Where(word => !excludedWords.Contains(word))];
         }
 
         foreach (string[] sentence in words)
