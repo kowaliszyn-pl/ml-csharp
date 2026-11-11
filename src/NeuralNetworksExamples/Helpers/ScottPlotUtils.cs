@@ -84,16 +84,16 @@ internal static class ScottPlotUtils
                     yPoints.Add(points[i, 1]);
 
                     Text text = plt.Add.Text(word, points[i, 0], points[i, 1]);
-                    text.LabelAlignment = Alignment.MiddleLeft;
-                    text.LabelOffsetX = 10;
+                    text.LabelAlignment = Alignment.UpperCenter;
+                    text.LabelOffsetY = -28;
                 }
             }
 
             Scatter scatter = plt.Add.ScatterPoints(xPoints, yPoints);
             scatter.LegendText = groupName;
-            scatter.MarkerSize = 15;
+            scatter.MarkerSize = 20;
         }
-        plt.ShowLegend();
+        plt.ShowLegend(Alignment.UpperLeft);
         SavePlotAsPng(plt, title, xLabel, yLabel, xSize, ySize, outputPath);
     }
 

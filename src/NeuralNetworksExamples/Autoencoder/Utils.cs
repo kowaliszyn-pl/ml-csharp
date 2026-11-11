@@ -28,7 +28,7 @@ internal static class Utils
         }
     }
 
-    internal static void VisualizeWithHistogramAndTsne(string modelName, string bottleneckActivationFunction, float[,] labels, float[,] encoded)
+    internal static void VisualizeWithHistogramAndTsne(string modelName, string bottleneckActivationFunction, float[,] labels, float[,] encoded, int seed)
     {
         int rows = encoded.GetLength(0);
         int dim = encoded.GetLength(1);
@@ -36,7 +36,7 @@ internal static class Utils
 
         try
         {
-            float[,] reduced = TransformWithTsne(encoded, outputDimensions: 2, perplexity: 30);
+            float[,] reduced = TransformWithTsne(encoded, 2, 30, seed);
 
             WriteLine("Creating visualization...");
 

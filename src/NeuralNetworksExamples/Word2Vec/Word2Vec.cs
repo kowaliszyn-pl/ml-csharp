@@ -233,32 +233,38 @@ internal class Word2Vec
         // 3. Countries: denmark, england, poland, sweden
         // 4. Cities: copenhagen, london, stockholm, warsaw
         // 5. Kindom: king, kingdom, monarch, rules, royal, ruler, rulers, queen
-        // 6. Family: child, daughter, family, father, husband, mother, parents, son, wife
+        // 6. Children-parents: child, daughter, father,mother, parents, son
+        // 7. Names: charles, elizabeth, frederik, margrethe
+        // 8. three, two, four, nine
 
         List<List<string>> plotWords = [
             ["2", "3", "4", "9"],
-            ["ii", "iii", "iv", "ix"],
+            //["ii", "iii", "iv", "ix"],
+            ["three", "two", "four", "nine"],
+            //["2", "3", "4", "9", "three", "two", "four", "nine"],
             ["denmark", "england", "poland", "sweden"],
             ["copenhagen", "london", "stockholm", "warsaw"],
             ["king", "kingdom", "monarch", "rules", "royal", "ruler", "rulers", "queen"],
-            ["child", "daughter", "family", "father", "husband", "mother", "parents", "son", "wife"],
+            ["child", "daughter", "father", "mother", "parents", "son"],
             ["charles", "elizabeth", "frederik", "margrethe"]
         ];
 
         List<string> groups = [
             "Arabic numbers",
-            "Roman numbers",
+            //"Roman numbers",
+            "Numbers written in words",
+            //"Non-Roman Numbers",
             "Countries",
             "Cities",
             "Kindom",
-            "Family",
+            "Children-parents",
             "Names"
         ];
 
-        int perplexity = 5;
+        int perplexity = 4;
         string outputPath = $"word2vec_embeddings_tsne_{perplexity}.png";
 
-        float[,] reducedEmbeddings = TransformWithTsne(learnedEmbeddings, outputDimensions: 2, perplexity);
+        float[,] reducedEmbeddings = TransformWithTsne(learnedEmbeddings, 2, perplexity, RandomSeed);
 
         SaveWordVecGroupPointsAsPng(
             reducedEmbeddings,

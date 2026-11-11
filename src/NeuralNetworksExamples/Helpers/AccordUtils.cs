@@ -9,9 +9,11 @@ namespace NeuralNetworksExamples.Helpers;
 
 internal static class AccordUtils
 {
-    public static float[,] TransformWithTsne(float[,] inputData, int outputDimensions, int perplexity)
+    public static float[,] TransformWithTsne(float[,] inputData, int outputDimensions, int perplexity, int seed)
     {
         double[][] inputDataDouble = ConvertToDoubleJaggedArray(inputData);
+
+        Accord.Math.Random.Generator.Seed = seed; // For reproducibility
 
         TSNE tsne = new()
         {
