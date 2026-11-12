@@ -12,6 +12,7 @@ using NeuralNetworks.Core.Operations;
 using NeuralNetworksExamples.Autoencoder;
 using NeuralNetworksExamples.Cnn;
 using NeuralNetworksExamples.Dense;
+using NeuralNetworksExamples.Word2Vec;
 using NeuralNetworksExamples.UI;
 
 using Serilog;
@@ -67,7 +68,7 @@ internal static class Program
             new("🧠 Dense layer models", SelectDenseLayerModel),
             new("🖼️ Convolutional models (CNN)", SelectConvolutionalModel),
             new("🔧 Autoencoders", SelectAutoencoderModel),
-            new("📝 Word Embeddings (Word2Vec)", Word2Vec.Word2Vec.Run, true),
+            new("📝 Word Embeddings (Word2Vec)", SelectWord2VecModel),
             new("⚙️ Settings", ShowSettingsMenu),
         ];
 
@@ -172,6 +173,15 @@ internal static class Program
 
             new("🔙 Back", () => { })
         ], "Select [bold]MNIST autoencoder[/] operation:");
+    }
+
+    private static void SelectWord2VecModel()
+    {
+        ExecuteMenu([
+            new("📝 Word2Vec with softmax loss", Word2VecSoftmax.Run, true),
+            new("📝 Word2Vec with negative sampling", Word2VecNegativeSampling.Run, true),
+            new("🔙 Back", () => { })
+        ], "Select a [bold]Word2Vec[/] model:");
     }
 
     private static void DisplayOptions()

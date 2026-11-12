@@ -62,22 +62,7 @@ internal class Word2VecSoftmaxModel(int vocabSize, int embeddingDim, SeededRando
     }
 }
 
-// TODO: Add a Word2VecNegativeSamplingModel class (in new file) that uses negative sampling loss instead of softmax loss for more efficient training on large vocabularies.
-internal class Word2VecNegativeSamplingModel(int vocabSize, int embeddingDim, SeededRandom? random = null)
-    : BaseModel<int[,], float[,]>(new SigmoidBinaryCrossEntropyLoss(), random)
-{
-    private EmbeddingLayer? _embeddingLayer;
-
-    protected override LayerListBuilder<int[,], float[,]> CreateLayerListBuilder()
-    {
-        GlorotInitializer initializer = new(Random);
-        return
-            AddLayer(_embeddingLayer = new EmbeddingLayer(vocabSize, embeddingDim, initializer))
-            .AddLayer(new DenseLayer(1, new Linear(), initializer));
-    }
-}
-
-internal class Word2Vec
+internal class Word2VecSoftmax
 {
     private const int RandomSeed = 260720;
     private const int Epochs = 1000; // 2000;
@@ -93,7 +78,7 @@ internal class Word2Vec
 
     public static void Run()
     {
-        ILogger logger = Program.LoggerFactory.CreateLogger<Word2Vec>();
+        ILogger logger = Program.LoggerFactory.CreateLogger<Word2VecSoftmax>();
 
         WriteLine("Load and preprocess the corpus...");
 
