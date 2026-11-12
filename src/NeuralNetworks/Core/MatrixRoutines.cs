@@ -511,6 +511,59 @@ public static class MatrixRoutines
     }
 
     /// <summary>
+    /// Computes the dot product of two single-precision vectors, with optional magnitude normalization.
+    /// </summary>
+    /// <remarks>
+    /// Both vectors are expected to have the same length. When normalization is requested and either
+    /// vector has zero magnitude, the non-normalized dot product is returned.
+    /// <para />
+    /// This method uses the following mathematical formulas: 
+    /// <para />
+    /// a * b = Σ(aᵢ * bᵢ) for i = 0 to n-1, where n is the length of the vectors.
+    /// <para />
+    /// When normalization is requested, the result is divided by the product of the magnitudes of the two vectors:
+    /// <para />
+    /// normalized_dot_product = (a * b) / (||a|| * ||b||)
+    /// </remarks>
+    /// <param name="source">The first vector in the operation.</param>
+    /// <param name="vector">The second vector in the operation. Must have the same length as <paramref name="source"/>.</param>
+    /// <param name="normalize"><see langword="true"/> to divide the dot product by the product of the vector magnitudes; otherwise, <see
+    /// langword="false"/>.</param>
+    /// <returns>The dot product of <paramref name="source"/> and <paramref name="vector"/>. If <paramref name="normalize"/> is
+    /// <see langword="true"/> and both magnitudes are greater than zero, returns the normalized dot product.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static float DotProduct(this float[] source, float[] vector, bool normalize = false)
+    {
+        Debug.Assert(source.Length == vector.Length, "Source and vector must have the same length for dot product.");
+
+        // Length of source vector
+        float sourceMagnitude = 0;
+        // Length of vector
+        float vectorMagnitude = 0;
+        float sum = 0;
+        for (int i = 0; i < source.Length; i++)
+        {
+            sum += source[i] * vector[i];
+
+            if(normalize)
+            {
+                sourceMagnitude += source[i] * source[i];
+                vectorMagnitude += vector[i] * vector[i];
+            }
+        }
+        if (normalize)
+        {
+            sourceMagnitude = MathF.Sqrt(sourceMagnitude);
+            vectorMagnitude = MathF.Sqrt(vectorMagnitude);
+            if (sourceMagnitude > 0 && vectorMagnitude > 0)
+            {
+                sum /= (sourceMagnitude * vectorMagnitude);
+            }
+        }
+        return sum;
+    }
+
+    /// <summary>
     /// Divides each element of a three-dimensional array by a scalar in place.
     /// </summary>
     /// <param name="source">The array to modify.</param>
