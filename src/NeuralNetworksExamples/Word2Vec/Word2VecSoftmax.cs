@@ -200,7 +200,7 @@ internal class Word2VecSoftmax
         WriteLine("🚀 Training Word2Vec model...");
 
         // Train the model
-        trainer.Fit(
+        float? finalLoss = trainer.Fit(
             dataSource,
             epochs: Epochs,
             evalEveryEpochs: EvalEveryEpochs,
@@ -223,6 +223,12 @@ internal class Word2VecSoftmax
 
         // Apply dimensionality reduction (t-SNE) and save the visualization to PNG
         SaveTsneReductionChart(learnedEmbeddings, tokenIdToWord);
+
+        string modelPath = $"word2vec_model_final_{EmbeddingDim}.json";
+        model.SaveParams(modelPath, $"Final trained model with loss {finalLoss:F5}.");
+        ForegroundColor = ConsoleColor.Green;
+        WriteLine($"\nModel parameters saved to {modelPath}.");
+        ResetColor();
     }
 
     private static void SaveTsneReductionChart(float[,] learnedEmbeddings, List<string> tokenIdToWord)

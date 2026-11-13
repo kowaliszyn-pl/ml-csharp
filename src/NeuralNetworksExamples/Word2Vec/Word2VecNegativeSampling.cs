@@ -2,6 +2,8 @@
 // File name: Word2VecNegativeSampling.cs
 // www.kowaliszyn.pl, 2025 - 2026
 
+using System.Diagnostics;
+
 using NeuralNetworks.Core;
 using NeuralNetworks.Layers;
 using NeuralNetworks.Losses;
@@ -12,7 +14,6 @@ using NeuralNetworks.ParamInitializers;
 
 namespace NeuralNetworksExamples.Word2Vec;
 
-// TODO: Add a Word2VecNegativeSamplingModel class (in new file) that uses negative sampling loss instead of softmax loss for more efficient training on large vocabularies.
 internal class Word2VecNegativeSamplingModel(int vocabSize, int embeddingDim, SeededRandom? random = null)
     : BaseModel<int[,], float[,]>(new SigmoidBinaryCrossEntropyLoss(), random)
 {
@@ -24,6 +25,12 @@ internal class Word2VecNegativeSamplingModel(int vocabSize, int embeddingDim, Se
         return
             AddLayer(_embeddingLayer = new EmbeddingLayer(vocabSize, embeddingDim, initializer))
             .AddLayer(new DenseLayer(1, new Linear(), initializer));
+    }
+
+    public float[,] GetEmbeddings()
+    {
+        Debug.Assert(_embeddingLayer != null, "_embeddingLayer should not be null here.");
+        return _embeddingLayer.GetEmbeddings();
     }
 }
 
